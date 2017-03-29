@@ -1,0 +1,54 @@
+<html>
+<head>
+<script src="../core/smartChartsNXT.core.js" type="text/javascript"></script>
+<script src="./pieChart3d.js" type="text/javascript"></script>
+<script>
+  var settings = {
+      "width":700,
+      "height":500,
+      "title":"Browser Statistics and Trends",
+      "depth":15,
+      "outline":2,
+      "canvasBorder":false,
+      "subTitle":"As of Q1, 2016",
+      "targetElem":"chartContainer",
+      "dataSet":[
+        {
+          "label":"Chrome",
+          "value":"74.4"
+        },
+        {
+          "label":"IE",
+          "value":"5.7"
+        },
+        {
+          "label":"Safari",
+          "value":"3.6"
+        },
+        {
+          "label":"Firefox",
+          "value":"16.9"
+        },
+        {
+          "label":"Opera",
+          "value":"1.2"
+        }
+      ]
+    };      
+
+  window.onload = function(){
+    SmartChartsNXT.ready(function(){
+      var PieChart3D = new SmartChartsNXT.PieChart3D(settings);
+    });
+  };
+</script>
+
+
+</head>
+<body>
+  <div>
+    <div id='chartContainer'>
+    </div>
+  </div>
+</body>
+</html>
