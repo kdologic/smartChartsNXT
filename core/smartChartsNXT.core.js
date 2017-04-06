@@ -1,7 +1,7 @@
 /*
  * smartChartsNXT.core.js
  * @CreatedOn: 06-Jul-2016
- * @LastUpdated: 29-Dec-2016
+ * @LastUpdated: 05-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.1
  * @description:SmartChartsNXT Core Library components. That contains common functionality.
@@ -9,8 +9,14 @@
 
 window.SmartChartsNXT = new function () {
   window.$SC = this;
-  this.libPath = "/lib";
+  var self = this;
+  this.libPath = "/smartChartsNXT";
+  this.coreLibPath = "/smartChartsNXT/core";
+  this.readyStatus = false;
 
+  var CORE_LIBS = {
+    "DataParser": "/dataParser.js"
+  };
 
   var CHART_MAP = {
     "PieChart3D": this.libPath + "/pieChart3d/pieChart3d.js",
@@ -22,24 +28,57 @@ window.SmartChartsNXT = new function () {
     "DonutChart": this.libPath + "/donutChart/donutChart.js"
   };
 
-  function initCore() {
-    $SC.ui = {};
-    $SC.geom = {};
-    $SC.util = {};
 
-    addFont();
-    appendChartTypeNamespace();
+  /*This method will load other dependent libs then callback  */
+  function loadDependencies(callback) {
+    var libCount = Object.keys(CORE_LIBS).length;
+    var loadCount = 0;
+    for (var lib in CORE_LIBS) {
+      async($SC.coreLibPath + CORE_LIBS[lib], function () {
+        loadCount++;
+        if (loadCount === libCount)
+          callback.call(this);
+      });
+    }
+  } /*End loadDependencies() */
+
+  /*load js files asynchronously*/
+  function async(url, cb) {
+    var d = document,
+      t = 'script',
+      o = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+    o.src = url;
+    if (cb) {
+      o.addEventListener('load', function (e) {
+        cb(null, e);
+      }, false);
+    }
+    s.parentNode.insertBefore(o, s);
+  } /*End async()*/
+
+  function initCore() {
+    addFont(function () {
+      appendChartTypeNamespace();
+      self.readyStatus = true;
+    });
   } /*End initLib()*/
 
-  initCore();
+
+  loadDependencies(function () {
+    initCore();
+  });
+
   var preLoaderImg = "<svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'> <rect y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='30' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='60' width='15' height='140' rx='6'> <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='90' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='120' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect></svg>";
 
+  /*Load a particular chart type on demand*/
   function appendChartTypeNamespace() {
     for (var chartType in CHART_MAP) {
       (function (cType) {
         $SC[chartType] = function (opts) {
           var targetElem = document.querySelector("#" + opts.targetElem);
-          /*Show loader before showing the chart*/
+
+          /*------Show loader before showing the chart----------*/
           var strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
             "viewBox='0 0 " + targetElem.offsetWidth + " " + targetElem.offsetHeight + "'" +
             "version='1.1'" +
@@ -52,6 +91,10 @@ window.SmartChartsNXT = new function () {
           document.getElementById(opts.targetElem).innerHTML = "";
           document.getElementById(opts.targetElem).insertAdjacentHTML("beforeend", strSVG);
           document.querySelector("#" + opts.targetElem + " #preLoader_" + opts.targetElem + " #container").insertAdjacentHTML("beforeend", preLoaderImg);
+
+          /*Parse opts if data format is XML --- THIS PART IS SKIPED NOW*/
+          // if (opts.sourceDatatype && opts.sourceDatatype.toLowerCase() === "xml")
+          //   opts.dataSet = $SC.DataParser.parseXmlToJson(opts.dataSet);
 
           loadLib(CHART_MAP[cType], function () {
             callChart();
@@ -98,10 +141,14 @@ window.SmartChartsNXT = new function () {
 
 
   this.ready = function (successBack) {
-    if (typeof successBack === "function") {
-      successBack.call(this);
-    }
-
+    var statusCheck = setInterval(function () {
+      if (self.readyStatus) {
+        if (typeof successBack === "function") {
+          successBack.call(this);
+        }
+        clearInterval(statusCheck);
+      }
+    }, 100);
   }; /*End ready()*/
 
   this.handleError = function (ex, msg) {
@@ -110,19 +157,24 @@ window.SmartChartsNXT = new function () {
   }; /*End handleError()*/
 
   /*Depricated will remove soon*/
-  this.addFont = function () {
-    var fontLink = document.createElement("link");
-    fontLink.href = "https://fonts.googleapis.com/css?family=Lato:400,700";
-    fontLink.rel = "stylesheet";
-    document.getElementsByTagName("head")[0].appendChild(fontLink);
-  }; /*End addFont()*/
+  // this.addFont = function () {
+  //   var fontLink = document.createElement("link");
+  //   fontLink.href = "https://fonts.googleapis.com/css?family=Lato:400,700";
+  //   fontLink.rel = "stylesheet";
+  //   document.getElementsByTagName("head")[0].appendChild(fontLink);
+  // }; /*End addFont()*/
 
-  function addFont() {
+  function addFont(cb) {
     var fontLink = document.createElement("link");
     fontLink.href = "https://fonts.googleapis.com/css?family=Lato:400,700";
     fontLink.rel = "stylesheet";
     document.getElementsByTagName("head")[0].appendChild(fontLink);
-  }; /*End addFont()*/
+    if (cb) {
+      fontLink.addEventListener('load', function (e) {
+        cb(null, e);
+      }, false);
+    }
+  } /*End addFont()*/
 
   this.appendWaterMark = function (targetElem, scaleX, scaleY) {
     var strSVG = "<g id='smartCharts-watermark'>";
@@ -134,6 +186,10 @@ window.SmartChartsNXT = new function () {
 
   /*-----------SmartChartsNXT UI functions------------- */
 
+
+
+
+  this.ui = {};
   this.ui.dropShadow = function (parentID) {
     var shadow = document.querySelectorAll("#" + parentID + " svg #" + parentID + "-smartCharts-dropshadow");
     if (shadow.length < 1) {
@@ -603,6 +659,7 @@ window.SmartChartsNXT = new function () {
 
   /*-----------SmartChartsNXT Utility functions------------- */
 
+  this.util = {};
   this.util.mergeRecursive = function (obj1, obj2) {
     //iterate over all the properties in the object which is being consumed
     for (var p in obj2) {
@@ -803,10 +860,11 @@ window.SmartChartsNXT = new function () {
 
   this.util.assemble = function (literal, params) {
     return new Function(params, "return `" + literal + "`;"); // TODO: Proper escaping
-  } /*End assemble()*/
+  }; /*End assemble()*/
 
   /*---------------Related mathematical shapes---------------------------*/
 
+  this.geom = {};
   this.geom.describeRoundedRect = function (x, y, width, height, radius) {
     return [
       "M", (x + radius), y, "h", (width - (2 * radius)), "a", radius, radius, " 0 0 1 ", radius, radius, "v", (height - (2 * radius)), "a", radius, radius, " 0 0 1 ", -radius, radius, "h", ((2 * radius) - width), "a", radius, radius, " 0 0 1 ", -radius, -radius, "v", ((2 * radius) - height), "a", radius, radius, " 0 0 1 ", radius, -radius, "z"
