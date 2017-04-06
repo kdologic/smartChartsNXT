@@ -3,11 +3,11 @@
 <head>
 	<script>
 		/*	This work is licensed under Creative Commons GNU LGPL License.
-							License: http://creativecommons.org/licenses/LGPL/2.1/
-							Version: 0.9
-							Author:  Stefan Goessner/2006
-							Web:     http://goessner.net/ 
-						*/
+									License: http://creativecommons.org/licenses/LGPL/2.1/
+									Version: 0.9
+									Author:  Stefan Goessner/2006
+									Web:     http://goessner.net/ 
+								*/
 		function json2xml(o, tab) {
 			var toXml = function (v, name, ind) {
 					var xml = "";
@@ -193,7 +193,7 @@
 			return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
 		}
 
-var parseXml;
+		var parseXml;
 
 		if (window.DOMParser) {
 			parseXml = function (xmlStr) {
@@ -212,7 +212,7 @@ var parseXml;
 			}
 		}
 
-		
+
 
 		let jsn = {
 			"xAxis": {
@@ -231,19 +231,20 @@ var parseXml;
 				"smoothedLine": false,
 				"areaOpacity": "0.4",
 				"data": "some data"
-			},{
+			}, {
 				"lineWidth": 2,
 				"color": "#009688",
 				"name": "Raphael"
 			}]
 		}
-		var xmlStr = "<xml><xAxis><title>Date</title></xAxis><yAxis><title>Total Sales</title><prefix>Rs. </prefix></yAxis><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name><noPointMarker>false</noPointMarker><markerRadius>3.5</markerRadius><smoothedLine>false</smoothedLine><areaOpacity>0.4</areaOpacity><data>some data</data></series><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name></series></xml>"
+		var xmlStr =
+			"<xml><xAxis><title>Date</title></xAxis><yAxis><title>Total Sales</title><prefix>Rs. </prefix></yAxis><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name><noPointMarker>false</noPointMarker><markerRadius>3.5</markerRadius><smoothedLine>false</smoothedLine><areaOpacity>0.4</areaOpacity><data>some data</data></series><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name></series></xml>"
 
-		console.log("<xml>"+json2xml(jsn)+"</xml>");
+		console.log("<xml>" + json2xml(jsn) + "</xml>");
 		//var xml =parseXml("<xml>"+json2xml(jsn)+"</xml>");
 		var xml = parseXml(xmlStr);
 		console.log(xml);
-		console.log(JSON.parse(xml2json(xml,"")));
+		console.log(JSON.parse(xml2json(xml, "")));
 	</script>
 </head>
 

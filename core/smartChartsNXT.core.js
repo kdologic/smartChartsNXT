@@ -1,18 +1,31 @@
 /*
  * smartChartsNXT.core.js
  * @CreatedOn: 06-Jul-2016
- * @LastUpdated: 05-Apr-2016
+ * @LastUpdated: 06-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.1
  * @description:SmartChartsNXT Core Library components. That contains common functionality.
  */
+
+/*
+NOTE :-------------- >
+  Charts can be loaded locally for that we should load core library and 
+  chart library as well (otherwise there will be CORS error) for example :
+  <script src="./core/smartChartsNXT.core.js" type="text/javascript"></script>
+  <script src="./areaChart/areaChart.js" type="text/javascript"></script>
+
+  it can be loaded from localhost also for this we have to load the core library 
+  for example: 
+  <script src="/smartChartsNXT/core/smartChartsNXT.core.js" type="text/javascript"></script>
+*/
+
 
 window.SmartChartsNXT = new function () {
   window.$SC = this;
   var self = this;
   this.libPath = "/smartChartsNXT";
   this.coreLibPath = "/smartChartsNXT/core";
-  this.readyStatus = false;
+  this.nameSpaceReadyStatus = false;
 
   var CORE_LIBS = {
     "DataParser": "/dataParser.js"
@@ -33,34 +46,49 @@ window.SmartChartsNXT = new function () {
   function loadDependencies(callback) {
     var libCount = Object.keys(CORE_LIBS).length;
     var loadCount = 0;
+
+    function commonCallback(res) {
+      if (res.error)
+        $SC.handleError(res.error, res.msg);
+      loadCount++;
+      if (loadCount === libCount)
+        callback.call(this);
+    }
+
     for (var lib in CORE_LIBS) {
-      async($SC.coreLibPath + CORE_LIBS[lib], function () {
-        loadCount++;
-        if (loadCount === libCount)
-          callback.call(this);
-      });
+      asyncLoad($SC.coreLibPath + CORE_LIBS[lib], commonCallback, commonCallback);
     }
   } /*End loadDependencies() */
 
   /*load js files asynchronously*/
-  function async(url, cb) {
-    var d = document,
-      t = 'script',
-      o = d.createElement(t),
-      s = d.getElementsByTagName(t)[0];
-    o.src = url;
-    if (cb) {
-      o.addEventListener('load', function (e) {
-        cb(null, e);
+  function asyncLoad(url, successCB, errorCB) {
+    var doc = document,
+      spt = 'script',
+      elem = doc.createElement(spt),
+      script = doc.getElementsByTagName(spt)[0];
+    elem.src = url;
+    if (successCB) {
+      /*successback */
+      elem.addEventListener('load', function (e) {
+        successCB.call(null, e);
       }, false);
     }
-    s.parentNode.insertBefore(o, s);
-  } /*End async()*/
+    if (errorCB) {
+      /*errorback */
+      elem.addEventListener('error', function (e) {
+        errorCB.call(null, {
+          error: "Load dependency error some feature may not work",
+          msg: "error with loading dependency :" + url
+        });
+      }, false);
+    }
+    script.parentNode.insertBefore(elem, script);
+  } /*End asyncLoad()*/
 
   function initCore() {
     addFont(function () {
       appendChartTypeNamespace();
-      self.readyStatus = true;
+      self.nameSpaceReadyStatus = true;
     });
   } /*End initLib()*/
 
@@ -74,6 +102,11 @@ window.SmartChartsNXT = new function () {
   /*Load a particular chart type on demand*/
   function appendChartTypeNamespace() {
     for (var chartType in CHART_MAP) {
+
+      /*continue if the the chart is already loaded*/
+      if ($SC[chartType])
+        continue;
+
       (function (cType) {
         $SC[chartType] = function (opts) {
           var targetElem = document.querySelector("#" + opts.targetElem);
@@ -92,61 +125,46 @@ window.SmartChartsNXT = new function () {
           document.getElementById(opts.targetElem).insertAdjacentHTML("beforeend", strSVG);
           document.querySelector("#" + opts.targetElem + " #preLoader_" + opts.targetElem + " #container").insertAdjacentHTML("beforeend", preLoaderImg);
 
-          /*Parse opts if data format is XML --- THIS PART IS SKIPED NOW*/
-          // if (opts.sourceDatatype && opts.sourceDatatype.toLowerCase() === "xml")
-          //   opts.dataSet = $SC.DataParser.parseXmlToJson(opts.dataSet);
+          /*Parse opts if data format is XML --- THIS PART IS SKIPED NOW
+          if (opts.sourceDatatype && opts.sourceDatatype.toLowerCase() === "xml")
+            opts.dataSet = $SC.DataParser.parseXmlToJson(opts.dataSet);*/
 
-          loadLib(CHART_MAP[cType], function () {
-            callChart();
+          loadChartLib(CHART_MAP[cType], callChart, function (data) {
+            //SOME ERROR HANDLER
+          });
 
-            function callChart() {
-              if (opts.targetElem) {
-
-                if (targetElem.offsetWidth === 0 && targetElem.offsetHeight === 0) {
-                  setTimeout(function () {
-                    callChart();
-                  }, 500);
-                } else {
-                  $SC[cType].call(this, opts);
-                }
+          /* this method recursively check for the DOM readyness, if DOM was loaded then 
+           * call will be pass into actual chart constructor
+           */
+          function callChart() {
+            if (opts.targetElem) {
+              if (targetElem.offsetWidth === 0 && targetElem.offsetHeight === 0) {
+                setTimeout(function () {
+                  callChart();
+                }, 500);
+              } else {
+                $SC[cType].call(this, opts);
               }
             }
+          } /*End callChart() */
 
-          });
         };
       })(chartType);
     }
   } /*End appendChartTypeNamespace()*/
 
 
-  var loadLib = function (libURL, onSuccess, onError) {
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function () {
-      if (xhr.readyState === 4 && xhr.status === 200) {
-        try {
-          eval(xhr.responseText);
-          if (typeof onSuccess === "function")
-            onSuccess.call(this);
-        } catch (ex) {
-          if (typeof onError === "function")
-            onError.call(this);
-          $SC.handleError(ex, "Error in load Library [" + libURL + "]");
-        }
-      }
-    };
-    xhr.open("GET", libURL, true);
-    xhr.send();
+  var loadChartLib = function (libURL, onSuccess, onError) {
+    asyncLoad(libURL, onSuccess, onError);
   };
-
-
 
   this.ready = function (successBack) {
     var statusCheck = setInterval(function () {
-      if (self.readyStatus) {
+      if (self.nameSpaceReadyStatus) {
+        clearInterval(statusCheck);
         if (typeof successBack === "function") {
           successBack.call(this);
         }
-        clearInterval(statusCheck);
       }
     }, 100);
   }; /*End ready()*/
@@ -185,9 +203,6 @@ window.SmartChartsNXT = new function () {
 
 
   /*-----------SmartChartsNXT UI functions------------- */
-
-
-
 
   this.ui = {};
   this.ui.dropShadow = function (parentID) {
