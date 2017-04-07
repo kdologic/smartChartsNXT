@@ -1,3 +1,14 @@
+
+/*
+ * dataParser.js
+ * @CreatedOn: 07-Apr-2016
+ * @Author: SmartChartsNXT
+ * @Version: 1.0.0
+ * @description:This utility will handle conversion for data for xml and json format.
+ */
+
+
+
 window.SmartChartsNXT.DataParser = new function () {
     var self = this; 
     
