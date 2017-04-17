@@ -9,12 +9,8 @@
 
 /*
 NOTE :-------------- >
-  Charts can be loaded locally for that we should load core library and 
-  chart library as well (otherwise there will be CORS error) for example :
-  <script src="./core/smartChartsNXT.core.js" type="text/javascript"></script>
-  <script src="./areaChart/areaChart.js" type="text/javascript"></script>
-
-  it can be loaded from localhost also for this we have to load the core library 
+  It can be loaded ONLY from localhost/server.
+  To load this we have to attach the core library in to our doc. 
   for example: 
   <script src="/smartChartsNXT/core/smartChartsNXT.core.js" type="text/javascript"></script>
 */
@@ -32,7 +28,8 @@ window.SmartChartsNXT = new function () {
     "uiCore": "/sc.ui.core.js",
     "geomCore": "/sc.geom.core.js",
     "utilCore": "/sc.util.core.js",
-    "dataParser": "/dataParser.js"
+    "dataParser": "/dataParser.js",
+    "eventCore": "/event.core.js"
   };
 
   var CHART_MAP = {

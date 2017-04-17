@@ -1,6 +1,6 @@
 
 /*
- * sc.ui.core.js
+ * sc.util.core.js
  * @CreatedOn: 07-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.0
