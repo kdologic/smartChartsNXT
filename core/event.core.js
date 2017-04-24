@@ -30,7 +30,12 @@
 
 /* will detach a existing event */
   window.SmartChartsNXT.off = function (eventName, handler) {
-
+    if (this.eventList && this.eventList[eventName]){
+      for(var i=0; i < this.eventList[eventName].length; i++){
+        if(this.eventList[eventName][i] === handler)
+          this.eventList[eventName].splice(i, 1);
+      }
+    }
   };
 
 /*Will fire a event of the sepecific event type */
@@ -41,7 +46,7 @@
           
           for (var i = 0; i < this.eventList[evt].length; i++) {
             if (typeof this.eventList[evt][i] === "function")
-              this.eventList[evt][i].call(this);
+              this.eventList[evt][i].call(this, objEvent);
           }
 
         }

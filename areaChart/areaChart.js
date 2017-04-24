@@ -64,7 +64,7 @@
 window.SmartChartsNXT.AreaChart = function(opts)
 {
   var PAGE_OPTIONS = { };
-
+  var self = this; 
   var PAGE_DATA = {
     scaleX:0,
     scaleY:0,
@@ -99,8 +99,8 @@ window.SmartChartsNXT.AreaChart = function(opts)
     hGridCount:9,
     runId:"areachart_"+Math.round(Math.random()*1000000001)
   };
-  
 
+  
   function init()
   {
     try {
@@ -115,6 +115,13 @@ window.SmartChartsNXT.AreaChart = function(opts)
       if(PAGE_OPTIONS.height < PAGE_CONST.MIN_HEIGHT)
         PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = PAGE_CONST.MIN_HEIGHT;
       
+      if (PAGE_OPTIONS.events && typeof PAGE_OPTIONS.events === "object") {
+        for (var e in PAGE_OPTIONS.events) {
+          self.off(e, PAGE_OPTIONS.events[e]);
+          self.on(e, PAGE_OPTIONS.events[e]);
+        }
+
+      }
       
       console.log(PAGE_OPTIONS);
       PAGE_DATA.scaleX = PAGE_CONST.FIX_WIDTH-PAGE_OPTIONS.width;
@@ -693,7 +700,7 @@ window.SmartChartsNXT.AreaChart = function(opts)
         arrLegendColor[i].setAttribute("y",(PAGE_DATA.marginTop+PAGE_DATA.gridBoxHeight+PAGE_DATA.fcMarginTop+PAGE_DATA.fullChartHeight+10+(row*20)));
         arrLegendText[i].setAttribute("y",(PAGE_DATA.marginTop+PAGE_DATA.gridBoxHeight+PAGE_DATA.fcMarginTop+PAGE_DATA.fullChartHeight+20+(row*20)));
         width+=(arrLegendText[i].getBBox().width+50);
-      };
+      }
       
     }
     
@@ -1150,6 +1157,10 @@ window.SmartChartsNXT.AreaChart = function(opts)
     resetTextPositions();
     bindEvents();
     onMouseLeave();
+
+    var aftrRenderEvent = new self.Event("afterRender",{srcElement:self});
+    self.dispatchEvent(aftrRenderEvent);
+   
   }/*End reDrawSeries()*/
   
   
@@ -1176,8 +1187,8 @@ window.SmartChartsNXT.AreaChart = function(opts)
       return roundVal;
   }/*End round()*/
 
-  
+
   init();
   if(PAGE_OPTIONS.animated !== false) showAnimatedView();
 };/*End of AreaChart()*/
-  
+

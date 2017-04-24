@@ -1,7 +1,7 @@
 /*
  * smartChartsNXT.core.js
  * @CreatedOn: 06-Jul-2016
- * @LastUpdated: 06-Apr-2016
+ * @LastUpdated: 24-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.2
  * @description:SmartChartsNXT Core Library components. That contains common functionality.
@@ -111,6 +111,11 @@ window.SmartChartsNXT = new function () {
 
       (function (cType) {
         $SC[chartType] = function (opts) {
+          var newObj = this;
+
+          //adding SmartChartsNXT into prototype chain
+          newObj.__proto__ = Object.create(window.SmartChartsNXT); 
+          
           var targetElem = document.querySelector("#" + opts.targetElem);
 
           /*------Show loader before showing the chart----------*/
@@ -131,8 +136,9 @@ window.SmartChartsNXT = new function () {
           if (opts.sourceDatatype && opts.sourceDatatype.toLowerCase() === "xml")
             opts.dataSet = $SC.DataParser.parseXmlToJson(opts.dataSet);*/
 
-          loadChartLib(CHART_MAP[cType], callChart, function (data) {
-            //SOME ERROR HANDLER
+          //bind callChart to preserve the context of new object
+          loadChartLib(CHART_MAP[cType], callChart.bind(newObj), function (data) {
+            //onError:SOME ERROR HANDLER
           });
 
           /* this method recursively check for the DOM readyness, if DOM was loaded then 
@@ -166,7 +172,7 @@ window.SmartChartsNXT = new function () {
       if (self.nameSpaceReadyStatus) {
         clearInterval(statusCheck);
         if (typeof successBack === "function") {
-          successBack.call(this);
+          successBack.call(window.SmartChartsNXT);
         }
       }
     }, 100);
