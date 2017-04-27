@@ -127,6 +127,9 @@ window.SmartChartsNXT.AreaChart = function(opts)
       PAGE_DATA.scaleX = PAGE_CONST.FIX_WIDTH-PAGE_OPTIONS.width;
       PAGE_DATA.scaleY = PAGE_CONST.FIX_HEIGHT-PAGE_OPTIONS.height;
 
+      //fire Event onInit
+      var onInitEvent = new self.Event("onInit",{srcElement:self});
+      self.dispatchEvent(onInitEvent);
 
       var strSVG ="<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'"+ 
                   "viewBox='0 0 "+PAGE_CONST.FIX_WIDTH+" "+PAGE_CONST.FIX_HEIGHT+"'"+
@@ -176,7 +179,7 @@ window.SmartChartsNXT.AreaChart = function(opts)
 
       prepareChart();
       
-      $SC.ui.appendMenu2(PAGE_OPTIONS.targetElem,PAGE_DATA.svgCenter);
+      $SC.ui.appendMenu2(PAGE_OPTIONS.targetElem,PAGE_DATA.svgCenter, null, null, self);
       $SC.appendWaterMark(PAGE_OPTIONS.targetElem,PAGE_DATA.scaleX,PAGE_DATA.scaleY);
       
     }catch(ex){
@@ -382,6 +385,10 @@ window.SmartChartsNXT.AreaChart = function(opts)
     PAGE_DATA.maxima = Math.max.apply(null,maxSet);
     PAGE_DATA.minima = Math.min.apply(null,minSet);
     PAGE_DATA.maxima = round(PAGE_DATA.maxima);
+
+    //fire Event afterParseData
+    var afterParseDataEvent = new self.Event("afterParseData", { srcElement: self });
+    self.dispatchEvent(afterParseDataEvent);
   }/*End prepareDataSet()*/
 
   function createSeries(dataSet,index,scaleX)
@@ -1158,6 +1165,7 @@ window.SmartChartsNXT.AreaChart = function(opts)
     bindEvents();
     onMouseLeave();
 
+    //fire event afterRender
     var aftrRenderEvent = new self.Event("afterRender",{srcElement:self});
     self.dispatchEvent(aftrRenderEvent);
    

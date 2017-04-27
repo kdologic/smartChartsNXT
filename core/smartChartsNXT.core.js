@@ -1,7 +1,7 @@
 /*
  * smartChartsNXT.core.js
  * @CreatedOn: 06-Jul-2016
- * @LastUpdated: 24-Apr-2016
+ * @LastUpdated: 27-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.2
  * @description:SmartChartsNXT Core Library components. That contains common functionality.
@@ -113,8 +113,8 @@ window.SmartChartsNXT = new function () {
         $SC[chartType] = function (opts) {
           var newObj = this;
 
-          //adding SmartChartsNXT into prototype chain
-          newObj.__proto__ = Object.create(window.SmartChartsNXT); 
+          //adding core feature into prototype chain
+          setPrototype(newObj);
           
           var targetElem = document.querySelector("#" + opts.targetElem);
 
@@ -177,6 +177,15 @@ window.SmartChartsNXT = new function () {
       }
     }, 100);
   }; /*End ready()*/
+
+  function setPrototype(obj){
+    var proto = {}; 
+    for(key in $SC){
+      if(!CHART_MAP[key])
+        proto[key] = $SC[key]; 
+    }
+    obj.__proto__ = Object.create(proto); 
+  }/*End setInheritance() */
 
 
 

@@ -159,7 +159,7 @@ window.SmartChartsNXT.ui.cursorPoint = function (targetElem, evt) {
 }; /*End cursorPoint()*/
 
 
-window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, scaleY) {
+window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, scaleY, chartObj) {
     scaleX = scaleX || 1;
     scaleY = scaleY || 1;
     var strSVG = "";
@@ -255,6 +255,10 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                     e.stopPropagation();
                     e.preventDefault();
 
+                    //fire Event beforePrint
+                    var beforePrintEvent = new self.Event("beforePrint", { srcElement: chartObj });
+                    chartObj.dispatchEvent(beforePrintEvent);
+
                     document.querySelector("#" + targetElem + " svg #smartsCharts-loader-container #loader-icon").style.display = "block";
                     var opts = {
                         width: svgCenter.x * 2,
@@ -264,6 +268,10 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                             document.querySelector("#" + targetElem + " #smartCharts-menu2").style.visibility = "visible";
                             var loaderContainter = document.querySelector(opts.srcElem + " #smartsCharts-loader-container");
                             if (loaderContainter) loaderContainter.parentNode.removeChild(loaderContainter);
+
+                            //fire Event afterPrint
+                            var afterPrintEvent = new self.Event("afterPrint", { srcElement: chartObj });
+                            chartObj.dispatchEvent(afterPrintEvent);
                         }
                     };
                     var menuSidePanel = document.querySelectorAll("#" + targetElem + " #smartCharts-menu-panel");
@@ -285,6 +293,11 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
             function onSaveAs(e) {
                 e.stopPropagation();
                 e.preventDefault();
+
+                //fire Event beforeSave
+                var beforeSaveEvent = new self.Event("beforeSave", { srcElement: chartObj });
+                chartObj.dispatchEvent(beforeSaveEvent);
+
                 var subMenuOffsetY = 100;
                 var saveAsMenu = document.querySelectorAll("#" + targetElem + " svg #smartCharts-menu-panel #smartCharts-saveas-submenu");
                 if (saveAsMenu.length > 0) {
@@ -357,6 +370,10 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                                 document.querySelector("#" + targetElem + " #smartCharts-menu2").style.visibility = "visible";
                                 var loaderContainter = document.querySelector(opts.srcElem + " #smartsCharts-loader-container");
                                 if (loaderContainter) loaderContainter.parentNode.removeChild(loaderContainter);
+
+                                //fire Event afterSave
+                                var afterSaveEvent = new self.Event("afterSave", { srcElement: chartObj });
+                                chartObj.dispatchEvent(afterSaveEvent);
                             }
                         };
                         var menuSidePanel = document.querySelectorAll("#" + targetElem + " #smartCharts-menu-panel");
@@ -367,11 +384,11 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
 
                     }, false);
                 }
-            } /*End onSaveAs()*/ ;
+            } /*End onSaveAs()*/ 
 
         }
 
-    }; /*End onMenuClick()*/
+    } /*End onMenuClick()*/
 
 }; /*End appendMenu2()*/
 

@@ -6,6 +6,15 @@
  * @description:SmartChartsNXT Core Library components. That will define all the event related activity functionality.
  */
 
+//<-----core event list ----->
+// afterRender
+// onInit
+// afterParseData
+// beforePrint
+// afterPrint
+// beforeSave
+// afterSave
+
 /*This is a event object class */
  window.SmartChartsNXT.Event = function (eventType, data) {
     this.cancelable = false;
