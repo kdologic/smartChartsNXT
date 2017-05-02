@@ -166,12 +166,13 @@ window.SmartChartsNXT.util.saveAsImage = function (opts) {
             document.body.appendChild(iframe);
             iframe = document.querySelector('#chartFrame');
             iframe.contentWindow.document.write("<body><img style='width:100%;height:auto;' src='" + canvas.toDataURL("image/jpeg") + "' /></body.");
-            window.frames["chartFrame"].focus();
-            window.frames["chartFrame"].print();
-            iframe.parentNode.removeChild(iframe);
-            if (typeof opts.saveSuccess === "function")
+            setTimeout(function () {
+                window.frames["chartFrame"].focus();
+                window.frames["chartFrame"].print();
+                iframe.parentNode.removeChild(iframe);
+                if (typeof opts.saveSuccess === "function")
                 opts.saveSuccess.call(this);
-
+            }, 0);
         } else if (opts.type === "pdf") {
             var head = document.getElementsByTagName("head")[0];
             var pdfLib = document.createElement("script");

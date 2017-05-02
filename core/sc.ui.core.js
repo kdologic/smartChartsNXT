@@ -294,10 +294,6 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                 e.stopPropagation();
                 e.preventDefault();
 
-                //fire Event beforeSave
-                var beforeSaveEvent = new self.Event("beforeSave", { srcElement: chartObj });
-                chartObj.dispatchEvent(beforeSaveEvent);
-
                 var subMenuOffsetY = 100;
                 var saveAsMenu = document.querySelectorAll("#" + targetElem + " svg #smartCharts-menu-panel #smartCharts-saveas-submenu");
                 if (saveAsMenu.length > 0) {
@@ -357,6 +353,10 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                     saveAsSubmenus[i].addEventListener("click", function (e) {
                         e.stopPropagation();
                         e.preventDefault();
+
+                        //fire Event beforeSave
+                        var beforeSaveEvent = new self.Event("beforeSave", { srcElement: chartObj });
+                        chartObj.dispatchEvent(beforeSaveEvent);
 
                         document.querySelector("#" + targetElem + " svg #smartsCharts-loader-container #loader-icon").style.display = "block";
 
