@@ -256,7 +256,7 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                     e.preventDefault();
 
                     //fire Event beforePrint
-                    var beforePrintEvent = new self.Event("beforePrint", { srcElement: chartObj });
+                    var beforePrintEvent = new $SC.Event("beforePrint", { srcElement: chartObj });
                     chartObj.dispatchEvent(beforePrintEvent);
 
                     document.querySelector("#" + targetElem + " svg #smartsCharts-loader-container #loader-icon").style.display = "block";
@@ -270,7 +270,7 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                             if (loaderContainter) loaderContainter.parentNode.removeChild(loaderContainter);
 
                             //fire Event afterPrint
-                            var afterPrintEvent = new self.Event("afterPrint", { srcElement: chartObj });
+                            var afterPrintEvent = new $SC.Event("afterPrint", { srcElement: chartObj });
                             chartObj.dispatchEvent(afterPrintEvent);
                         }
                     };
@@ -355,7 +355,7 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                         e.preventDefault();
 
                         //fire Event beforeSave
-                        var beforeSaveEvent = new self.Event("beforeSave", { srcElement: chartObj });
+                        var beforeSaveEvent = new $SC.Event("beforeSave", { srcElement: chartObj });
                         chartObj.dispatchEvent(beforeSaveEvent);
 
                         document.querySelector("#" + targetElem + " svg #smartsCharts-loader-container #loader-icon").style.display = "block";
@@ -372,7 +372,7 @@ window.SmartChartsNXT.ui.appendMenu2 = function (targetElem, svgCenter, scaleX, 
                                 if (loaderContainter) loaderContainter.parentNode.removeChild(loaderContainter);
 
                                 //fire Event afterSave
-                                var afterSaveEvent = new self.Event("afterSave", { srcElement: chartObj });
+                                var afterSaveEvent = new $SC.Event("afterSave", { srcElement: chartObj });
                                 chartObj.dispatchEvent(afterSaveEvent);
                             }
                         };
