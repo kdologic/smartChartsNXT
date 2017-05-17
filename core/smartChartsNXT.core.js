@@ -1,7 +1,7 @@
 /*
  * smartChartsNXT.core.js
  * @CreatedOn: 06-Jul-2016
- * @LastUpdated: 27-Apr-2016
+ * @LastUpdated: 15-May-2016
  * @Author: SmartChartsNXT
  * @Version: 1.0.2
  * @description:SmartChartsNXT Core Library components. That contains common functionality.
@@ -19,7 +19,7 @@ NOTE :-------------- >
 window.SmartChartsNXT = new function () {
   window.$SC = this;
   var self = this;
-  
+
   this.libPath = "/smartChartsNXT";
   this.coreLibPath = "/smartChartsNXT/core";
   this.nameSpaceReadyStatus = false;
@@ -42,6 +42,8 @@ window.SmartChartsNXT = new function () {
     "DonutChart": this.libPath + "/donutChart/donutChart.js"
   };
 
+  var BASE_CHART = "/SmartChartsNXT/base/base_chart.js"
+
 
   /*This method will load other dependent libs then callback  */
   function loadDependencies(callback) {
@@ -60,6 +62,22 @@ window.SmartChartsNXT = new function () {
       asyncLoad($SC.coreLibPath + CORE_LIBS[lib], commonCallback, commonCallback);
     }
   } /*End loadDependencies() */
+
+  function loadBaseChart(callback) {
+    asyncLoad(BASE_CHART, function () {
+      var proto = {};
+      for (key in $SC) {
+        if (!CHART_MAP[key] && key !== "BaseChart") //excluding other chart classes
+          proto[key] = $SC[key];
+      }
+      console.log(proto);
+      $SC.BaseChart.prototype = Object.create(proto);
+      if (typeof callback === "function")
+        callback.call(this);
+    }, function (err) {
+      $SC.handleError(res.error, res.msg);
+    });
+  } /*End loadBaseChart() */
 
   /*load js files asynchronously*/
   function asyncLoad(url, successCB, errorCB) {
@@ -96,7 +114,9 @@ window.SmartChartsNXT = new function () {
 
 
   loadDependencies(function () {
-    initCore();
+    loadBaseChart(function () {
+      initCore();
+    });
   });
 
   var preLoaderImg = "<svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'> <rect y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='30' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='60' width='15' height='140' rx='6'> <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='90' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='120' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect></svg>";
@@ -113,9 +133,10 @@ window.SmartChartsNXT = new function () {
         $SC[chartType] = function (opts) {
           var newObj = this;
 
-          //adding core feature into prototype chain
-          setPrototype(newObj);
-          
+          //inherit Base Chart into prototype chain
+          newObj.__proto__ = Object.create($SC.BaseChart.prototype);
+          newObj.__proto__ .constructor = $SC[chartType];
+
           var targetElem = document.querySelector("#" + opts.targetElem);
 
           /*------Show loader before showing the chart----------*/
@@ -151,7 +172,12 @@ window.SmartChartsNXT = new function () {
                   callChart();
                 }, 500);
               } else {
+                var startTime = window.performance.now();
+
                 $SC[cType].call(this, opts);
+
+                var endTitme = window.performance.now();
+                console.log("Time elapsed for "+ cType + " : " + (endTitme-startTime) + " Ms");
               }
             }
           } /*End callChart() */
@@ -177,16 +203,6 @@ window.SmartChartsNXT = new function () {
       }
     }, 100);
   }; /*End ready()*/
-
-  function setPrototype(obj){
-    var proto = {}; 
-    for(key in $SC){
-      if(!CHART_MAP[key])
-        proto[key] = $SC[key]; 
-    }
-    obj.__proto__ = Object.create(proto); 
-  }/*End setInheritance() */
-
 
 
   /*Depricated will remove soon*/
