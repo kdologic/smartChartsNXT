@@ -114,6 +114,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       PAGE_OPTIONS = self._PAGE_OPTIONS;
       PAGE_DATA = self._PAGE_DATA;
 
+      console.log(self);
+
       initDataSet();
       PAGE_DATA.chartCenter = new $SC.geom.Point(PAGE_DATA.svgCenter.x, PAGE_DATA.svgCenter.y + 50);
       PAGE_DATA.marginLeft = ((-1) * PAGE_DATA.scaleX / 2) + 100;

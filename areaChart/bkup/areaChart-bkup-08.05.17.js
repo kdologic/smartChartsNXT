@@ -62,12 +62,8 @@
  */
 
 window.SmartChartsNXT.AreaChart = function (opts) {
-
-  //call base chart constructor
-  $SC.BaseChart.call(this);
-
   var PAGE_OPTIONS = {};
-  var self = this;
+  var self = this; 
   var PAGE_DATA = {
     scaleX: 0,
     scaleY: 0,
@@ -104,17 +100,57 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   };
 
   self._PAGE_DATA = PAGE_DATA;
-  self._PAGE_CONST = PAGE_CONST;
-  self._PAGE_OPTIONS = {};
-  console.log(this);
+  self._PAGE_CONST = PAGE_CONST
+
+  
 
   function init() {
     try {
-      self.init("areaChart", opts);
-      PAGE_OPTIONS = self._PAGE_OPTIONS;
-      PAGE_DATA = self._PAGE_DATA;
 
+      PAGE_OPTIONS = $SC.util.extends(opts, PAGE_OPTIONS);
+      var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
+      PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = containerDiv.offsetWidth || PAGE_CONST.FIX_WIDTH;
+      PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = containerDiv.offsetHeight || PAGE_CONST.FIX_HEIGHT;
+
+      if (PAGE_OPTIONS.width < PAGE_CONST.MIN_WIDTH)
+        PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = PAGE_CONST.MIN_WIDTH;
+      if (PAGE_OPTIONS.height < PAGE_CONST.MIN_HEIGHT)
+        PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = PAGE_CONST.MIN_HEIGHT;
+
+      if (PAGE_OPTIONS.events && typeof PAGE_OPTIONS.events === "object") {
+        for (var e in PAGE_OPTIONS.events) {
+          self.off(e, PAGE_OPTIONS.events[e]);
+          self.on(e, PAGE_OPTIONS.events[e]);
+        }
+      }
+      console.log(PAGE_OPTIONS);
+      PAGE_DATA.scaleX = PAGE_CONST.FIX_WIDTH - PAGE_OPTIONS.width;
+      PAGE_DATA.scaleY = PAGE_CONST.FIX_HEIGHT - PAGE_OPTIONS.height;
+
+      //fire Event onInit
+      var onInitEvent = new self.Event("onInit", {
+        srcElement: self
+      });
+      self.dispatchEvent(onInitEvent);
+
+      var strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
+        "viewBox='0 0 " + PAGE_CONST.FIX_WIDTH + " " + PAGE_CONST.FIX_HEIGHT + "'" +
+        "version='1.1'" +
+        "width='" + PAGE_OPTIONS.width + "'" +
+        "height='" + PAGE_OPTIONS.height + "'" +
+        "id='areaChart'" +
+        "style='background:" + (PAGE_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
+        "> <\/svg>";
+
+      document.getElementById(PAGE_OPTIONS.targetElem).setAttribute("runId", PAGE_CONST.runId);
+      document.getElementById(PAGE_OPTIONS.targetElem).innerHTML = "";
+      document.getElementById(PAGE_OPTIONS.targetElem).insertAdjacentHTML("beforeend", strSVG);
       initDataSet();
+
+
+      var svgWidth = parseInt(document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").getAttribute("width"));
+      var svgHeight = parseInt(document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").getAttribute("height"));
+      PAGE_DATA.svgCenter = new $SC.geom.Point((svgWidth / 2), (svgHeight / 2));
       PAGE_DATA.chartCenter = new $SC.geom.Point(PAGE_DATA.svgCenter.x, PAGE_DATA.svgCenter.y + 50);
       PAGE_DATA.marginLeft = ((-1) * PAGE_DATA.scaleX / 2) + 100;
       PAGE_DATA.marginRight = ((-1) * PAGE_DATA.scaleX / 2) + 20;
@@ -130,6 +166,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
           longSeriesLen = PAGE_OPTIONS.dataSet.series[index].data.length;
         }
       }
+
       PAGE_DATA.longestSeries = longestSeries;
 
       if (PAGE_OPTIONS.zoomWindow) {
@@ -144,6 +181,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
       prepareChart();
 
+      $SC.ui.appendMenu2(PAGE_OPTIONS.targetElem, PAGE_DATA.svgCenter, null, null, self);
+      $SC.appendWaterMark(PAGE_OPTIONS.targetElem, PAGE_DATA.scaleX, PAGE_DATA.scaleY);
+
     } catch (ex) {
       $SC.handleError(ex, "Error in AreaChart");
     }
@@ -157,6 +197,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     PAGE_DATA.newCatgList = [];
     PAGE_DATA.windowLeftIndex = 0;
     PAGE_DATA.windowRightIndex = -1;
+
   } /*End initDataSet()*/
 
   function prepareChart() {
@@ -183,11 +224,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = PAGE_OPTIONS.title;
-    self._PAGE_DATA.objChart.querySelector("#txtSubtitle").textContent = PAGE_OPTIONS.subTitle;
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtTitle").textContent = PAGE_OPTIONS.title;
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtSubtitle").textContent = PAGE_OPTIONS.subTitle;
 
     createGrid();
     createFullSeries();
@@ -223,19 +265,19 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
     strSVG += "</g>";
 
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strSVG);
 
     resetTextPositions();
 
     resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
     resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
 
-    //bindEvents();
+    bindEvents();
     bindSliderEvents();
 
-    var fullSeries = self._PAGE_DATA.objChart.querySelector("#fullSeriesContr");
+    var fullSeries = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #fullSeriesContr");
     fullSeries.parentNode.removeChild(fullSeries);
-    self._PAGE_DATA.objChart.appendChild(fullSeries);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").appendChild(fullSeries);
 
     reDrawSeries();
   } /*End prepareChart()*/
@@ -245,7 +287,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var strSVG = "";
     strSVG += "<rect id='sliderLeftOffset' x='" + (PAGE_DATA.marginLeft) + "' y='" + ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop) + "' width='0' height='" + (PAGE_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)'  style='stroke-width:0.1;stroke:#717171;' \/>";
     strSVG += "<rect id='sliderRightOffset' x='" + ((PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginRight) + "' y='" + ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop) + "' width='0' height='" + (PAGE_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)' style='stroke-width:0.1;stroke:#717171;' \/>";
-    self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
     /* ploting actual points */
     for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
@@ -272,7 +314,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "</g>";
-    self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
 
     function drawFullSeries(dataSet, index) {
@@ -314,7 +356,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strSeries += "<path id='fLine_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='1'></path>";
       strSeries += "<path id='fArea_" + index + "' stroke='none' fill='url(#" + PAGE_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")' d='" + area.join(" ") + "' stroke-width='1' opacity='1'></path>";
 
-      self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
     } /*End drawFullSeries()*/
 
   } /*End createFullChart()*/
@@ -351,8 +393,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function createSeries(dataSet, index, scaleX) {
     var d = [];
-    var elemSeries = self._PAGE_DATA.objChart.querySelector("#series_" + index);
-    var elemActualSeries = self._PAGE_DATA.objChart.querySelector("#series_actual_" + index);
+    var elemSeries = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #series_" + index);
+    var elemActualSeries = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #series_actual_" + index);
     if (elemSeries) elemSeries.parentNode.removeChild(elemSeries);
     if (elemActualSeries) elemActualSeries.parentNode.removeChild(elemActualSeries);
 
@@ -388,7 +430,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
     strSeries += "</g>";
     if (dataSet.length < 50)
-      self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strSeries);
     PAGE_DATA.series.push(arrPointsSet);
 
     var line = [],
@@ -429,7 +471,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
     strSeries += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strSeries);
 
   } /*End createSeries()*/
 
@@ -444,11 +486,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <stop offset='100%' style='stop-color:" + color + ";stop-opacity:" + areaOpacity + "' />";
     strSVG += "  </linearGradient>";
     strSVG += "</defs>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
   function createLegands(index) {
-    var seriesLegend = self._PAGE_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
+    var seriesLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #legendContainer #series_legend_" + index);
     if (seriesLegend) seriesLegend.parentNode.removeChild(seriesLegend);
 
     /*Creating series legend*/
@@ -458,7 +500,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "<rect id='legend_color_" + index + "' x='" + PAGE_DATA.marginLeft + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
     strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (PAGE_DATA.marginLeft + 20) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + PAGE_OPTIONS.dataSet.series[index].name + "</text>";
     strSVG += "</g>";
-    self._PAGE_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #legendContainer").insertAdjacentHTML("beforeend", strSVG);
   }
 
 
@@ -466,7 +508,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     PAGE_DATA.gridBoxWidth = (PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginLeft - PAGE_DATA.marginRight;
     PAGE_DATA.gridBoxHeight = (PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom;
     PAGE_DATA.gridHeight = (((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom) / (PAGE_CONST.hGridCount - 1));
-    var hGrid = self._PAGE_DATA.objChart.querySelector("#hGrid");
+    var hGrid = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #hGrid");
     if (hGrid) hGrid.parentNode.removeChild(hGrid);
 
     var strGrid = "";
@@ -479,12 +521,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strGrid += "<rect id='gridRect' x='" + PAGE_DATA.marginLeft + "' y='" + PAGE_DATA.marginTop + "' width='" + PAGE_DATA.gridBoxWidth + "' height='" + PAGE_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
     strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strGrid += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strGrid);
     createVerticalLabel();
   } /*End createGrid()*/
 
   function createVerticalLabel() {
-    var vTextLabel = self._PAGE_DATA.objChart.querySelector("#vTextLabel");
+    var vTextLabel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #vTextLabel");
     if (vTextLabel) vTextLabel.parentNode.removeChild(vTextLabel);
 
     var interval = (PAGE_DATA.maxima) / (PAGE_CONST.hGridCount - 1);
@@ -497,10 +539,10 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strText);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strText);
 
     var overFlow = 0;
-    var vTextLabel = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var vTextLabel = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #vTextLabel tspan");
     for (var i = 0; i < vTextLabel.length; i++) {
       if ((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
         overFlow = Math.abs((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
@@ -512,12 +554,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End createVerticalLabel()*/
 
   function createHorizontalLabel(categories, scaleX) {
-    var hTextLabel = self._PAGE_DATA.objChart.querySelector("#hTextLabel");
+    var hTextLabel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
 
     var interval = scaleX || (PAGE_DATA.gridBoxWidth / (categories.length));
 
-    /*if there is too much categories then discard some categories*/
+    /*if there is too much categories then discurd some categories*/
     if (interval < 30) {
       var newCategories = [],
         skipLen = Math.ceil(30 / interval);
@@ -541,8 +583,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strText += "</g>";
 
     /*bind hover event*/
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strText);
-    var hTextLabels = self._PAGE_DATA.objChart.querySelectorAll("#hTextLabel text");
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").insertAdjacentHTML("beforeend", strText);
+    var hTextLabels = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #hTextLabel text");
     var totalHTextWidth = 0;
     for (var i = 0; i < hTextLabels.length; i++) {
       var txWidth = hTextLabels[i].getComputedTextLength();
@@ -575,18 +617,18 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   function resetTextPositions() {
-    var txtTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-    var txtSubTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    var txtTitleGrp = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp");
+    var txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtTitle").getComputedTextLength();
+    var txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
+    var txtTitleGrp = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp");
 
 
     if (txtTitleLen > PAGE_CONST.FIX_WIDTH) {
-      var fontSize = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+      var fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtTitle").getAttribute("font-size");
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
     txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtTitleLen / 2)));
@@ -595,15 +637,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
     /*Reset vertical text label*/
-    var arrVLabels = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel");
+    var arrVLabels = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #vTextLabel");
     var vLabelwidth = arrVLabels[0].getBBox().width;
-    var arrVText = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var arrVText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #vTextLabel tspan");
     for (var i = 0; i < arrVText.length; i++)
       arrVText[i].setAttribute("x", (PAGE_DATA.marginLeft - vLabelwidth - 10));
 
     /*Reset horzontal text label*/
     var totalHTextWidth = 0;
-    var arrHText = self._PAGE_DATA.objChart.querySelectorAll("#hTextLabel text");
+    var arrHText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #hTextLabel text");
     for (var i = 0; i < arrHText.length; i++) {
       var txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
@@ -629,14 +671,14 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    var vTxtSubTitle = self._PAGE_DATA.objChart.querySelector("#vTextSubTitle");
+    var vTxtSubTitle = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #vTextSubTitle");
     vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (PAGE_DATA.marginLeft - vLabelwidth - 30) + "," + (PAGE_DATA.svgCenter.y) + ")");
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
     /*Set position for legend text*/
-    var arrLegendText = self._PAGE_DATA.objChart.querySelectorAll("#legendContainer text");
-    var arrLegendColor = self._PAGE_DATA.objChart.querySelectorAll("#legendContainer rect");
+    var arrLegendText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #legendContainer text");
+    var arrLegendColor = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart #legendContainer rect");
     var width = 0,
       row = 0;
     for (var i = 0; i < arrLegendText.length; i++) {
@@ -660,6 +702,43 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   } /*End resetTextPositions()*/
 
+  function showAnimatedView() {
+    var dataSet = [];
+    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex).length;
+    var pointIndex = 0;
+
+    for (var i = 0; i < PAGE_OPTIONS.dataSet.series.length; i++) {
+      var set = {
+        "data": PAGE_OPTIONS.dataSet.series[i].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex)
+      };
+      dataSet.push(set);
+    }
+    prepareDataSet(dataSet);
+    PAGE_DATA.series = [];
+
+    var maxLen = 0;
+    for (var i = 0; i < dataSet.length; i++) {
+      var len = dataSet[i].data.length;
+      if (len > maxLen) maxLen = len;
+    }
+
+    /*if there is more than 50 points then skip the animation*/
+    if (maxLen > 50)
+      pointIndex = maxLen;
+    var timoutId = setInterval(function () {
+
+      for (var index = 0; index < dataSet.length; index++) {
+        createSeries(dataSet[index].data.slice(0, pointIndex), index, scaleX);
+      }
+
+      if (pointIndex === maxLen) {
+        clearInterval(timoutId);
+        reDrawSeries();
+      }
+      pointIndex++;
+    }, 50);
+  } /*End showAnimatedView()*/
+
   function bindEvents() {
     PAGE_DATA.windowRightIndex = (PAGE_DATA.windowRightIndex < 0) ? PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length : PAGE_DATA.windowRightIndex;
     PAGE_DATA.newDataSet = [], PAGE_DATA.newCatgList = [];
@@ -673,14 +752,14 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     }
 
     for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
-      var legend = self._PAGE_DATA.objChart.querySelector("#series_legend_" + index);
+      var legend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #series_legend_" + index);
       if (legend) {
         legend.removeEventListener("click", onLegendClick);
         legend.addEventListener("click", onLegendClick, false);
       }
     }
 
-    var gridRect = self._PAGE_DATA.objChart.querySelector("#gridRect");
+    var gridRect = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #gridRect");
     if (gridRect) {
       gridRect.removeEventListener("mousemove", onMouseMove);
       gridRect.addEventListener("mousemove", onMouseMove, false);
@@ -690,7 +769,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       gridRect.addEventListener("mouseleave", onMouseLeave, false);
     }
 
-    var zoomOutBox = self._PAGE_DATA.objChart.querySelector("#zoomOutBox");
+    var zoomOutBox = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBox");
     if (zoomOutBox) {
       zoomOutBox.removeEventListener("click", onZoomOut);
       zoomOutBox.addEventListener("click", onZoomOut, false);
@@ -738,11 +817,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       e.stopPropagation();
 
       var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-      var gridBox = self._PAGE_DATA.objChart.querySelector("#hGrid").getBBox();
+      var gridBox = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #hGrid").getBBox();
       if (mousePointer.x >= gridBox.x && mousePointer.x < (gridBox.x + PAGE_DATA.gridBoxWidth) && mousePointer.y >= gridBox.y && mousePointer.y < (gridBox.y + PAGE_DATA.gridBoxHeight)) {
         var multiSeriesPoints = [];
         for (var i = 0; i < PAGE_DATA.series.length; i++) {
-          if (self._PAGE_DATA.objChart.querySelector("#series_" + i).style.display === "none")
+          if (document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #series_" + i).style.display === "none")
             continue;
           for (var j = 0; j < PAGE_DATA.series[i].length - 1; j++) {
             if (mousePointer.x > PAGE_DATA.series[i][j].x && mousePointer.x < PAGE_DATA.series[i][j + 1].x) {
@@ -781,15 +860,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
         /*Create vertical line*/
         var vLinePath = ["M", toolTipPoint.x, toolTipPoint.y, "L", toolTipPoint.x, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight];
-        var vLine = self._PAGE_DATA.objChart.querySelector("#vLine");
+        var vLine = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #vLine");
         if (vLine) {
           vLine.setAttribute("d", vLinePath.join(" "));
           vLine.parentNode.removeChild(vLine);
-          self._PAGE_DATA.objChart.appendChild(vLine);
+          document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").appendChild(vLine);
         }
 
         if (toolTipPoint) {
-          var elms = self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
+          var elms = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart .tooTipPoint");
           for (var i = 0; i < elms.length; i++)
             elms[i].parentNode.removeChild(elms[i]);
 
@@ -814,8 +893,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
             $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
           } else
             $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
-
-          self._PAGE_DATA.objChart.querySelector("#vLine").style.display = "block";
+          document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #vLine").style.display = "block";
         }
       }
     } catch (ex) {
@@ -825,21 +903,21 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function onMouseLeave() {
     $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
-    self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
-    var elms = self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
+    document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart .tooTipPoint");
+    var elms = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #areaChart .tooTipPoint");
     for (var i = 0; i < elms.length; i++)
       elms[i].parentNode.removeChild(elms[i]);
 
-    var vLine = self._PAGE_DATA.objChart.querySelector("#vLine");
+    var vLine = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #vLine");
     if (vLine) vLine.style.display = "none";
 
   } /*End onMouseLeave()*/
 
   function onLegendClick(e) {
     var seriesIndex = e.target.id.split("_")[2];
-    var legendColor = self._PAGE_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
-    var area = self._PAGE_DATA.objChart.querySelector("#series_" + seriesIndex);
-    var actualArea = self._PAGE_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
+    var legendColor = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #legend_color_" + seriesIndex);
+    var area = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #series_" + seriesIndex);
+    var actualArea = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #series_actual_" + seriesIndex);
     var color = PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
 
     if (legendColor.getAttribute("fill") === "#eee") {
@@ -854,34 +932,34 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End onLegendClick()*/
 
   function bindSliderEvents() {
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").addEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
       reDrawSeries();
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._PAGE_DATA.objChart.addEventListener("mouseup", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       if (PAGE_DATA.mouseDown === 1) {
-        self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-        self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-        self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
-        self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindLeftSliderMove);
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindRightSliderMove);
         if (e.target.id === "sliderRight")
           resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
         else
@@ -891,57 +969,57 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       PAGE_DATA.mouseDown = 0;
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").addEventListener("mousemove", bindRightSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
       reDrawSeries();
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
     });
 
     /*Events for touch devices*/
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").addEventListener("touchmove", bindLeftSliderMove);
     }, false);
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("touchmove", bindLeftSliderMove);
       resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
       reDrawSeries();
     }, false);
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").addEventListener("touchmove", bindRightSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("touchmove", bindRightSliderMove);
       resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
       reDrawSeries();
     });
@@ -954,12 +1032,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
 
-    var sliderLsel = self._PAGE_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._PAGE_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderLsel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideLSel").getBBox();
+    var sliderRsel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideRSel").getBBox();
 
     if (sliderLsel.x + (PAGE_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
-      self._PAGE_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
       reDrawSeries();
       return;
@@ -981,12 +1059,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    var sliderLsel = self._PAGE_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._PAGE_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderLsel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideLSel").getBBox();
+    var sliderRsel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideRSel").getBBox();
 
     if (sliderRsel.x - (PAGE_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
-      self._PAGE_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #slideLSel").removeEventListener("mousemove", bindRightSliderMove);
+      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart").removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
       reDrawSeries();
       return;
@@ -1019,30 +1097,30 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     ];
 
     var cy = (PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + (PAGE_DATA.fullChartHeight / 2) + PAGE_DATA.fcMarginTop;
-    self._PAGE_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
-    self._PAGE_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
-    self._PAGE_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
-    var fullSeries = self._PAGE_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #" + sliderLine).setAttribute("d", dr.join(" "));
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #" + innerBarType).setAttribute("d", innerBar.join(" "));
+    var fullSeries = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #fullSeriesContr #outerFrame");
 
     if (type === "left") {
-      var sliderOffset = self._PAGE_DATA.objChart.querySelector("#sliderLeftOffset");
+      var sliderOffset = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderLeftOffset");
       sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
     } else {
-      var sliderOffset = self._PAGE_DATA.objChart.querySelector("#sliderRightOffset");
+      var sliderOffset = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #sliderRightOffset");
       sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
       sliderOffset.setAttribute("x", x);
     }
 
     if (type === "left") {
       if (PAGE_DATA.windowLeftIndex > 0)
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBoxCont").style.display = "block";
       else
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBoxCont").style.display = "none";
     } else if (type === "right") {
       if (PAGE_DATA.windowRightIndex < ((PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length * 2) - 1)) {
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBoxCont").style.display = "block";
       } else {
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBoxCont").style.display = "none";
       }
     }
 
@@ -1092,7 +1170,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
     resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
     reDrawSeries();
-    self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #areaChart #zoomOutBoxCont").style.display = "none";
   } /*End onZoomOut()*/
 
   function round(val) {
@@ -1105,43 +1183,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     else
       return roundVal;
   } /*End round()*/
-
-  function showAnimatedView() {
-    var dataSet = [];
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex).length;
-    var pointIndex = 0;
-
-    for (var i = 0; i < PAGE_OPTIONS.dataSet.series.length; i++) {
-      var set = {
-        "data": PAGE_OPTIONS.dataSet.series[i].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex)
-      };
-      dataSet.push(set);
-    }
-    prepareDataSet(dataSet);
-    PAGE_DATA.series = [];
-
-    var maxLen = 0;
-    for (var i = 0; i < dataSet.length; i++) {
-      var len = dataSet[i].data.length;
-      if (len > maxLen) maxLen = len;
-    }
-
-    /*if there is more than 50 points then skip the animation*/
-    if (maxLen > 50)
-      pointIndex = maxLen;
-    var timoutId = setInterval(function () {
-
-      for (var index = 0; index < dataSet.length; index++) {
-        createSeries(dataSet[index].data.slice(0, pointIndex), index, scaleX);
-      }
-
-      if (pointIndex === maxLen) {
-        clearInterval(timoutId);
-        reDrawSeries();
-      }
-      pointIndex++;
-    }, 50);
-  } /*End showAnimatedView()*/
 
 
   init();
