@@ -66,9 +66,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   //call base chart constructor
   $SC.BaseChart.call(this);
 
-  var PAGE_OPTIONS = {};
+  var CHART_OPTIONS = {};
   var self = this;
-  var PAGE_DATA = {
+  var CHART_DATA = {
     scaleX: 0,
     scaleY: 0,
     svgCenter: 0,
@@ -94,7 +94,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     newCatgList: []
   };
 
-  var PAGE_CONST = {
+  var CHART_CONST = {
     FIX_WIDTH: 800,
     FIX_HEIGHT: 600,
     MIN_WIDTH: 250,
@@ -103,44 +103,44 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     runId: "areachart_" + Math.round(Math.random() * 1000000001)
   };
 
-  self._PAGE_DATA = PAGE_DATA;
-  self._PAGE_CONST = PAGE_CONST;
-  self._PAGE_OPTIONS = {};
+  self._CHART_DATA = CHART_DATA;
+  self._CHART_CONST = CHART_CONST;
+  self._CHART_OPTIONS = {};
   console.log(this);
 
   function init() {
     try {
       self.init("areaChart", opts);
-      PAGE_OPTIONS = self._PAGE_OPTIONS;
-      PAGE_DATA = self._PAGE_DATA;
+      CHART_OPTIONS = self._CHART_OPTIONS;
+      CHART_DATA = self._CHART_DATA;
 
       initDataSet();
-      PAGE_DATA.chartCenter = new $SC.geom.Point(PAGE_DATA.svgCenter.x, PAGE_DATA.svgCenter.y + 50);
-      PAGE_DATA.marginLeft = ((-1) * PAGE_DATA.scaleX / 2) + 100;
-      PAGE_DATA.marginRight = ((-1) * PAGE_DATA.scaleX / 2) + 20;
-      PAGE_DATA.marginTop = ((-1) * PAGE_DATA.scaleY / 2) + 120;
-      PAGE_DATA.marginBottom = ((-1) * PAGE_DATA.scaleY / 2) + 170;
+      CHART_DATA.chartCenter = new $SC.geom.Point(CHART_DATA.svgCenter.x, CHART_DATA.svgCenter.y + 50);
+      CHART_DATA.marginLeft = ((-1) * CHART_DATA.scaleX / 2) + 100;
+      CHART_DATA.marginRight = ((-1) * CHART_DATA.scaleX / 2) + 20;
+      CHART_DATA.marginTop = ((-1) * CHART_DATA.scaleY / 2) + 120;
+      CHART_DATA.marginBottom = ((-1) * CHART_DATA.scaleY / 2) + 170;
 
       var longestSeries = 0,
         longSeriesLen = 0;
-      for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
+      for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
 
-        if (PAGE_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
+        if (CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
           longestSeries = index;
-          longSeriesLen = PAGE_OPTIONS.dataSet.series[index].data.length;
+          longSeriesLen = CHART_OPTIONS.dataSet.series[index].data.length;
         }
       }
-      PAGE_DATA.longestSeries = longestSeries;
+      CHART_DATA.longestSeries = longestSeries;
 
-      if (PAGE_OPTIONS.zoomWindow) {
-        if (PAGE_OPTIONS.zoomWindow.leftIndex && PAGE_OPTIONS.zoomWindow.leftIndex >= 0 && PAGE_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1)
-          PAGE_DATA.windowLeftIndex = PAGE_OPTIONS.zoomWindow.leftIndex;
-        if (PAGE_OPTIONS.zoomWindow.rightIndex && PAGE_OPTIONS.zoomWindow.rightIndex > PAGE_OPTIONS.zoomWindow.leftIndex && PAGE_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1)
-          PAGE_DATA.windowRightIndex = PAGE_OPTIONS.zoomWindow.rightIndex;
+      if (CHART_OPTIONS.zoomWindow) {
+        if (CHART_OPTIONS.zoomWindow.leftIndex && CHART_OPTIONS.zoomWindow.leftIndex >= 0 && CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1)
+          CHART_DATA.windowLeftIndex = CHART_OPTIONS.zoomWindow.leftIndex;
+        if (CHART_OPTIONS.zoomWindow.rightIndex && CHART_OPTIONS.zoomWindow.rightIndex > CHART_OPTIONS.zoomWindow.leftIndex && CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1)
+          CHART_DATA.windowRightIndex = CHART_OPTIONS.zoomWindow.rightIndex;
         else
-          PAGE_DATA.windowRightIndex = (longSeriesLen) - 1;
+          CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
       } else
-        PAGE_DATA.windowRightIndex = (longSeriesLen) - 1;
+        CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
 
       prepareChart();
 
@@ -151,25 +151,25 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End init()*/
 
   function initDataSet() {
-    PAGE_DATA.fullSeries = [];
-    PAGE_DATA.series = [];
-    PAGE_DATA.newDataSet = [];
-    PAGE_DATA.newCatgList = [];
-    PAGE_DATA.windowLeftIndex = 0;
-    PAGE_DATA.windowRightIndex = -1;
+    CHART_DATA.fullSeries = [];
+    CHART_DATA.series = [];
+    CHART_DATA.newDataSet = [];
+    CHART_DATA.newCatgList = [];
+    CHART_DATA.windowLeftIndex = 0;
+    CHART_DATA.windowRightIndex = -1;
   } /*End initDataSet()*/
 
   function prepareChart() {
     prepareDataSet();
     var strSVG = "";
-    if (PAGE_OPTIONS.canvasBorder) {
+    if (CHART_OPTIONS.canvasBorder) {
       strSVG += "<g>";
-      strSVG += "  <rect x='" + ((-1) * PAGE_DATA.scaleX / 2) + "' y='" + ((-1) * PAGE_DATA.scaleY / 2) + "' width='" + ((PAGE_DATA.svgCenter.x * 2) + PAGE_DATA.scaleX) + "' height='" + ((PAGE_DATA.svgCenter.y * 2) + PAGE_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
+      strSVG += "  <rect x='" + ((-1) * CHART_DATA.scaleX / 2) + "' y='" + ((-1) * CHART_DATA.scaleY / 2) + "' width='" + ((CHART_DATA.svgCenter.x * 2) + CHART_DATA.scaleX) + "' height='" + ((CHART_DATA.svgCenter.y * 2) + CHART_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
       strSVG += "<\/g>";
     }
     strSVG += "<g>";
     strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
-    strSVG += "    <tspan id='txtTitle' x='" + (100 / PAGE_CONST.FIX_WIDTH * PAGE_OPTIONS.width) + "' y='" + (50 / PAGE_CONST.FIX_HEIGHT * PAGE_OPTIONS.height) + "' font-size='20'><\/tspan>";
+    strSVG += "    <tspan id='txtTitle' x='" + (100 / CHART_CONST.FIX_WIDTH * CHART_OPTIONS.width) + "' y='" + (50 / CHART_CONST.FIX_HEIGHT * CHART_OPTIONS.height) + "' font-size='20'><\/tspan>";
     strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='13'><\/tspan>";
     strSVG += "  <\/text>";
     strSVG += "<\/g>";
@@ -183,33 +183,33 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = PAGE_OPTIONS.title;
-    self._PAGE_DATA.objChart.querySelector("#txtSubtitle").textContent = PAGE_OPTIONS.subTitle;
+    self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = CHART_OPTIONS.title;
+    self._CHART_DATA.objChart.querySelector("#txtSubtitle").textContent = CHART_OPTIONS.subTitle;
 
     createGrid();
     createFullSeries();
 
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length;
-    for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
-      createSeries(PAGE_OPTIONS.dataSet.series[index].data, index, scaleX);
-      if (PAGE_OPTIONS.dataSet.series.length > 1)
+    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length;
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
+      createSeries(CHART_OPTIONS.dataSet.series[index].data, index, scaleX);
+      if (CHART_OPTIONS.dataSet.series.length > 1)
         createLegands(index);
       appendGradFill(index);
     }
 
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.slice(0, PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length);
-    createHorizontalLabel(PAGE_OPTIONS.dataSet.xAxis.categories, scaleX);
+    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(0, CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
+    createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
 
     /*Creating horizontal and vertical subtitles*/
-    strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (PAGE_DATA.marginLeft + (PAGE_DATA.gridBoxWidth / 2) - 30) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 70) + "' font-size='18' >" + PAGE_OPTIONS.dataSet.xAxis.title + "<\/text>";
-    strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (PAGE_DATA.marginLeft - 30) + "' y='" + (PAGE_DATA.marginTop + (PAGE_DATA.gridBoxHeight / 2) - 5) + "' font-size='18' >" + PAGE_OPTIONS.dataSet.yAxis.title + "<\/text>";
+    strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft + (CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 70) + "' font-size='18' >" + CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
+    strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft - 30) + "' y='" + (CHART_DATA.marginTop + (CHART_DATA.gridBoxHeight / 2) - 5) + "' font-size='18' >" + CHART_OPTIONS.dataSet.yAxis.title + "<\/text>";
 
     var zoomOutBox = {
-      top: PAGE_DATA.marginTop - 40,
-      left: PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth - 40,
+      top: CHART_DATA.marginTop - 40,
+      left: CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth - 40,
       width: 40,
       height: 40
     };
@@ -223,19 +223,19 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
     strSVG += "</g>";
 
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
     resetTextPositions();
 
-    resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
-    resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+    resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
+    resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
 
     //bindEvents();
     bindSliderEvents();
 
-    var fullSeries = self._PAGE_DATA.objChart.querySelector("#fullSeriesContr");
+    var fullSeries = self._CHART_DATA.objChart.querySelector("#fullSeriesContr");
     fullSeries.parentNode.removeChild(fullSeries);
-    self._PAGE_DATA.objChart.appendChild(fullSeries);
+    self._CHART_DATA.objChart.appendChild(fullSeries);
 
     reDrawSeries();
   } /*End prepareChart()*/
@@ -243,25 +243,25 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function createFullSeries() {
     var strSVG = "";
-    strSVG += "<rect id='sliderLeftOffset' x='" + (PAGE_DATA.marginLeft) + "' y='" + ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop) + "' width='0' height='" + (PAGE_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)'  style='stroke-width:0.1;stroke:#717171;' \/>";
-    strSVG += "<rect id='sliderRightOffset' x='" + ((PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginRight) + "' y='" + ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop) + "' width='0' height='" + (PAGE_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)' style='stroke-width:0.1;stroke:#717171;' \/>";
-    self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)'  style='stroke-width:0.1;stroke:#717171;' \/>";
+    strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)' style='stroke-width:0.1;stroke:#717171;' \/>";
+    self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
     /* ploting actual points */
-    for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
-      drawFullSeries(PAGE_OPTIONS.dataSet.series[index].data, index);
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
+      drawFullSeries(CHART_OPTIONS.dataSet.series[index].data, index);
     }
 
     var outerContPath = [
-      "M", (PAGE_DATA.marginLeft), ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop + 10),
-      "L", (PAGE_DATA.marginLeft), ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop),
-      "L", (PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth), ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop),
-      "L", (PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth), ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop + 10)
+      "M", (CHART_DATA.marginLeft), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop + 10),
+      "L", (CHART_DATA.marginLeft), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop),
+      "L", (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop),
+      "L", (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop + 10)
     ];
 
     strSVG = "";
     strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
-    strSVG += "<rect id='outerFrame' x='" + (PAGE_DATA.marginLeft) + "' y='" + ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop) + "' width='" + ((PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginLeft - PAGE_DATA.marginRight) + "' height='" + (PAGE_DATA.fullChartHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
+    strSVG += "<rect id='outerFrame' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight) + "' height='" + (CHART_DATA.fullChartHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
     strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "<g id='sliderLeftHandle'>";
@@ -272,21 +272,21 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "</g>";
-    self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
 
     function drawFullSeries(dataSet, index) {
       var d = [];
-      var scaleX = PAGE_DATA.fsScaleX = (PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length);
-      var scaleYfull = (PAGE_DATA.fullChartHeight / PAGE_DATA.maxima);
+      var scaleX = CHART_DATA.fsScaleX = (CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
+      var scaleYfull = (CHART_DATA.fullChartHeight / CHART_DATA.maxima);
       var arrPointsSet = [],
         strSeries = "";
       for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        var p = new $SC.geom.Point(PAGE_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fullChartHeight + PAGE_DATA.fcMarginTop) - (dataSet[dataCount].value * scaleYfull));
+        var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop) - (dataSet[dataCount].value * scaleYfull));
         arrPointsSet.push(p);
       }
 
-      PAGE_DATA.fullSeries.push(arrPointsSet);
+      CHART_DATA.fullSeries.push(arrPointsSet);
 
       var line = [],
         area = [];
@@ -295,7 +295,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var point = 0;
       for (var point = 0;
         (point + 2) < arrPointsSet.length; point++) {
-        if (PAGE_OPTIONS.dataSet.series[index].smoothedLine) {
+        if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
           var curve = $SC.geom.describeBezireArc(arrPointsSet[point], arrPointsSet[point + 1], arrPointsSet[point + 2]);
           line.push.apply(line, curve);
         } else {
@@ -303,18 +303,18 @@ window.SmartChartsNXT.AreaChart = function (opts) {
         }
       }
 
-      if (!PAGE_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
+      if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
         line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
       line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
       area.push.apply(area, line);
-      d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fullChartHeight + PAGE_DATA.fcMarginTop), "L", PAGE_DATA.marginLeft + (scaleX / 2), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fullChartHeight + PAGE_DATA.fcMarginTop), "Z"];
+      d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", CHART_DATA.marginLeft + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "Z"];
       area.push.apply(area, d);
 
-      var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+      var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
       strSeries += "<path id='fLine_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='1'></path>";
-      strSeries += "<path id='fArea_" + index + "' stroke='none' fill='url(#" + PAGE_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")' d='" + area.join(" ") + "' stroke-width='1' opacity='1'></path>";
+      strSeries += "<path id='fArea_" + index + "' stroke='none' fill='url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")' d='" + area.join(" ") + "' stroke-width='1' opacity='1'></path>";
 
-      self._PAGE_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
+      self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
     } /*End drawFullSeries()*/
 
   } /*End createFullChart()*/
@@ -323,7 +323,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var maxSet = [],
       minSet = [],
       categories = [];
-    dataSet = dataSet || PAGE_OPTIONS.dataSet.series;
+    dataSet = dataSet || CHART_OPTIONS.dataSet.series;
 
     for (var i = 0; i < dataSet.length; i++) {
       var arrData = [];
@@ -337,10 +337,10 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       maxSet.push(maxVal);
       minSet.push(minVal);
     }
-    PAGE_OPTIONS.dataSet.xAxis.categories = categories;
-    PAGE_DATA.maxima = Math.max.apply(null, maxSet);
-    PAGE_DATA.minima = Math.min.apply(null, minSet);
-    PAGE_DATA.maxima = round(PAGE_DATA.maxima);
+    CHART_OPTIONS.dataSet.xAxis.categories = categories;
+    CHART_DATA.maxima = Math.max.apply(null, maxSet);
+    CHART_DATA.minima = Math.min.apply(null, minSet);
+    CHART_DATA.maxima = round(CHART_DATA.maxima);
 
     //fire Event afterParseData
     var afterParseDataEvent = new self.Event("afterParseData", {
@@ -351,22 +351,22 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function createSeries(dataSet, index, scaleX) {
     var d = [];
-    var elemSeries = self._PAGE_DATA.objChart.querySelector("#series_" + index);
-    var elemActualSeries = self._PAGE_DATA.objChart.querySelector("#series_actual_" + index);
+    var elemSeries = self._CHART_DATA.objChart.querySelector("#series_" + index);
+    var elemActualSeries = self._CHART_DATA.objChart.querySelector("#series_actual_" + index);
     if (elemSeries) elemSeries.parentNode.removeChild(elemSeries);
     if (elemActualSeries) elemActualSeries.parentNode.removeChild(elemActualSeries);
 
     if (dataSet.length < 1)
       return;
-    var interval = scaleX || (PAGE_DATA.gridBoxWidth / (dataSet.length));
-    var scaleY = (PAGE_DATA.gridBoxHeight / PAGE_DATA.maxima);
+    var interval = scaleX || (CHART_DATA.gridBoxWidth / (dataSet.length));
+    var scaleY = (CHART_DATA.gridBoxHeight / CHART_DATA.maxima);
     var arrPointsSet = [],
       strSeries = "";
 
     /* ploting actual points */
     var strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      var p = new $SC.geom.Point(PAGE_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
+      var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
       if (dataCount === 0)
         d.push("M");
       else
@@ -376,20 +376,20 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       arrPointsSet.push(p);
     }
 
-    var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
-    var strokeWidth = PAGE_OPTIONS.dataSet.series[index].lineWidth || 3;
-    var areaOpacity = PAGE_OPTIONS.dataSet.series[index].areaOpacity || 0.3;
-    areaOpacity = PAGE_OPTIONS.dataSet.series[index].showGradient ? 1 : areaOpacity;
-    var fill = PAGE_OPTIONS.dataSet.series[index].showGradient ? "url(#" + PAGE_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")" : color;
+    var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+    var strokeWidth = CHART_OPTIONS.dataSet.series[index].lineWidth || 3;
+    var areaOpacity = CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.3;
+    areaOpacity = CHART_OPTIONS.dataSet.series[index].showGradient ? 1 : areaOpacity;
+    var fill = CHART_OPTIONS.dataSet.series[index].showGradient ? "url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")" : color;
 
-    if (PAGE_OPTIONS.dataSet.series[index].smoothedLine)
+    if (CHART_OPTIONS.dataSet.series[index].smoothedLine)
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-dasharray='1,1' stroke-width='1' opacity='1'></path>";
     else
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
     strSeries += "</g>";
     if (dataSet.length < 50)
-      self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
-    PAGE_DATA.series.push(arrPointsSet);
+      self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    CHART_DATA.series.push(arrPointsSet);
 
     var line = [],
       area = [];
@@ -399,7 +399,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var point = 0;
     for (var point = 0;
       (point + 2) < arrPointsSet.length; point++) {
-      if (PAGE_OPTIONS.dataSet.series[index].smoothedLine) {
+      if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
         var curve = $SC.geom.describeBezireArc(arrPointsSet[point], arrPointsSet[point + 1], arrPointsSet[point + 2]);
         line.push.apply(line, curve);
       } else {
@@ -407,19 +407,19 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    if (!PAGE_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
+    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
       line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
 
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight, "L", PAGE_DATA.marginLeft + (interval / 2), PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight, "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "L", CHART_DATA.marginLeft + (interval / 2), CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='area_" + index + "' stroke='none' fill='" + fill + "' d='" + area.join(" ") + "' stroke-width='1' opacity='" + areaOpacity + "'></path>";
     strSeries += "<path id='line_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
 
-    var radius = PAGE_OPTIONS.dataSet.series[index].markerRadius || 4;
-    if (!PAGE_OPTIONS.dataSet.series[index].noPointMarker) {
+    var radius = CHART_OPTIONS.dataSet.series[index].markerRadius || 4;
+    if (!CHART_OPTIONS.dataSet.series[index].noPointMarker) {
       for (var point = 0;
         (point + 2) < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
@@ -429,93 +429,93 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
     strSeries += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
 
   } /*End createSeries()*/
 
   function appendGradFill(index) {
     /*Creating gradient fill for area*/
-    var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
-    var areaOpacity = PAGE_OPTIONS.dataSet.series[index].areaOpacity || 0.5;
+    var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+    var areaOpacity = CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.5;
     var strSVG = "";
     strSVG += "<defs>";
-    strSVG += "  <linearGradient gradientUnits = 'userSpaceOnUse' id='" + PAGE_OPTIONS.targetElem + "-areachart-gradLinear" + index + "' x1='0%' y1='0%' x2='100%' y2='0%'>";
+    strSVG += "  <linearGradient gradientUnits = 'userSpaceOnUse' id='" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + "' x1='0%' y1='0%' x2='100%' y2='0%'>";
     strSVG += "  <stop offset='0%' style='stop-color:white;stop-opacity:" + areaOpacity + "' />";
     strSVG += "  <stop offset='100%' style='stop-color:" + color + ";stop-opacity:" + areaOpacity + "' />";
     strSVG += "  </linearGradient>";
     strSVG += "</defs>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
   function createLegands(index) {
-    var seriesLegend = self._PAGE_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
+    var seriesLegend = self._CHART_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
     if (seriesLegend) seriesLegend.parentNode.removeChild(seriesLegend);
 
     /*Creating series legend*/
-    var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+    var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
     var strSVG = "";
     strSVG = "<g id='series_legend_" + index + "' style='cursor:pointer;'>";
-    strSVG += "<rect id='legend_color_" + index + "' x='" + PAGE_DATA.marginLeft + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-    strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (PAGE_DATA.marginLeft + 20) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + PAGE_OPTIONS.dataSet.series[index].name + "</text>";
+    strSVG += "<rect id='legend_color_" + index + "' x='" + CHART_DATA.marginLeft + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
+    strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (CHART_DATA.marginLeft + 20) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + CHART_OPTIONS.dataSet.series[index].name + "</text>";
     strSVG += "</g>";
-    self._PAGE_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
+    self._CHART_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
   }
 
 
   function createGrid() {
-    PAGE_DATA.gridBoxWidth = (PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginLeft - PAGE_DATA.marginRight;
-    PAGE_DATA.gridBoxHeight = (PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom;
-    PAGE_DATA.gridHeight = (((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom) / (PAGE_CONST.hGridCount - 1));
-    var hGrid = self._PAGE_DATA.objChart.querySelector("#hGrid");
+    CHART_DATA.gridBoxWidth = (CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight;
+    CHART_DATA.gridBoxHeight = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom;
+    CHART_DATA.gridHeight = (((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom) / (CHART_CONST.hGridCount - 1));
+    var hGrid = self._CHART_DATA.objChart.querySelector("#hGrid");
     if (hGrid) hGrid.parentNode.removeChild(hGrid);
 
     var strGrid = "";
     strGrid += "<g id='hGrid' >";
-    for (var gridCount = 0; gridCount < PAGE_CONST.hGridCount; gridCount++) {
-      var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight), "L", PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth, PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight)];
+    for (var gridCount = 0; gridCount < CHART_CONST.hGridCount; gridCount++) {
+      var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight), "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)];
       strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' stroke-width='1' stroke-opacity='1'></path>";
     }
-    var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop, "L", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 10];
-    strGrid += "<rect id='gridRect' x='" + PAGE_DATA.marginLeft + "' y='" + PAGE_DATA.marginTop + "' width='" + PAGE_DATA.gridBoxWidth + "' height='" + PAGE_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
+    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop, "L", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10];
+    strGrid += "<rect id='gridRect' x='" + CHART_DATA.marginLeft + "' y='" + CHART_DATA.marginTop + "' width='" + CHART_DATA.gridBoxWidth + "' height='" + CHART_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
     strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strGrid += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
     createVerticalLabel();
   } /*End createGrid()*/
 
   function createVerticalLabel() {
-    var vTextLabel = self._PAGE_DATA.objChart.querySelector("#vTextLabel");
+    var vTextLabel = self._CHART_DATA.objChart.querySelector("#vTextLabel");
     if (vTextLabel) vTextLabel.parentNode.removeChild(vTextLabel);
 
-    var interval = (PAGE_DATA.maxima) / (PAGE_CONST.hGridCount - 1);
+    var interval = (CHART_DATA.maxima) / (CHART_CONST.hGridCount - 1);
     var strText = "<g id='vTextLabel'>";
-    for (var gridCount = PAGE_CONST.hGridCount - 1, i = 0; gridCount >= 0; gridCount--) {
+    for (var gridCount = CHART_CONST.hGridCount - 1, i = 0; gridCount >= 0; gridCount--) {
       var value = (i++ * interval);
       value = (value >= 1000 ? (value / 1000).toFixed(2) + "K" : value.toFixed(2));
-      strText += "<text font-family='Lato' fill='black'><tspan x='" + (PAGE_DATA.marginLeft - 55) + "' y='" + (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight) + 5) + "' font-size='12' >" + ((PAGE_OPTIONS.dataSet.yAxis.prefix) ? PAGE_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
-      var d = ["M", PAGE_DATA.marginLeft, (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight)), "L", (PAGE_DATA.marginLeft - 5), (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight))];
+      strText += "<text font-family='Lato' fill='black'><tspan x='" + (CHART_DATA.marginLeft - 55) + "' y='" + (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight) + 5) + "' font-size='12' >" + ((CHART_OPTIONS.dataSet.yAxis.prefix) ? CHART_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
+      var d = ["M", CHART_DATA.marginLeft, (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)), "L", (CHART_DATA.marginLeft - 5), (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight))];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strText);
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
 
     var overFlow = 0;
-    var vTextLabel = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var vTextLabel = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
     for (var i = 0; i < vTextLabel.length; i++) {
-      if ((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
-        overFlow = Math.abs((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
+      if ((CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
+        overFlow = Math.abs((CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
     }
     if (overFlow !== 0) {
-      PAGE_DATA.marginLeft = PAGE_DATA.marginLeft + overFlow;
+      CHART_DATA.marginLeft = CHART_DATA.marginLeft + overFlow;
       createGrid();
     }
   } /*End createVerticalLabel()*/
 
   function createHorizontalLabel(categories, scaleX) {
-    var hTextLabel = self._PAGE_DATA.objChart.querySelector("#hTextLabel");
+    var hTextLabel = self._CHART_DATA.objChart.querySelector("#hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
 
-    var interval = scaleX || (PAGE_DATA.gridBoxWidth / (categories.length));
+    var interval = scaleX || (CHART_DATA.gridBoxWidth / (categories.length));
 
     /*if there is too much categories then discard some categories*/
     if (interval < 30) {
@@ -529,20 +529,20 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     }
     var strText = "<g id='hTextLabel'>";
     for (var hText = 0; hText < categories.length; hText++) {
-      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + (PAGE_DATA.marginLeft + (hText * interval) + (interval / 2)) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 20) + "' ><tspan  font-size='12' >" + categories[hText] + "<\/tspan></text>";
+      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + (CHART_DATA.marginLeft + (hText * interval) + (interval / 2)) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 20) + "' ><tspan  font-size='12' >" + categories[hText] + "<\/tspan></text>";
     }
 
     for (var hText = 0; hText < categories.length; hText++) {
-      var d = ["M", (PAGE_DATA.marginLeft + (hText * interval) + (interval)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight), "L", (PAGE_DATA.marginLeft + (hText * interval) + (interval)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 10)];
+      var d = ["M", (CHART_DATA.marginLeft + (hText * interval) + (interval)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight), "L", (CHART_DATA.marginLeft + (hText * interval) + (interval)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10)];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
-    var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight, "L", PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight];
+    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
     strText += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strText += "</g>";
 
     /*bind hover event*/
-    self._PAGE_DATA.objChart.insertAdjacentHTML("beforeend", strText);
-    var hTextLabels = self._PAGE_DATA.objChart.querySelectorAll("#hTextLabel text");
+    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
+    var hTextLabels = self._CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
     var totalHTextWidth = 0;
     for (var i = 0; i < hTextLabels.length; i++) {
       var txWidth = hTextLabels[i].getComputedTextLength();
@@ -551,7 +551,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     for (var i = 0; i < hTextLabels.length; i++) {
       var txtWidth = hTextLabels[i].querySelector("tspan").getComputedTextLength();
-      if (parseFloat(totalHTextWidth + (hTextLabels.length * 5)) < parseFloat(PAGE_DATA.gridBoxWidth)) {
+      if (parseFloat(totalHTextWidth + (hTextLabels.length * 5)) < parseFloat(CHART_DATA.gridBoxWidth)) {
         while (txtWidth + 5 > interval) {
           hTextLabels[i].querySelector("tspan").textContent = hTextLabels[i].querySelector("tspan").textContent.substring(0, (hTextLabels[i].querySelector("tspan").textContent.length - 4)) + "...";
           txtWidth = (hTextLabels[i].querySelector("tspan").getComputedTextLength());
@@ -560,13 +560,13 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
       hTextLabels[i].addEventListener("mouseenter", function (e) {
         e.stopPropagation();
-        var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, mousePointer, "#555", e.target.getAttribute("title"));
+        var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e);
+        $SC.ui.toolTip(CHART_OPTIONS.targetElem, mousePointer, "#555", e.target.getAttribute("title"));
       }, false);
 
       hTextLabels[i].addEventListener("mouseleave", function (e) {
         e.stopPropagation();
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
+        $SC.ui.toolTip(CHART_OPTIONS.targetElem, "hide");
       }, false);
 
     }
@@ -575,41 +575,41 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   function resetTextPositions() {
-    var txtTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-    var txtSubTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    var txtTitleGrp = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp");
+    var txtTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    var txtSubTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    var txtTitleGrp = self._CHART_DATA.objChart.querySelector("#txtTitleGrp");
 
 
-    if (txtTitleLen > PAGE_CONST.FIX_WIDTH) {
-      var fontSize = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = self._PAGE_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    if (txtTitleLen > CHART_CONST.FIX_WIDTH) {
+      var fontSize = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
+      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
-    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
     txtTitleGrp.querySelector("#txtTitle").setAttribute("y", 70);
-    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtSubTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
     /*Reset vertical text label*/
-    var arrVLabels = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel");
+    var arrVLabels = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel");
     var vLabelwidth = arrVLabels[0].getBBox().width;
-    var arrVText = self._PAGE_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var arrVText = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
     for (var i = 0; i < arrVText.length; i++)
-      arrVText[i].setAttribute("x", (PAGE_DATA.marginLeft - vLabelwidth - 10));
+      arrVText[i].setAttribute("x", (CHART_DATA.marginLeft - vLabelwidth - 10));
 
     /*Reset horzontal text label*/
     var totalHTextWidth = 0;
-    var arrHText = self._PAGE_DATA.objChart.querySelectorAll("#hTextLabel text");
+    var arrHText = self._CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
     for (var i = 0; i < arrHText.length; i++) {
       var txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
     }
     var interval = 70;
-    if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(PAGE_DATA.gridBoxWidth)) {
+    if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(CHART_DATA.gridBoxWidth)) {
       for (var i = 0; i < arrHText.length; i++) {
         var cx = arrHText[i].getAttribute("x");
         var cy = arrHText[i].getAttribute("y");
@@ -629,30 +629,30 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    var vTxtSubTitle = self._PAGE_DATA.objChart.querySelector("#vTextSubTitle");
-    vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (PAGE_DATA.marginLeft - vLabelwidth - 30) + "," + (PAGE_DATA.svgCenter.y) + ")");
+    var vTxtSubTitle = self._CHART_DATA.objChart.querySelector("#vTextSubTitle");
+    vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (CHART_DATA.marginLeft - vLabelwidth - 30) + "," + (CHART_DATA.svgCenter.y) + ")");
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
     /*Set position for legend text*/
-    var arrLegendText = self._PAGE_DATA.objChart.querySelectorAll("#legendContainer text");
-    var arrLegendColor = self._PAGE_DATA.objChart.querySelectorAll("#legendContainer rect");
+    var arrLegendText = self._CHART_DATA.objChart.querySelectorAll("#legendContainer text");
+    var arrLegendColor = self._CHART_DATA.objChart.querySelectorAll("#legendContainer rect");
     var width = 0,
       row = 0;
     for (var i = 0; i < arrLegendText.length; i++) {
-      arrLegendColor[i].setAttribute("x", (width + PAGE_DATA.marginLeft - 60));
-      arrLegendText[i].setAttribute("x", (width + PAGE_DATA.marginLeft + 20 - 60));
-      arrLegendColor[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + PAGE_DATA.fullChartHeight + 10 + (row * 20)));
-      arrLegendText[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + PAGE_DATA.fullChartHeight + 20 + (row * 20)));
+      arrLegendColor[i].setAttribute("x", (width + CHART_DATA.marginLeft - 60));
+      arrLegendText[i].setAttribute("x", (width + CHART_DATA.marginLeft + 20 - 60));
+      arrLegendColor[i].setAttribute("y", (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + CHART_DATA.fullChartHeight + 10 + (row * 20)));
+      arrLegendText[i].setAttribute("y", (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + CHART_DATA.fullChartHeight + 20 + (row * 20)));
       width += (arrLegendText[i].getBBox().width + 50);
 
-      if (width > PAGE_CONST.FIX_WIDTH) {
+      if (width > CHART_CONST.FIX_WIDTH) {
         width = 0;
         row++;
-        arrLegendColor[i].setAttribute("x", (width + PAGE_DATA.marginLeft - 60));
-        arrLegendText[i].setAttribute("x", (width + PAGE_DATA.marginLeft + 20 - 60));
-        arrLegendColor[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + PAGE_DATA.fullChartHeight + 10 + (row * 20)));
-        arrLegendText[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + PAGE_DATA.fullChartHeight + 20 + (row * 20)));
+        arrLegendColor[i].setAttribute("x", (width + CHART_DATA.marginLeft - 60));
+        arrLegendText[i].setAttribute("x", (width + CHART_DATA.marginLeft + 20 - 60));
+        arrLegendColor[i].setAttribute("y", (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + CHART_DATA.fullChartHeight + 10 + (row * 20)));
+        arrLegendText[i].setAttribute("y", (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + CHART_DATA.fullChartHeight + 20 + (row * 20)));
         width += (arrLegendText[i].getBBox().width + 50);
       }
 
@@ -661,26 +661,26 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End resetTextPositions()*/
 
   function bindEvents() {
-    PAGE_DATA.windowRightIndex = (PAGE_DATA.windowRightIndex < 0) ? PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length : PAGE_DATA.windowRightIndex;
-    PAGE_DATA.newDataSet = [], PAGE_DATA.newCatgList = [];
+    CHART_DATA.windowRightIndex = (CHART_DATA.windowRightIndex < 0) ? CHART_DATA.fullSeries[CHART_DATA.longestSeries].length : CHART_DATA.windowRightIndex;
+    CHART_DATA.newDataSet = [], CHART_DATA.newCatgList = [];
 
-    for (var i = PAGE_DATA.windowLeftIndex; i <= PAGE_DATA.windowRightIndex; i++)
-      PAGE_DATA.newCatgList.push(PAGE_OPTIONS.dataSet.xAxis.categories[i % PAGE_OPTIONS.dataSet.xAxis.categories.length]);
+    for (var i = CHART_DATA.windowLeftIndex; i <= CHART_DATA.windowRightIndex; i++)
+      CHART_DATA.newCatgList.push(CHART_OPTIONS.dataSet.xAxis.categories[i % CHART_OPTIONS.dataSet.xAxis.categories.length]);
 
-    for (var setIndex = 0; setIndex < PAGE_OPTIONS.dataSet.series.length; setIndex++) {
-      var set = PAGE_OPTIONS.dataSet.series[setIndex].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex + 1);
-      PAGE_DATA.newDataSet.push(set);
+    for (var setIndex = 0; setIndex < CHART_OPTIONS.dataSet.series.length; setIndex++) {
+      var set = CHART_OPTIONS.dataSet.series[setIndex].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex + 1);
+      CHART_DATA.newDataSet.push(set);
     }
 
-    for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
-      var legend = self._PAGE_DATA.objChart.querySelector("#series_legend_" + index);
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
+      var legend = self._CHART_DATA.objChart.querySelector("#series_legend_" + index);
       if (legend) {
         legend.removeEventListener("click", onLegendClick);
         legend.addEventListener("click", onLegendClick, false);
       }
     }
 
-    var gridRect = self._PAGE_DATA.objChart.querySelector("#gridRect");
+    var gridRect = self._CHART_DATA.objChart.querySelector("#gridRect");
     if (gridRect) {
       gridRect.removeEventListener("mousemove", onMouseMove);
       gridRect.addEventListener("mousemove", onMouseMove, false);
@@ -690,7 +690,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       gridRect.addEventListener("mouseleave", onMouseLeave, false);
     }
 
-    var zoomOutBox = self._PAGE_DATA.objChart.querySelector("#zoomOutBox");
+    var zoomOutBox = self._CHART_DATA.objChart.querySelector("#zoomOutBox");
     if (zoomOutBox) {
       zoomOutBox.removeEventListener("click", onZoomOut);
       zoomOutBox.addEventListener("click", onZoomOut, false);
@@ -703,15 +703,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   var timeOut = null;
   var onWindowResize = function () {
-    var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
-    if (PAGE_CONST.runId != containerDiv.getAttribute("runId")) {
+    var containerDiv = document.querySelector("#" + CHART_OPTIONS.targetElem);
+    if (CHART_CONST.runId != containerDiv.getAttribute("runId")) {
       window.removeEventListener('resize', onWindowResize);
       if (timeOut != null) {
         clearTimeout(timeOut);
       }
       return;
     }
-    if (containerDiv.offsetWidth !== PAGE_CONST.FIX_WIDTH || containerDiv.offsetHeight !== PAGE_CONST.FIX_HEIGHT) {
+    if (containerDiv.offsetWidth !== CHART_CONST.FIX_WIDTH || containerDiv.offsetHeight !== CHART_CONST.FIX_HEIGHT) {
       if (timeOut != null) {
         clearTimeout(timeOut);
       }
@@ -737,27 +737,27 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     try {
       e.stopPropagation();
 
-      var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-      var gridBox = self._PAGE_DATA.objChart.querySelector("#hGrid").getBBox();
-      if (mousePointer.x >= gridBox.x && mousePointer.x < (gridBox.x + PAGE_DATA.gridBoxWidth) && mousePointer.y >= gridBox.y && mousePointer.y < (gridBox.y + PAGE_DATA.gridBoxHeight)) {
+      var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e);
+      var gridBox = self._CHART_DATA.objChart.querySelector("#hGrid").getBBox();
+      if (mousePointer.x >= gridBox.x && mousePointer.x < (gridBox.x + CHART_DATA.gridBoxWidth) && mousePointer.y >= gridBox.y && mousePointer.y < (gridBox.y + CHART_DATA.gridBoxHeight)) {
         var multiSeriesPoints = [];
-        for (var i = 0; i < PAGE_DATA.series.length; i++) {
-          if (self._PAGE_DATA.objChart.querySelector("#series_" + i).style.display === "none")
+        for (var i = 0; i < CHART_DATA.series.length; i++) {
+          if (self._CHART_DATA.objChart.querySelector("#series_" + i).style.display === "none")
             continue;
-          for (var j = 0; j < PAGE_DATA.series[i].length - 1; j++) {
-            if (mousePointer.x > PAGE_DATA.series[i][j].x && mousePointer.x < PAGE_DATA.series[i][j + 1].x) {
+          for (var j = 0; j < CHART_DATA.series[i].length - 1; j++) {
+            if (mousePointer.x > CHART_DATA.series[i][j].x && mousePointer.x < CHART_DATA.series[i][j + 1].x) {
               multiSeriesPoints.push({
                 seriesIndex: i,
                 pointIndex: j + 1,
-                point: PAGE_DATA.series[i][j + 1]
+                point: CHART_DATA.series[i][j + 1]
               });
             }
           }
-          if (mousePointer.x < PAGE_DATA.series[i][0].x)
+          if (mousePointer.x < CHART_DATA.series[i][0].x)
             multiSeriesPoints.push({
               seriesIndex: i,
               pointIndex: 0,
-              point: PAGE_DATA.series[i][0]
+              point: CHART_DATA.series[i][0]
             });
         }
         if (multiSeriesPoints.length === 0)
@@ -765,7 +765,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
         var toolTipPoint, npIndex, indx;
         for (var i = 0; i < multiSeriesPoints.length; i++) {
-          if (mousePointer.y > multiSeriesPoints[i].point.y || PAGE_DATA.series.length === 1) {
+          if (mousePointer.y > multiSeriesPoints[i].point.y || CHART_DATA.series.length === 1) {
             toolTipPoint = multiSeriesPoints[i].point;
             npIndex = multiSeriesPoints[i].pointIndex;
             indx = multiSeriesPoints[i].seriesIndex;
@@ -777,45 +777,45 @@ window.SmartChartsNXT.AreaChart = function (opts) {
           indx = multiSeriesPoints[0].seriesIndex;
         }
 
-        var toolTipPoint = PAGE_DATA.series[indx][npIndex];
+        var toolTipPoint = CHART_DATA.series[indx][npIndex];
 
         /*Create vertical line*/
-        var vLinePath = ["M", toolTipPoint.x, toolTipPoint.y, "L", toolTipPoint.x, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight];
-        var vLine = self._PAGE_DATA.objChart.querySelector("#vLine");
+        var vLinePath = ["M", toolTipPoint.x, toolTipPoint.y, "L", toolTipPoint.x, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
+        var vLine = self._CHART_DATA.objChart.querySelector("#vLine");
         if (vLine) {
           vLine.setAttribute("d", vLinePath.join(" "));
           vLine.parentNode.removeChild(vLine);
-          self._PAGE_DATA.objChart.appendChild(vLine);
+          self._CHART_DATA.objChart.appendChild(vLine);
         }
 
         if (toolTipPoint) {
-          var elms = self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
+          var elms = self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
           for (var i = 0; i < elms.length; i++)
             elms[i].parentNode.removeChild(elms[i]);
 
-          var color = PAGE_OPTIONS.dataSet.series[indx].color || $SC.util.getColor(indx);
-          var radius = PAGE_OPTIONS.dataSet.series[indx].markerRadius || 4;
+          var color = CHART_OPTIONS.dataSet.series[indx].color || $SC.util.getColor(indx);
+          var radius = CHART_OPTIONS.dataSet.series[indx].markerRadius || 4;
           $SC.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", "areaChart", color);
           $SC.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", "areaChart");
 
           var toolTipRow1, toolTipRow2;
-          toolTipRow1 = (PAGE_OPTIONS.dataSet.xAxis.title + " " + PAGE_DATA.newCatgList[npIndex]);
-          toolTipRow2 = (PAGE_OPTIONS.dataSet.yAxis.title + " " + (PAGE_OPTIONS.dataSet.yAxis.prefix || "") + " " + PAGE_DATA.newDataSet[indx][npIndex].value);
+          toolTipRow1 = (CHART_OPTIONS.dataSet.xAxis.title + " " + CHART_DATA.newCatgList[npIndex]);
+          toolTipRow2 = (CHART_OPTIONS.dataSet.yAxis.title + " " + (CHART_OPTIONS.dataSet.yAxis.prefix || "") + " " + CHART_DATA.newDataSet[indx][npIndex].value);
 
           /*point should be available globally*/
-          var point = PAGE_DATA.newDataSet[indx][npIndex];
+          var point = CHART_DATA.newDataSet[indx][npIndex];
           point["series"] = {
-            name: PAGE_OPTIONS.dataSet.series[indx].name
+            name: CHART_OPTIONS.dataSet.series[indx].name
           };
 
-          if (PAGE_OPTIONS.toolTip && PAGE_OPTIONS.toolTip.content) {
-            var toolTipContent = PAGE_OPTIONS.toolTip.content.replace(/{{/g, "${").replace(/}}/g, "}");
+          if (CHART_OPTIONS.toolTip && CHART_OPTIONS.toolTip.content) {
+            var toolTipContent = CHART_OPTIONS.toolTip.content.replace(/{{/g, "${").replace(/}}/g, "}");
             var genContent = $SC.util.assemble(toolTipContent, "point");
-            $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
+            $SC.ui.toolTip(CHART_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
           } else
-            $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
+            $SC.ui.toolTip(CHART_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
 
-          self._PAGE_DATA.objChart.querySelector("#vLine").style.display = "block";
+          self._CHART_DATA.objChart.querySelector("#vLine").style.display = "block";
         }
       }
     } catch (ex) {
@@ -824,23 +824,23 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End onMouseMove()*/
 
   function onMouseLeave() {
-    $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
-    self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
-    var elms = self._PAGE_DATA.objChart.querySelectorAll(".tooTipPoint");
+    $SC.ui.toolTip(CHART_OPTIONS.targetElem, "hide");
+    self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+    var elms = self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
     for (var i = 0; i < elms.length; i++)
       elms[i].parentNode.removeChild(elms[i]);
 
-    var vLine = self._PAGE_DATA.objChart.querySelector("#vLine");
+    var vLine = self._CHART_DATA.objChart.querySelector("#vLine");
     if (vLine) vLine.style.display = "none";
 
   } /*End onMouseLeave()*/
 
   function onLegendClick(e) {
     var seriesIndex = e.target.id.split("_")[2];
-    var legendColor = self._PAGE_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
-    var area = self._PAGE_DATA.objChart.querySelector("#series_" + seriesIndex);
-    var actualArea = self._PAGE_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
-    var color = PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+    var legendColor = self._CHART_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
+    var area = self._CHART_DATA.objChart.querySelector("#series_" + seriesIndex);
+    var actualArea = self._CHART_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
+    var color = CHART_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
 
     if (legendColor.getAttribute("fill") === "#eee") {
       legendColor.setAttribute("fill", color);
@@ -854,95 +854,95 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End onLegendClick()*/
 
   function bindSliderEvents() {
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.mouseDown = 1;
+      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-      resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
+      CHART_DATA.mouseDown = 0;
+      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._PAGE_DATA.objChart.addEventListener("mouseup", function (e) {
+    self._CHART_DATA.objChart.addEventListener("mouseup", function (e) {
       e.stopPropagation();
-      if (PAGE_DATA.mouseDown === 1) {
-        self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-        self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-        self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
-        self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      if (CHART_DATA.mouseDown === 1) {
+        self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+        self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+        self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
+        self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
         if (e.target.id === "sliderRight")
-          resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+          resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
         else
-          resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
+          resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
         reDrawSeries();
       }
-      PAGE_DATA.mouseDown = 0;
+      CHART_DATA.mouseDown = 0;
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.mouseDown = 1;
+      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
+      self._CHART_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
-      resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+      CHART_DATA.mouseDown = 0;
+      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
     });
 
     /*Events for touch devices*/
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.mouseDown = 1;
+      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
     }, false);
 
-    self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
-      resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
+      CHART_DATA.mouseDown = 0;
+      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
+      resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     }, false);
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 1;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.mouseDown = 1;
+      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
+      self._CHART_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
     });
 
-    self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
+    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
-      PAGE_DATA.mouseDown = 0;
-      self._PAGE_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
-      resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+      CHART_DATA.mouseDown = 0;
+      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
+      resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
     });
 
@@ -952,26 +952,26 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   function bindLeftSliderMove(e) {
     e.stopPropagation();
     e.preventDefault();
-    var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
+    var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
 
-    var sliderLsel = self._PAGE_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._PAGE_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderLsel = self._CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = self._CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
-    if (sliderLsel.x + (PAGE_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
-      self._PAGE_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-      resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
+    if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
+      self._CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
       return;
     }
 
-    if (mousePointer.x > (PAGE_DATA.marginLeft) && mousePointer.x < ((PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginRight)) {
-      for (var j = 0; j < PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length - 1; j++) {
-        if (mousePointer.x >= PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][j].x && mousePointer.x <= PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][j + 1].x)
+    if (mousePointer.x > (CHART_DATA.marginLeft) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
+      for (var j = 0; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1; j++) {
+        if (mousePointer.x >= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j].x && mousePointer.x <= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j + 1].x)
           if (e.movementX <= 0)
-            PAGE_DATA.windowLeftIndex = j;
+            CHART_DATA.windowLeftIndex = j;
           else
-            PAGE_DATA.windowLeftIndex = j + 1;
+            CHART_DATA.windowLeftIndex = j + 1;
       }
       resetSliderPos("left", mousePointer.x);
     }
@@ -980,27 +980,27 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   function bindRightSliderMove(e) {
     e.stopPropagation();
     e.preventDefault();
-    var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    var sliderLsel = self._PAGE_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._PAGE_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
+    var sliderLsel = self._CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = self._CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
-    if (sliderRsel.x - (PAGE_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
-      self._PAGE_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
-      self._PAGE_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
-      resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+    if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
+      self._CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
+      self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
       return;
     }
-    if (mousePointer.x > (PAGE_DATA.marginLeft + PAGE_DATA.scaleX) && mousePointer.x < ((PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginRight)) {
-      for (var j = 1; j < PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length; j++) {
-        if (mousePointer.x >= PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][j - 1].x && mousePointer.x <= PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][j].x)
+    if (mousePointer.x > (CHART_DATA.marginLeft + CHART_DATA.scaleX) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
+      for (var j = 1; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length; j++) {
+        if (mousePointer.x >= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j - 1].x && mousePointer.x <= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j].x)
           if (e.movementX <= 0)
-            PAGE_DATA.windowRightIndex = j - 1;
+            CHART_DATA.windowRightIndex = j - 1;
           else
-            PAGE_DATA.windowRightIndex = j;
+            CHART_DATA.windowRightIndex = j;
       }
-      if (mousePointer.x > PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length - 1].x) {
-        PAGE_DATA.windowRightIndex = PAGE_DATA.fullSeries[PAGE_DATA.longestSeries].length - 1;
+      if (mousePointer.x > CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1].x) {
+        CHART_DATA.windowRightIndex = CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1;
       }
       resetSliderPos("right", mousePointer.x);
     }
@@ -1011,38 +1011,38 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var sliderLine = (type === "right") ? "sliderRight" : "sliderLeft";
     var innerBarType = (type === "right") ? "slideRSelInner" : "slideLSelInner";
     var swipeFlag = (type === "right") ? 1 : 0;
-    x = (x <= 0 ? PAGE_DATA.marginLeft : x);
+    x = (x <= 0 ? CHART_DATA.marginLeft : x);
 
-    var dr = ["M", x, ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fullChartHeight + PAGE_DATA.fcMarginTop), "L", x, ((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + PAGE_DATA.fcMarginTop)];
-    var innerBar = ["M", (type === "right" ? (x + 3) : (x - 3)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + (PAGE_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 3) : (x - 3)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + (PAGE_DATA.fullChartHeight / 2) + 5),
-      "M", (type === "right" ? (x + 5) : (x - 5)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + (PAGE_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 5) : (x - 5)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + PAGE_DATA.fcMarginTop + (PAGE_DATA.fullChartHeight / 2) + 5)
+    var dr = ["M", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop)];
+    var innerBar = ["M", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5),
+      "M", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5)
     ];
 
-    var cy = (PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginBottom + (PAGE_DATA.fullChartHeight / 2) + PAGE_DATA.fcMarginTop;
-    self._PAGE_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
-    self._PAGE_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
-    self._PAGE_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
-    var fullSeries = self._PAGE_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
+    var cy = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + (CHART_DATA.fullChartHeight / 2) + CHART_DATA.fcMarginTop;
+    self._CHART_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
+    self._CHART_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
+    self._CHART_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
+    var fullSeries = self._CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
 
     if (type === "left") {
-      var sliderOffset = self._PAGE_DATA.objChart.querySelector("#sliderLeftOffset");
+      var sliderOffset = self._CHART_DATA.objChart.querySelector("#sliderLeftOffset");
       sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
     } else {
-      var sliderOffset = self._PAGE_DATA.objChart.querySelector("#sliderRightOffset");
+      var sliderOffset = self._CHART_DATA.objChart.querySelector("#sliderRightOffset");
       sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
       sliderOffset.setAttribute("x", x);
     }
 
     if (type === "left") {
-      if (PAGE_DATA.windowLeftIndex > 0)
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+      if (CHART_DATA.windowLeftIndex > 0)
+        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
       else
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
     } else if (type === "right") {
-      if (PAGE_DATA.windowRightIndex < ((PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length * 2) - 1)) {
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+      if (CHART_DATA.windowRightIndex < ((CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length * 2) - 1)) {
+        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
       } else {
-        self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
       }
     }
 
@@ -1051,10 +1051,10 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function reDrawSeries() {
     var dataSet = [];
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex + 1).length;
-    for (var i = 0; i < PAGE_OPTIONS.dataSet.series.length; i++) {
+    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex + 1).length;
+    for (var i = 0; i < CHART_OPTIONS.dataSet.series.length; i++) {
       var set = {
-        "data": PAGE_OPTIONS.dataSet.series[i].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex + 1)
+        "data": CHART_OPTIONS.dataSet.series[i].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex + 1)
       };
       dataSet.push(set);
     }
@@ -1062,12 +1062,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     prepareDataSet(dataSet);
     createVerticalLabel();
 
-    createHorizontalLabel(PAGE_OPTIONS.dataSet.xAxis.categories, scaleX);
+    createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
 
-    PAGE_DATA.series = [];
+    CHART_DATA.series = [];
     for (var i = 0; i < dataSet.length; i++) {
       createSeries(dataSet[i].data, i, scaleX);
-      if (PAGE_OPTIONS.dataSet.series.length > 1)
+      if (CHART_OPTIONS.dataSet.series.length > 1)
         createLegands(i);
     }
 
@@ -1087,12 +1087,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   function onZoomOut(e) {
     e.stopPropagation();
     e.preventDefault();
-    PAGE_DATA.windowLeftIndex = 0;
-    PAGE_DATA.windowRightIndex = (PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length) - 1;
-    resetSliderPos("left", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowLeftIndex].x);
-    resetSliderPos("right", PAGE_DATA.fullSeries[PAGE_DATA.longestSeries][PAGE_DATA.windowRightIndex].x);
+    CHART_DATA.windowLeftIndex = 0;
+    CHART_DATA.windowRightIndex = (CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length) - 1;
+    resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
+    resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
     reDrawSeries();
-    self._PAGE_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+    self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
   } /*End onZoomOut()*/
 
   function round(val) {
@@ -1108,17 +1108,17 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function showAnimatedView() {
     var dataSet = [];
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex).length;
+    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex).length;
     var pointIndex = 0;
 
-    for (var i = 0; i < PAGE_OPTIONS.dataSet.series.length; i++) {
+    for (var i = 0; i < CHART_OPTIONS.dataSet.series.length; i++) {
       var set = {
-        "data": PAGE_OPTIONS.dataSet.series[i].data.slice(PAGE_DATA.windowLeftIndex, PAGE_DATA.windowRightIndex)
+        "data": CHART_OPTIONS.dataSet.series[i].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex)
       };
       dataSet.push(set);
     }
     prepareDataSet(dataSet);
-    PAGE_DATA.series = [];
+    CHART_DATA.series = [];
 
     var maxLen = 0;
     for (var i = 0; i < dataSet.length; i++) {
@@ -1145,5 +1145,5 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   init();
-  if (PAGE_OPTIONS.animated !== false) showAnimatedView();
+  if (CHART_OPTIONS.animated !== false) showAnimatedView();
 }; /*End of AreaChart()*/
