@@ -105,14 +105,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   self._CHART_DATA = CHART_DATA;
   self._CHART_CONST = CHART_CONST;
-  self._CHART_OPTIONS = {};
-  console.log(this);
+  self._CHART_OPTIONS = CHART_OPTIONS;
 
   function init() {
     try {
       self.init("areaChart", opts);
       CHART_OPTIONS = self._CHART_OPTIONS;
-      CHART_DATA = self._CHART_DATA;
 
       initDataSet();
       CHART_DATA.chartCenter = new $SC.geom.Point(CHART_DATA.svgCenter.x, CHART_DATA.svgCenter.y + 50);
@@ -183,23 +181,18 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = CHART_OPTIONS.title;
-    self._CHART_DATA.objChart.querySelector("#txtSubtitle").textContent = CHART_OPTIONS.subTitle;
+    CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = CHART_OPTIONS.title;
+    CHART_DATA.objChart.querySelector("#txtSubtitle").textContent = CHART_OPTIONS.subTitle;
 
     createGrid();
     createFullSeries();
 
-    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length;
-    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
-      createSeries(CHART_OPTIONS.dataSet.series[index].data, index, scaleX);
-      if (CHART_OPTIONS.dataSet.series.length > 1)
-        createLegands(index);
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) 
       appendGradFill(index);
-    }
-
+    
     var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(0, CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
     createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
 
@@ -223,7 +216,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
     strSVG += "</g>";
 
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
     resetTextPositions();
 
@@ -233,9 +226,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     //bindEvents();
     bindSliderEvents();
 
-    var fullSeries = self._CHART_DATA.objChart.querySelector("#fullSeriesContr");
+    var fullSeries = CHART_DATA.objChart.querySelector("#fullSeriesContr");
     fullSeries.parentNode.removeChild(fullSeries);
-    self._CHART_DATA.objChart.appendChild(fullSeries);
+    CHART_DATA.objChart.appendChild(fullSeries);
 
     reDrawSeries();
   } /*End prepareChart()*/
@@ -245,7 +238,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var strSVG = "";
     strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)'  style='stroke-width:0.1;stroke:#717171;' \/>";
     strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)' style='stroke-width:0.1;stroke:#717171;' \/>";
-    self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
     /* ploting actual points */
     for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
@@ -272,7 +265,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "</g>";
-    self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
 
     function drawFullSeries(dataSet, index) {
@@ -314,15 +307,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strSeries += "<path id='fLine_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='1'></path>";
       strSeries += "<path id='fArea_" + index + "' stroke='none' fill='url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")' d='" + area.join(" ") + "' stroke-width='1' opacity='1'></path>";
 
-      self._CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
+      CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
     } /*End drawFullSeries()*/
 
   } /*End createFullChart()*/
 
   function prepareDataSet(dataSet) {
-    var maxSet = [],
-      minSet = [],
-      categories = [];
+    var maxSet = [];
+    var minSet = [];
+    var categories = [];
     dataSet = dataSet || CHART_OPTIONS.dataSet.series;
 
     for (var i = 0; i < dataSet.length; i++) {
@@ -351,8 +344,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function createSeries(dataSet, index, scaleX) {
     var d = [];
-    var elemSeries = self._CHART_DATA.objChart.querySelector("#series_" + index);
-    var elemActualSeries = self._CHART_DATA.objChart.querySelector("#series_actual_" + index);
+    var elemSeries = CHART_DATA.objChart.querySelector("#series_" + index);
+    var elemActualSeries = CHART_DATA.objChart.querySelector("#series_actual_" + index);
     if (elemSeries) elemSeries.parentNode.removeChild(elemSeries);
     if (elemActualSeries) elemActualSeries.parentNode.removeChild(elemActualSeries);
 
@@ -388,11 +381,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
     strSeries += "</g>";
     if (dataSet.length < 50)
-      self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+      CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
     CHART_DATA.series.push(arrPointsSet);
 
-    var line = [],
-      area = [];
+    var line = [];
+    var area = [];
     strSeries = "<g id='series_" + index + "' class='series' pointer-events='none' >";
 
     line.push.apply(line, ["M", arrPointsSet[0].x, arrPointsSet[0].y]);
@@ -429,7 +422,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
     strSeries += "</g>";
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
 
   } /*End createSeries()*/
 
@@ -444,11 +437,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "  <stop offset='100%' style='stop-color:" + color + ";stop-opacity:" + areaOpacity + "' />";
     strSVG += "  </linearGradient>";
     strSVG += "</defs>";
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
   function createLegands(index) {
-    var seriesLegend = self._CHART_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
+    var seriesLegend = CHART_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
     if (seriesLegend) seriesLegend.parentNode.removeChild(seriesLegend);
 
     /*Creating series legend*/
@@ -458,7 +451,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strSVG += "<rect id='legend_color_" + index + "' x='" + CHART_DATA.marginLeft + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
     strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (CHART_DATA.marginLeft + 20) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + CHART_OPTIONS.dataSet.series[index].name + "</text>";
     strSVG += "</g>";
-    self._CHART_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
+    CHART_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
   }
 
 
@@ -466,7 +459,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     CHART_DATA.gridBoxWidth = (CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight;
     CHART_DATA.gridBoxHeight = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom;
     CHART_DATA.gridHeight = (((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom) / (CHART_CONST.hGridCount - 1));
-    var hGrid = self._CHART_DATA.objChart.querySelector("#hGrid");
+    var hGrid = CHART_DATA.objChart.querySelector("#hGrid");
     if (hGrid) hGrid.parentNode.removeChild(hGrid);
 
     var strGrid = "";
@@ -479,12 +472,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strGrid += "<rect id='gridRect' x='" + CHART_DATA.marginLeft + "' y='" + CHART_DATA.marginTop + "' width='" + CHART_DATA.gridBoxWidth + "' height='" + CHART_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
     strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strGrid += "</g>";
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
     createVerticalLabel();
   } /*End createGrid()*/
 
   function createVerticalLabel() {
-    var vTextLabel = self._CHART_DATA.objChart.querySelector("#vTextLabel");
+    var vTextLabel = CHART_DATA.objChart.querySelector("#vTextLabel");
     if (vTextLabel) vTextLabel.parentNode.removeChild(vTextLabel);
 
     var interval = (CHART_DATA.maxima) / (CHART_CONST.hGridCount - 1);
@@ -497,10 +490,10 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
 
     var overFlow = 0;
-    var vTextLabel = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var vTextLabel = CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
     for (var i = 0; i < vTextLabel.length; i++) {
       if ((CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
         overFlow = Math.abs((CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
@@ -512,7 +505,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End createVerticalLabel()*/
 
   function createHorizontalLabel(categories, scaleX) {
-    var hTextLabel = self._CHART_DATA.objChart.querySelector("#hTextLabel");
+    var hTextLabel = CHART_DATA.objChart.querySelector("#hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
 
     var interval = scaleX || (CHART_DATA.gridBoxWidth / (categories.length));
@@ -541,8 +534,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     strText += "</g>";
 
     /*bind hover event*/
-    self._CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
-    var hTextLabels = self._CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
+    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
+    var hTextLabels = CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
     var totalHTextWidth = 0;
     for (var i = 0; i < hTextLabels.length; i++) {
       var txWidth = hTextLabels[i].getComputedTextLength();
@@ -575,18 +568,18 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   function resetTextPositions() {
-    var txtTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-    var txtSubTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    var txtTitleGrp = self._CHART_DATA.objChart.querySelector("#txtTitleGrp");
+    var txtTitleLen = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    var txtSubTitleLen = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    var txtTitleGrp = CHART_DATA.objChart.querySelector("#txtTitleGrp");
 
 
     if (txtTitleLen > CHART_CONST.FIX_WIDTH) {
-      var fontSize = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
-      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = self._CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+      var fontSize = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
+      CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
     txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
@@ -595,15 +588,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
     /*Reset vertical text label*/
-    var arrVLabels = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel");
+    var arrVLabels = CHART_DATA.objChart.querySelectorAll("#vTextLabel");
     var vLabelwidth = arrVLabels[0].getBBox().width;
-    var arrVText = self._CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
+    var arrVText = CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
     for (var i = 0; i < arrVText.length; i++)
       arrVText[i].setAttribute("x", (CHART_DATA.marginLeft - vLabelwidth - 10));
 
     /*Reset horzontal text label*/
     var totalHTextWidth = 0;
-    var arrHText = self._CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
+    var arrHText = CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
     for (var i = 0; i < arrHText.length; i++) {
       var txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
@@ -629,14 +622,14 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    var vTxtSubTitle = self._CHART_DATA.objChart.querySelector("#vTextSubTitle");
+    var vTxtSubTitle = CHART_DATA.objChart.querySelector("#vTextSubTitle");
     vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (CHART_DATA.marginLeft - vLabelwidth - 30) + "," + (CHART_DATA.svgCenter.y) + ")");
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
     /*Set position for legend text*/
-    var arrLegendText = self._CHART_DATA.objChart.querySelectorAll("#legendContainer text");
-    var arrLegendColor = self._CHART_DATA.objChart.querySelectorAll("#legendContainer rect");
+    var arrLegendText = CHART_DATA.objChart.querySelectorAll("#legendContainer text");
+    var arrLegendColor = CHART_DATA.objChart.querySelectorAll("#legendContainer rect");
     var width = 0,
       row = 0;
     for (var i = 0; i < arrLegendText.length; i++) {
@@ -661,6 +654,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End resetTextPositions()*/
 
   function bindEvents() {
+    console.log("inside bind events");
     CHART_DATA.windowRightIndex = (CHART_DATA.windowRightIndex < 0) ? CHART_DATA.fullSeries[CHART_DATA.longestSeries].length : CHART_DATA.windowRightIndex;
     CHART_DATA.newDataSet = [], CHART_DATA.newCatgList = [];
 
@@ -673,14 +667,14 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     }
 
     for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
-      var legend = self._CHART_DATA.objChart.querySelector("#series_legend_" + index);
+      var legend = CHART_DATA.objChart.querySelector("#series_legend_" + index);
       if (legend) {
         legend.removeEventListener("click", onLegendClick);
         legend.addEventListener("click", onLegendClick, false);
       }
     }
 
-    var gridRect = self._CHART_DATA.objChart.querySelector("#gridRect");
+    var gridRect = CHART_DATA.objChart.querySelector("#gridRect");
     if (gridRect) {
       gridRect.removeEventListener("mousemove", onMouseMove);
       gridRect.addEventListener("mousemove", onMouseMove, false);
@@ -690,7 +684,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       gridRect.addEventListener("mouseleave", onMouseLeave, false);
     }
 
-    var zoomOutBox = self._CHART_DATA.objChart.querySelector("#zoomOutBox");
+    var zoomOutBox = CHART_DATA.objChart.querySelector("#zoomOutBox");
     if (zoomOutBox) {
       zoomOutBox.removeEventListener("click", onZoomOut);
       zoomOutBox.addEventListener("click", onZoomOut, false);
@@ -738,11 +732,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       e.stopPropagation();
 
       var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e);
-      var gridBox = self._CHART_DATA.objChart.querySelector("#hGrid").getBBox();
+      var gridBox = CHART_DATA.objChart.querySelector("#hGrid").getBBox();
       if (mousePointer.x >= gridBox.x && mousePointer.x < (gridBox.x + CHART_DATA.gridBoxWidth) && mousePointer.y >= gridBox.y && mousePointer.y < (gridBox.y + CHART_DATA.gridBoxHeight)) {
         var multiSeriesPoints = [];
         for (var i = 0; i < CHART_DATA.series.length; i++) {
-          if (self._CHART_DATA.objChart.querySelector("#series_" + i).style.display === "none")
+          if (!CHART_DATA.objChart.querySelector("#series_" + i) || CHART_DATA.objChart.querySelector("#series_" + i).style.display === "none")
             continue;
           for (var j = 0; j < CHART_DATA.series[i].length - 1; j++) {
             if (mousePointer.x > CHART_DATA.series[i][j].x && mousePointer.x < CHART_DATA.series[i][j + 1].x) {
@@ -781,15 +775,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
         /*Create vertical line*/
         var vLinePath = ["M", toolTipPoint.x, toolTipPoint.y, "L", toolTipPoint.x, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
-        var vLine = self._CHART_DATA.objChart.querySelector("#vLine");
+        var vLine = CHART_DATA.objChart.querySelector("#vLine");
         if (vLine) {
           vLine.setAttribute("d", vLinePath.join(" "));
           vLine.parentNode.removeChild(vLine);
-          self._CHART_DATA.objChart.appendChild(vLine);
+          CHART_DATA.objChart.appendChild(vLine);
         }
 
         if (toolTipPoint) {
-          var elms = self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+          var elms = CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
           for (var i = 0; i < elms.length; i++)
             elms[i].parentNode.removeChild(elms[i]);
 
@@ -815,7 +809,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
           } else
             $SC.ui.toolTip(CHART_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
 
-          self._CHART_DATA.objChart.querySelector("#vLine").style.display = "block";
+          CHART_DATA.objChart.querySelector("#vLine").style.display = "block";
         }
       }
     } catch (ex) {
@@ -825,21 +819,21 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function onMouseLeave() {
     $SC.ui.toolTip(CHART_OPTIONS.targetElem, "hide");
-    self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
-    var elms = self._CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+    CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+    var elms = CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
     for (var i = 0; i < elms.length; i++)
       elms[i].parentNode.removeChild(elms[i]);
 
-    var vLine = self._CHART_DATA.objChart.querySelector("#vLine");
+    var vLine = CHART_DATA.objChart.querySelector("#vLine");
     if (vLine) vLine.style.display = "none";
 
   } /*End onMouseLeave()*/
 
   function onLegendClick(e) {
     var seriesIndex = e.target.id.split("_")[2];
-    var legendColor = self._CHART_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
-    var area = self._CHART_DATA.objChart.querySelector("#series_" + seriesIndex);
-    var actualArea = self._CHART_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
+    var legendColor = CHART_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
+    var area = CHART_DATA.objChart.querySelector("#series_" + seriesIndex);
+    var actualArea = CHART_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
     var color = CHART_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
 
     if (legendColor.getAttribute("fill") === "#eee") {
@@ -854,34 +848,34 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End onLegendClick()*/
 
   function bindSliderEvents() {
-    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
-      self._CHART_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
     });
 
-    self._CHART_DATA.objChart.addEventListener("mouseup", function (e) {
+    CHART_DATA.objChart.addEventListener("mouseup", function (e) {
       e.stopPropagation();
       if (CHART_DATA.mouseDown === 1) {
-        self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
-        self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-        self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
-        self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+        CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
+        CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+        CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
+        CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
         if (e.target.id === "sliderRight")
           resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
         else
@@ -891,57 +885,57 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       CHART_DATA.mouseDown = 0;
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
-      self._CHART_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
     });
 
     /*Events for touch devices*/
 
-    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
-      self._CHART_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
     }, false);
 
-    self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      self._CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     }, false);
 
-    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
-      self._CHART_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
     });
 
-    self._CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      self._CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
     });
@@ -954,12 +948,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
 
-    var sliderLsel = self._CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
     if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
-      self._CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
       return;
@@ -981,12 +975,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    var sliderLsel = self._CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    var sliderRsel = self._CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
     if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
-      self._CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
-      self._CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
       return;
@@ -1019,30 +1013,30 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     ];
 
     var cy = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + (CHART_DATA.fullChartHeight / 2) + CHART_DATA.fcMarginTop;
-    self._CHART_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
-    self._CHART_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
-    self._CHART_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
-    var fullSeries = self._CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
+    CHART_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
+    CHART_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
+    CHART_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
+    var fullSeries = CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
 
     if (type === "left") {
-      var sliderOffset = self._CHART_DATA.objChart.querySelector("#sliderLeftOffset");
+      var sliderOffset = CHART_DATA.objChart.querySelector("#sliderLeftOffset");
       sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
     } else {
-      var sliderOffset = self._CHART_DATA.objChart.querySelector("#sliderRightOffset");
+      var sliderOffset = CHART_DATA.objChart.querySelector("#sliderRightOffset");
       sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
       sliderOffset.setAttribute("x", x);
     }
 
     if (type === "left") {
       if (CHART_DATA.windowLeftIndex > 0)
-        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
       else
-        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
     } else if (type === "right") {
       if (CHART_DATA.windowRightIndex < ((CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length * 2) - 1)) {
-        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
       } else {
-        self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
       }
     }
 
@@ -1074,13 +1068,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     resetTextPositions();
     bindEvents();
     onMouseLeave();
-
-    //fire event afterRender
-    var aftrRenderEvent = new self.Event("afterRender", {
-      srcElement: self
-    });
-    self.dispatchEvent(aftrRenderEvent);
-
+    self.render(); 
   } /*End reDrawSeries()*/
 
 
@@ -1092,7 +1080,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
     resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
     reDrawSeries();
-    self._CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+    CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
   } /*End onZoomOut()*/
 
   function round(val) {
@@ -1107,6 +1095,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End round()*/
 
   function showAnimatedView() {
+    console.log( CHART_OPTIONS);
     var dataSet = [];
     var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex).length;
     var pointIndex = 0;
@@ -1143,7 +1132,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     }, 50);
   } /*End showAnimatedView()*/
 
-
   init();
-  if (CHART_OPTIONS.animated !== false) showAnimatedView();
+  if(CHART_OPTIONS.animated !== false) 
+    showAnimatedView();
+    
 }; /*End of AreaChart()*/

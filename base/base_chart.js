@@ -62,4 +62,12 @@ window.SmartChartsNXT.BaseChart = function () {
         }, 100);
     } /* End of Init() */
 
+    this.render = function(){
+        //fire event afterRender
+        var aftrRenderEvent = new this.Event("afterRender", {
+        srcElement: this
+        });
+        this.dispatchEvent(aftrRenderEvent);
+    }
+
 }
