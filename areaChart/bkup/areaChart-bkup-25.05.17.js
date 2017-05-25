@@ -223,6 +223,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
     resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
 
+    //bindEvents();
     bindSliderEvents();
 
     var fullSeries = CHART_DATA.objChart.querySelector("#fullSeriesContr");
@@ -280,8 +281,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
       CHART_DATA.fullSeries.push(arrPointsSet);
 
-      var line = [];
-      var area = [];
+      var line = [],
+        area = [];
       strSeries = "<g id='fullSeries_" + index + "' class='fullSeries'>";
       line.push.apply(line, ["M", arrPointsSet[0].x, arrPointsSet[0].y]);
       var point = 0;
@@ -321,7 +322,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var arrData = [];
       for (var j = 0; j < dataSet[i].data.length; j++) {
         arrData.push(dataSet[i].data[j].value);
-        categories.push(dataSet[i].data[j].label);
+        if (categories.indexOf(dataSet[i].data[j].label) < 0)
+          categories.push(dataSet[i].data[j].label);
       }
       var maxVal = Math.max.apply(null, arrData);
       var minVal = Math.min.apply(null, arrData);
@@ -652,6 +654,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End resetTextPositions()*/
 
   function bindEvents() {
+    console.log("inside bind events");
     CHART_DATA.windowRightIndex = (CHART_DATA.windowRightIndex < 0) ? CHART_DATA.fullSeries[CHART_DATA.longestSeries].length : CHART_DATA.windowRightIndex;
     CHART_DATA.newDataSet = [], CHART_DATA.newCatgList = [];
 
@@ -944,12 +947,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    
+
     var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
     var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
     if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
-      CHART_DATA.windowLeftIndex = CHART_DATA.windowRightIndex;
       CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
       CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
@@ -965,7 +967,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
           else
             CHART_DATA.windowLeftIndex = j + 1;
       }
-      reDrawSeries();
       resetSliderPos("left", mousePointer.x);
     }
   } /*End bindLeftSliderMove()*/
@@ -978,7 +979,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
     if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
-      CHART_DATA.windowRightIndex = CHART_DATA.windowLeftIndex;
       CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
       CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
@@ -996,7 +996,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       if (mousePointer.x > CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1].x) {
         CHART_DATA.windowRightIndex = CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1;
       }
-      reDrawSeries();
       resetSliderPos("right", mousePointer.x);
     }
   } /*End bindRightSliderMove()*/
@@ -1096,6 +1095,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End round()*/
 
   function showAnimatedView() {
+    console.log( CHART_OPTIONS);
     var dataSet = [];
     var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(CHART_DATA.windowLeftIndex, CHART_DATA.windowRightIndex).length;
     var pointIndex = 0;
