@@ -41,8 +41,10 @@
             "lineWidth":2,
             "color":"#F44336",
             "noPointMarker":false,
-            "markerRadius":3,
+            "markerRadius":3.5,
             "smoothedLine":false,
+            "showGradient":true,
+            "areaOpacity":"0.5",
             "name": 'Wilson',
             "data": [
               {label:"Jan",value:"6446"},{label:"Feb",value:"333"},{label:"Mar",value:"470"},{label:"Apr",value:"8472"},
@@ -52,10 +54,33 @@
           }
         ]
       },
-      zoomWindow:{
-        "leftIndex":10,
-        "rightIndex":20
-      }
+      events: {
+          afterRender: function (e) {
+            console.log(e, "event after rendering complete");
+          },
+          onInit: function (e) {
+            console.log(e, "event onInit");
+          },
+          afterParseData: function (e) {
+            console.log(e, "event afterParseData");
+          },
+          beforeSave: function (e) {
+            console.log(e, "event beforeSave");
+          },
+          afterSave: function (e) {
+            console.log(e, "event afterSave");
+          },
+            beforePrint: function (e) {
+            console.log(e, "event beforePrint");
+          },
+          afterPrint: function (e) {
+            console.log(e, "event afterPrint");
+          }
+        },
+        zoomWindow:{
+          "leftIndex":10,
+          "rightIndex":20
+        }
     });
   });
 
@@ -190,11 +215,11 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     createGrid();
     createFullSeries();
 
-    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) 
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++)
       appendGradFill(index);
-    
-    var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(0, CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
-    createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
+
+    //var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(0, CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
+    //createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
 
     /*Creating horizontal and vertical subtitles*/
     strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft + (CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 70) + "' font-size='18' >" + CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
@@ -235,8 +260,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
   function createFullSeries() {
     var strSVG = "";
-    strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)'  style='stroke-width:0.1;stroke:#717171;' \/>";
-    strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.1)' style='stroke-width:0.1;stroke:#717171;' \/>";
+    strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)'  style='stroke-width:0.1;stroke:#717171;' \/>";
+    strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)' style='stroke-width:0.1;stroke:#717171;' \/>";
     CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
     /* ploting actual points */
@@ -321,7 +346,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var arrData = [];
       for (var j = 0; j < dataSet[i].data.length; j++) {
         arrData.push(dataSet[i].data[j].value);
-        categories.push(dataSet[i].data[j].label);
+        if (j > categories.length - 1) {
+          categories.push(dataSet[i].data[j].label);
+        }
       }
       var maxVal = Math.max.apply(null, arrData);
       var minVal = Math.min.apply(null, arrData);
@@ -506,25 +533,38 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var hTextLabel = CHART_DATA.objChart.querySelector("#hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
 
-    var interval = scaleX || (CHART_DATA.gridBoxWidth / (categories.length));
-
+    var interval = scaleX || (CHART_DATA.gridBoxWidth / categories.length);
+    console.log("interval-->", interval, "categories-->", categories);
     /*if there is too much categories then discard some categories*/
     if (interval < 30) {
-      var newCategories = [],
-        skipLen = Math.ceil(30 / interval);
+      var newCategories = [];
+      var skipLen = Math.ceil(30 / interval);
+
+      console.log("skiplen-->", skipLen);
       for (var i = 0; i < categories.length; i += skipLen) {
         newCategories.push(categories[i]);
       }
+      console.log("new category-->", newCategories);
       categories = newCategories;
       interval *= skipLen;
     }
     var strText = "<g id='hTextLabel'>";
     for (var hText = 0; hText < categories.length; hText++) {
-      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + (CHART_DATA.marginLeft + (hText * interval) + (interval / 2)) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 20) + "' ><tspan  font-size='12' >" + categories[hText] + "<\/tspan></text>";
+      var xPos = (CHART_DATA.marginLeft + (hText * interval) + (interval / 2));
+      var yPos = (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 20);
+      if (xPos + (interval / 2) > (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth))
+        break;
+      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + xPos + "' y='" + yPos + "' >";
+      strText += "  <tspan  font-size='12' >" + categories[hText] + "<\/tspan>";
+      strText += "</text>";
     }
 
     for (var hText = 0; hText < categories.length; hText++) {
-      var d = ["M", (CHART_DATA.marginLeft + (hText * interval) + (interval)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight), "L", (CHART_DATA.marginLeft + (hText * interval) + (interval)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10)];
+      var xPos = (CHART_DATA.marginLeft + (hText * interval) + (interval));
+      var yPos = (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight);
+      if (xPos > (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth))
+        break;
+      var d = ["M", xPos, yPos, "L", xPos, (yPos + 10)];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
@@ -944,7 +984,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    
+
     var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
     var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
 
@@ -1056,7 +1096,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     prepareDataSet(dataSet);
     createVerticalLabel();
-
     createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
 
     CHART_DATA.series = [];
@@ -1069,7 +1108,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     resetTextPositions();
     bindEvents();
     onMouseLeave();
-    self.render(); 
+    self.render();
   } /*End reDrawSeries()*/
 
 
@@ -1133,7 +1172,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End showAnimatedView()*/
 
   init();
-  if(CHART_OPTIONS.animated !== false) 
+  if (CHART_OPTIONS.animated !== false)
     showAnimatedView();
-    
+
 }; /*End of AreaChart()*/

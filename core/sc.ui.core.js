@@ -146,7 +146,7 @@ window.SmartChartsNXT.ui.toolTip = function (targetElem, cPoint, color, line1, l
 
     toolTip.style.display = "block";
 
-}; /*End showToolTip()*/
+}; /*End toolTip()*/
 
 
 /* Get point in global SVG space*/
