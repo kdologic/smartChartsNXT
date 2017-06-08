@@ -215,11 +215,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     createGrid();
     createFullSeries();
 
-    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++)
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++){
       appendGradFill(index);
-
-    //var scaleX = CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.slice(0, CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
-    //createHorizontalLabel(CHART_OPTIONS.dataSet.xAxis.categories, scaleX);
+    }
 
     /*Creating horizontal and vertical subtitles*/
     strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft + (CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 70) + "' font-size='18' >" + CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
@@ -243,7 +241,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
-    resetTextPositions();
+    //resetTextPositions();
 
     resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
     resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
@@ -296,8 +294,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var d = [];
       var scaleX = CHART_DATA.fsScaleX = (CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
       var scaleYfull = (CHART_DATA.fullChartHeight / CHART_DATA.maxima);
-      var arrPointsSet = [],
-        strSeries = "";
+      var arrPointsSet = [];
+      var strSeries = "";
       for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
         var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop) - (dataSet[dataCount].value * scaleYfull));
         arrPointsSet.push(p);
@@ -320,8 +318,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
         }
       }
 
-      if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
+      if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1){
         line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
+      }
       line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
       area.push.apply(area, line);
       d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", CHART_DATA.marginLeft + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "Z"];
@@ -532,19 +531,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   function createHorizontalLabel(categories, scaleX) {
     var hTextLabel = CHART_DATA.objChart.querySelector("#hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
-
     var interval = scaleX || (CHART_DATA.gridBoxWidth / categories.length);
-    console.log("interval-->", interval, "categories-->", categories);
     /*if there is too much categories then discard some categories*/
     if (interval < 30) {
       var newCategories = [];
       var skipLen = Math.ceil(30 / interval);
 
-      console.log("skiplen-->", skipLen);
       for (var i = 0; i < categories.length; i += skipLen) {
         newCategories.push(categories[i]);
       }
-      console.log("new category-->", newCategories);
       categories = newCategories;
       interval *= skipLen;
     }
@@ -552,7 +547,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     for (var hText = 0; hText < categories.length; hText++) {
       var xPos = (CHART_DATA.marginLeft + (hText * interval) + (interval / 2));
       var yPos = (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 20);
-      if (xPos + (interval / 2) > (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth))
+      if (xPos > (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth))
         break;
       strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + xPos + "' y='" + yPos + "' >";
       strText += "  <tspan  font-size='12' >" + categories[hText] + "<\/tspan>";
@@ -574,21 +569,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     /*bind hover event*/
     CHART_DATA.objChart.insertAdjacentHTML("beforeend", strText);
     var hTextLabels = CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
-    var totalHTextWidth = 0;
-    for (var i = 0; i < hTextLabels.length; i++) {
-      var txWidth = hTextLabels[i].getComputedTextLength();
-      totalHTextWidth += (txWidth);
-    }
 
     for (var i = 0; i < hTextLabels.length; i++) {
-      var txtWidth = hTextLabels[i].querySelector("tspan").getComputedTextLength();
-      if (parseFloat(totalHTextWidth + (hTextLabels.length * 5)) < parseFloat(CHART_DATA.gridBoxWidth)) {
-        while (txtWidth + 5 > interval) {
-          hTextLabels[i].querySelector("tspan").textContent = hTextLabels[i].querySelector("tspan").textContent.substring(0, (hTextLabels[i].querySelector("tspan").textContent.length - 4)) + "...";
-          txtWidth = (hTextLabels[i].querySelector("tspan").getComputedTextLength());
-        }
-      }
-
       hTextLabels[i].addEventListener("mouseenter", function (e) {
         e.stopPropagation();
         var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e);
@@ -599,13 +581,12 @@ window.SmartChartsNXT.AreaChart = function (opts) {
         e.stopPropagation();
         $SC.ui.toolTip(CHART_OPTIONS.targetElem, "hide");
       }, false);
-
     }
 
   } /*End createHorizontalLabel()*/
 
 
-  function resetTextPositions() {
+  function resetTextPositions(categories) {
     var txtTitleLen = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
     var txtSubTitleLen = CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
     var txtTitleGrp = CHART_DATA.objChart.querySelector("#txtTitleGrp");
@@ -625,35 +606,39 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
-    /*Reset vertical text label*/
+    /*Adjust vertical text label size*/
     var arrVLabels = CHART_DATA.objChart.querySelectorAll("#vTextLabel");
     var vLabelwidth = arrVLabels[0].getBBox().width;
     var arrVText = CHART_DATA.objChart.querySelectorAll("#vTextLabel tspan");
     for (var i = 0; i < arrVText.length; i++)
       arrVText[i].setAttribute("x", (CHART_DATA.marginLeft - vLabelwidth - 10));
 
-    /*Reset horzontal text label*/
+    /*Adjust horzontal text label size*/
     var totalHTextWidth = 0;
     var arrHText = CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
     for (var i = 0; i < arrHText.length; i++) {
       var txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
     }
-    var interval = 70;
+    var interval = CHART_DATA.gridBoxWidth / categories.length;
     if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(CHART_DATA.gridBoxWidth)) {
       for (var i = 0; i < arrHText.length; i++) {
         var cx = arrHText[i].getAttribute("x");
         var cy = arrHText[i].getAttribute("y");
 
         txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
-        arrHText[i].setAttribute("transform", "translate(0," + (10) + ")rotate(-45," + (cx) + "," + (cy) + ")");
+        arrHText[i].setAttribute("transform", "translate(-" + interval / 2 + "," + (10) + ")rotate(-45," + (cx) + "," + (cy) + ")");
 
-        if (txWidth + 15 > interval) {
+        if (txWidth + 15 > CHART_DATA.fcMarginTop) {
           var fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
-          arrHText[i].querySelector("tspan").setAttribute("font-size", (fontSize - 2));
+          if (fontSize > 9) {
+            arrHText.forEach(function (elem) {
+              elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
+            });
+          }
           txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
         }
-        while (txWidth + 15 > interval) {
+        while (txWidth + 15 > CHART_DATA.fcMarginTop) {
           arrHText[i].querySelector("tspan").textContent = arrHText[i].querySelector("tspan").textContent.substring(0, (arrHText[i].querySelector("tspan").textContent.length - 4)) + "...";
           txWidth = (arrHText[i].querySelector("tspan").getComputedTextLength());
         }
@@ -668,8 +653,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     /*Set position for legend text*/
     var arrLegendText = CHART_DATA.objChart.querySelectorAll("#legendContainer text");
     var arrLegendColor = CHART_DATA.objChart.querySelectorAll("#legendContainer rect");
-    var width = 0,
-      row = 0;
+    var width = 0;
+    var row = 0;
     for (var i = 0; i < arrLegendText.length; i++) {
       arrLegendColor[i].setAttribute("x", (width + CHART_DATA.marginLeft - 60));
       arrLegendText[i].setAttribute("x", (width + CHART_DATA.marginLeft + 20 - 60));
@@ -1105,7 +1090,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
         createLegands(i);
     }
 
-    resetTextPositions();
+    resetTextPositions(CHART_OPTIONS.dataSet.xAxis.categories);
     bindEvents();
     onMouseLeave();
     self.render();
