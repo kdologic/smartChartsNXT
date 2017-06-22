@@ -106,7 +106,7 @@ window.SmartChartsNXT = new function () {
 
 
   function initCore() {
-    addFont(function () {
+    addFont(function (event) {
       appendChartTypeNamespace();
       self.nameSpaceReadyStatus = true;
     });
@@ -218,9 +218,9 @@ window.SmartChartsNXT = new function () {
     fontLink.href = "https://fonts.googleapis.com/css?family=Lato:400,700";
     fontLink.rel = "stylesheet";
     document.getElementsByTagName("head")[0].appendChild(fontLink);
-    if (cb) {
+    if (typeof cb === "function") {
       fontLink.addEventListener('load', function (e) {
-        cb(null, e);
+        cb(e);
       }, false);
     }
   } /*End addFont()*/
