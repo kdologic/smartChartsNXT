@@ -911,7 +911,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     sliderLeftHandle.addEventListener("mouseenter", function (e) {
       e.stopPropagation();
-      console.log("event mouse enter left", "mousedown=", CHART_DATA.mouseDown);
       if (CHART_DATA.mouseDown === 1) {
         sliderRightHandle.dispatchEvent(eventMouseUp);
         sliderRightHandle.dispatchEvent(eventTouchEnd);
@@ -961,7 +960,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     sliderRightHandle.addEventListener("mouseenter", function (e) {
       e.stopPropagation();
-      console.log("event mouse enter right", "mousedown=", CHART_DATA.mouseDown);
       if (CHART_DATA.mouseDown === 1) {
         sliderLeftHandle.dispatchEvent(eventMouseUp);
         sliderLeftHandle.dispatchEvent(eventTouchEnd);
@@ -1012,32 +1010,19 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    console.log("inside bindLeftSliderMove",e);
+    var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderPosX = mousePointer.x < sliderRsel.x ? mousePointer.x : sliderRsel.x;
     if (e.type === "touchmove") {
-      var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-      var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-      console.log(sliderLsel.x + (CHART_DATA.fsScaleX * 2), sliderRsel.x, e.movementX);
-      if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x) {
-        CHART_DATA.windowLeftIndex = CHART_DATA.windowRightIndex;
+      if (mousePointer.x > sliderRsel.x) {
         var eventMouseEnter = new Event("mouseenter");
-        CHART_DATA.objChart.querySelector("#sliderRightHandle").dispatchEvent(eventMouseEnter);
-        //CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
-        //CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-        resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
+        resetSliderPos("left", sliderPosX);
+        resetSliderPos("right", mousePointer.x);
         reDrawSeries();
+        CHART_DATA.objChart.querySelector("#sliderRightHandle").dispatchEvent(eventMouseEnter);
         return;
       }
     }
-    // var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    // var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-    // if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
-    //   CHART_DATA.windowLeftIndex = CHART_DATA.windowRightIndex;
-    //   CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
-    //   CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-    //   resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
-    //   reDrawSeries();
-    //   return;
-    // }
 
     if (mousePointer.x > (CHART_DATA.marginLeft) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
       for (var j = 0; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length - 1; j++) {
@@ -1056,33 +1041,20 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    console.log("inside bindRightSliderMove",e);
+    var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
+    var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
+    var sliderPosX = mousePointer.x > sliderLsel.x + sliderLsel.width ? mousePointer.x : sliderLsel.x + sliderLsel.width;
     if (e.type === "touchmove") {
-      var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-      var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-
-      if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x)) {
-        CHART_DATA.windowRightIndex = CHART_DATA.windowLeftIndex;
+      if (sliderRsel.x < sliderLsel.x + sliderLsel.width) {
         var eventMouseEnter = new Event("mouseenter");
-        CHART_DATA.objChart.querySelector("#sliderLeftHandle").dispatchEvent(eventMouseEnter);
-        //CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
-        //CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
-        resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
+        resetSliderPos("right", sliderPosX);
+        resetSliderPos("left", mousePointer.x);
         reDrawSeries();
+        CHART_DATA.objChart.querySelector("#sliderLeftHandle").dispatchEvent(eventMouseEnter);
         return;
       }
     }
-    // var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    // var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-
-    // if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
-    //   CHART_DATA.windowRightIndex = CHART_DATA.windowLeftIndex;
-    //   CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
-    //   CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
-    //   resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
-    //   reDrawSeries();
-    //   return;
-    // }
+  
     if (mousePointer.x > (CHART_DATA.marginLeft + CHART_DATA.scaleX) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
       for (var j = 1; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length; j++) {
         if (mousePointer.x >= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j - 1].x && mousePointer.x <= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j].x)
