@@ -144,8 +144,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       CHART_DATA.marginTop = ((-1) * CHART_DATA.scaleY / 2) + 120;
       CHART_DATA.marginBottom = ((-1) * CHART_DATA.scaleY / 2) + 170;
 
-      var longestSeries = 0;
-      var longSeriesLen = 0;
+      var longestSeries = 0,
+        longSeriesLen = 0;
       for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
 
         if (CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
@@ -155,7 +155,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
       CHART_DATA.longestSeries = longestSeries;
 
-      /* Will set initial zoom window */
       if (CHART_OPTIONS.zoomWindow) {
         if (CHART_OPTIONS.zoomWindow.leftIndex && CHART_OPTIONS.zoomWindow.leftIndex >= 0 && CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1)
           CHART_DATA.windowLeftIndex = CHART_OPTIONS.zoomWindow.leftIndex;
@@ -213,56 +212,60 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = CHART_OPTIONS.title;
     CHART_DATA.objChart.querySelector("#txtSubtitle").textContent = CHART_OPTIONS.subTitle;
 
-    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
-      appendGradFill(index);
-    }
-
     createGrid();
-    prepareFullSeriesDataset();
     createFullSeries();
 
-    /* ploting full series actual points */
-    for (var index = 0; index < CHART_DATA.fullSeries.length; index++) {
-      drawFullSeries(CHART_DATA.fullSeries[index], index);
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++){
+      appendGradFill(index);
     }
 
     /*Creating horizontal and vertical subtitles*/
     strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft + (CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 70) + "' font-size='18' >" + CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
     strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (CHART_DATA.marginLeft - 30) + "' y='" + (CHART_DATA.marginTop + (CHART_DATA.gridBoxHeight / 2) - 5) + "' font-size='18' >" + CHART_OPTIONS.dataSet.yAxis.title + "<\/text>";
+
+    var zoomOutBox = {
+      top: CHART_DATA.marginTop - 40,
+      left: CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth - 40,
+      width: 40,
+      height: 40
+    };
+
+    strSVG += "<g id='zoomOutBoxCont' style='display:none;'>";
+    strSVG += "  <rect id='zoomOutBox' x='" + zoomOutBox.left + "' y='" + zoomOutBox.top + "' width='" + zoomOutBox.width + "' height='" + zoomOutBox.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
+    strSVG += "  <circle r='10' cx='" + (zoomOutBox.left + (zoomOutBox.width / 2)) + "' cy='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+    strSVG += "  <line x1='" + (zoomOutBox.left + (zoomOutBox.width / 2) - 4) + "' y1='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' x2='" + (zoomOutBox.left + (zoomOutBox.width / 2) + 4) + "' y2='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+    var lineStart = $SC.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 10, 135);
+    var lineEnd = $SC.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 20, 135);
+    strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
+    strSVG += "</g>";
+
     CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
+    //resetTextPositions();
 
-    if (CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame")) {
-      bindSliderEvents();
-      resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
-      resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
-      createZoomOutBox();
-    }
+    resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
+    resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
+
+    bindSliderEvents();
+
+    var fullSeries = CHART_DATA.objChart.querySelector("#fullSeriesContr");
+    fullSeries.parentNode.removeChild(fullSeries);
+    CHART_DATA.objChart.appendChild(fullSeries);
 
     reDrawSeries();
   } /*End prepareChart()*/
 
-  function prepareFullSeriesDataset() {
-    var scaleX = CHART_DATA.fsScaleX = (CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
-    var scaleYfull = (CHART_DATA.fullChartHeight / CHART_DATA.maxima);
-
-    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
-      var arrPointsSet = [];
-      var dataSet = CHART_OPTIONS.dataSet.series[index].data;
-      for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop) - (dataSet[dataCount].value * scaleYfull));
-        arrPointsSet.push(p);
-      }
-      CHART_DATA.fullSeries.push(arrPointsSet);
-    }
-  } /* End prepareFullSeriesDataset() */
-
 
   function createFullSeries() {
     var strSVG = "";
-    strSVG += "<g id='fullSeriesChartCont'></g>";
-    strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)'  fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
-    strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill = 'rgba(128,179,236,0.5)' fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
+    strSVG += "<rect id='sliderLeftOffset' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)'  style='stroke-width:0.1;stroke:#717171;' \/>";
+    strSVG += "<rect id='sliderRightOffset' x='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='0' height='" + (CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)' style='stroke-width:0.1;stroke:#717171;' \/>";
+    CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+
+    /* ploting actual points */
+    for (var index = 0; index < CHART_OPTIONS.dataSet.series.length; index++) {
+      drawFullSeries(CHART_OPTIONS.dataSet.series[index].data, index);
+    }
 
     var outerContPath = [
       "M", (CHART_DATA.marginLeft), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop + 10),
@@ -271,79 +274,66 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       "L", (CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth), ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop + 10)
     ];
 
+    strSVG = "";
     strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
     strSVG += "<rect id='outerFrame' x='" + (CHART_DATA.marginLeft) + "' y='" + ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop) + "' width='" + ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight) + "' height='" + (CHART_DATA.fullChartHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
     strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-
-    strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
-    strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + CHART_DATA.svgCenter.y + "' width='10' height='" + CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+    strSVG += "<g id='sliderLeftHandle'>";
     strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "</g>";
-
-    strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
-    strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + CHART_DATA.svgCenter.y + "' width='10' height='" + CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+    strSVG += "<g id='sliderRightHandle'>";
     strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
     strSVG += "</g>";
     CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
 
-  } /*End createFullSeries()*/
 
-  function drawFullSeries(arrPointsSet, index) {
-    var line = [];
-    var area = [];
-    var strSeries = "<g id='fullSeries_" + index + "' class='fullSeries'>";
-    line.push.apply(line, ["M", arrPointsSet[0].x, arrPointsSet[0].y]);
-    var point = 0;
-    for (var point = 0;
-      (point + 2) < arrPointsSet.length; point++) {
-      if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
-        var curve = $SC.geom.describeBezireArc(arrPointsSet[point], arrPointsSet[point + 1], arrPointsSet[point + 2]);
-        line.push.apply(line, curve);
-      } else {
-        line.push.apply(line, ["L", arrPointsSet[point].x, arrPointsSet[point].y]);
+    function drawFullSeries(dataSet, index) {
+      var d = [];
+      var scaleX = CHART_DATA.fsScaleX = (CHART_DATA.gridBoxWidth / CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length);
+      var scaleYfull = (CHART_DATA.fullChartHeight / CHART_DATA.maxima);
+      var arrPointsSet = [];
+      var strSeries = "";
+      for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
+        var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop) - (dataSet[dataCount].value * scaleYfull));
+        arrPointsSet.push(p);
       }
-    }
 
-    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1) {
-      line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
-    }
-    line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
-    area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", CHART_DATA.marginLeft + (CHART_DATA.fsScaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "Z"];
-    area.push.apply(area, d);
+      CHART_DATA.fullSeries.push(arrPointsSet);
 
-    strSeries += "<path id='fLine_" + index + "' stroke='#000' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='0.6'></path>";
-    strSeries += "<path id='fArea_" + index + "' stroke='none' fill='#000' d='" + area.join(" ") + "' stroke-width='1' opacity='0.4'></path>";
+      var line = [];
+      var area = [];
+      strSeries = "<g id='fullSeries_" + index + "' class='fullSeries'>";
+      line.push.apply(line, ["M", arrPointsSet[0].x, arrPointsSet[0].y]);
+      var point = 0;
+      for (var point = 0;
+        (point + 2) < arrPointsSet.length; point++) {
+        if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
+          var curve = $SC.geom.describeBezireArc(arrPointsSet[point], arrPointsSet[point + 1], arrPointsSet[point + 2]);
+          line.push.apply(line, curve);
+        } else {
+          line.push.apply(line, ["L", arrPointsSet[point].x, arrPointsSet[point].y]);
+        }
+      }
 
-    var fullSeriesChartCont = CHART_DATA.objChart.querySelector("#fullSeriesContr #fullSeriesChartCont");
-    if (fullSeriesChartCont) {
-      fullSeriesChartCont.insertAdjacentHTML("beforeend", strSeries);
-    }
-  } /*End drawFullSeries()*/
+      if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1){
+        line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
+      }
+      line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
+      area.push.apply(area, line);
+      d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", CHART_DATA.marginLeft + (scaleX / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "Z"];
+      area.push.apply(area, d);
 
-  function createZoomOutBox() {
-    var zoomOutBox = {
-      top: CHART_DATA.marginTop - 40,
-      left: CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth - 40,
-      width: 40,
-      height: 40
-    };
+      var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+      strSeries += "<path id='fLine_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='1'></path>";
+      strSeries += "<path id='fArea_" + index + "' stroke='none' fill='url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")' d='" + area.join(" ") + "' stroke-width='1' opacity='1'></path>";
 
-    var strSVG = "<g id='zoomOutBoxCont' style='display:none;'>";
-    strSVG += "  <rect id='zoomOutBox' x='" + zoomOutBox.left + "' y='" + zoomOutBox.top + "' width='" + zoomOutBox.width + "' height='" + zoomOutBox.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
-    strSVG += "  <circle r='10' cx='" + (zoomOutBox.left + (zoomOutBox.width / 2)) + "' cy='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
-    strSVG += "  <line x1='" + (zoomOutBox.left + (zoomOutBox.width / 2) - 4) + "' y1='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' x2='" + (zoomOutBox.left + (zoomOutBox.width / 2) + 4) + "' y2='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+      CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSeries);
+    } /*End drawFullSeries()*/
 
-    var lineStart = $SC.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 10, 135);
-    var lineEnd = $SC.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 20, 135);
-    strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
-    strSVG += "</g>";
-
-    CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
-  } /*End createZoomOutBox() */
+  } /*End createFullSeries()*/
 
   function prepareDataSet(dataSet) {
     var maxSet = [];
@@ -383,10 +373,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     if (elemSeries) elemSeries.parentNode.removeChild(elemSeries);
     if (elemActualSeries) elemActualSeries.parentNode.removeChild(elemActualSeries);
 
-    if (dataSet.length < 1) {
-      return void 0;
-    }
-
+    if (dataSet.length < 1)
+      return;
     var interval = scaleX || (CHART_DATA.gridBoxWidth / (dataSet.length));
     var scaleY = (CHART_DATA.gridBoxHeight / CHART_DATA.maxima);
     var arrPointsSet = [],
@@ -396,27 +384,28 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
       var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
-      d.push(!dataCount ? "M" : "L");
+      if (dataCount === 0)
+        d.push("M");
+      else
+        d.push("L");
       d.push(p.x);
       d.push(p.y);
       arrPointsSet.push(p);
     }
 
     var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
-    var strokeWidth = CHART_OPTIONS.dataSet.series[index].lineWidth || 1;
+    var strokeWidth = CHART_OPTIONS.dataSet.series[index].lineWidth || 3;
     var areaOpacity = CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.3;
     areaOpacity = CHART_OPTIONS.dataSet.series[index].showGradient ? 1 : areaOpacity;
     var fill = CHART_OPTIONS.dataSet.series[index].showGradient ? "url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")" : color;
 
-    if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
+    if (CHART_OPTIONS.dataSet.series[index].smoothedLine)
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-dasharray='1,1' stroke-width='1' opacity='1'></path>";
-    } else {
+    else
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
-    }
     strSeries += "</g>";
-    if (dataSet.length < 50) {
+    if (dataSet.length < 50)
       CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
-    }
     CHART_DATA.series.push(arrPointsSet);
 
     var line = [];
@@ -435,9 +424,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1) {
+    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
       line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
-    }
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
 
     area.push.apply(area, line);
@@ -449,7 +437,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     var radius = CHART_OPTIONS.dataSet.series[index].markerRadius || 4;
     if (!CHART_OPTIONS.dataSet.series[index].noPointMarker) {
-      for (var point = 0; point + 2 < arrPointsSet.length; point++) {
+      for (var point = 0;
+        (point + 2) < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + radius + "' class='dot' style='fill:" + color + "; opacity: 1; stroke-width: 1px;'></circle>";
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='2' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
@@ -491,7 +480,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   function createGrid() {
-    var d;
     CHART_DATA.gridBoxWidth = (CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight;
     CHART_DATA.gridBoxHeight = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom;
     CHART_DATA.gridHeight = (((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom) / (CHART_CONST.hGridCount - 1));
@@ -500,15 +488,13 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     var strGrid = "";
     strGrid += "<g id='hGrid' >";
-    for (var gridCount = 0; gridCount < CHART_CONST.hGridCount-1; gridCount++) {
-      d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight), "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)];
+    for (var gridCount = 0; gridCount < CHART_CONST.hGridCount; gridCount++) {
+      var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight), "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)];
       strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' stroke-width='1' stroke-opacity='1'></path>";
     }
-    d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop, "L", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10];
+    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop, "L", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10];
     strGrid += "<rect id='gridRect' x='" + CHART_DATA.marginLeft + "' y='" + CHART_DATA.marginTop + "' width='" + CHART_DATA.gridBoxWidth + "' height='" + CHART_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
     strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 1, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 1];
-    strGrid += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strGrid += "</g>";
     CHART_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
     createVerticalLabel();
@@ -524,7 +510,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var value = (i++ * interval);
       value = (value >= 1000 ? (value / 1000).toFixed(2) + "K" : value.toFixed(2));
       strText += "<text font-family='Lato' fill='black'><tspan x='" + (CHART_DATA.marginLeft - 55) + "' y='" + (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight) + 5) + "' font-size='12' >" + ((CHART_OPTIONS.dataSet.yAxis.prefix) ? CHART_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
-      var d = ["M", CHART_DATA.marginLeft, (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)) + (i === 1 ? 1 : 0), "L", (CHART_DATA.marginLeft - 5), (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight) + (i === 1 ? 1 : 0))];
+      var d = ["M", CHART_DATA.marginLeft, (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)), "L", (CHART_DATA.marginLeft - 5), (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight))];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
@@ -576,6 +562,8 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var d = ["M", xPos, yPos, "L", xPos, (yPos + 10)];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
+    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
+    strText += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strText += "</g>";
 
     /*bind hover event*/
@@ -882,53 +870,33 @@ window.SmartChartsNXT.AreaChart = function (opts) {
   } /*End onLegendClick()*/
 
   function bindSliderEvents() {
-    var sliderLeftHandle = CHART_DATA.objChart.querySelector("#sliderLeftHandle");
-    var sliderRightHandle = CHART_DATA.objChart.querySelector("#sliderRightHandle");
-    var eventMouseDown = new Event("mousedown");
-    var eventMouseUp = new Event("mouseup");
-    var eventTouchStart = new Event("touchstart");
-    var eventTouchEnd = new Event("touchend");
-    var eventTouchCancel = new Event("touchcancel")
-
-    sliderLeftHandle.addEventListener("mousedown", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      sliderLeftHandle.addEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mousemove", bindLeftSliderMove);
       CHART_DATA.objChart.addEventListener("mousemove", bindLeftSliderMove);
     });
 
-    sliderLeftHandle.addEventListener("mouseup", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      sliderLeftHandle.removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
       CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     });
 
-    sliderLeftHandle.addEventListener("mouseleave", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      sliderLeftHandle.removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
     });
-
-    sliderLeftHandle.addEventListener("mouseenter", function (e) {
-      e.stopPropagation();
-      if (CHART_DATA.mouseDown === 1) {
-        sliderRightHandle.dispatchEvent(eventMouseUp);
-        sliderRightHandle.dispatchEvent(eventTouchEnd);
-        sliderRightHandle.dispatchEvent(eventTouchCancel);
-        sliderLeftHandle.dispatchEvent(eventMouseDown);
-        sliderLeftHandle.dispatchEvent(eventTouchStart);
-      }
-    });
-
 
     CHART_DATA.objChart.addEventListener("mouseup", function (e) {
       e.stopPropagation();
       if (CHART_DATA.mouseDown === 1) {
-        sliderLeftHandle.removeEventListener("mousemove", bindLeftSliderMove);
+        CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindLeftSliderMove);
         CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
-        sliderLeftHandle.removeEventListener("mousemove", bindRightSliderMove);
+        CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("mousemove", bindRightSliderMove);
         CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
         if (e.target.id === "sliderRight")
           resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
@@ -939,67 +907,56 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       CHART_DATA.mouseDown = 0;
     });
 
-    sliderRightHandle.addEventListener("mousedown", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousedown", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      sliderRightHandle.addEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mousemove", bindRightSliderMove);
       CHART_DATA.objChart.addEventListener("mousemove", bindRightSliderMove);
     });
 
-    sliderRightHandle.addEventListener("mouseup", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseup", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      sliderRightHandle.removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
       CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
     });
 
-    sliderRightHandle.addEventListener("mouseleave", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("mouseleave", function (e) {
       e.stopPropagation();
-      sliderRightHandle.removeEventListener("mousemove", bindRightSliderMove);
-    });
-
-    sliderRightHandle.addEventListener("mouseenter", function (e) {
-      e.stopPropagation();
-      if (CHART_DATA.mouseDown === 1) {
-        sliderLeftHandle.dispatchEvent(eventMouseUp);
-        sliderLeftHandle.dispatchEvent(eventTouchEnd);
-        sliderLeftHandle.dispatchEvent(eventTouchCancel);
-        sliderRightHandle.dispatchEvent(eventMouseDown);
-        sliderRightHandle.dispatchEvent(eventTouchStart);
-      }
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("mousemove", bindRightSliderMove);
     });
 
     /*Events for touch devices*/
 
-    sliderLeftHandle.addEventListener("touchstart", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      sliderLeftHandle.addEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchmove", bindLeftSliderMove);
       CHART_DATA.objChart.addEventListener("touchmove", bindLeftSliderMove);
     }, false);
 
-    sliderLeftHandle.addEventListener("touchend", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderLeftHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      sliderLeftHandle.removeEventListener("touchmove", bindLeftSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderLeftHandle").removeEventListener("touchmove", bindLeftSliderMove);
       CHART_DATA.objChart.removeEventListener("touchmove", bindLeftSliderMove);
       resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
       reDrawSeries();
     }, false);
 
-    sliderRightHandle.addEventListener("touchstart", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchstart", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 1;
-      sliderRightHandle.addEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchmove", bindRightSliderMove);
       CHART_DATA.objChart.addEventListener("touchmove", bindRightSliderMove);
     });
 
-    sliderRightHandle.addEventListener("touchend", function (e) {
+    CHART_DATA.objChart.querySelector("#sliderRightHandle").addEventListener("touchend", function (e) {
       e.stopPropagation();
       CHART_DATA.mouseDown = 0;
-      sliderRightHandle.removeEventListener("touchmove", bindRightSliderMove);
+      CHART_DATA.objChart.querySelector("#sliderRightHandle").removeEventListener("touchmove", bindRightSliderMove);
       CHART_DATA.objChart.removeEventListener("touchmove", bindRightSliderMove);
       resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
       reDrawSeries();
@@ -1012,18 +969,17 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     e.stopPropagation();
     e.preventDefault();
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
+
     var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
     var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-    var sliderPosX = mousePointer.x < sliderRsel.x ? mousePointer.x : sliderRsel.x;
-    if (e.type === "touchmove") {
-      if (mousePointer.x > sliderRsel.x) {
-        var eventMouseEnter = new Event("mouseenter");
-        resetSliderPos("left", sliderPosX);
-        resetSliderPos("right", mousePointer.x);
-        reDrawSeries();
-        CHART_DATA.objChart.querySelector("#sliderRightHandle").dispatchEvent(eventMouseEnter);
-        return;
-      }
+
+    if (sliderLsel.x + (CHART_DATA.fsScaleX * 2) > sliderRsel.x && e.movementX > 0) {
+      CHART_DATA.windowLeftIndex = CHART_DATA.windowRightIndex;
+      CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindLeftSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindLeftSliderMove);
+      resetSliderPos("left", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowLeftIndex].x);
+      reDrawSeries();
+      return;
     }
 
     if (mousePointer.x > (CHART_DATA.marginLeft) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
@@ -1045,18 +1001,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var mousePointer = $SC.ui.cursorPoint(CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
     var sliderLsel = CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
     var sliderRsel = CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-    var sliderPosX = mousePointer.x > sliderLsel.x + sliderLsel.width ? mousePointer.x : sliderLsel.x + sliderLsel.width;
-    if (e.type === "touchmove") {
-      if (sliderRsel.x < sliderLsel.x + sliderLsel.width) {
-        var eventMouseEnter = new Event("mouseenter");
-        resetSliderPos("right", sliderPosX);
-        resetSliderPos("left", mousePointer.x);
-        reDrawSeries();
-        CHART_DATA.objChart.querySelector("#sliderLeftHandle").dispatchEvent(eventMouseEnter);
-        return;
-      }
-    }
 
+    if (sliderRsel.x - (CHART_DATA.fsScaleX * 2) <= (sliderLsel.x) && e.movementX <= 0) {
+      CHART_DATA.windowRightIndex = CHART_DATA.windowLeftIndex;
+      CHART_DATA.objChart.querySelector("#slideLSel").removeEventListener("mousemove", bindRightSliderMove);
+      CHART_DATA.objChart.removeEventListener("mousemove", bindRightSliderMove);
+      resetSliderPos("right", CHART_DATA.fullSeries[CHART_DATA.longestSeries][CHART_DATA.windowRightIndex].x);
+      reDrawSeries();
+      return;
+    }
     if (mousePointer.x > (CHART_DATA.marginLeft + CHART_DATA.scaleX) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
       for (var j = 1; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length; j++) {
         if (mousePointer.x >= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j - 1].x && mousePointer.x <= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j].x)
@@ -1077,60 +1030,39 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var sliderSel = (type === "right") ? "slideRSel" : "slideLSel";
     var sliderLine = (type === "right") ? "sliderRight" : "sliderLeft";
     var innerBarType = (type === "right") ? "slideRSelInner" : "slideLSelInner";
-    var selFrame = (type === "right") ? "sliderRSelFrame" : "sliderLSelFrame";
     var swipeFlag = (type === "right") ? 1 : 0;
     x = (x <= 0 ? CHART_DATA.marginLeft : x);
 
-    var dr = [
-      "M", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop),
-      "L", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop)
-    ];
-    var innerBar = [
-      "M", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5),
-      "L", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5),
-      "M", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5),
-      "L", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5)
+    var dr = ["M", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fullChartHeight + CHART_DATA.fcMarginTop), "L", x, ((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + CHART_DATA.fcMarginTop)];
+    var innerBar = ["M", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 3) : (x - 3)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5),
+      "M", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) - 5), "L", (type === "right" ? (x + 5) : (x - 5)), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + CHART_DATA.fcMarginTop + (CHART_DATA.fullChartHeight / 2) + 5)
     ];
 
     var cy = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginBottom + (CHART_DATA.fullChartHeight / 2) + CHART_DATA.fcMarginTop;
-    var sldrSel = CHART_DATA.objChart.querySelector("#" + sliderSel);
-    var sldrLine = CHART_DATA.objChart.querySelector("#" + sliderLine);
-    var inrBarType = CHART_DATA.objChart.querySelector("#" + innerBarType);
-    var lSelFrame = CHART_DATA.objChart.querySelector("#" + selFrame);
-    if (sldrSel) {
-      sldrSel.setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
-    }
-    if (sldrLine) {
-      sldrLine.setAttribute("d", dr.join(" "));
-    }
-    if (inrBarType) {
-      inrBarType.setAttribute("d", innerBar.join(" "));
-    }
-    if (lSelFrame) {
-      var xPos = type === "right" ? x + lSelFrame.getAttribute("width") : x - lSelFrame.getAttribute("width");
-      lSelFrame.setAttribute("x", xPos);
-    }
-
+    CHART_DATA.objChart.querySelector("#" + sliderSel).setAttribute("d", $SC.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
+    CHART_DATA.objChart.querySelector("#" + sliderLine).setAttribute("d", dr.join(" "));
+    CHART_DATA.objChart.querySelector("#" + innerBarType).setAttribute("d", innerBar.join(" "));
     var fullSeries = CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
-    if (fullSeries) {
-      if (type === "left") {
-        var sliderOffset = CHART_DATA.objChart.querySelector("#sliderLeftOffset");
-        sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
-      } else {
-        var sliderOffset = CHART_DATA.objChart.querySelector("#sliderRightOffset");
-        sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
-        sliderOffset.setAttribute("x", x);
-      }
+
+    if (type === "left") {
+      var sliderOffset = CHART_DATA.objChart.querySelector("#sliderLeftOffset");
+      sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
+    } else {
+      var sliderOffset = CHART_DATA.objChart.querySelector("#sliderRightOffset");
+      sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
+      sliderOffset.setAttribute("x", x);
     }
 
-
-    /*If zoomOutBox is exist then show/hide that accordingly */
-    var zoomOutBoxCont = CHART_DATA.objChart.querySelector("#zoomOutBoxCont");
-    if (zoomOutBoxCont) {
-      if (type === "left") {
-        zoomOutBoxCont.style.display = CHART_DATA.windowLeftIndex > 0 ? "block" : "none";
-      } else if (type === "right") {
-        zoomOutBoxCont.style.display = (CHART_DATA.windowRightIndex < ((CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length * 2) - 1)) ? "block" : "none";
+    if (type === "left") {
+      if (CHART_DATA.windowLeftIndex > 0)
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+      else
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
+    } else if (type === "right") {
+      if (CHART_DATA.windowRightIndex < ((CHART_OPTIONS.dataSet.series[CHART_DATA.longestSeries].data.length * 2) - 1)) {
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "block";
+      } else {
+        CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
       }
     }
 
