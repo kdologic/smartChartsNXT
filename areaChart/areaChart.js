@@ -383,8 +383,10 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     if (elemSeries) elemSeries.parentNode.removeChild(elemSeries);
     if (elemActualSeries) elemActualSeries.parentNode.removeChild(elemActualSeries);
 
-    if (dataSet.length < 1)
-      return;
+    if (dataSet.length < 1) {
+      return void 0;
+    }
+
     var interval = scaleX || (CHART_DATA.gridBoxWidth / (dataSet.length));
     var scaleY = (CHART_DATA.gridBoxHeight / CHART_DATA.maxima);
     var arrPointsSet = [],
@@ -394,28 +396,27 @@ window.SmartChartsNXT.AreaChart = function (opts) {
     var strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
       var p = new $SC.geom.Point(CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (CHART_DATA.marginTop + CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
-      if (dataCount === 0)
-        d.push("M");
-      else
-        d.push("L");
+      d.push(!dataCount ? "M" : "L");
       d.push(p.x);
       d.push(p.y);
       arrPointsSet.push(p);
     }
 
     var color = CHART_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
-    var strokeWidth = CHART_OPTIONS.dataSet.series[index].lineWidth || 3;
+    var strokeWidth = CHART_OPTIONS.dataSet.series[index].lineWidth || 1;
     var areaOpacity = CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.3;
     areaOpacity = CHART_OPTIONS.dataSet.series[index].showGradient ? 1 : areaOpacity;
     var fill = CHART_OPTIONS.dataSet.series[index].showGradient ? "url(#" + CHART_OPTIONS.targetElem + "-areachart-gradLinear" + index + ")" : color;
 
-    if (CHART_OPTIONS.dataSet.series[index].smoothedLine)
+    if (CHART_OPTIONS.dataSet.series[index].smoothedLine) {
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-dasharray='1,1' stroke-width='1' opacity='1'></path>";
-    else
+    } else {
       strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
+    }
     strSeries += "</g>";
-    if (dataSet.length < 50)
+    if (dataSet.length < 50) {
       CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    }
     CHART_DATA.series.push(arrPointsSet);
 
     var line = [];
@@ -434,8 +435,9 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       }
     }
 
-    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1)
+    if (!CHART_OPTIONS.dataSet.series[index].smoothedLine && arrPointsSet.length > 1) {
       line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 2].x, arrPointsSet[arrPointsSet.length - 2].y]);
+    }
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
 
     area.push.apply(area, line);
@@ -447,8 +449,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     var radius = CHART_OPTIONS.dataSet.series[index].markerRadius || 4;
     if (!CHART_OPTIONS.dataSet.series[index].noPointMarker) {
-      for (var point = 0;
-        (point + 2) < arrPointsSet.length; point++) {
+      for (var point = 0; point + 2 < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + radius + "' class='dot' style='fill:" + color + "; opacity: 1; stroke-width: 1px;'></circle>";
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='2' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
@@ -490,6 +491,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
 
   function createGrid() {
+    var d;
     CHART_DATA.gridBoxWidth = (CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginLeft - CHART_DATA.marginRight;
     CHART_DATA.gridBoxHeight = (CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom;
     CHART_DATA.gridHeight = (((CHART_DATA.svgCenter.y * 2) - CHART_DATA.marginTop - CHART_DATA.marginBottom) / (CHART_CONST.hGridCount - 1));
@@ -498,13 +500,15 @@ window.SmartChartsNXT.AreaChart = function (opts) {
 
     var strGrid = "";
     strGrid += "<g id='hGrid' >";
-    for (var gridCount = 0; gridCount < CHART_CONST.hGridCount; gridCount++) {
-      var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight), "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)];
+    for (var gridCount = 0; gridCount < CHART_CONST.hGridCount-1; gridCount++) {
+      d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight), "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)];
       strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' stroke-width='1' stroke-opacity='1'></path>";
     }
-    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop, "L", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10];
+    d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop, "L", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 10];
     strGrid += "<rect id='gridRect' x='" + CHART_DATA.marginLeft + "' y='" + CHART_DATA.marginTop + "' width='" + CHART_DATA.gridBoxWidth + "' height='" + CHART_DATA.gridBoxHeight + "' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
     strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
+    d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 1, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight + 1];
+    strGrid += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strGrid += "</g>";
     CHART_DATA.objChart.insertAdjacentHTML("beforeend", strGrid);
     createVerticalLabel();
@@ -520,7 +524,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var value = (i++ * interval);
       value = (value >= 1000 ? (value / 1000).toFixed(2) + "K" : value.toFixed(2));
       strText += "<text font-family='Lato' fill='black'><tspan x='" + (CHART_DATA.marginLeft - 55) + "' y='" + (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight) + 5) + "' font-size='12' >" + ((CHART_OPTIONS.dataSet.yAxis.prefix) ? CHART_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
-      var d = ["M", CHART_DATA.marginLeft, (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)), "L", (CHART_DATA.marginLeft - 5), (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight))];
+      var d = ["M", CHART_DATA.marginLeft, (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight)) + (i === 1 ? 1 : 0), "L", (CHART_DATA.marginLeft - 5), (CHART_DATA.marginTop + (gridCount * CHART_DATA.gridHeight) + (i === 1 ? 1 : 0))];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
@@ -572,8 +576,6 @@ window.SmartChartsNXT.AreaChart = function (opts) {
       var d = ["M", xPos, yPos, "L", xPos, (yPos + 10)];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
-    var d = ["M", CHART_DATA.marginLeft, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight, "L", CHART_DATA.marginLeft + CHART_DATA.gridBoxWidth, CHART_DATA.marginTop + CHART_DATA.gridBoxHeight];
-    strText += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strText += "</g>";
 
     /*bind hover event*/
@@ -1054,7 +1056,7 @@ window.SmartChartsNXT.AreaChart = function (opts) {
         return;
       }
     }
-  
+
     if (mousePointer.x > (CHART_DATA.marginLeft + CHART_DATA.scaleX) && mousePointer.x < ((CHART_DATA.svgCenter.x * 2) - CHART_DATA.marginRight)) {
       for (var j = 1; j < CHART_DATA.fullSeries[CHART_DATA.longestSeries].length; j++) {
         if (mousePointer.x >= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j - 1].x && mousePointer.x <= CHART_DATA.fullSeries[CHART_DATA.longestSeries][j].x)
