@@ -15,5 +15,15 @@
   "bugs": {
     "url": "https://github.com/kausikongit/smartChartsNXT/issues"
   },
-  "homepage": "https://github.com/kausikongit/smartChartsNXT#readme"
+  "homepage": "https://github.com/kausikongit/smartChartsNXT#readme",
+  "devDependencies": {
+    "gulp": "3.9.x",
+    "gulp-concat": "~2.1.x",
+    "gulp-connect": "~2.0.5",
+    "gulp-eslint": "^3.0.0",
+    "gulp-streamify": "^1.0.2",
+    "gulp-uglify": "~2.0.x",
+    "gulp-util": "~2.2.x",
+    "gulp-zip": "~3.2.0"
+  }
 }
