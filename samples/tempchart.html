@@ -1,0 +1,127 @@
+<html>
+
+<head>
+  <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
+  <script>
+
+  
+    function generateData(x, y, count) {
+      var dataSet = [];
+      for (var i = 0; i < count; i++) {
+        var newDate = new Date();
+        newDate.setDate(newDate.getDate() + i);
+        var datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
+        dataSet.push({
+          label: newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          value: datum
+        });
+      }
+      return dataSet;
+    }
+
+    window.onload = function () {
+      SmartChartsNXT.ready(function () {
+        var areaChart = new SmartChartsNXT.AreaChart({
+          "title": "Area Chart",
+          "subTitle": "Single series",
+          "targetElem": "chartContainer",
+          "canvasBorder": false,
+          "bgColor": "none",
+          "animated": false, 
+          "toolTip": {
+            "content": '<table>' +
+              '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
+              '<tr><td>a total Sales of <b>Rs. {{point.value}} </b></td></tr>' +
+              '<tr><td>on <b>{{point.label}}</b></tr>' +
+              '</table>'
+          },
+          //sourceDatatype: "xml",
+          "dataSet": {
+            "xAxis": {
+              "title": "Date"
+            },
+            "yAxis": {
+              "title": "Total Sales",
+              "prefix": "Rs. "
+            },
+            "series": [{
+              "lineWidth": 1,
+              "color": "#FFC107",
+              "name": 'Raphael',
+              "noPointMarker": false,
+              "markerRadius": 3.5,
+              "smoothedLine": false,
+              "areaOpacity": "0.6",
+              "showGradient":true,
+              "data": generateData(10, 500, 50) //[{label:"Jan",value:"6446"},{label:"Feb",value:"333"},{label:"Feb",value:"470"}]//
+            },
+            {
+              "lineWidth": 1,
+              "color": "#F44336",
+              "name": 'hael',
+              "noPointMarker": false,
+              "markerRadius": 3.5,
+              "smoothedLine": false,
+              "areaOpacity": "0.6",
+              "showGradient":true,
+              "data": generateData(10, 500, 100) //[{label:"Man",value:"646"},{label:"Feb",value:"833"},{label:"Feb",value:"70"}]//
+            }]
+          },
+          // events: {
+          //   afterRender: function (e) {
+          //     console.log(e, "event after rendering complete");
+          //   },
+          //   onInit: function (e) {
+          //     console.log(e, "event onInit");
+          //   },
+          //   afterParseData: function (e) {
+          //     console.log(e, "event afterParseData");
+          //   },
+          //   beforeSave: function (e) {
+          //     console.log(e, "event beforeSave");
+          //   },
+          //   afterSave: function (e) {
+          //     console.log(e, "event afterSave");
+          //   },
+          //    beforePrint: function (e) {
+          //     console.log(e, "event beforePrint");
+          //   },
+          //   afterPrint: function (e) {
+          //     console.log(e, "event afterPrint");
+          //   }
+          // },
+          zoomWindow: {
+            "leftIndex": 20,
+            "rightIndex": 30
+          }
+        });
+
+      
+        //console.log(areaChart);
+      });
+    };
+
+    
+
+    "<xml><xAxis><title>Date</title></xAxis><yAxis><title>Total Sales</title><prefix>Rs. </prefix></yAxis><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name><noPointMarker>false</noPointMarker><markerRadius>3.5</markerRadius><smoothedLine>false</smoothedLine><areaOpacity>0.4</areaOpacity><data>some data</data></series><series><lineWidth>2</lineWidth><color>#009688</color><name>Raphael</name></series></xml>"
+  </script>
+
+  <script>
+  
+  </script>
+
+ 
+</head>
+
+<body>
+  <div>
+    <div id='chartContainer' style="width:100%; height:100%;">
+    </div>
+  </div>
+</body>
+
+</html>
+
+
+    
+    
