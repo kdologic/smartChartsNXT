@@ -1,6 +1,6 @@
 /*
  * SVG Area Chart 
- * @Version:1.0.0
+ * @Version:1.1.0
  * @CreatedOn:31-05-2016
  * @Author:SmartChartsNXT
  * @description: SVG Area Chart, that support multiple series, and zoom window.
@@ -94,6 +94,7 @@ class AreaChart extends BaseChart {
 
   constructor(opts) {
     super("areaChart", opts);
+    let self = this;
     this.CHART_DATA = this.util.extends({
       chartCenter: 0,
       maxima: 0,
@@ -122,6 +123,13 @@ class AreaChart extends BaseChart {
     }, this.CHART_CONST);
 
     this.timeOut = null;
+    this.EVENT_BINDS = {
+      onLegendClickBind: self.onLegendClick.bind(self),
+      onMouseMoveBind: self.onMouseMove.bind(self),
+      onMouseLeaveBind: self.onMouseLeave.bind(self),
+      onZoomOutBind: self.onZoomOut.bind(self),
+      onWindowResizeBind: self.onWindowResize.bind(self)
+    };
     this.init();
 
     if (this.CHART_OPTIONS.animated !== false) {
@@ -131,6 +139,7 @@ class AreaChart extends BaseChart {
 
   init() {
     try {
+      super.initBase();
       this.initDataSet();
       this.CHART_DATA.chartCenter = new this.geom.Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
       this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
@@ -552,7 +561,7 @@ class AreaChart extends BaseChart {
   } /*End createVerticalLabel()*/
 
   createHorizontalLabel(categories, scaleX) {
-    let self =this; 
+    let self = this;
     let hTextLabel = this.CHART_DATA.objChart.querySelector("#hTextLabel");
     if (hTextLabel) {
       hTextLabel.parentNode.removeChild(hTextLabel);
@@ -716,42 +725,38 @@ class AreaChart extends BaseChart {
       this.CHART_DATA.newDataSet.push(set);
     }
 
-    let onLegendClickBind = this.onLegendClick.bind(this);
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       let legend = this.CHART_DATA.objChart.querySelector("#series_legend_" + index);
       if (legend) {
-        legend.removeEventListener("click", onLegendClickBind);
-        legend.addEventListener("click", onLegendClickBind, false);
+        legend.removeEventListener("click", this.EVENT_BINDS.onLegendClickBind);
+        legend.addEventListener("click", this.EVENT_BINDS.onLegendClickBind, false);
       }
     }
 
-    let onMouseMoveBind = this.onMouseMove.bind(this);
-    let onMouseLeaveBind = this.onMouseLeave.bind(this);
     let gridRect = this.CHART_DATA.objChart.querySelector("#gridRect");
     if (gridRect) {
-      gridRect.removeEventListener("mousemove", onMouseMoveBind);
-      gridRect.addEventListener("mousemove", onMouseMoveBind, false);
-      gridRect.removeEventListener("click", onMouseMoveBind);
-      gridRect.addEventListener("click", onMouseMoveBind, false);
-      gridRect.removeEventListener("mousleave", onMouseLeaveBind);
-      gridRect.addEventListener("mouseleave", onMouseLeaveBind, false);
-    }
-    let onZoomOutBind = this.onZoomOut.bind(this);
-    let zoomOutBox = this.CHART_DATA.objChart.querySelector("#zoomOutBox");
-    if (zoomOutBox) {
-      zoomOutBox.removeEventListener("click", onZoomOutBind);
-      zoomOutBox.addEventListener("click", onZoomOutBind, false);
+      gridRect.removeEventListener("mousemove", this.EVENT_BINDS.onMouseMoveBind);
+      gridRect.addEventListener("mousemove", this.EVENT_BINDS.onMouseMoveBind, false);
+      gridRect.removeEventListener("click", this.EVENT_BINDS.onMouseMoveBind);
+      gridRect.addEventListener("click", this.EVENT_BINDS.onMouseMoveBind, false);
+      gridRect.removeEventListener("mousleave", this.EVENT_BINDS.onMouseLeaveBind);
+      gridRect.addEventListener("mouseleave", this.EVENT_BINDS.onMouseLeaveBind, false);
     }
 
-    let onWindowResizeBind = this.onWindowResize.bind(this);
-    window.removeEventListener('resize', onWindowResizeBind);
-    window.addEventListener('resize', onWindowResizeBind, true);
+    let zoomOutBox = this.CHART_DATA.objChart.querySelector("#zoomOutBox");
+    if (zoomOutBox) {
+      zoomOutBox.removeEventListener("click", this.EVENT_BINDS.onZoomOutBind);
+      zoomOutBox.addEventListener("click", this.EVENT_BINDS.onZoomOutBind, false);
+    }
+
+    window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
+    window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
   } /*End bindEvents()*/
 
 
 
   onWindowResize() {
-    let self = this; 
+    let self = this;
     let containerDiv = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
     if (this.runId != containerDiv.getAttribute("runId")) {
       window.removeEventListener('resize', self.onWindowResize);
@@ -922,8 +927,8 @@ class AreaChart extends BaseChart {
     let eventTouchEnd = new Event("touchend");
     let eventTouchCancel = new Event("touchcancel");
     let self = this;
-    let leftSliderMoveBind = this.bindLeftSliderMove.bind(this); 
-    let rightSliderMoveBind = this.bindRightSliderMove.bind(this); 
+    let leftSliderMoveBind = this.bindLeftSliderMove.bind(this);
+    let rightSliderMoveBind = this.bindRightSliderMove.bind(this);
 
     sliderLeftHandle.addEventListener("mousedown", function (e) {
       e.stopPropagation();

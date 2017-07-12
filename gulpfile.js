@@ -6,8 +6,13 @@ var insert = require('gulp-insert');
 //var concat = require('gulp-concat');
 var connect = require('gulp-connect');
 //var streamify = require('gulp-streamify');
-var uglify = require('gulp-uglify');
-//var util = require('gulp-util');
+
+
+var uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
+var composer = require('gulp-uglify/composer');
+var minify = composer(uglifyEs, console);
+
+var util = require('gulp-util');
 //var notify = require("gulp-notify");
 var browserify = require('gulp-browserify');
 var rename = require('gulp-rename');
@@ -34,33 +39,19 @@ var header = `/*
 /*
  * Generate a build based on the source file
  */
-// function buildTask() {
-//     var bundled = browserify(srcDir + 'build.core.js', {debug: true})
-//         .on('error', notify.onError({
-//             message: "Error: <%= error.message %>",
-//             title: "Failed running browserify"
-//         }))
-//         .bundle()
-//         .on('error', notify.onError({
-//             message: "Error: <%= error.message %>",
-//             title: "Failed running browserify"
-//         }))
-//         .pipe(source('smartChartsNXT.bundle.js'))
-//         .pipe(insert.prepend(header))
-//         .pipe(gulp.dest(buildDir));
-// }
+
 function buildTask() {
-    var bundled = gulp.src(srcDir + 'build.core.js')
+    return gulp.src(srcDir + 'build.core.js')
         .pipe(browserify({
             insertGlobals: false
         }))
         .pipe(rename('smartChartsNXT.bundle.js'))
         .pipe(insert.prepend(header))
+        .pipe(gulp.dest(buildDir))
+        .pipe(minify({}))
+        .pipe(rename('smartChartsNXT.bundle.min.js'))
+        .pipe(insert.prepend(header))
         .pipe(gulp.dest(buildDir));
-        // .pipe(uglify())
-        // .pipe(rename('smartChartsNXT.bundle.min.js'))
-        // .pipe(insert.prepend(header))
-        // .pipe(gulp.dest(buildDir));
 }
 
 

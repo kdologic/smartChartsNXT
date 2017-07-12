@@ -8,9 +8,9 @@
 
 "use strict";
 
-let UiCore = require("./../core/sc.ui.core");
-let GeomCore = require("./../core/sc.geom.core");
-let UtilCore = require("./../core/sc.util.core");
+let UiCore = require("./../core/ui.core");
+let GeomCore = require("./../core/geom.core");
+let UtilCore = require("./../core/util.core");
 let EventCore = require("./../core/event.core");
 
 class BaseChart {
@@ -19,6 +19,7 @@ class BaseChart {
         this.geom = new GeomCore();
         this.event = new EventCore();
         this.ui = new UiCore();
+        this.chartType = chartType; 
         this.CHART_OPTIONS = this.util.extends(opts, {});
         this.CHART_DATA = {};
         this.CHART_CONST = {
@@ -28,10 +29,9 @@ class BaseChart {
             MIN_HEIGHT: 400
         };
         this.runId = chartType + "_" + Math.round(Math.random() * 1000000001);
-        this.initBase(chartType, opts);
     }
 
-    initBase(chartType, opts) {
+    initBase() {
         let self = this;
         this.CHART_DATA.container = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
         this.CHART_DATA.container.setAttribute("runId", this.runId);
@@ -67,13 +67,13 @@ class BaseChart {
             "version='1.1'" +
             "width='" + this.CHART_OPTIONS.width + "'" +
             "height='" + this.CHART_OPTIONS.height + "'" +
-            "id='" + chartType + "'" +
+            "id='" + this.chartType + "'" +
             "style='background:" + (this.CHART_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
             "> <\/svg>";
 
         this.CHART_DATA.container.innerHTML = "";
         this.CHART_DATA.container.insertAdjacentHTML("beforeend", strSVG);
-        this.CHART_DATA.objChart = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + chartType);
+        this.CHART_DATA.objChart = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + this.chartType);
 
         let svgWidth = parseInt(this.CHART_DATA.objChart.getAttribute("width"));
         let svgHeight = parseInt(this.CHART_DATA.objChart.getAttribute("height"));

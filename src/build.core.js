@@ -10,12 +10,11 @@
 /* Using namespace SmartChartsNXT */
 
 "use strict";
-let CoreChart = require("./core/smartChartsNXT.core"); 
+let CoreChart = require("./core/chart.core"); 
 let SmartChartsNXT = new CoreChart(); 
 
 module.exports = SmartChartsNXT;
 
 if (typeof window !== 'undefined') {
 	window.SmartChartsNXT = SmartChartsNXT;
-	window.$SC = SmartChartsNXT; 
 }
