@@ -1,8 +1,8 @@
 <html>
 
 <head>
-  <script src="../core/smartChartsNXT.core.js" type="text/javascript"></script>
-  <!--script src="./lineChart.js" type="text/javascript"></script-->
+  <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
+
   <script>
     function generateData(x, y, count) {
       var dataSet = [];
@@ -20,12 +20,11 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var lineChart = new SmartChartsNXT.LineChart({
-          "title": "Basic Line Chart",
+        var areaChart = new SmartChartsNXT.AreaChart({
+          "title": "Area Chart",
           "subTitle": "Single series",
           "targetElem": "chartContainer",
           "canvasBorder": false,
-
           "bgColor": "none",
           "toolTip": {
             "content": '<table>' +
@@ -44,12 +43,13 @@
             },
             "series": [{
               "lineWidth": 2,
-              "noPointMarker": false,
-              "markerRadius": 3,
               "color": "#009688",
               "name": 'Raphael',
+              "noPointMarker": false,
+              "markerRadius": 3.5,
               "smoothedLine": false,
-              "data": generateData(10, 90, 100)
+              "areaOpacity": "0.4",
+              "data": generateData(10, 50, 45)
             }]
           },
           events: {

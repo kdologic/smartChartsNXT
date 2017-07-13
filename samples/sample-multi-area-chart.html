@@ -1,14 +1,13 @@
 <html>
 <head>
-<script src="../core/smartChartsNXT.core.js" type="text/javascript"></script>
-<!--script src="./areaChart.js" type="text/javascript"></script-->
+<script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
 <script>
   function generateData(x,y,count) {
     var dataSet = [];
     for (var i = 0; i < count; i++) {
       var newDate = new Date();
       newDate.setDate(newDate.getDate() + i);
-      var datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
+      var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
       dataSet.push({
         label:newDate.getDate()+"-"+(newDate.getMonth()+1)+"-"+newDate.getFullYear(),
         value:datum
@@ -25,6 +24,7 @@
         "targetElem":"chartContainer",
         "canvasBorder":false,
         "bgColor":"none",
+        "animated": false, 
         "toolTip":{
           "content":'<table>'+
                 '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
@@ -42,14 +42,14 @@
           },
           "series":[
             {
-              "lineWidth":2,
+              "lineWidth":1,
               "color":"#FFC107",
               "name": 'Raphael',
               "areaOpacity":"0.3",
               "data": generateData(10,50,45)
             },
             {
-              "lineWidth":2,
+              "lineWidth":1,
               "color":"#F44336",
               "noPointMarker":false,
               "markerRadius":3.5,
