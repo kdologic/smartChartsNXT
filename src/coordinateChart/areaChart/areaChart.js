@@ -89,6 +89,7 @@
 "use strict";
 
 let CoordinateChart = require("./../coordinateChart");
+let Point = require("./../../core/point");
 
 class AreaChart extends CoordinateChart {
 
@@ -116,7 +117,9 @@ class AreaChart extends CoordinateChart {
       series: [],
       mouseDown: 0,
       newDataSet: [],
-      newCatgList: []
+      newCatgList: [],
+      zoomOutBoxWidth: 40,
+      zoomOutBoxHeight: 40
     }, this.CHART_DATA);
 
     this.CHART_CONST = this.util.extends({
@@ -131,7 +134,9 @@ class AreaChart extends CoordinateChart {
       onZoomOutBind: self.onZoomOut.bind(self),
       onWindowResizeBind: self.onWindowResize.bind(self),
       onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
-      onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self)
+      onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
+      onLeftSliderMoveBind: self.onLeftSliderMove.bind(self),
+      onRightSliderMoveBind: self.onRightSliderMove.bind(self)
     };
     this.init();
 
@@ -144,7 +149,7 @@ class AreaChart extends CoordinateChart {
     try {
       super.initBase();
       this.initDataSet();
-      this.CHART_DATA.chartCenter = new this.geom.Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+      this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
       this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
       this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
       this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
@@ -237,7 +242,7 @@ class AreaChart extends CoordinateChart {
       "scrollerCont",
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight,
-      this.CHART_DATA.gridBoxWidth, 
+      this.CHART_DATA.gridBoxWidth,
       this.CHART_DATA.hScrollBoxHeight
     );
 
@@ -253,10 +258,15 @@ class AreaChart extends CoordinateChart {
 
 
     if (this.CHART_DATA.objChart.querySelector("#scrollerCont #outerFrame")) {
-      this.bindSliderEvents();
-      this.createZoomOutBox();
-      this.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
-      this.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
+      this.zoomOutBox.createZoomOutBox(
+        this, this.CHART_DATA.objChart,
+        this.CHART_DATA.marginTop - this.CHART_DATA.zoomOutBoxHeight,
+        this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth,
+        this.CHART_DATA.zoomOutBoxWidth,
+        this.CHART_DATA.zoomOutBoxHeight
+      );
+      this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
+      this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
     }
 
     this.reDrawSeries();
@@ -270,7 +280,7 @@ class AreaChart extends CoordinateChart {
       let arrPointsSet = [];
       let dataSet = this.CHART_OPTIONS.dataSet.series[index].data;
       for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        let p = new this.geom.Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
+        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
         arrPointsSet.push(p);
       }
       this.CHART_DATA.fullSeries.push(arrPointsSet);
@@ -345,26 +355,26 @@ class AreaChart extends CoordinateChart {
     }
   } /*End drawFullSeries()*/
 
-  createZoomOutBox() {
-    let zoomOutBox = {
-      top: this.CHART_DATA.marginTop - 40,
-      left: this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - 40,
-      width: 40,
-      height: 40
-    };
+  // createZoomOutBox() {
+  //   let zoomOutBox = {
+  //     top: this.CHART_DATA.marginTop - 40,
+  //     left: this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - 40,
+  //     width: 40,
+  //     height: 40
+  //   };
 
-    let strSVG = "<g id='zoomOutBoxCont' style='display:none;'>";
-    strSVG += "  <rect id='zoomOutBox' x='" + zoomOutBox.left + "' y='" + zoomOutBox.top + "' width='" + zoomOutBox.width + "' height='" + zoomOutBox.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
-    strSVG += "  <circle r='10' cx='" + (zoomOutBox.left + (zoomOutBox.width / 2)) + "' cy='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
-    strSVG += "  <line x1='" + (zoomOutBox.left + (zoomOutBox.width / 2) - 4) + "' y1='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' x2='" + (zoomOutBox.left + (zoomOutBox.width / 2) + 4) + "' y2='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+  //   let strSVG = "<g id='zoomOutBoxCont' style='display:none;'>";
+  //   strSVG += "  <rect id='zoomOutBox' x='" + zoomOutBox.left + "' y='" + zoomOutBox.top + "' width='" + zoomOutBox.width + "' height='" + zoomOutBox.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
+  //   strSVG += "  <circle r='10' cx='" + (zoomOutBox.left + (zoomOutBox.width / 2)) + "' cy='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+  //   strSVG += "  <line x1='" + (zoomOutBox.left + (zoomOutBox.width / 2) - 4) + "' y1='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' x2='" + (zoomOutBox.left + (zoomOutBox.width / 2) + 4) + "' y2='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
 
-    let lineStart = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 10, 135);
-    let lineEnd = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 20, 135);
-    strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
-    strSVG += "</g>";
+  //   let lineStart = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 10, 135);
+  //   let lineEnd = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 20, 135);
+  //   strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
+  //   strSVG += "</g>";
 
-    this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
-  } /*End createZoomOutBox() */
+  //   this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+  // } /*End createZoomOutBox() */
 
   prepareDataSet(dataSet) {
     let maxSet = [];
@@ -420,7 +430,7 @@ class AreaChart extends CoordinateChart {
     /* ploting actual points */
     strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      let p = new this.geom.Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
+      let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
       d.push(!dataCount ? "M" : "L");
       d.push(p.x);
       d.push(p.y);
@@ -650,12 +660,19 @@ class AreaChart extends CoordinateChart {
       zoomOutBox.addEventListener("click", this.EVENT_BINDS.onZoomOutBind, false);
     }
 
-    /*Add event for Horizontal Text label hover */
+    /*Add events for Horizontal Text label hover */
     this.event.off("onHTextLabelHover", this.EVENT_BINDS.onHTextLabelHoverBind);
     this.event.on("onHTextLabelHover", this.EVENT_BINDS.onHTextLabelHoverBind);
     this.event.off("onHTextLabelMouseLeave", this.EVENT_BINDS.onHTextLabelMouseLeaveBind);
     this.event.on("onHTextLabelMouseLeave", this.EVENT_BINDS.onHTextLabelMouseLeaveBind);
 
+    /*Add events for Horizontal chart scroller */
+    this.event.off("onLeftSliderMove", this.EVENT_BINDS.onLeftSliderMoveBind);
+    this.event.on("onLeftSliderMove", this.EVENT_BINDS.onLeftSliderMoveBind);
+    this.event.off("onRightSliderMove", this.EVENT_BINDS.onRightSliderMoveBind);
+    this.event.on("onRightSliderMove", this.EVENT_BINDS.onRightSliderMoveBind);
+
+    /*Add events for resize chart window */
     window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
     window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
   } /*End bindEvents()*/
@@ -833,269 +850,30 @@ class AreaChart extends CoordinateChart {
     }
   } /*End onLegendClick()*/
 
-  bindSliderEvents() {
-    let sliderLeftHandle = this.CHART_DATA.objChart.querySelector("#sliderLeftHandle");
-    let sliderRightHandle = this.CHART_DATA.objChart.querySelector("#sliderRightHandle");
-    let eventMouseDown = new Event("mousedown");
-    let eventMouseUp = new Event("mouseup");
-    let eventTouchStart = new Event("touchstart");
-    let eventTouchEnd = new Event("touchend");
-    let eventTouchCancel = new Event("touchcancel");
-    let self = this;
-    let leftSliderMoveBind = this.bindLeftSliderMove.bind(this);
-    let rightSliderMoveBind = this.bindRightSliderMove.bind(this);
+  onHorizontalScroll(e) {
+    
+  }
 
-    sliderLeftHandle.addEventListener("mousedown", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 1;
-      sliderLeftHandle.addEventListener("mousemove", leftSliderMoveBind);
-      self.CHART_DATA.objChart.addEventListener("mousemove", leftSliderMoveBind);
-    });
-
-    sliderLeftHandle.addEventListener("mouseup", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 0;
-      sliderLeftHandle.removeEventListener("mousemove", leftSliderMoveBind);
-      self.CHART_DATA.objChart.removeEventListener("mousemove", leftSliderMoveBind);
-      self.resetSliderPos("left", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowLeftIndex].x);
-      self.reDrawSeries();
-    });
-
-    sliderLeftHandle.addEventListener("mouseleave", function (e) {
-      e.stopPropagation();
-      sliderLeftHandle.removeEventListener("mousemove", leftSliderMoveBind);
-    });
-
-    sliderLeftHandle.addEventListener("mouseenter", function (e) {
-      e.stopPropagation();
-      if (self.CHART_DATA.mouseDown === 1) {
-        sliderRightHandle.dispatchEvent(eventMouseUp);
-        sliderRightHandle.dispatchEvent(eventTouchEnd);
-        sliderRightHandle.dispatchEvent(eventTouchCancel);
-        sliderLeftHandle.dispatchEvent(eventMouseDown);
-        sliderLeftHandle.dispatchEvent(eventTouchStart);
-      }
-    });
-
-
-    this.CHART_DATA.objChart.addEventListener("mouseup", function (e) {
-      e.stopPropagation();
-      if (self.CHART_DATA.mouseDown === 1) {
-        sliderLeftHandle.removeEventListener("mousemove", leftSliderMoveBind);
-        self.CHART_DATA.objChart.removeEventListener("mousemove", leftSliderMoveBind);
-        sliderLeftHandle.removeEventListener("mousemove", rightSliderMoveBind);
-        self.CHART_DATA.objChart.removeEventListener("mousemove", rightSliderMoveBind);
-        if (e.target.id === "sliderRight") {
-          self.resetSliderPos("right", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowRightIndex].x);
-        } else {
-          self.resetSliderPos("left", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowLeftIndex].x);
-        }
-        self.reDrawSeries();
-      }
-      self.CHART_DATA.mouseDown = 0;
-    });
-
-    sliderRightHandle.addEventListener("mousedown", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 1;
-      sliderRightHandle.addEventListener("mousemove", rightSliderMoveBind);
-      self.CHART_DATA.objChart.addEventListener("mousemove", rightSliderMoveBind);
-    });
-
-    sliderRightHandle.addEventListener("mouseup", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 0;
-      sliderRightHandle.removeEventListener("mousemove", rightSliderMoveBind);
-      self.CHART_DATA.objChart.removeEventListener("mousemove", rightSliderMoveBind);
-      self.resetSliderPos("right", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowRightIndex].x);
-      self.reDrawSeries();
-    });
-
-    sliderRightHandle.addEventListener("mouseleave", function (e) {
-      e.stopPropagation();
-      sliderRightHandle.removeEventListener("mousemove", rightSliderMoveBind);
-    });
-
-    sliderRightHandle.addEventListener("mouseenter", function (e) {
-      e.stopPropagation();
-      if (self.CHART_DATA.mouseDown === 1) {
-        sliderLeftHandle.dispatchEvent(eventMouseUp);
-        sliderLeftHandle.dispatchEvent(eventTouchEnd);
-        sliderLeftHandle.dispatchEvent(eventTouchCancel);
-        sliderRightHandle.dispatchEvent(eventMouseDown);
-        sliderRightHandle.dispatchEvent(eventTouchStart);
-      }
-    });
-
-    /*Events for touch devices*/
-
-    sliderLeftHandle.addEventListener("touchstart", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 1;
-      sliderLeftHandle.addEventListener("touchmove", leftSliderMoveBind);
-      self.CHART_DATA.objChart.addEventListener("touchmove", leftSliderMoveBind);
-    }, false);
-
-    sliderLeftHandle.addEventListener("touchend", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 0;
-      sliderLeftHandle.removeEventListener("touchmove", leftSliderMoveBind);
-      self.CHART_DATA.objChart.removeEventListener("touchmove", leftSliderMoveBind);
-      self.resetSliderPos("left", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowLeftIndex].x);
-      self.reDrawSeries();
-    }, false);
-
-    sliderRightHandle.addEventListener("touchstart", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 1;
-      sliderRightHandle.addEventListener("touchmove", rightSliderMoveBind);
-      self.CHART_DATA.objChart.addEventListener("touchmove", rightSliderMoveBind);
-    });
-
-    sliderRightHandle.addEventListener("touchend", function (e) {
-      e.stopPropagation();
-      self.CHART_DATA.mouseDown = 0;
-      sliderRightHandle.removeEventListener("touchmove", rightSliderMoveBind);
-      self.CHART_DATA.objChart.removeEventListener("touchmove", rightSliderMoveBind);
-      self.resetSliderPos("right", self.CHART_DATA.fullSeries[self.CHART_DATA.longestSeries][self.CHART_DATA.windowRightIndex].x);
-      self.reDrawSeries();
-    });
-
-
-  } /*End bindSliderEvents()*/
-
-  bindLeftSliderMove(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    let mousePointer = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    let sliderLsel = this.CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    let sliderRsel = this.CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-    let sliderPosX = mousePointer.x < sliderRsel.x ? mousePointer.x : sliderRsel.x;
-    if (e.type === "touchmove") {
-      if (mousePointer.x > sliderRsel.x) {
-        let eventMouseEnter = new Event("mouseenter");
-        this.resetSliderPos("left", sliderPosX);
-        this.resetSliderPos("right", mousePointer.x);
-        this.reDrawSeries();
-        this.CHART_DATA.objChart.querySelector("#sliderRightHandle").dispatchEvent(eventMouseEnter);
-        return;
+  onLeftSliderMove(e) {
+    let sliderPos = e.sliderPosition;
+    for (let j = 0; j < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length - 1; j++) {
+      if (sliderPos.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x && sliderPos.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j + 1].x) {
+        this.CHART_DATA.windowLeftIndex = j;
       }
     }
+    this.reDrawSeries();
+    this.CHART_DATA.windowLeftIndex > 0 ? this.zoomOutBox.show() : this.zoomOutBox.hide();
+  } /*End onLeftSliderMove()*/
 
-    if (mousePointer.x > (this.CHART_DATA.marginLeft) && mousePointer.x < ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginRight)) {
-      for (let j = 0; j < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length - 1; j++) {
-        if (mousePointer.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x && mousePointer.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j + 1].x) {
-          if (e.movementX <= 0) {
-            this.CHART_DATA.windowLeftIndex = j;
-          } else {
-            this.CHART_DATA.windowLeftIndex = j + 1;
-          }
-        }
-      }
-      this.reDrawSeries();
-      this.resetSliderPos("left", mousePointer.x);
-    }
-  } /*End bindLeftSliderMove()*/
-
-  bindRightSliderMove(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    let mousePointer = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.changedTouches ? e.changedTouches[0] : e);
-    let sliderLsel = this.CHART_DATA.objChart.querySelector("#slideLSel").getBBox();
-    let sliderRsel = this.CHART_DATA.objChart.querySelector("#slideRSel").getBBox();
-    let sliderPosX = mousePointer.x > sliderLsel.x + sliderLsel.width ? mousePointer.x : sliderLsel.x + sliderLsel.width;
-    if (e.type === "touchmove") {
-      if (sliderRsel.x < sliderLsel.x + sliderLsel.width) {
-        let eventMouseEnter = new Event("mouseenter");
-        this.resetSliderPos("right", sliderPosX);
-        this.resetSliderPos("left", mousePointer.x);
-        this.reDrawSeries();
-        this.CHART_DATA.objChart.querySelector("#sliderLeftHandle").dispatchEvent(eventMouseEnter);
-        return;
-      }
-    }
-
-    if (mousePointer.x > (this.CHART_DATA.marginLeft + this.CHART_DATA.scaleX) && mousePointer.x < ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginRight)) {
+  onRightSliderMove(e) {
+    let sliderPos = e.sliderPosition;
       for (let j = 1; j < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length; j++) {
-        if (mousePointer.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j - 1].x && mousePointer.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x) {
-          if (e.movementX <= 0) {
-            this.CHART_DATA.windowRightIndex = j - 1;
-          } else {
+        if (sliderPos.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j - 1].x && sliderPos.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x) {
             this.CHART_DATA.windowRightIndex = j;
-          }
         }
       }
-      if (mousePointer.x > this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length - 1].x) {
-        this.CHART_DATA.windowRightIndex = this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length - 1;
-      }
       this.reDrawSeries();
-      this.resetSliderPos("right", mousePointer.x);
-    }
-  } /*End bindRightSliderMove()*/
-
-  resetSliderPos(type, x) {
-    let sliderSel = (type === "right") ? "slideRSel" : "slideLSel";
-    let sliderLine = (type === "right") ? "sliderRight" : "sliderLeft";
-    let innerBarType = (type === "right") ? "slideRSelInner" : "slideLSelInner";
-    let selFrame = (type === "right") ? "sliderRSelFrame" : "sliderLSelFrame";
-    let swipeFlag = (type === "right") ? 1 : 0;
-    x = (x <= 0 ? this.CHART_DATA.marginLeft : x);
-
-    let dr = [
-      "M", x, ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight),
-      "L", x, ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight)
-    ];
-    let innerBar = [
-      "M", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) - 5),
-      "L", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) + 5),
-      "M", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) - 5),
-      "L", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) + 5)
-    ];
-
-    let cy = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + (this.CHART_DATA.hScrollBoxHeight / 2) + this.CHART_DATA.hLabelHeight;
-    let sldrSel = this.CHART_DATA.objChart.querySelector("#" + sliderSel);
-    let sldrLine = this.CHART_DATA.objChart.querySelector("#" + sliderLine);
-    let inrBarType = this.CHART_DATA.objChart.querySelector("#" + innerBarType);
-    let lSelFrame = this.CHART_DATA.objChart.querySelector("#" + selFrame);
-    if (sldrSel) {
-      sldrSel.setAttribute("d", this.geom.describeEllipticalArc(x, cy, 15, 15, 180, 360, swipeFlag).d);
-    }
-    if (sldrLine) {
-      sldrLine.setAttribute("d", dr.join(" "));
-    }
-    if (inrBarType) {
-      inrBarType.setAttribute("d", innerBar.join(" "));
-    }
-    if (lSelFrame) {
-      let xPos = type === "right" ? x + lSelFrame.getAttribute("width") : x - lSelFrame.getAttribute("width");
-      lSelFrame.setAttribute("x", xPos);
-    }
-
-    let fullSeries = this.CHART_DATA.objChart.querySelector("#scrollerCont #outerFrame");
-    if (fullSeries) {
-      if (type === "left") {
-        let sliderOffset = this.CHART_DATA.objChart.querySelector("#sliderLeftOffset");
-        sliderOffset.setAttribute("width", ((x - fullSeries.getBBox().x) < 0 ? 0 : (x - fullSeries.getBBox().x)));
-      } else {
-        let sliderOffset = this.CHART_DATA.objChart.querySelector("#sliderRightOffset");
-        sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - x));
-        sliderOffset.setAttribute("x", x);
-      }
-    }
-
-
-    /*If zoomOutBox is exist then show/hide that accordingly */
-    let zoomOutBoxCont = this.CHART_DATA.objChart.querySelector("#zoomOutBoxCont");
-    if (zoomOutBoxCont) {
-      if (type === "left") {
-        zoomOutBoxCont.style.display = this.CHART_DATA.windowLeftIndex > 0 ? "block" : "none";
-      } else if (type === "right") {
-        zoomOutBoxCont.style.display = (this.CHART_DATA.windowRightIndex < ((this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length * 2) - 1)) ? "block" : "none";
-      }
-    }
-
-  } /*End resetSliderPos()*/
-
+  } /*End onRightSliderMove()*/
 
   reDrawSeries() {
     let dataSet = [];
@@ -1150,8 +928,8 @@ class AreaChart extends CoordinateChart {
     e.preventDefault();
     this.CHART_DATA.windowLeftIndex = 0;
     this.CHART_DATA.windowRightIndex = (this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length) - 1;
-    this.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
-    this.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
+    this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
+    this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
     this.reDrawSeries();
     this.CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
   } /*End onZoomOut()*/

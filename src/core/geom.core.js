@@ -12,20 +12,18 @@
 
 "use strict";
 
-let Point = require("./point"); 
+let Point = require("./point");
 
 class GeomCore {
-    constructor() { 
-        this.Point = Point; 
-    }
-   
-    describeRoundedRect (x, y, width, height, radius) {
+    constructor() {}
+
+    describeRoundedRect(x, y, width, height, radius) {
         return [
             "M", (x + radius), y, "h", (width - (2 * radius)), "a", radius, radius, " 0 0 1 ", radius, radius, "v", (height - (2 * radius)), "a", radius, radius, " 0 0 1 ", -radius, radius, "h", ((2 * radius) - width), "a", radius, radius, " 0 0 1 ", -radius, -radius, "v", ((2 * radius) - height), "a", radius, radius, " 0 0 1 ", radius, -radius, "z"
         ];
     } /*End describeRoundedRect()*/
 
-    describeBezireArc (point1, point2, point3) {
+    describeBezireArc(point1, point2, point3) {
         let mid2 = this.getMidPoint(point2, point3);
 
         let c = [
@@ -40,12 +38,11 @@ class GeomCore {
         return c;
     } /*End describeBezireArc()*/
 
-    createDot (center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
+    createDot(center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
         let svg;
-        if (targetElem){
+        if (targetElem) {
             svg = document.getElementById(targetElem);
-        }
-        else {
+        } else {
             svg = document.getElementsByTagName('svg')[0]; //Get svg element
         }
         let newElement = document.createElementNS("http://www.w3.org/2000/svg", 'circle'); //Create a path in SVG's namespace
@@ -61,7 +58,7 @@ class GeomCore {
     } /*End createDot()*/
 
 
-    createRect (left, top, width, height, color, cls, opacity, stroke, strokeWidth) {
+    createRect(left, top, width, height, color, cls, opacity, stroke, strokeWidth) {
         let svg = document.getElementsByTagName('svg')[0]; //Get svg element
         let newElement = document.createElementNS("http://www.w3.org/2000/svg", 'rect'); //Create a path in SVG's namespace
         newElement.setAttribute("x", left); //Set left position
@@ -78,12 +75,12 @@ class GeomCore {
 
 
 
-    getDistanceBetween (point1, point2) {
+    getDistanceBetween(point1, point2) {
         let dist = Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y - point2.y) * (point1.y - point2.y)) || 0;
         return dist;
     } /*End getDistanceBetween()*/
 
-    polarToCartesian (centerX, centerY, radius, angleInDegrees) {
+    polarToCartesian(centerX, centerY, radius, angleInDegrees) {
         let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
 
         return {
@@ -92,17 +89,17 @@ class GeomCore {
         };
     } /*End polarToCartesian()*/
 
-    getMidPoint (point1, point2) {
-        return new this.Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
+    getMidPoint(point1, point2) {
+        return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
     } /*End getMidPoint()*/
 
-    getEllipticalRadious (rx, ry, angleInDegrees) {
+    getEllipticalRadious(rx, ry, angleInDegrees) {
         let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
         let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
         return r;
     } /*End getEllipticalRadious()*/
 
-    describeEllipticalArc (cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
+    describeEllipticalArc(cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
         let fullArc = false;
         if (startAngle % 360 === endAngle % 360) {
             endAngle--;
@@ -118,7 +115,7 @@ class GeomCore {
             "A", rx, ry, 0, largeArcFlag, sweepFlag, end.x, end.y
         ];
 
-        if (fullArc){
+        if (fullArc) {
             d.push("L", start.x, start.y);
         }
         d.push("L", cx, cy, "Z");
@@ -127,7 +124,7 @@ class GeomCore {
             arc: [rx, ry, 0, largeArcFlag, sweepFlag, end.x, end.y].join(" "),
             start: start,
             end: end,
-            center: new this.Point(cx, cy),
+            center: new Point(cx, cy),
             rx: rx,
             ry: ry,
             startAngle: startAngle,
@@ -136,7 +133,7 @@ class GeomCore {
         return path;
     } /*End describeEllipticalArc()*/
 
-    checkLineIntersection (line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+    checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
         /* if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point*/
         let denominator, a, b, numerator1, numerator2, result = {
             x: null,
@@ -173,7 +170,7 @@ class GeomCore {
         }
         /* if line1 and line2 are segments, they intersect if both of the above are true*/
         return result;
-    } /*End checkLineIntersection()*/ 
+    } /*End checkLineIntersection()*/
 }
 
-module.exports = GeomCore; 
+module.exports = GeomCore;

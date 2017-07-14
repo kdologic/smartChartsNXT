@@ -12,6 +12,7 @@ let UiCore = require("./../core/ui.core");
 let GeomCore = require("./../core/geom.core");
 let UtilCore = require("./../core/util.core");
 let EventCore = require("./../core/event.core");
+let Point = require("./../core/point");
 
 class BaseChart {
     constructor(chartType, opts) {
@@ -77,7 +78,7 @@ class BaseChart {
 
         let svgWidth = parseInt(this.CHART_DATA.objChart.getAttribute("width"));
         let svgHeight = parseInt(this.CHART_DATA.objChart.getAttribute("height"));
-        this.CHART_DATA.svgCenter = new this.geom.Point((svgWidth / 2), (svgHeight / 2));
+        this.CHART_DATA.svgCenter = new Point((svgWidth / 2), (svgHeight / 2));
 
         setTimeout(function () {
             self.ui.appendMenu2(self.CHART_OPTIONS.targetElem, self.CHART_DATA.svgCenter, null, null, self);

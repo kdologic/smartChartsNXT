@@ -11,7 +11,7 @@
 
 "use strict";
 
-let Point = require("./point"); 
+let Point = require("./point");
 
 class UiCore {
     constructor() {}
@@ -164,11 +164,13 @@ class UiCore {
 
     /* Get point in global SVG space*/
     cursorPoint(targetElem, evt) {
-        let svg = document.querySelector("#" + targetElem + " svg");
-        let pt = svg.createSVGPoint();
+        if (typeof targetElem === "string") {
+            targetElem = document.querySelector("#" + targetElem + " svg");
+        }
+        let pt = targetElem.createSVGPoint();
         pt.x = evt.clientX;
         pt.y = evt.clientY;
-        return pt.matrixTransform(svg.getScreenCTM().inverse());
+        return pt.matrixTransform(targetElem.getScreenCTM().inverse());
     } /*End cursorPoint()*/
 
 
