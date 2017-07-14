@@ -1,7 +1,7 @@
 /*
  * grid.js
  * @Version:1.0.0
- * @CreatedOn:13-Jul-2017
+ * @CreatedOn:14-Jul-2017
  * @Author:SmartChartsNXT
  * @Description: This components will create a grid for the chart. 
  */
@@ -36,7 +36,6 @@ class Grid {
         strGrid += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
         strGrid += "</g>";
         objChart.insertAdjacentHTML("beforeend", strGrid);
-        //this.createVerticalLabel();
     } /*End createGrid()*/
 }
 

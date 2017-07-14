@@ -105,7 +105,7 @@ class AreaChart extends CoordinateChart {
       marginBottom: 0,
       gridBoxWidth: 0,
       gridBoxHeight: 0,
-      fullChartHeight: 60,
+      hScrollBoxHeight: 60,
       fullSeries: [],
       fsScaleX: 0,
       vLabelWidth: 70,
@@ -211,7 +211,7 @@ class AreaChart extends CoordinateChart {
     strSVG += "<g id='legendContainer'>";
     strSVG += "<\/g>";
 
-    strSVG += "<g id='fullSeriesContr'>";
+    strSVG += "<g id='scrollerCont'>";
     strSVG += "</g>";
 
     strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
@@ -232,7 +232,14 @@ class AreaChart extends CoordinateChart {
 
     this.grid.createGrid(this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
     this.prepareFullSeriesDataset();
-    this.createFullSeries();
+    this.hScroller.createScrollBox(this,
+      this.CHART_DATA.objChart,
+      "scrollerCont",
+      this.CHART_DATA.marginLeft,
+      this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight,
+      this.CHART_DATA.gridBoxWidth, 
+      this.CHART_DATA.hScrollBoxHeight
+    );
 
     /* ploting full series actual points */
     for (let index = 0; index < this.CHART_DATA.fullSeries.length; index++) {
@@ -245,7 +252,7 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
 
 
-    if (this.CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame")) {
+    if (this.CHART_DATA.objChart.querySelector("#scrollerCont #outerFrame")) {
       this.bindSliderEvents();
       this.createZoomOutBox();
       this.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
@@ -257,13 +264,13 @@ class AreaChart extends CoordinateChart {
 
   prepareFullSeriesDataset() {
     let scaleX = this.CHART_DATA.fsScaleX = (this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length);
-    let scaleYfull = (this.CHART_DATA.fullChartHeight / this.CHART_DATA.maxima);
+    let scaleYfull = (this.CHART_DATA.hScrollBoxHeight / this.CHART_DATA.maxima);
 
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       let arrPointsSet = [];
       let dataSet = this.CHART_OPTIONS.dataSet.series[index].data;
       for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        let p = new this.geom.Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.fullChartHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
+        let p = new this.geom.Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
         arrPointsSet.push(p);
       }
       this.CHART_DATA.fullSeries.push(arrPointsSet);
@@ -271,38 +278,38 @@ class AreaChart extends CoordinateChart {
   } /* End prepareFullSeriesDataset() */
 
 
-  createFullSeries() {
-    let strSVG = "";
-    strSVG += "<g id='fullSeriesChartCont'></g>";
-    strSVG += "<rect id='sliderLeftOffset' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.fullChartHeight) + "' fill= 'rgba(128,179,236,0.5)'  fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
-    strSVG += "<rect id='sliderRightOffset' x='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginRight) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.fullChartHeight) + "' fill = 'rgba(128,179,236,0.5)' fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
+  // createFullSeries() {
+  //   let strSVG = "";
+  //   strSVG += "<g id='fullSeriesChartCont'></g>";
+  //   strSVG += "<rect id='sliderLeftOffset' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' fill= 'rgba(128,179,236,0.5)'  fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
+  //   strSVG += "<rect id='sliderRightOffset' x='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginRight) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' fill = 'rgba(128,179,236,0.5)' fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
 
-    let outerContPath = [
-      "M", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10),
-      "L", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
-      "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
-      "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10)
-    ];
+  //   let outerContPath = [
+  //     "M", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10),
+  //     "L", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
+  //     "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
+  //     "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10)
+  //   ];
 
-    strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
-    strSVG += "<rect id='outerFrame' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight) + "' height='" + (this.CHART_DATA.fullChartHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
-    strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-    strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "<rect id='outerFrame' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight) + "' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
+  //   strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
 
-    strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
-    strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
-    strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-    strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-    strSVG += "</g>";
+  //   strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
+  //   strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+  //   strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "</g>";
 
-    strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
-    strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
-    strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-    strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-    strSVG += "</g>";
-    this.CHART_DATA.objChart.querySelector("#fullSeriesContr").insertAdjacentHTML("beforeend", strSVG);
+  //   strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
+  //   strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+  //   strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+  //   strSVG += "</g>";
+  //   this.CHART_DATA.objChart.querySelector("#scrollerCont").insertAdjacentHTML("beforeend", strSVG);
 
-  } /*End createFullSeries()*/
+  // } /*End createFullSeries()*/
 
   drawFullSeries(arrPointsSet, index) {
     let line = [];
@@ -326,15 +333,15 @@ class AreaChart extends CoordinateChart {
     }
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.fullChartHeight + this.CHART_DATA.hLabelHeight), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.fullChartHeight + this.CHART_DATA.hLabelHeight), "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='fLine_" + index + "' stroke='#000' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='0.6'></path>";
     strSeries += "<path id='fArea_" + index + "' stroke='none' fill='#000' d='" + area.join(" ") + "' stroke-width='1' opacity='0.4'></path>";
 
-    let fullSeriesChartCont = this.CHART_DATA.objChart.querySelector("#fullSeriesContr #fullSeriesChartCont");
-    if (fullSeriesChartCont) {
-      fullSeriesChartCont.insertAdjacentHTML("beforeend", strSeries);
+    let hChartScrollerCont = this.CHART_DATA.objChart.querySelector("#scrollerCont #hChartScrollerCont");
+    if (hChartScrollerCont) {
+      hChartScrollerCont.insertAdjacentHTML("beforeend", strSeries);
     }
   } /*End drawFullSeries()*/
 
@@ -587,8 +594,8 @@ class AreaChart extends CoordinateChart {
     for (let i = 0; i < arrLegendText.length; i++) {
       arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
       arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-      arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fullChartHeight + 10 + (row * 20)));
-      arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fullChartHeight + 20 + (row * 20)));
+      arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
+      arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
       width += (arrLegendText[i].getBBox().width + 50);
 
       if (width > this.CHART_CONST.FIX_WIDTH) {
@@ -596,8 +603,8 @@ class AreaChart extends CoordinateChart {
         row++;
         arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
         arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-        arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fullChartHeight + 10 + (row * 20)));
-        arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fullChartHeight + 20 + (row * 20)));
+        arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
+        arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
         width += (arrLegendText[i].getBBox().width + 50);
       }
 
@@ -1035,17 +1042,17 @@ class AreaChart extends CoordinateChart {
     x = (x <= 0 ? this.CHART_DATA.marginLeft : x);
 
     let dr = [
-      "M", x, ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.fullChartHeight + this.CHART_DATA.hLabelHeight),
+      "M", x, ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight),
       "L", x, ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight)
     ];
     let innerBar = [
-      "M", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.fullChartHeight / 2) - 5),
-      "L", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.fullChartHeight / 2) + 5),
-      "M", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.fullChartHeight / 2) - 5),
-      "L", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.fullChartHeight / 2) + 5)
+      "M", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) - 5),
+      "L", (type === "right" ? (x + 3) : (x - 3)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) + 5),
+      "M", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) - 5),
+      "L", (type === "right" ? (x + 5) : (x - 5)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + (this.CHART_DATA.hScrollBoxHeight / 2) + 5)
     ];
 
-    let cy = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + (this.CHART_DATA.fullChartHeight / 2) + this.CHART_DATA.hLabelHeight;
+    let cy = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + (this.CHART_DATA.hScrollBoxHeight / 2) + this.CHART_DATA.hLabelHeight;
     let sldrSel = this.CHART_DATA.objChart.querySelector("#" + sliderSel);
     let sldrLine = this.CHART_DATA.objChart.querySelector("#" + sliderLine);
     let inrBarType = this.CHART_DATA.objChart.querySelector("#" + innerBarType);
@@ -1064,7 +1071,7 @@ class AreaChart extends CoordinateChart {
       lSelFrame.setAttribute("x", xPos);
     }
 
-    let fullSeries = this.CHART_DATA.objChart.querySelector("#fullSeriesContr #outerFrame");
+    let fullSeries = this.CHART_DATA.objChart.querySelector("#scrollerCont #outerFrame");
     if (fullSeries) {
       if (type === "left") {
         let sliderOffset = this.CHART_DATA.objChart.querySelector("#sliderLeftOffset");

@@ -1,7 +1,7 @@
 /*
  * horizontalLabels.js
  * @Version:1.0.0
- * @CreatedOn:13-Jul-2017
+ * @CreatedOn:14-Jul-2017
  * @Author:SmartChartsNXT
  * @Description: This components will create a Horizontal Labels for the chart. 
  */
