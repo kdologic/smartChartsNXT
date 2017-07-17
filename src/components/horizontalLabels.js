@@ -14,9 +14,9 @@ class HorizontalLabels {
 
     constructor() {}
 
-    createHorizontalLabel(objChart, chartDOM, posX, posY, componentWidth, componentHeight, categories, scaleX) {
+    createHorizontalLabel(objChart, chartSVG, posX, posY, componentWidth, componentHeight, categories, scaleX) {
         let self = this;
-        let hTextLabel = chartDOM.querySelector("#hTextLabel");
+        let hTextLabel = chartSVG.querySelector("#hTextLabel");
         if (hTextLabel) {
             hTextLabel.parentNode.removeChild(hTextLabel);
         }
@@ -54,17 +54,17 @@ class HorizontalLabels {
             strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
-        chartDOM.insertAdjacentHTML("beforeend", strText);
+        chartSVG.insertAdjacentHTML("beforeend", strText);
 
         /*bind hover event*/
-        let hTextLabels = chartDOM.querySelectorAll("#hTextLabel text");
+        let hTextLabels = chartSVG.querySelectorAll("#hTextLabel text");
 
         for (let i = 0; i < hTextLabels.length; i++) {
             hTextLabels[i].addEventListener("mouseenter", function (e) {
                 e.stopPropagation();
                 //fire Event Hover
                 let onHoverEvent = new Event("onHTextLabelHover", {
-                    srcElement: chartDOM,
+                    srcElement: chartSVG,
                     originEvent: e
                 });
                 objChart.event.dispatchEvent(onHoverEvent);
@@ -74,7 +74,7 @@ class HorizontalLabels {
                 e.stopPropagation();
                 //fire Event mouseLeave
                 let onMouseLeaveEvent = new Event("onHTextLabelMouseLeave", {
-                    srcElement: chartDOM,
+                    srcElement: chartSVG,
                     originEvent: e
                 });
                 objChart.event.dispatchEvent(onMouseLeaveEvent);

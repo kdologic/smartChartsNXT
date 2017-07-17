@@ -33,133 +33,133 @@ class UiCore {
         return "url(#" + parentID + "-smartCharts-dropshadow)";
     } /*End appendDropShadow()*/
 
-    /*function used to show/hide tooltip*/
-    toolTip(targetElem, cPoint, color, line1, line2) {
-        if (typeof cPoint === "string" && cPoint === "hide") {
-            let toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
-            if (toolTip) {
-                toolTip.style.display = "none";
-            }
-            return;
-        }
-        let containerDiv = document.querySelector("#" + targetElem);
-        let svgWidth = containerDiv.offsetWidth;
-        let svgHeight = containerDiv.offsetHeight;
-        let strContents = "";
+    // /*function used to show/hide tooltip*/
+    // toolTip(targetElem, cPoint, color, line1, line2) {
+    //     if (typeof cPoint === "string" && cPoint === "hide") {
+    //         let toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
+    //         if (toolTip) {
+    //             toolTip.style.display = "none";
+    //         }
+    //         return;
+    //     }
+    //     let containerDiv = document.querySelector("#" + targetElem);
+    //     let svgWidth = containerDiv.offsetWidth;
+    //     let svgHeight = containerDiv.offsetHeight;
+    //     let strContents = "";
 
-        /*Prevent call-by-sharing*/
-        if (cPoint) {
-            cPoint = new Point(cPoint.x, cPoint.y);
-        }
+    //     /*Prevent call-by-sharing*/
+    //     if (cPoint) {
+    //         cPoint = new Point(cPoint.x, cPoint.y);
+    //     }
 
-        if (line2 === "html") {
-            strContents += line1;
-        } else {
-            strContents += "<table>";
-            strContents += "<tr><td>" + line1 + "</td></tr>";
-            if (line2) {
-                strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
-            }
-            strContents += "</table>";
-        }
+    //     if (line2 === "html") {
+    //         strContents += line1;
+    //     } else {
+    //         strContents += "<table>";
+    //         strContents += "<tr><td>" + line1 + "</td></tr>";
+    //         if (line2) {
+    //             strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
+    //         }
+    //         strContents += "</table>";
+    //     }
 
-        let toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
-        if (toolTip) {
-            toolTip.parentNode.removeChild(toolTip);
-        }
+    //     let toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
+    //     if (toolTip) {
+    //         toolTip.parentNode.removeChild(toolTip);
+    //     }
 
-        let strSVG = "<g id='toolTipContainer' pointer-events='none'>";
-        strSVG += "  <path id='toolTip'  filter='" + this.dropShadow(targetElem) + "' fill='white' stroke='rgb(124, 181, 236)' fill='none' d='' stroke-width='1' opacity='0.9'></path>";
-        strSVG += "  <g id='txtToolTipGrp' fill='#717171' font-family='Lato' >";
+    //     let strSVG = "<g id='toolTipContainer' pointer-events='none'>";
+    //     strSVG += "  <path id='toolTip'  filter='" + this.dropShadow(targetElem) + "' fill='white' stroke='rgb(124, 181, 236)' fill='none' d='' stroke-width='1' opacity='0.9'></path>";
+    //     strSVG += "  <g id='txtToolTipGrp' fill='#717171' font-family='Lato' >";
 
-        strSVG += "<foreignobject id='toolTipHTML'>";
-        strSVG += "<body xmlns='http://www.w3.org/1999/xhtml'>";
-        strSVG += strContents;
-        strSVG += "</body>";
+    //     strSVG += "<foreignobject id='toolTipHTML'>";
+    //     strSVG += "<body xmlns='http://www.w3.org/1999/xhtml'>";
+    //     strSVG += strContents;
+    //     strSVG += "</body>";
 
-        strSVG += "  </g>";
-        strSVG += "</g>";
-        document.querySelector("#" + targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
-        toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
+    //     strSVG += "  </g>";
+    //     strSVG += "</g>";
+    //     document.querySelector("#" + targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
+    //     toolTip = document.querySelector("#" + targetElem + " svg #toolTipContainer");
 
-        let lineHeight = 20;
-        let padding = 10;
-        let temp = document.createElement("div");
-        temp.innerHTML = strContents;
-        temp.style.display = "inline-block";
-        temp.style.visibility = 'hidden';
-        document.getElementsByTagName("body")[0].appendChild(temp);
-        let containBox = {
-            width: temp.offsetWidth + 6,
-            height: temp.offsetHeight
-        };
-        if (temp) {
-            temp.parentNode.removeChild(temp);
-        }
-        let txtWidth = containBox.width;
-        lineHeight = containBox.height;
+    //     let lineHeight = 20;
+    //     let padding = 10;
+    //     let temp = document.createElement("div");
+    //     temp.innerHTML = strContents;
+    //     temp.style.display = "inline-block";
+    //     temp.style.visibility = 'hidden';
+    //     document.getElementsByTagName("body")[0].appendChild(temp);
+    //     let containBox = {
+    //         width: temp.offsetWidth + 6,
+    //         height: temp.offsetHeight
+    //     };
+    //     if (temp) {
+    //         temp.parentNode.removeChild(temp);
+    //     }
+    //     let txtWidth = containBox.width;
+    //     lineHeight = containBox.height;
 
-        cPoint.y -= 20;
-        let topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - lineHeight - 10 - padding);
-        let width = txtWidth + (2 * padding),
-            height = lineHeight + (2 * padding);
-        let d = [
-            "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-            "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-            "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-            "L", cPoint.x + 10, cPoint.y,
-            "L", cPoint.x, cPoint.y + 10,
-            "L", cPoint.x - 10, cPoint.y,
-            "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-            "Z"
-        ];
-        if (topLeft.x + width > svgWidth) {
-            cPoint.x -= 20;
-            cPoint.y += 20;
-            topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - (lineHeight) - 10 - (padding));
-            topLeft.x -= (width / 2);
-            topLeft.y += (height / 2);
-            d = [
-                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-                "L", cPoint.x, cPoint.y - 10,
-                "L", cPoint.x + 10, cPoint.y,
-                "L", cPoint.x, cPoint.y + 10,
-                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-                "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-                "Z"
-            ];
-        } else if (topLeft.y < 0) {
-            cPoint.y += 40;
-            topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y);
-            d = [
-                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-                "L", cPoint.x - 10, cPoint.y,
-                "L", cPoint.x, cPoint.y - 10,
-                "L", cPoint.x + 10, cPoint.y,
-                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-                "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-                "Z"
-            ];
-        }
+    //     cPoint.y -= 20;
+    //     let topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - lineHeight - 10 - padding);
+    //     let width = txtWidth + (2 * padding),
+    //         height = lineHeight + (2 * padding);
+    //     let d = [
+    //         "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
+    //         "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
+    //         "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
+    //         "L", cPoint.x + 10, cPoint.y,
+    //         "L", cPoint.x, cPoint.y + 10,
+    //         "L", cPoint.x - 10, cPoint.y,
+    //         "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
+    //         "Z"
+    //     ];
+    //     if (topLeft.x + width > svgWidth) {
+    //         cPoint.x -= 20;
+    //         cPoint.y += 20;
+    //         topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - (lineHeight) - 10 - (padding));
+    //         topLeft.x -= (width / 2);
+    //         topLeft.y += (height / 2);
+    //         d = [
+    //             "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
+    //             "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
+    //             "L", cPoint.x, cPoint.y - 10,
+    //             "L", cPoint.x + 10, cPoint.y,
+    //             "L", cPoint.x, cPoint.y + 10,
+    //             "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
+    //             "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
+    //             "Z"
+    //         ];
+    //     } else if (topLeft.y < 0) {
+    //         cPoint.y += 40;
+    //         topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y);
+    //         d = [
+    //             "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
+    //             "L", cPoint.x - 10, cPoint.y,
+    //             "L", cPoint.x, cPoint.y - 10,
+    //             "L", cPoint.x + 10, cPoint.y,
+    //             "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
+    //             "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
+    //             "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
+    //             "Z"
+    //         ];
+    //     }
 
-        let toolTipGrp = toolTip.querySelector("#txtToolTipGrp");
-        let tooTipHTML = toolTipGrp.querySelector("#toolTipHTML");
-        let textPos;
-        if (tooTipHTML) {
-            textPos = new Point(topLeft.x + 5, topLeft.y + 5);
-            tooTipHTML.setAttribute("x", textPos.x);
-            tooTipHTML.setAttribute("y", textPos.y);
-            tooTipHTML.setAttribute("width", containBox.width + padding);
-            tooTipHTML.setAttribute("height", containBox.height + padding);
-        }
-        document.querySelector("#" + targetElem + " svg #toolTip").setAttribute("d", d.join(" "));
-        document.querySelector("#" + targetElem + " svg #toolTip").setAttribute("stroke", color);
+    //     let toolTipGrp = toolTip.querySelector("#txtToolTipGrp");
+    //     let tooTipHTML = toolTipGrp.querySelector("#toolTipHTML");
+    //     let textPos;
+    //     if (tooTipHTML) {
+    //         textPos = new Point(topLeft.x + 5, topLeft.y + 5);
+    //         tooTipHTML.setAttribute("x", textPos.x);
+    //         tooTipHTML.setAttribute("y", textPos.y);
+    //         tooTipHTML.setAttribute("width", containBox.width + padding);
+    //         tooTipHTML.setAttribute("height", containBox.height + padding);
+    //     }
+    //     document.querySelector("#" + targetElem + " svg #toolTip").setAttribute("d", d.join(" "));
+    //     document.querySelector("#" + targetElem + " svg #toolTip").setAttribute("stroke", color);
 
-        toolTip.style.display = "block";
+    //     toolTip.style.display = "block";
 
-    } /*End toolTip()*/
+    // } /*End toolTip()*/
 
 
     /* Get point in global SVG space*/

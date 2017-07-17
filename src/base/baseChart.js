@@ -74,10 +74,10 @@ class BaseChart {
 
         this.CHART_DATA.container.innerHTML = "";
         this.CHART_DATA.container.insertAdjacentHTML("beforeend", strSVG);
-        this.CHART_DATA.objChart = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + this.chartType);
+        this.CHART_DATA.chartSVG = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + this.chartType);
 
-        let svgWidth = parseInt(this.CHART_DATA.objChart.getAttribute("width"));
-        let svgHeight = parseInt(this.CHART_DATA.objChart.getAttribute("height"));
+        let svgWidth = parseInt(this.CHART_DATA.chartSVG.getAttribute("width"));
+        let svgHeight = parseInt(this.CHART_DATA.chartSVG.getAttribute("height"));
         this.CHART_DATA.svgCenter = new Point((svgWidth / 2), (svgHeight / 2));
 
         setTimeout(function () {

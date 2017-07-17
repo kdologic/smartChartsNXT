@@ -12,8 +12,8 @@ class VerticalLabels {
 
     constructor() {}
 
-    createVerticalLabel(objChart, chartDOM, posX, posY, maxVal, minVal, maxWidth, gridHeight, lableCount, labelPrefix) {
-        let vTextLabel = chartDOM.querySelector("#vTextLabel");
+    createVerticalLabel(objChart, chartSVG, posX, posY, maxVal, minVal, maxWidth, gridHeight, lableCount, labelPrefix) {
+        let vTextLabel = chartSVG.querySelector("#vTextLabel");
         if (vTextLabel) {
             vTextLabel.parentNode.removeChild(vTextLabel);
         }
@@ -28,13 +28,13 @@ class VerticalLabels {
             strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
-        chartDOM.insertAdjacentHTML("beforeend", strText);
-        this.adjustFontSize(chartDOM, maxWidth);
+        chartSVG.insertAdjacentHTML("beforeend", strText);
+        this.adjustFontSize(chartSVG, maxWidth);
     } /*End createVerticalLabel()*/
 
-    adjustFontSize(chartDOM, maxWidth) {
+    adjustFontSize(chartSVG, maxWidth) {
         /*Adjust vertical text label size*/
-        let arrVTextLabels = chartDOM.querySelectorAll("#vTextLabel text");
+        let arrVTextLabels = chartSVG.querySelectorAll("#vTextLabel text");
         for (let i = 0; i < arrVTextLabels.length; i++) {
             let txtWidth = arrVTextLabels[i].getComputedTextLength();
             if (txtWidth > maxWidth - 10) {

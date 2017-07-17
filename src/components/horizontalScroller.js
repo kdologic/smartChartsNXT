@@ -10,17 +10,19 @@
 
 let Event = require("./../core/event");
 let UiCore = require("./../core/ui.core");
+let GeomCore = require("./../core/geom.core");
 let Point = require("./../core/point");
 
 class HorizontalScroller {
 
     constructor() {
-        this.uiCore = new UiCore();
+        this.ui = new UiCore();
+        this.geom = new GeomCore();
     }
 
-    createScrollBox(objChart, chartDOM, targetElem, posX, posY, scrollBoxWidth, scrollBoxHeight) {
+    createScrollBox(objChart, chartSVG, targetElem, posX, posY, scrollBoxWidth, scrollBoxHeight) {
         this.objChart = objChart;
-        this.chartDOM = chartDOM;
+        this.chartSVG = chartSVG;
         this.targetElem = targetElem;
         this.posX = posX;
         this.posY = posY;
@@ -44,25 +46,38 @@ class HorizontalScroller {
         strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
 
         strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
-        strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='10' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+        strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='30' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
         strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
         strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
         strSVG += "</g>";
 
         strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
-        strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='10' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
+        strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='30' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
         strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
         strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
         strSVG += "</g>";
-        chartDOM.querySelector("#" + targetElem).insertAdjacentHTML("beforeend", strSVG);
+        chartSVG.querySelector("#" + targetElem).insertAdjacentHTML("beforeend", strSVG);
+
+        this.slideRSel = this.chartSVG.querySelector("#slideRSel");
+        this.slideLSel = this.chartSVG.querySelector("#slideLSel");
+        this.sliderRight = this.chartSVG.querySelector("#sliderRight");
+        this.sliderLeft = this.chartSVG.querySelector("#sliderLeft");
+        this.sliderLeftHandle = this.chartSVG.querySelector("#sliderLeftHandle");
+        this.sliderRightHandle = this.chartSVG.querySelector("#sliderRightHandle");
+        this.slideRSelInner = this.chartSVG.querySelector("#slideRSelInner");
+        this.slideLSelInner = this.chartSVG.querySelector("#slideLSelInner");
+        this.sliderRSelFrame = this.chartSVG.querySelector("#sliderRSelFrame");
+        this.sliderLSelFrame = this.chartSVG.querySelector("#sliderLSelFrame");
+        this.sliderLeftOffset = this.chartSVG.querySelector("#sliderLeftOffset");
+        this.sliderRightOffset = this.chartSVG.querySelector("#sliderRightOffset");
 
         this.bindSliderEvents();
     }
 
     bindSliderEvents() {
         let self = this;
-        let sliderLeftHandle = this.chartDOM.querySelector("#sliderLeftHandle");
-        let sliderRightHandle = this.chartDOM.querySelector("#sliderRightHandle");
+        let sliderLeftHandle = this.chartSVG.querySelector("#sliderLeftHandle");
+        let sliderRightHandle = this.chartSVG.querySelector("#sliderRightHandle");
         let eventMouseDown = new window.Event("mousedown");
         let eventMouseUp = new window.Event("mouseup");
         let eventTouchStart = new window.Event("touchstart");
@@ -75,14 +90,14 @@ class HorizontalScroller {
             e.stopPropagation();
             self.mouseDown = 1;
             sliderLeftHandle.addEventListener("mousemove", leftSliderMoveBind);
-            self.chartDOM.addEventListener("mousemove", leftSliderMoveBind);
+            self.chartSVG.addEventListener("mousemove", leftSliderMoveBind);
         });
 
         sliderLeftHandle.addEventListener("mouseup", function (e) {
             e.stopPropagation();
             self.mouseDown = 0;
             sliderLeftHandle.removeEventListener("mousemove", leftSliderMoveBind);
-            self.chartDOM.removeEventListener("mousemove", leftSliderMoveBind);
+            self.chartSVG.removeEventListener("mousemove", leftSliderMoveBind);
         });
 
         sliderLeftHandle.addEventListener("mouseleave", function (e) {
@@ -102,13 +117,13 @@ class HorizontalScroller {
         });
 
 
-        this.chartDOM.addEventListener("mouseup", function (e) {
+        this.chartSVG.addEventListener("mouseup", function (e) {
             e.stopPropagation();
             if (self.mouseDown === 1) {
                 sliderLeftHandle.removeEventListener("mousemove", leftSliderMoveBind);
-                self.chartDOM.removeEventListener("mousemove", leftSliderMoveBind);
+                self.chartSVG.removeEventListener("mousemove", leftSliderMoveBind);
                 sliderLeftHandle.removeEventListener("mousemove", rightSliderMoveBind);
-                self.chartDOM.removeEventListener("mousemove", rightSliderMoveBind);
+                self.chartSVG.removeEventListener("mousemove", rightSliderMoveBind);
             }
             self.mouseDown = 0;
         });
@@ -117,14 +132,14 @@ class HorizontalScroller {
             e.stopPropagation();
             self.mouseDown = 1;
             sliderRightHandle.addEventListener("mousemove", rightSliderMoveBind);
-            self.chartDOM.addEventListener("mousemove", rightSliderMoveBind);
+            self.chartSVG.addEventListener("mousemove", rightSliderMoveBind);
         });
 
         sliderRightHandle.addEventListener("mouseup", function (e) {
             e.stopPropagation();
             self.mouseDown = 0;
             sliderRightHandle.removeEventListener("mousemove", rightSliderMoveBind);
-            self.chartDOM.removeEventListener("mousemove", rightSliderMoveBind);
+            self.chartSVG.removeEventListener("mousemove", rightSliderMoveBind);
         });
 
         sliderRightHandle.addEventListener("mouseleave", function (e) {
@@ -149,28 +164,28 @@ class HorizontalScroller {
             e.stopPropagation();
             self.mouseDown = 1;
             sliderLeftHandle.addEventListener("touchmove", leftSliderMoveBind);
-            self.chartDOM.addEventListener("touchmove", leftSliderMoveBind);
+            self.chartSVG.addEventListener("touchmove", leftSliderMoveBind);
         }, false);
 
         sliderLeftHandle.addEventListener("touchend", function (e) {
             e.stopPropagation();
             self.mouseDown = 0;
             sliderLeftHandle.removeEventListener("touchmove", leftSliderMoveBind);
-            self.chartDOM.removeEventListener("touchmove", leftSliderMoveBind);
+            self.chartSVG.removeEventListener("touchmove", leftSliderMoveBind);
         }, false);
 
         sliderRightHandle.addEventListener("touchstart", function (e) {
             e.stopPropagation();
             self.mouseDown = 1;
             sliderRightHandle.addEventListener("touchmove", rightSliderMoveBind);
-            self.chartDOM.addEventListener("touchmove", rightSliderMoveBind);
+            self.chartSVG.addEventListener("touchmove", rightSliderMoveBind);
         });
 
         sliderRightHandle.addEventListener("touchend", function (e) {
             e.stopPropagation();
             self.mouseDown = 0;
             sliderRightHandle.removeEventListener("touchmove", rightSliderMoveBind);
-            self.chartDOM.removeEventListener("touchmove", rightSliderMoveBind);
+            self.chartSVG.removeEventListener("touchmove", rightSliderMoveBind);
         });
 
     }
@@ -178,12 +193,12 @@ class HorizontalScroller {
     leftSliderMove(e) {
         e.stopPropagation();
         e.preventDefault();
-        let mousePointer = this.uiCore.cursorPoint(this.chartDOM, e.changedTouches ? e.changedTouches[0] : e);
-        let sliderLsel = this.chartDOM.querySelector("#slideLSel").getBBox();
-        let sliderRsel = this.chartDOM.querySelector("#slideRSel").getBBox();
+        let mousePointer = this.ui.cursorPoint(this.chartSVG, e.changedTouches ? e.changedTouches[0] : e);
+        let sliderLsel = this.slideLSel.getBBox();
+        let sliderRsel = this.slideRSel.getBBox();
         let sliderPosX = mousePointer.x < sliderRsel.x ? mousePointer.x : sliderRsel.x;
         let leftSliderMoveEvent = new Event("onLeftSliderMove", {
-            srcElement: this.chartDOM,
+            srcElement: this.chartSVG,
             originEvent: e,
             sliderPosition: new Point(sliderPosX, mousePointer.y)
         });
@@ -193,7 +208,7 @@ class HorizontalScroller {
                 let eventMouseEnter = new Event("mouseenter");
                 this.resetSliderPos("left", sliderPosX);
                 this.resetSliderPos("right", mousePointer.x);
-                this.chartDOM.querySelector("#sliderRightHandle").dispatchEvent(eventMouseEnter);
+                this.sliderRightHandle.dispatchEvent(eventMouseEnter);
                 this.objChart.event.dispatchEvent(leftSliderMoveEvent);
                 return;
             }
@@ -208,12 +223,12 @@ class HorizontalScroller {
     rightSliderMove(e) {
         e.stopPropagation();
         e.preventDefault();
-        let mousePointer = this.uiCore.cursorPoint(this.chartDOM, e.changedTouches ? e.changedTouches[0] : e);
-        let sliderLsel = this.chartDOM.querySelector("#slideLSel").getBBox();
-        let sliderRsel = this.chartDOM.querySelector("#slideRSel").getBBox();
+        let mousePointer = this.ui.cursorPoint(this.chartSVG, e.changedTouches ? e.changedTouches[0] : e);
+        let sliderLsel = this.slideLSel.getBBox();
+        let sliderRsel = this.slideRSel.getBBox();
         let sliderPosX = mousePointer.x > sliderLsel.x + sliderLsel.width ? mousePointer.x : sliderLsel.x + sliderLsel.width;
         let rightSliderMoveEvent = new Event("onRightSliderMove", {
-            srcElement: this.chartDOM,
+            srcElement: this.chartSVG,
             originEvent: e,
             sliderPosition: new Point(sliderPosX, mousePointer.y)
         });
@@ -223,7 +238,7 @@ class HorizontalScroller {
                 let eventMouseEnter = new Event("mouseenter");
                 this.resetSliderPos("right", sliderPosX);
                 this.resetSliderPos("left", mousePointer.x);
-                this.chartDOM.querySelector("#sliderLeftHandle").dispatchEvent(eventMouseEnter);
+                this.sliderLeftHandle.dispatchEvent(eventMouseEnter);
                 this.objChart.event.dispatchEvent(rightSliderMoveEvent);
                 return;
             }
@@ -254,12 +269,12 @@ class HorizontalScroller {
         ];
 
         let cy = this.posY + (this.scrollBoxHeight / 2);
-        let sldrSel = this.chartDOM.querySelector("#" + sliderSel);
-        let sldrLine = this.chartDOM.querySelector("#" + sliderLine);
-        let inrBarType = this.chartDOM.querySelector("#" + innerBarType);
-        let lSelFrame = this.chartDOM.querySelector("#" + selFrame);
+        let sldrSel = this[sliderSel];
+        let sldrLine = this[sliderLine];
+        let inrBarType = this[innerBarType];
+        let lSelFrame = this[selFrame];
         if (sldrSel) {
-            sldrSel.setAttribute("d", this.objChart.geom.describeEllipticalArc(scrollPosX, cy, 15, 15, 180, 360, swipeFlag).d);
+            sldrSel.setAttribute("d", this.geom.describeEllipticalArc(scrollPosX, cy, 15, 15, 180, 360, swipeFlag).d);
         }
         if (sldrLine) {
             sldrLine.setAttribute("d", dr.join(" "));
@@ -268,57 +283,26 @@ class HorizontalScroller {
             inrBarType.setAttribute("d", innerBar.join(" "));
         }
         if (lSelFrame) {
-            let xPos = type === "right" ? scrollPosX + lSelFrame.getAttribute("width") : scrollPosX - lSelFrame.getAttribute("width");
+            let xPos = type === "right" ? scrollPosX : scrollPosX - Number(lSelFrame.getAttribute("width"));
             lSelFrame.setAttribute("x", xPos);
         }
 
-        let fullSeries = this.chartDOM.querySelector("#scrollerCont #outerFrame");
-        if (fullSeries) {
-            if (type === "left") {
-                let sliderOffset = this.chartDOM.querySelector("#sliderLeftOffset");
-                sliderOffset.setAttribute("width", ((scrollPosX - fullSeries.getBBox().x) < 0 ? 0 : (scrollPosX - fullSeries.getBBox().x)));
-            } else {
-                let sliderOffset = this.chartDOM.querySelector("#sliderRightOffset");
-                sliderOffset.setAttribute("width", ((fullSeries.getBBox().width + fullSeries.getBBox().x) - scrollPosX));
-                sliderOffset.setAttribute("x", scrollPosX);
-            }
-        }
+        let leftHandle = this.sliderLeftHandle.getBBox();
+        let rightHandle = this.sliderRightHandle.getBBox();
+
+        this.sliderLeftOffset.setAttribute("width", (leftHandle.x + leftHandle.width - this.posX));
+        this.sliderRightOffset.setAttribute("width", (this.posX + this.scrollBoxWidth - rightHandle.x));
+        this.sliderRightOffset.setAttribute("x", rightHandle.x);
 
 
-
+        /*Fire event on change of slider position */
         let horizontalScrollEvent = new Event("onHorizontalScroll", {
-            srcElement: this.chartDOM,
-            sliderType: type,
-            sliderPosition: new Point(scrollPosX, this.posY)
+            srcElement: this.chartSVG,
+            LeftHandlePosition: new Point(leftHandle.x + leftHandle.width, this.posY),
+            RightHandlePosition: new Point(rightHandle.x + this.posY)
         });
+
         this.objChart.event.dispatchEvent(horizontalScrollEvent);
-        // /*Fire event on change of slider position */
-        // if (type === "left") {
-        //     let leftSliderMoveEvent = new Event("onLeftSliderMove", {
-        //         srcElement: this,
-        //         originEvent: e,
-        //         sliderPosition: new Point(scrollPosX, this.posY)
-        //     });
-        //     this.objChart.event.dispatchEvent(leftSliderMoveEvent);
-        // } else {
-        //     let rightSliderMoveEvent = new Event("onRightSliderMove", {
-        //         srcElement: this,
-        //         originEvent: e,
-        //         sliderPosition: new Point(scrollPosX, this.posY)
-        //     });
-        //     this.objChart.event.dispatchEvent(leftSliderMoveEvent);
-        // }
-
-        // /*If zoomOutBox is exist then show/hide that accordingly */
-        // let zoomOutBoxCont = this.chartDOM.querySelector("#zoomOutBoxCont");
-        // if (zoomOutBoxCont) {
-        //     if (type === "left") {
-        //         zoomOutBoxCont.style.display = this.CHART_DATA.windowLeftIndex > 0 ? "block" : "none";
-        //     } else if (type === "right") {
-        //         zoomOutBoxCont.style.display = (this.CHART_DATA.windowRightIndex < ((this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length * 2) - 1)) ? "block" : "none";
-        //     }
-        // }
-
     }
 }
 

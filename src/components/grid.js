@@ -15,10 +15,11 @@ class Grid {
         this.chartType = chartType;
     }
 
-    createGrid(posX, posY, gridBoxWidth, gridBoxHeight, gridHeight, TgridCount) {
+    createGrid(objChart, chartSVG, posX, posY, gridBoxWidth, gridBoxHeight, gridHeight, TgridCount) {
+        this.objChart = objChart; 
+        this.chartSVG = chartSVG; 
         let d;
-        let objChart = document.querySelector("#" + this.targetElem + " #" + this.chartType);
-        let hGrid = objChart.querySelector("#hGrid");
+        let hGrid = this.chartSVG.querySelector("#hGrid");
         if (hGrid) {
             hGrid.parentNode.removeChild(hGrid);
         }
@@ -35,7 +36,7 @@ class Grid {
         d = ["M", posX, posY + gridBoxHeight + 1, "L", posX + gridBoxWidth, posY + gridBoxHeight + 1];
         strGrid += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
         strGrid += "</g>";
-        objChart.insertAdjacentHTML("beforeend", strGrid);
+        this.chartSVG.insertAdjacentHTML("beforeend", strGrid);
     } /*End createGrid()*/
 }
 

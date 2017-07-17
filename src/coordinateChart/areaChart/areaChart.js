@@ -136,7 +136,8 @@ class AreaChart extends CoordinateChart {
       onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
       onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
       onLeftSliderMoveBind: self.onLeftSliderMove.bind(self),
-      onRightSliderMoveBind: self.onRightSliderMove.bind(self)
+      onRightSliderMoveBind: self.onRightSliderMove.bind(self),
+      onHorizontalScrollBind: self.onHorizontalScroll.bind(self)
     };
     this.init();
 
@@ -181,7 +182,7 @@ class AreaChart extends CoordinateChart {
       }
 
       this.prepareChart();
-
+      this.tooltip.createTooltip(this, this.CHART_DATA.chartSVG);
     } catch (ex) {
       this.handleError(ex, "Error in AreaChart");
     }
@@ -221,11 +222,11 @@ class AreaChart extends CoordinateChart {
 
     strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
-    this.CHART_DATA.objChart.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
+    this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
+    this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
 
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       this.appendGradFill(index);
@@ -235,10 +236,10 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
     this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1));
 
-    this.grid.createGrid(this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
+    this.grid.createGrid(this, this.CHART_DATA.chartSVG, this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
     this.prepareFullSeriesDataset();
     this.hScroller.createScrollBox(this,
-      this.CHART_DATA.objChart,
+      this.CHART_DATA.chartSVG,
       "scrollerCont",
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight,
@@ -254,22 +255,22 @@ class AreaChart extends CoordinateChart {
     /*Creating horizontal and vertical subtitles*/
     strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 70) + "' font-size='18' >" + this.CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
     strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (this.CHART_DATA.marginLeft - 30) + "' y='" + (this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2) - 5) + "' font-size='18' >" + this.CHART_OPTIONS.dataSet.yAxis.title + "<\/text>";
-    this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
 
-    if (this.CHART_DATA.objChart.querySelector("#scrollerCont #outerFrame")) {
+    if (this.CHART_DATA.chartSVG.querySelector("#scrollerCont #outerFrame")) {
       this.zoomOutBox.createZoomOutBox(
-        this, this.CHART_DATA.objChart,
+        this, this.CHART_DATA.chartSVG,
         this.CHART_DATA.marginTop - this.CHART_DATA.zoomOutBoxHeight,
         this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth,
         this.CHART_DATA.zoomOutBoxWidth,
         this.CHART_DATA.zoomOutBoxHeight
       );
-      this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
-      this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
     }
 
     this.reDrawSeries();
+    this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
+    this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
   } /*End prepareChart()*/
 
   prepareFullSeriesDataset() {
@@ -286,40 +287,6 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.fullSeries.push(arrPointsSet);
     }
   } /* End prepareFullSeriesDataset() */
-
-
-  // createFullSeries() {
-  //   let strSVG = "";
-  //   strSVG += "<g id='fullSeriesChartCont'></g>";
-  //   strSVG += "<rect id='sliderLeftOffset' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' fill= 'rgba(128,179,236,0.5)'  fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
-  //   strSVG += "<rect id='sliderRightOffset' x='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginRight) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='0' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' fill = 'rgba(128,179,236,0.5)' fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
-
-  //   let outerContPath = [
-  //     "M", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10),
-  //     "L", (this.CHART_DATA.marginLeft), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
-  //     "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight),
-  //     "L", (this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth), ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight + 10)
-  //   ];
-
-  //   strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "<rect id='outerFrame' x='" + (this.CHART_DATA.marginLeft) + "' y='" + ((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginBottom + this.CHART_DATA.hLabelHeight) + "' width='" + ((this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight) + "' height='" + (this.CHART_DATA.hScrollBoxHeight) + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
-  //   strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-
-  //   strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
-  //   strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
-  //   strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "</g>";
-
-  //   strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
-  //   strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + this.CHART_DATA.svgCenter.y + "' width='10' height='" + this.CHART_DATA.svgCenter.y + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
-  //   strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
-  //   strSVG += "</g>";
-  //   this.CHART_DATA.objChart.querySelector("#scrollerCont").insertAdjacentHTML("beforeend", strSVG);
-
-  // } /*End createFullSeries()*/
 
   drawFullSeries(arrPointsSet, index) {
     let line = [];
@@ -349,32 +316,11 @@ class AreaChart extends CoordinateChart {
     strSeries += "<path id='fLine_" + index + "' stroke='#000' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='0.6'></path>";
     strSeries += "<path id='fArea_" + index + "' stroke='none' fill='#000' d='" + area.join(" ") + "' stroke-width='1' opacity='0.4'></path>";
 
-    let hChartScrollerCont = this.CHART_DATA.objChart.querySelector("#scrollerCont #hChartScrollerCont");
+    let hChartScrollerCont = this.CHART_DATA.chartSVG.querySelector("#scrollerCont #hChartScrollerCont");
     if (hChartScrollerCont) {
       hChartScrollerCont.insertAdjacentHTML("beforeend", strSeries);
     }
   } /*End drawFullSeries()*/
-
-  // createZoomOutBox() {
-  //   let zoomOutBox = {
-  //     top: this.CHART_DATA.marginTop - 40,
-  //     left: this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - 40,
-  //     width: 40,
-  //     height: 40
-  //   };
-
-  //   let strSVG = "<g id='zoomOutBoxCont' style='display:none;'>";
-  //   strSVG += "  <rect id='zoomOutBox' x='" + zoomOutBox.left + "' y='" + zoomOutBox.top + "' width='" + zoomOutBox.width + "' height='" + zoomOutBox.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
-  //   strSVG += "  <circle r='10' cx='" + (zoomOutBox.left + (zoomOutBox.width / 2)) + "' cy='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
-  //   strSVG += "  <line x1='" + (zoomOutBox.left + (zoomOutBox.width / 2) - 4) + "' y1='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' x2='" + (zoomOutBox.left + (zoomOutBox.width / 2) + 4) + "' y2='" + (zoomOutBox.top + (zoomOutBox.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
-
-  //   let lineStart = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 10, 135);
-  //   let lineEnd = this.geom.polarToCartesian((zoomOutBox.left + (zoomOutBox.width / 2)), (zoomOutBox.top + (zoomOutBox.height / 2)), 20, 135);
-  //   strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
-  //   strSVG += "</g>";
-
-  //   this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
-  // } /*End createZoomOutBox() */
 
   prepareDataSet(dataSet) {
     let maxSet = [];
@@ -409,8 +355,8 @@ class AreaChart extends CoordinateChart {
 
   createSeries(dataSet, index, scaleX) {
     let d = [];
-    let elemSeries = this.CHART_DATA.objChart.querySelector("#series_" + index);
-    let elemActualSeries = this.CHART_DATA.objChart.querySelector("#series_actual_" + index);
+    let elemSeries = this.CHART_DATA.chartSVG.querySelector("#series_" + index);
+    let elemActualSeries = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + index);
     if (elemSeries) {
       elemSeries.parentNode.removeChild(elemSeries);
     }
@@ -450,7 +396,7 @@ class AreaChart extends CoordinateChart {
     }
     strSeries += "</g>";
     if (dataSet.length < 50) {
-      this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+      this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSeries);
     }
     this.CHART_DATA.series.push(arrPointsSet);
 
@@ -492,7 +438,7 @@ class AreaChart extends CoordinateChart {
       }
     }
     strSeries += "</g>";
-    this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSeries);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSeries);
 
   } /*End createSeries()*/
 
@@ -507,11 +453,11 @@ class AreaChart extends CoordinateChart {
     strSVG += "  <stop offset='100%' style='stop-color:" + color + ";stop-opacity:" + areaOpacity + "' />";
     strSVG += "  </linearGradient>";
     strSVG += "</defs>";
-    this.CHART_DATA.objChart.insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
   createLegands(index) {
-    let seriesLegend = this.CHART_DATA.objChart.querySelector("#legendContainer #series_legend_" + index);
+    let seriesLegend = this.CHART_DATA.chartSVG.querySelector("#legendContainer #series_legend_" + index);
     if (seriesLegend) {
       seriesLegend.parentNode.removeChild(seriesLegend);
     }
@@ -523,22 +469,22 @@ class AreaChart extends CoordinateChart {
     strSVG += "<rect id='legend_color_" + index + "' x='" + this.CHART_DATA.marginLeft + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
     strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (this.CHART_DATA.marginLeft + 20) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + this.CHART_OPTIONS.dataSet.series[index].name + "</text>";
     strSVG += "</g>";
-    this.CHART_DATA.objChart.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
   }
 
   resetTextPositions(categories) {
-    let txtTitleLen = this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-    let txtSubTitleLen = this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    let txtTitleGrp = this.CHART_DATA.objChart.querySelector("#txtTitleGrp");
+    let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    let txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    let txtTitleGrp = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp");
 
 
     if (txtTitleLen > this.CHART_CONST.FIX_WIDTH) {
-      let fontSize = this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
-      this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = this.CHART_DATA.objChart.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+      let fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
     txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
@@ -547,7 +493,7 @@ class AreaChart extends CoordinateChart {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
     // /*Adjust vertical text label size*/
-    // let arrVTextLabels = this.CHART_DATA.objChart.querySelectorAll("#vTextLabel text");
+    // let arrVTextLabels = this.CHART_DATA.chartSVG.querySelectorAll("#vTextLabel text");
     // for (let i = 0; i < arrVTextLabels.length; i++) {
     //   let txtWidth = arrVTextLabels[i].getComputedTextLength();
     //   if (txtWidth > this.CHART_DATA.vLabelWidth - 10) {
@@ -561,7 +507,7 @@ class AreaChart extends CoordinateChart {
 
     /*Adjust horzontal text label size*/
     let totalHTextWidth = 0;
-    let arrHText = this.CHART_DATA.objChart.querySelectorAll("#hTextLabel text");
+    let arrHText = this.CHART_DATA.chartSVG.querySelectorAll("#hTextLabel text");
     for (let i = 0; i < arrHText.length; i++) {
       let txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
@@ -591,14 +537,14 @@ class AreaChart extends CoordinateChart {
       }
     }
 
-    let vTxtSubTitle = this.CHART_DATA.objChart.querySelector("#vTextSubTitle");
+    let vTxtSubTitle = this.CHART_DATA.chartSVG.querySelector("#vTextSubTitle");
     vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (this.CHART_DATA.marginLeft - this.CHART_DATA.vLabelWidth - 10) + "," + (this.CHART_DATA.svgCenter.y) + ")");
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
     /*Set position for legend text*/
-    let arrLegendText = this.CHART_DATA.objChart.querySelectorAll("#legendContainer text");
-    let arrLegendColor = this.CHART_DATA.objChart.querySelectorAll("#legendContainer rect");
+    let arrLegendText = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer text");
+    let arrLegendColor = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer rect");
     let width = 0;
     let row = 0;
     for (let i = 0; i < arrLegendText.length; i++) {
@@ -624,27 +570,15 @@ class AreaChart extends CoordinateChart {
 
   bindEvents() {
     let self = this;
-    this.CHART_DATA.windowRightIndex = (this.CHART_DATA.windowRightIndex < 0) ? this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length : this.CHART_DATA.windowRightIndex;
-    this.CHART_DATA.newDataSet = [], this.CHART_DATA.newCatgList = [];
-
-    for (let i = this.CHART_DATA.windowLeftIndex; i <= this.CHART_DATA.windowRightIndex; i++) {
-      this.CHART_DATA.newCatgList.push(this.CHART_OPTIONS.dataSet.xAxis.categories[i % this.CHART_OPTIONS.dataSet.xAxis.categories.length]);
-    }
-
-    for (let setIndex = 0; setIndex < this.CHART_OPTIONS.dataSet.series.length; setIndex++) {
-      let set = this.CHART_OPTIONS.dataSet.series[setIndex].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1);
-      this.CHART_DATA.newDataSet.push(set);
-    }
-
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
-      let legend = this.CHART_DATA.objChart.querySelector("#series_legend_" + index);
+      let legend = this.CHART_DATA.chartSVG.querySelector("#series_legend_" + index);
       if (legend) {
         legend.removeEventListener("click", this.EVENT_BINDS.onLegendClickBind);
         legend.addEventListener("click", this.EVENT_BINDS.onLegendClickBind, false);
       }
     }
 
-    let gridRect = this.CHART_DATA.objChart.querySelector("#gridRect");
+    let gridRect = this.CHART_DATA.chartSVG.querySelector("#gridRect");
     if (gridRect) {
       gridRect.removeEventListener("mousemove", this.EVENT_BINDS.onMouseMoveBind);
       gridRect.addEventListener("mousemove", this.EVENT_BINDS.onMouseMoveBind, false);
@@ -654,11 +588,15 @@ class AreaChart extends CoordinateChart {
       gridRect.addEventListener("mouseleave", this.EVENT_BINDS.onMouseLeaveBind, false);
     }
 
-    let zoomOutBox = this.CHART_DATA.objChart.querySelector("#zoomOutBox");
-    if (zoomOutBox) {
-      zoomOutBox.removeEventListener("click", this.EVENT_BINDS.onZoomOutBind);
-      zoomOutBox.addEventListener("click", this.EVENT_BINDS.onZoomOutBind, false);
-    }
+    // let zoomOutBox = this.CHART_DATA.chartSVG.querySelector("#zoomOutBox");
+    // if (zoomOutBox) {
+    //   zoomOutBox.removeEventListener("click", this.EVENT_BINDS.onZoomOutBind);
+    //   zoomOutBox.addEventListener("click", this.EVENT_BINDS.onZoomOutBind, false);
+    // }
+
+    /*Add events for onZoomOut */
+    this.event.off("onZoomOut", this.EVENT_BINDS.onZoomOutBind);
+    this.event.on("onZoomOut", this.EVENT_BINDS.onZoomOutBind);
 
     /*Add events for Horizontal Text label hover */
     this.event.off("onHTextLabelHover", this.EVENT_BINDS.onHTextLabelHoverBind);
@@ -671,6 +609,8 @@ class AreaChart extends CoordinateChart {
     this.event.on("onLeftSliderMove", this.EVENT_BINDS.onLeftSliderMoveBind);
     this.event.off("onRightSliderMove", this.EVENT_BINDS.onRightSliderMoveBind);
     this.event.on("onRightSliderMove", this.EVENT_BINDS.onRightSliderMoveBind);
+    this.event.off("onHorizontalScroll", this.EVENT_BINDS.onHorizontalScrollBind);
+    this.event.on("onHorizontalScroll", this.EVENT_BINDS.onHorizontalScrollBind);
 
     /*Add events for resize chart window */
     window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
@@ -680,11 +620,11 @@ class AreaChart extends CoordinateChart {
 
   onHTextLabelHover(e) {
     let mousePointer = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.originEvent);
-    this.ui.toolTip(this.CHART_OPTIONS.targetElem, mousePointer, "#555", e.originEvent.target.getAttribute("title"));
+    this.tooltip.updateTip(mousePointer, "#555", e.originEvent.target.getAttribute("title"));
   } /*End onHTextLabelHover() */
 
   onHTextLabelMouseLeave(e) {
-    this.ui.toolTip(this.CHART_OPTIONS.targetElem, "hide");
+    this.tooltip.hide(); 
   } /*End onHTextLabelMouseLeave()*/
 
   onWindowResize() {
@@ -723,11 +663,11 @@ class AreaChart extends CoordinateChart {
     try {
       e.stopPropagation();
       let mousePointer = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
-      let gridBox = this.CHART_DATA.objChart.querySelector("#hGrid").getBBox();
+      let gridBox = this.CHART_DATA.chartSVG.querySelector("#hGrid").getBBox();
       if (mousePointer.x >= gridBox.x && mousePointer.x < (gridBox.x + this.CHART_DATA.gridBoxWidth) && mousePointer.y >= gridBox.y && mousePointer.y < (gridBox.y + this.CHART_DATA.gridBoxHeight)) {
         let multiSeriesPoints = [];
         for (let i = 0; i < this.CHART_DATA.series.length; i++) {
-          if (!this.CHART_DATA.objChart.querySelector("#series_" + i) || this.CHART_DATA.objChart.querySelector("#series_" + i).style.display === "none") {
+          if (!this.CHART_DATA.chartSVG.querySelector("#series_" + i) || this.CHART_DATA.chartSVG.querySelector("#series_" + i).style.display === "none") {
             continue;
           }
           for (let j = 0; j < this.CHART_DATA.series[i].length - 1; j++) {
@@ -769,15 +709,15 @@ class AreaChart extends CoordinateChart {
 
         /*Create vertical line*/
         let vLinePath = ["M", toolTipPoint.x, toolTipPoint.y, "L", toolTipPoint.x, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight];
-        let vLine = this.CHART_DATA.objChart.querySelector("#vLine");
+        let vLine = this.CHART_DATA.chartSVG.querySelector("#vLine");
         if (vLine) {
           vLine.setAttribute("d", vLinePath.join(" "));
           vLine.parentNode.removeChild(vLine);
-          this.CHART_DATA.objChart.appendChild(vLine);
+          this.CHART_DATA.chartSVG.appendChild(vLine);
         }
 
         if (toolTipPoint) {
-          let elms = this.CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+          let elms = this.CHART_DATA.chartSVG.querySelectorAll(".tooTipPoint");
           for (let i = 0; i < elms.length; i++) {
             elms[i].parentNode.removeChild(elms[i]);
           }
@@ -789,10 +729,10 @@ class AreaChart extends CoordinateChart {
 
           let toolTipRow1, toolTipRow2;
           toolTipRow1 = (this.CHART_OPTIONS.dataSet.xAxis.title + " " + this.CHART_DATA.newCatgList[npIndex]);
-          toolTipRow2 = (this.CHART_OPTIONS.dataSet.yAxis.title + " " + (this.CHART_OPTIONS.dataSet.yAxis.prefix || "") + " " + this.CHART_DATA.newDataSet[indx][npIndex].value);
+          toolTipRow2 = (this.CHART_OPTIONS.dataSet.yAxis.title + " " + (this.CHART_OPTIONS.dataSet.yAxis.prefix || "") + " " + this.CHART_DATA.newDataSet[indx].data[npIndex].value);
 
           /*point should be available globally*/
-          let point = this.CHART_DATA.newDataSet[indx][npIndex];
+          let point = this.CHART_DATA.newDataSet[indx].data[npIndex];
           point["series"] = {
             name: this.CHART_OPTIONS.dataSet.series[indx].name
           };
@@ -800,12 +740,12 @@ class AreaChart extends CoordinateChart {
           if (this.CHART_OPTIONS.toolTip && this.CHART_OPTIONS.toolTip.content) {
             let toolTipContent = this.CHART_OPTIONS.toolTip.content.replace(/{{/g, "${").replace(/}}/g, "}");
             let genContent = this.util.assemble(toolTipContent, "point");
-            this.ui.toolTip(this.CHART_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
+            this.tooltip.updateTip(toolTipPoint, color, genContent(point), "html");
           } else {
-            this.ui.toolTip(this.CHART_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
+            this.tooltip.updateTip(toolTipPoint, color, toolTipRow1, toolTipRow2);
           }
 
-          this.CHART_DATA.objChart.querySelector("#vLine").style.display = "block";
+          this.CHART_DATA.chartSVG.querySelector("#vLine").style.display = "block";
         }
       }
     } catch (ex) {
@@ -814,14 +754,14 @@ class AreaChart extends CoordinateChart {
   } /*End onMouseMove()*/
 
   onMouseLeave() {
-    this.ui.toolTip(this.CHART_OPTIONS.targetElem, "hide");
-    this.CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
-    let elms = this.CHART_DATA.objChart.querySelectorAll(".tooTipPoint");
+    this.tooltip.hide();
+    this.CHART_DATA.chartSVG.querySelectorAll(".tooTipPoint");
+    let elms = this.CHART_DATA.chartSVG.querySelectorAll(".tooTipPoint");
     for (let i = 0; i < elms.length; i++) {
       elms[i].parentNode.removeChild(elms[i]);
     }
 
-    let vLine = this.CHART_DATA.objChart.querySelector("#vLine");
+    let vLine = this.CHART_DATA.chartSVG.querySelector("#vLine");
     if (vLine) {
       vLine.style.display = "none";
     }
@@ -830,9 +770,9 @@ class AreaChart extends CoordinateChart {
 
   onLegendClick(e) {
     let seriesIndex = e.target.id.split("_")[2];
-    let legendColor = this.CHART_DATA.objChart.querySelector("#legend_color_" + seriesIndex);
-    let area = this.CHART_DATA.objChart.querySelector("#series_" + seriesIndex);
-    let actualArea = this.CHART_DATA.objChart.querySelector("#series_actual_" + seriesIndex);
+    let legendColor = this.CHART_DATA.chartSVG.querySelector("#legend_color_" + seriesIndex);
+    let area = this.CHART_DATA.chartSVG.querySelector("#series_" + seriesIndex);
+    let actualArea = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + seriesIndex);
     let color = this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
 
     if (legendColor.getAttribute("fill") === "#eee") {
@@ -851,7 +791,11 @@ class AreaChart extends CoordinateChart {
   } /*End onLegendClick()*/
 
   onHorizontalScroll(e) {
-    
+    if (this.CHART_DATA.windowLeftIndex > 0 || this.CHART_DATA.windowRightIndex < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length - 1) {
+      this.zoomOutBox.show();
+    } else {
+      this.zoomOutBox.hide();
+    }
   }
 
   onLeftSliderMove(e) {
@@ -862,32 +806,36 @@ class AreaChart extends CoordinateChart {
       }
     }
     this.reDrawSeries();
-    this.CHART_DATA.windowLeftIndex > 0 ? this.zoomOutBox.show() : this.zoomOutBox.hide();
   } /*End onLeftSliderMove()*/
 
   onRightSliderMove(e) {
     let sliderPos = e.sliderPosition;
-      for (let j = 1; j < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length; j++) {
-        if (sliderPos.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j - 1].x && sliderPos.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x) {
-            this.CHART_DATA.windowRightIndex = j;
-        }
+    for (let j = 1; j < this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries].length; j++) {
+      if (sliderPos.x >= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j - 1].x && sliderPos.x <= this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][j].x) {
+        this.CHART_DATA.windowRightIndex = j;
       }
-      this.reDrawSeries();
+    }
+    this.reDrawSeries();
   } /*End onRightSliderMove()*/
 
   reDrawSeries() {
-    let dataSet = [];
+    this.CHART_DATA.newDataSet = [];
+    this.CHART_DATA.newCatgList = [];
     let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
-    for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
-      let set = {
-        "data": this.CHART_OPTIONS.dataSet.series[i].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1)
-      };
-      dataSet.push(set);
+    
+    for (let i = this.CHART_DATA.windowLeftIndex; i <= this.CHART_DATA.windowRightIndex; i++) {
+      this.CHART_DATA.newCatgList.push(this.CHART_OPTIONS.dataSet.xAxis.categories[i % this.CHART_OPTIONS.dataSet.xAxis.categories.length]);
     }
 
-    this.prepareDataSet(dataSet);
+    for (let setIndex = 0; setIndex < this.CHART_OPTIONS.dataSet.series.length; setIndex++) {
+      let set = {
+        data: this.CHART_OPTIONS.dataSet.series[setIndex].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1)
+      };
+      this.CHART_DATA.newDataSet.push(set);
+    }
+    this.prepareDataSet(this.CHART_DATA.newDataSet);
     this.vLabel.createVerticalLabel(this,
-      this.CHART_DATA.objChart,
+      this.CHART_DATA.chartSVG,
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop,
       this.CHART_DATA.maxima,
@@ -899,7 +847,7 @@ class AreaChart extends CoordinateChart {
     );
 
     this.hLabel.createHorizontalLabel(this,
-      this.CHART_DATA.objChart,
+      this.CHART_DATA.chartSVG,
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight,
       this.CHART_DATA.gridBoxWidth,
@@ -909,8 +857,8 @@ class AreaChart extends CoordinateChart {
     );
 
     this.CHART_DATA.series = [];
-    for (let i = 0; i < dataSet.length; i++) {
-      this.createSeries(dataSet[i].data, i, scaleX);
+    for (let i = 0; i < this.CHART_DATA.newDataSet.length; i++) {
+      this.createSeries(this.CHART_DATA.newDataSet[i].data, i, scaleX);
       if (this.CHART_OPTIONS.dataSet.series.length > 1) {
         this.createLegands(i);
       }
@@ -924,14 +872,11 @@ class AreaChart extends CoordinateChart {
 
 
   onZoomOut(e) {
-    e.stopPropagation();
-    e.preventDefault();
     this.CHART_DATA.windowLeftIndex = 0;
     this.CHART_DATA.windowRightIndex = (this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length) - 1;
     this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
     this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
     this.reDrawSeries();
-    this.CHART_DATA.objChart.querySelector("#zoomOutBoxCont").style.display = "none";
   } /*End onZoomOut()*/
 
   round(val) {
