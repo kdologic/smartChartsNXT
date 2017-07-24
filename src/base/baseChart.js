@@ -3,7 +3,7 @@
  * @CreatedOn: 10-May-2017
  * @Author: SmartChartsNXT
  * @Version: 1.1.0
- * @description:This class will be the parent class of all charts
+ * @Description:This class will be the parent class of all charts
  */
 
 "use strict";
@@ -12,6 +12,7 @@ let UiCore = require("./../core/ui.core");
 let GeomCore = require("./../core/geom.core");
 let UtilCore = require("./../core/util.core");
 let EventCore = require("./../core/event.core");
+let Event = require("./../core/event"); 
 let Point = require("./../core/point");
 
 class BaseChart {
@@ -58,7 +59,7 @@ class BaseChart {
         this.CHART_DATA.scaleY = this.CHART_CONST.FIX_HEIGHT - this.CHART_OPTIONS.height;
 
         //fire Event onInit
-        let onInitEvent = new this.event.Event("onInit", {
+        let onInitEvent = new Event("onInit", {
             srcElement: this
         });
         this.event.dispatchEvent(onInitEvent);
@@ -88,7 +89,7 @@ class BaseChart {
 
     render() {
         //fire event afterRender
-        let aftrRenderEvent = new this.event.Event("afterRender", {
+        let aftrRenderEvent = new Event("afterRender", {
             srcElement: this
         });
         this.event.dispatchEvent(aftrRenderEvent);

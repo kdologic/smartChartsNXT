@@ -1,0 +1,198 @@
+<html>
+
+<head>
+
+  [ [scaleX(),skewY(),skewX()], [scaleY(),translateX(),translateY()] ]
+
+  <script>
+    let a = [
+      [1, 2, 3],
+      [2, 1, 4],
+      [3, 4, 1]
+    ];
+    let b = [
+      [1, 3, 2],
+      [3, 1, 4],
+      [2, 4, 1]
+    ]
+
+    function getTransformMatrix(trnsOprtns) {
+      let matrix = [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+      ]
+      for (let i = 0; i < trnsOprtns.length; i++) {
+        let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
+          return v !== ""
+        });
+        switch (arrOpr[0]) {
+          case "rotate":
+            matrix = multiply(matrix, [
+              [Math.cos(degToRad(arrOpr[1])), (-1) * Math.sin(degToRad(arrOpr[1])), 0],
+              [Math.sin(degToRad(arrOpr[1])), Math.cos(degToRad(arrOpr[1])), 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scale":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleX":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translate":
+            matrix = multiply(matrix, [
+              [1, 0, arrOpr[1]],
+              [0, 1, arrOpr[2]],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateX":
+            matrix = multiply(matrix, [
+              [1, 0, arrOpr[1]],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, 1, arrOpr[1]],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skew":
+            var angle =
+              matrix = multiply(matrix, [
+                [1, Math.tan(degToRad(arrOpr[1])), 0],
+                [Math.tan(degToRad(arrOpr[2])), 1, 0],
+                [0, 0, 1]
+              ]);
+            break;
+          case "skewX":
+            matrix = multiply(matrix, [
+              [1, Math.tan(degToRad(arrOpr[1])), 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skewY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [Math.tan(degToRad(arrOpr[1])), 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+        }
+      }
+      return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
+    }
+
+    function degToRad(x) {
+      return Number(x) * Math.PI / 180;
+    }
+
+    function multiply(a, b) {
+      let aNumRows = a.length;
+      let aNumCols = a[0].length;
+      let bNumRows = b.length;
+      let bNumCols = b[0].length;
+      let m = new Array(aNumRows);
+      for (let r = 0; r < aNumRows; ++r) {
+        m[r] = new Array(bNumCols);
+        for (let c = 0; c < bNumCols; ++c) {
+          m[r][c] = 0;
+          for (let i = 0; i < aNumCols; ++i) {
+            m[r][c] += a[r][i] * b[i][c];
+          }
+        }
+      }
+      return m;
+    }
+  </script>
+</head>
+
+<body>
+
+  <script>
+    //let trnsOprns = ["skew(10,10)", "rotate(-45)"]; //, "translateX(230)", "scale(1.5)"];
+    let strHtml =
+      `<div id="myDiv1" style='
+    width: 50px;
+    height: 50px;
+    border: 1px solid darkred;
+    background: chocolate;
+    margin-left: 100px;
+    text-align: center;
+    border-radius: 25px 25px;
+    position:absolute; 
+    top:200;
+    '>div</div>
+    
+    <div style='border-top:1px solid black;width:500px;border-radius: 25px 25px;position: absolute;
+    top: 450;'><div>
+    `;
+    document.querySelector("body").innerHTML = strHtml;
+
+    var myDiv = document.getElementById("myDiv1");
+    createBounce(myDiv, 200);
+
+    function createBounce(element, dropHeight) {
+      let feet = 1152; // 1 feet ~ 1152 pixel; 
+      let u = 0; //is the initial velocity
+      let f = (1 * feet); //is the acceleration = feet/squire(s)
+      let t = 0 //is the time taken
+
+
+      bounce(element, u, f, t, dropHeight);
+    }
+
+    function bounce(elem, u, f, t, dropHeight, revertFlag) {
+      let intervalMS = 40;
+      let dist = 0;
+      let v = 0
+      let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1() 
+      let intervalId = setInterval(function () {
+        //debugger ;
+
+        dist = (u * t) + ((0.5) * (f * t * t)); // d = u*t + a*squire(t)/2
+        let height = dist;
+        if (revertFlag) {
+          height = dropHeight - dist;
+        }
+
+        t += (intervalMS / 1000);
+        console.log("dist:", dist, "height:", height, "dropHeight", dropHeight);
+        //u = u + (f * t);
+        let trnsOprns = [`translateY(${height})`];
+        elem.style.transform = getTransformMatrix(trnsOprns);
+        if (dist > dropHeight || dist < 0) {
+          clearInterval(intervalId);
+          let fVelocity = Math.sqrt(2 * Math.abs(f) * Math.abs(dropHeight));
+          let vi = cor * fVelocity;
+          let h1 = Math.abs((vi * vi) / (2 * f));
+          console.log("dist:", dist, "fVelocity:", fVelocity, "vi:", vi, "h1:", h1, "revertFlag:", revertFlag, "force:", f);
+          if (Math.round(dropHeight) !== 0) {
+            bounce(elem, vi, f > 0 ? (-1) * f : f, 0, h1, revertFlag === null ? 0 : 1);
+          }
+        }
+      }, intervalMS);
+    }
+  </script>
+</body>
+</head>

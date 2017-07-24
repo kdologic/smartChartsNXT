@@ -8,9 +8,7 @@
 
 "use strict";
 
-// let Event = require("./../core/event");
 let UiCore = require("./../core/ui.core");
-// let GeomCore = require("./../core/geom.core");
 let Point = require("./../core/point");
 
 class Tooltip {
@@ -19,8 +17,8 @@ class Tooltip {
     }
 
     createTooltip(objChart, chartSVG) {
-        this.objChart = objChart; 
-        this.chartSVG = chartSVG; 
+        this.objChart = objChart;
+        this.chartSVG = chartSVG;
         this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
         if (this.tooltipContainer) {
             this.tooltipContainer.parentNode.removeChild(this.tooltipContainer);
@@ -33,23 +31,27 @@ class Tooltip {
         strSVG += "<foreignobject id='toolTipHTML'>";
         strSVG += "<body xmlns='http://www.w3.org/1999/xhtml'>";
         strSVG += "</body>";
-        strSVG += "</foreignobject>";  
-        
+        strSVG += "</foreignobject>";
+
         strSVG += " </g>";
         strSVG += "</g>";
-        this.chartSVG.insertAdjacentHTML("beforeend", strSVG); 
+        this.chartSVG.insertAdjacentHTML("beforeend", strSVG);
         this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
         this.toolTipHtml = this.tooltipContainer.querySelector("#toolTipHTML");
         this.toolTip = this.tooltipContainer.querySelector("#toolTip");
     }
 
     updateTip(originPoint, color, line1, line2) {
+        if (!this.objChart || !this.chartSVG) {
+            return;
+        }
+        this.createTooltip(this.objChart, this.chartSVG);
         let lineHeight = 20;
         let padding = 10;
         let strContents = "";
         let chartWidth = this.chartSVG.parentNode.offsetWidth;
         let chartHeight = this.chartSVG.parentNode.offsetHeight;
-        let cPoint; 
+        let cPoint;
 
         /*Prevent call-by-sharing*/
         if (originPoint) {
@@ -65,7 +67,7 @@ class Tooltip {
             }
             strContents += "</table>";
         }
-        this.toolTipHtml.innerHTML = strContents; 
+        this.toolTipHtml.innerHTML = strContents;
 
         let temp = document.createElement("div");
         temp.innerHTML = strContents;
@@ -136,7 +138,7 @@ class Tooltip {
             this.toolTipHtml.setAttribute("height", containBox.height + padding);
         }
         this.toolTip.setAttribute("d", d.join(" "));
-        if(color){
+        if (color) {
             this.toolTip.setAttribute("stroke", color);
         }
         this.show();
