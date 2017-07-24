@@ -131,67 +131,107 @@
 
   <script>
     //let trnsOprns = ["skew(10,10)", "rotate(-45)"]; //, "translateX(230)", "scale(1.5)"];
-    let strHtml =
-      `<div id="myDiv1" style='
-    width: 50px;
-    height: 50px;
-    border: 1px solid darkred;
-    background: chocolate;
-    margin-left: 100px;
-    text-align: center;
-    border-radius: 25px 25px;
-    position:absolute; 
-    top:200;
-    '>div</div>
-    
-    <div style='border-top:1px solid black;width:500px;border-radius: 25px 25px;position: absolute;
-    top: 450;'><div>
-    `;
+    let screenHeight = window.innerHeight;
+    let screenWidth = window.innerWidth;
+    let bouncePlaneY = screenHeight - 50;
+    let strHtml = `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY};'><div>`;
     document.querySelector("body").innerHTML = strHtml;
+    for (var i = 0; i < 20; i++) {
+      let top = Math.round(Math.random() * 1000) % (bouncePlaneY - 100);
+      let left = Math.round(Math.random() * 1000) % (screenWidth - 100);
+      let ballDia = Math.round(Math.random() * 70);
+      ballDia = ballDia < 20 ? ballDia + 20 : ballDia;
+      strHtml =
+        `<div id="myDiv${i}" style='
+      width: ${ballDia}px;
+      height: ${ballDia}px;
+      background: ${getRandomColor()};
+      margin-left: ${left}px;
+      text-align: center;
+      border-radius: ${ballDia/2}px ${ballDia/2}px;
+      position:absolute; 
+      top:${top};
+      '>${i}</div>`
 
-    var myDiv = document.getElementById("myDiv1");
-    createBounce(myDiv, 200);
 
-    function createBounce(element, dropHeight) {
-      let feet = 1152; // 1 feet ~ 1152 pixel; 
-      let u = 0; //is the initial velocity
-      let f = (1 * feet); //is the acceleration = feet/squire(s)
-      let t = 0 //is the time taken
+      document.querySelector("body").insertAdjacentHTML("beforeend", strHtml);
 
-
-      bounce(element, u, f, t, dropHeight);
+      var myDiv = document.getElementById(`myDiv${i}`);
+      createBounce(myDiv, bouncePlaneY - top - ballDia);
     }
 
-    function bounce(elem, u, f, t, dropHeight, revertFlag) {
-      let intervalMS = 40;
-      let dist = 0;
-      let v = 0
-      let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1() 
-      let intervalId = setInterval(function () {
-        //debugger ;
+    /*
+     *  createBounce Function for bouncing. 
+     *  @param {Object} elem
+     */
+    function createBounce(element, dropHeight) {
+      let feet = 1152;
+      let u = 0;
+      let f = (1 * feet);
+      let t = 0;
 
-        dist = (u * t) + ((0.5) * (f * t * t)); // d = u*t + a*squire(t)/2
-        let height = dist;
-        if (revertFlag) {
-          height = dropHeight - dist;
-        }
+      /*
+       *  bounce Function for creating bounce effect of an element. 
+       *  @param {Object} elem
+       *  @param {Number} dropHeight -height where it starts to fall down
+       *  @param {Number} u -is the initial velocity 
+       *  @param {Number} f -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel]
+       *  @param {Number} t -is the time taken
+       *  @param {Boolean} isInitial -true for initial and false for call
+       *  @param {Number} baseHeight -is the initial height 
+       *  @return {void}
+       */
+      (function bounce(elem, dropHeight, u, f, t, isInitial, baseHeight) {
+        let intervalMS = 40;
+        let dist = 0;
+        let v = 0
+        let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1()
+        let shiftY = baseHeight - dropHeight;
+        baseHeight = baseHeight || dropHeight;
+        let intervalId = setInterval(function () {
+          //debugger ;
 
-        t += (intervalMS / 1000);
-        console.log("dist:", dist, "height:", height, "dropHeight", dropHeight);
-        //u = u + (f * t);
-        let trnsOprns = [`translateY(${height})`];
-        elem.style.transform = getTransformMatrix(trnsOprns);
-        if (dist > dropHeight || dist < 0) {
-          clearInterval(intervalId);
-          let fVelocity = Math.sqrt(2 * Math.abs(f) * Math.abs(dropHeight));
-          let vi = cor * fVelocity;
-          let h1 = Math.abs((vi * vi) / (2 * f));
-          console.log("dist:", dist, "fVelocity:", fVelocity, "vi:", vi, "h1:", h1, "revertFlag:", revertFlag, "force:", f);
-          if (Math.round(dropHeight) !== 0) {
-            bounce(elem, vi, f > 0 ? (-1) * f : f, 0, h1, revertFlag === null ? 0 : 1);
+          dist = (u * t) + ((0.5) * (f * t * t)); // d = u*t + a*squire(t)/2
+          dist = dist > dropHeight ? dropHeight : dist;
+          dist = dist < 0 ? -0.0001 : dist;
+          let height = dist;
+          if (!isInitial) {
+            height = dropHeight - dist;
+          } else {
+            shiftY = 0;
           }
-        }
-      }, intervalMS);
+
+          t += (intervalMS / 1000);
+
+          if (dist >= dropHeight || dist < 0) {
+            clearInterval(intervalId);
+            let fVelocity = Math.sqrt(2 * Math.abs(f) * Math.abs(dropHeight));
+            let vi = cor * fVelocity;
+            let h1 = Math.abs((vi * vi) / (2 * f));
+
+            //console.log("dist:", dist, "fVelocity:", fVelocity);
+            //console.log("vi:", vi, "h1:", h1, "isInitial:", isInitial,"force:", f);
+
+            if (Math.round(dropHeight) !== 0) {
+              bounce(elem, h1, vi, (-1) * Math.abs(f), 0, false, baseHeight);
+            }
+          }
+
+          //console.log("dist:", dist, "height:", height, "dropHeight", dropHeight, "baseHeight", baseHeight);
+          let trnsOprns = [`translateY(${shiftY})`, `translateY(${height})`];
+          elem.style.transform = getTransformMatrix(trnsOprns);
+
+        }, intervalMS);
+      })(element, dropHeight, u, f, t, true);
+    }
+
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
     }
   </script>
 </body>
