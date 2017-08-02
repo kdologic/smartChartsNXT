@@ -1,6 +1,6 @@
 /*
- * sc.geom.core.js
- * @CreatedOn: 07-Apr-2016
+ * point.js
+ * @CreatedOn: 11-July-2017
  * @Author: SmartChartsNXT
  * @Version: 1.1.0
  * @description:Define a Point class to store coordinate values.

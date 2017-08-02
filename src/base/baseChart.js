@@ -12,8 +12,12 @@ let UiCore = require("./../core/ui.core");
 let GeomCore = require("./../core/geom.core");
 let UtilCore = require("./../core/util.core");
 let EventCore = require("./../core/event.core");
-let Event = require("./../core/event"); 
+let Event = require("./../core/event");
 let Point = require("./../core/point");
+let transformer = require("./../core/transformer"); 
+
+/* ------------- Require pulgIns --------------*/
+let animator = require("./../plugIns/animator");
 
 class BaseChart {
     constructor(chartType, opts) {
@@ -21,7 +25,11 @@ class BaseChart {
         this.geom = new GeomCore();
         this.event = new EventCore();
         this.ui = new UiCore();
-        this.chartType = chartType; 
+        this.transformer = transformer; 
+        this.plugins = {
+            animator: animator
+        };
+        this.chartType = chartType;
         this.CHART_OPTIONS = this.util.extends(opts, {});
         this.CHART_DATA = {};
         this.CHART_CONST = {

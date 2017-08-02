@@ -2,26 +2,16 @@
 
 <head>
 
-  [ [scaleX(),skewY(),skewX()], [scaleY(),translateX(),translateY()] ]
 
   <script>
-    let a = [
-      [1, 2, 3],
-      [2, 1, 4],
-      [3, 4, 1]
-    ];
-    let b = [
-      [1, 3, 2],
-      [3, 1, 4],
-      [2, 4, 1]
-    ]
+    
 
     function getTransformMatrix(trnsOprtns) {
       let matrix = [
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
-      ]
+      ];
       for (let i = 0; i < trnsOprtns.length; i++) {
         let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
           return v !== ""
@@ -134,7 +124,8 @@
     let screenHeight = window.innerHeight;
     let screenWidth = window.innerWidth;
     let bouncePlaneY = screenHeight - 50;
-    let strHtml = `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY};'><div>`;
+    let strHtml =
+      `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY};'><div>`;
     document.querySelector("body").innerHTML = strHtml;
     for (var i = 0; i < 15; i++) {
       let top = Math.round(Math.random() * 1000) % (bouncePlaneY - 100);
@@ -157,42 +148,41 @@
       document.querySelector("body").insertAdjacentHTML("beforeend", strHtml);
 
       var myDiv = document.getElementById(`myDiv${i}`);
-      createBounce(myDiv, bouncePlaneY - top - ballDia);
+      createBounce(myDiv, (bouncePlaneY - top - ballDia), 0);
     }
 
     /*
-     *  createBounce Function for bouncing. 
-     *  @param {Object} elem
+     *  createBounce Function for bouncy effect. 
+     *  @param {Object} element - The target element where bounce apply.
+     *  @param {Number} dropHeight - height where it starts to fallen.
+     *  @param {Number} slope - Is the angle in which object moves.
+     *  @param {Function} callBack - Function call after completing animation. 
      */
-    function createBounce(element, dropX, dropY, dropHeight) {
+    function createBounce(element, dropHeight, slope, callBack) {
       let feet = 1152;
       let u = 0;
       let f = (1 * feet);
       let t = 0;
-      
-      let slope = 
 
       /*
        *  bounce Function for creating bounce effect of an element. 
        *  @param {Object} elem
-       *  @param {Number} dropHeight -height where it starts to fall down
-       *  @param {Number} u -is the initial velocity 
-       *  @param {Number} f -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel]
-       *  @param {Number} t -is the time taken
-       *  @param {Boolean} isInitial -true for initial and false for call
-       *  @param {Number} baseHeight -is the initial height 
+       *  @param {Number} dropHeight -height where it starts to fallen.
+       *  @param {Number} u -is the initial velocity. 
+       *  @param {Number} f -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel].
+       *  @param {Number} t -is the time taken.
+       *  @param {Boolean} isInitial -true for initial and false for call.
+       *  @param {Number} baseHeight -is the initial height. 
        *  @return {void}
        */
       (function bounce(elem, dropHeight, u, f, t, isInitial, baseHeight) {
         let intervalMS = 40;
         let dist = 0;
-        let v = 0
+        let v = 0;
         let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1()
         let shiftY = baseHeight - dropHeight;
         baseHeight = baseHeight || dropHeight;
         let intervalId = setInterval(function () {
-          //debugger ;
-
           dist = (u * t) + ((0.5) * (f * t * t)); // d = u*t + a*squire(t)/2
           dist = dist > dropHeight ? dropHeight : dist;
           dist = dist < 0 ? -0.0001 : dist;
@@ -221,6 +211,12 @@
 
           //console.log("dist:", dist, "height:", height, "dropHeight", dropHeight, "baseHeight", baseHeight);
           let trnsOprns = [`translateY(${shiftY})`, `translateY(${height})`];
+          if (slope) {
+            trnsOprns.unshift(`rotate(${slope})`);
+            trnsOprns.push(`rotate(${(-1)*slope})`);
+          }
+
+          console.log(trnsOprns);
           elem.style.transform = getTransformMatrix(trnsOprns);
 
         }, intervalMS);
