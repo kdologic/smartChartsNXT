@@ -3,10 +3,8 @@
 <head>
 
   <script>
-    
-
-    function getTransformMatrix(trnsOprtns) {
-      let matrix = [
+    function getTransformMatrix(trnsOprtns, baseMatrix) {
+      let matrix = baseMatrix || [
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
@@ -92,6 +90,38 @@
       return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
     }
 
+    function convertTransformMatrix(strMatrix) {
+      let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
+      if (!strMatrix || arr.length < 6) {
+        return null;
+      }
+      let arrMatrix = [
+        [arr[0], arr[2], arr[4]],
+        [arr[1], arr[3], arr[5]],
+        [0, 0, 1]
+      ];
+      return arrMatrix;
+    }
+
+    function getElementTransformation(element) {
+      if (element) {
+        let computedStyle = window.getComputedStyle(element);
+        return convertTransformMatrix(computedStyle.transform);
+      }
+      return null;
+
+    }
+
+    function setElementTransformation(element, strTrns) {
+      if (element) {
+        element.style["-webkit-transform"] = strTrns;
+        element.style["-moz-transform"] = strTrns;
+        element.style["-ms-transform"] = strTrns;
+        element.style["-o-transform"] = strTrns;
+        element.style["transform"] = strTrns;
+      }
+    }
+
     function degToRad(x) {
       return Number(x) * Math.PI / 180;
     }
@@ -113,6 +143,34 @@
       }
       return m;
     }
+
+    /*requestAnimationFrame SHIM for all browser*/
+    (function () {
+      var lastTime = 0;
+      var vendors = ['webkit', 'moz'];
+      for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame =
+          window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+      }
+
+      if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function (callback, element) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function () {
+              callback(currTime + timeToCall);
+            },
+            timeToCall);
+          lastTime = currTime + timeToCall;
+          return id;
+        };
+
+      if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function (id) {
+          clearTimeout(id);
+        };
+    }());
   </script>
 </head>
 
@@ -132,7 +190,7 @@
       //let height = Math.round(Math.random() * 500);
       //height = height < 100 ? height + 100 : height;
 
-      height = 500; 
+      height = 500;
       strHtml =
         `<div id="myDiv${i}" style='
       width: ${50}px;
@@ -143,87 +201,88 @@
       
       position:absolute; 
       top:${bouncePlaneY - height};
-      '>${i}</div>`
+      '>${i}</div>`;
 
+      strHtml +=
+        `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY-height};'><div>`
 
       document.querySelector("body").insertAdjacentHTML("beforeend", strHtml);
 
       var myDiv = document.getElementById(`myDiv${i}`);
-      createElastic(myDiv, 0.9, height, 50); 
+
+      let options = {
+        elasticity: 0.9,
+        baseWidth: 50,
+        baseHeight: height,
+        preTransform: [],
+        postTansform: []
+      };
+
+      createElastic(myDiv, options, () => {
+        console.log("end")
+      });
     }
 
+
+
     /*
-     *  createElastic Function for elastic effect. 
+     *  createBounce Function for bouncy effect. 
      *  @param {Object} element - The target element where bounce apply.
-     *  @param {Number} dropHeight - height where it starts to fallen.
-     *  @param {Number} slope - Is the angle in which object moves.
+     *  @param {Number} options.dropHeight - height where it starts to fallen.
+     *  @param {Number} options.slope - Is the angle in which object moves.
+     *  @param {Array} options.preTransform - is array of transformation apply before animation.
+     *  @param {Array} options.postTransform - is array of transformation apply after animation.
      *  @param {Function} callBack - Function call after completing animation. 
      */
+    function createElastic(element, options, callBack) {
+      let distTravelled = 1000;
+      let frequency = 1;
+      let period = 1 / frequency;
+      let time = 0;
+      let amp = 50;
 
-    function createElastic(element, impact, elemHeight, elemWidth ){
-      let feet = 1152;
-      let u = 0;
-      let f = (1 * feet);
-      let t = 0;
+      let baseTransformMatrix = getElementTransformation(element);
 
-      let dropHeight = elemHeight * impact; 
+      let timenow = window.performance.now ?
+        (performance.now() + performance.timing.navigationStart) : Date.now();
+      let intervalId = requestAnimationFrame((timestamp) => {
+        let starttime = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        moveIt(starttime - timenow);
+      });
 
-      /*
-       *  bounce Function for creating bounce effect of an element. 
-       *  @param {Object} elem
-       *  @param {Number} dropHeight -height where it starts to fallen.
-       *  @param {Number} u -is the initial velocity. 
-       *  @param {Number} f -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel].
-       *  @param {Number} t -is the time taken.
-       *  @param {Boolean} isInitial -true for initial and false for call.
-       *  @param {Number} baseHeight -is the initial height. 
-       *  @return {void}
-       */
-      (function elasticize(elem, dropHeight, u, f, t, isInitial, baseHeight) {
-        let intervalMS = 40;
-        let dist = 0;
-        //let v = 0;
-        let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1()
-        let shiftY = baseHeight - dropHeight;
-        baseHeight = baseHeight || dropHeight;
-        let intervalId = setInterval(function () {
-          dist = (u * t) + ((0.5) * (f * t * t)); // d = u*t + a*squire(t)/2
-          dist = dist > dropHeight ? dropHeight : dist;
-          dist = dist < 0 ? -0.0001 : dist;
-          let height = dist;
-          if (!isInitial) {
-            height = dropHeight - dist;
-          } else {
-            shiftY = 0;
-          }
+      function moveIt(intervalMS) {
+        let omega = (2 * Math.PI * frequency);
+        
 
-          t += (intervalMS / 1000);
+        time += intervalMS;
+        let displacement = amp * Math.cos(omega * (time / 1000));
+        let modHeight = options.baseHeight - displacement;
+        let scale = options.baseHeight / modHeight;
+        //console.log("displacement",displacement,"scale", scale, "modHeight",modHeight , Math.abs(amp - displacement));
+        
+        
+        if(Math.abs(Math.round(displacement)) < 2) {
+          amp*= 0.9;
+          console.log("displacement",displacement, "amp", amp);
+        }
+        if(Math.round(amp) === 0) {
+          return; 
+        }
 
-          if (dist >= dropHeight || dist < 0) {
-            clearInterval(intervalId);
-            let fVelocity = Math.sqrt(2 * Math.abs(f) * Math.abs(dropHeight));
-            let vi = cor * fVelocity;
-            let h1 = Math.abs((vi * vi) / (2 * f));
+        let trnsOprns = [`scaleY(${scale})`,`translateY(${-(displacement/2)})`];
+        setElementTransformation(element, getTransformMatrix(trnsOprns, baseTransformMatrix));
 
-            console.log("dist:", dist, "fVelocity:", fVelocity);
-            console.log("vi:", vi, "h1:", h1, "isInitial:", isInitial,"force:", f);
+        let timenow = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        intervarId = requestAnimationFrame((timestamp) => {
+          let starttime = window.performance.now ?
+            (performance.now() + performance.timing.navigationStart) : Date.now();
+          moveIt(starttime - timenow);
+        });
 
-            if (Math.round(dropHeight) !== 0) {
-              elasticize(elem, h1, vi, (-1) * Math.abs(f), 0, false, baseHeight);
-            }
-          }
+      } /*End of moveIt()*/
 
-          console.log("dist:", dist, "height:", height, "dropHeight", dropHeight, "baseHeight", baseHeight);
-          let trnsOprns = [`translateY(${shiftY})`, `translateY(${height})`];
-          // if (slope) {
-          //   trnsOprns.unshift(`rotate(${slope})`);
-          //   trnsOprns.push(`rotate(${(-1)*slope})`);
-          // }
-
-          elem.style.transform = getTransformMatrix(trnsOprns);
-
-        }, intervalMS);
-      })(element, dropHeight, u, f, t, true);
     }
 
     function getRandomColor() {

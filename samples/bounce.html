@@ -4,8 +4,8 @@
 
 
   <script>
-    function getTransformMatrix(trnsOprtns) {
-      let matrix = [
+    function getTransformMatrix(trnsOprtns, baseMatrix) {
+      let matrix = baseMatrix || [
         [1, 0, 0],
         [0, 1, 0],
         [0, 0, 1]
@@ -91,6 +91,38 @@
       return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
     }
 
+    function convertTransformMatrix(strMatrix) {
+      let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
+      if (!strMatrix || arr.length < 6) {
+        return null;
+      }
+      let arrMatrix = [
+        [arr[0], arr[2], arr[4]],
+        [arr[1], arr[3], arr[5]],
+        [0, 0, 1]
+      ];
+      return arrMatrix;
+    }
+
+    function getElementTransformation(element) {
+      if (element) {
+        let computedStyle = window.getComputedStyle(element); 
+        return convertTransformMatrix(computedStyle.transform);
+      }
+      return null;
+
+    }
+
+    function setElementTransformation(element, strTrns) {
+      if (element) {
+        element.style["-webkit-transform"] = strTrns;
+        element.style["-moz-transform"] = strTrns;
+        element.style["-ms-transform"] = strTrns;
+        element.style["-o-transform"] = strTrns;
+        element.style["transform"] = strTrns;
+      }
+    }
+
     function degToRad(x) {
       return Number(x) * Math.PI / 180;
     }
@@ -146,7 +178,16 @@
       document.querySelector("body").insertAdjacentHTML("beforeend", strHtml);
 
       var myDiv = document.getElementById(`myDiv${i}`);
-      createBounce(myDiv, (bouncePlaneY - top - ballDia), 0);
+      let options = {
+        dropHeight: (bouncePlaneY - top - ballDia),
+        slope: 0,
+        preTransform: [],
+        postTansform: []
+      };
+
+      createBounce(myDiv, options, () => {
+        console.log("end")
+      });
     }
 
 
@@ -181,20 +222,34 @@
     /*
      *  createBounce Function for bouncy effect. 
      *  @param {Object} element - The target element where bounce apply.
-     *  @param {Number} dropHeight - height where it starts to fallen.
-     *  @param {Number} slope - Is the angle in which object moves.
+     *  @param {Number} options.dropHeight - height where it starts to fallen.
+     *  @param {Number} options.slope - Is the angle in which object moves.
+     *  @param {Array} options.preTransform - is array of transformation apply before animation.
+     *  @param {Array} options.postTransform - is array of transformation apply after animation.
      *  @param {Function} callBack - Function call after completing animation. 
      */
-    function createBounce(element, dropHeight, slope, callBack) {
+    function createBounce(element, options, callBack) {
       let feet = 1152;
       let velocity = 0; //velocity -is the initial velocity. 
-      let acceleration = (1 * feet); //acceleration -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel].
+      let acceleration = (1 * feet); //acceleraion -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel].
       let time = 0; //time -is the time taken.
       let isInitial = true; //isInitial -true for initial and false for call.
+      let dropHeight = options.dropHeight || 0;
+      let slope = options.slope || 0;
       let baseHeight = dropHeight; //baseHeight -is the initial height. 
       let dist = 0;
       let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1()
       let shiftY = baseHeight - dropHeight;
+
+      let baseTransformMatrix = getElementTransformation(element);
+
+      let timenow = window.performance.now ?
+        (performance.now() + performance.timing.navigationStart) : Date.now();
+      let intervalId = requestAnimationFrame((timestamp) => {
+        let starttime = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        moveIt(starttime - timenow);
+      });
 
       function moveIt(intervalMS) {
         dist = (velocity * time) + ((0.5) * (acceleration * time * time)); // d = u*t + a*squire(t)/2
@@ -210,12 +265,18 @@
         time += (intervalMS / 1000);
 
         //console.log("dist:", dist, "height:", height, "dropHeight", dropHeight, "baseHeight", baseHeight);
-        let trnsOprns = [`translateY(${shiftY})`, `translateY(${height})`];
+
+        let trnsOprns = [];
+        if (options.preTransform && options.preTransform instanceof Array) {
+          trnsOprns.push.apply(trnsOprns, options.preTransform);
+        }
+        trnsOprns.push.apply(trnsOprns, [`translateY(${shiftY})`, `translateY(${height})`]);
         if (slope) {
           trnsOprns.unshift(`rotate(${slope})`);
           trnsOprns.push(`rotate(${(-1)*slope})`);
         }
-        element.style.transform = getTransformMatrix(trnsOprns);
+
+        setElementTransformation(element, getTransformMatrix(trnsOprns, baseTransformMatrix));
 
         if (dist >= dropHeight || dist < 0) {
           let fVelocity = Math.sqrt(2 * Math.abs(acceleration) * Math.abs(dropHeight));
@@ -225,7 +286,12 @@
           //console.log("dist:", dist, "fVelocity:", fVelocity);
           //console.log("vi:", vi, "h1:", h1, "isInitial:", isInitial, "force:", f);
 
-          if (Math.round(dropHeight) !== 0) {
+          if (Math.round(dropHeight) === 0) {
+            if (typeof callBack === "function") {
+              callBack.call(this);
+            }
+            return;
+          } else {
             dist = 0;
             acceleration = (-1) * Math.abs(acceleration);
             time = 0;
@@ -233,8 +299,6 @@
             dropHeight = h1;
             velocity = vi;
             shiftY = baseHeight - dropHeight;
-          } else {
-            return;
           }
         }
 
@@ -246,15 +310,8 @@
           moveIt(starttime - timenow);
         });
 
-      }
+      } /*End of moveIt()*/
 
-      let timenow = window.performance.now ?
-        (performance.now() + performance.timing.navigationStart) : Date.now();
-      let intervalId = requestAnimationFrame((timestamp) => {
-        let starttime = window.performance.now ?
-          (performance.now() + performance.timing.navigationStart) : Date.now();
-        moveIt(starttime - timenow);
-      });
     }
 
     function getRandomColor() {
