@@ -24,8 +24,8 @@ class VerticalLabels {
             let value = (i++ * interval);
             value = this.formatTextValue(value);
             strText += "<text font-family='Lato' fill='black'><tspan x='" + (posX - maxWidth) + "' y='" + (posY + (gridCount * gridHeight) + 5) + "' font-size='12' >" + (labelPrefix ? labelPrefix : "") + value + "<\/tspan></text>";
-            let d = ["M", posX, (posY + (gridCount * gridHeight)) + (i === 1 ? 1 : 0), "L", (posX - 5), (posY + (gridCount * gridHeight) + (i === 1 ? 1 : 0))];
-            strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
+            let d = ["M", posX, posY + (gridCount * gridHeight), "L", (posX - 5), posY + (gridCount * gridHeight)];
+            strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
         chartSVG.insertAdjacentHTML("beforeend", strText);

@@ -40,21 +40,21 @@ class HorizontalScroller {
             "L", (posX + scrollBoxWidth), (posY + 10)
         ];
 
-        strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' stroke-width='1' opacity='1'></path>";
+        strSVG += "<path stroke='#333' fill='none' d='" + outerContPath.join(" ") + "' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         strSVG += "<rect id='outerFrame' x='" + posX + "' y='" + (posY) + "' width='" + scrollBoxWidth + "' height='" + scrollBoxHeight + "' style='fill:none;stroke-width:0.1;stroke:none;' \/>";
-        strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+        strSVG += "<path id='sliderLeft' stroke='rgb(178, 177, 182)' fill='none' d=''  stroke-width='1' opacity='1'></path>";
         strSVG += "<path id='sliderRight' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
 
         strSVG += "<g id='sliderLeftHandle' style='cursor: ew-resize;'>";
         strSVG += "  <rect id='sliderLSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='30' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
         strSVG += "  <path id='slideLSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-        strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+        strSVG += "  <path id='slideLSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         strSVG += "</g>";
 
         strSVG += "<g id='sliderRightHandle' style='cursor: ew-resize;'>";
         strSVG += "  <rect id='sliderRSelFrame' x=''  y='" + (posY - scrollBoxHeight) + "' width='30' height='" + (scrollBoxHeight * 2) + "' style='cursor: default;fill:#000;stroke-width:0.1;stroke:none;fill-opacity: 0.0005' \/>";
         strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
-        strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' stroke-width='1' opacity='1'></path>";
+        strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         strSVG += "</g>";
         chartSVG.querySelector("#" + targetElem).insertAdjacentHTML("beforeend", strSVG);
 

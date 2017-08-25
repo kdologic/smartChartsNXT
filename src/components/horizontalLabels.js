@@ -51,7 +51,7 @@ class HorizontalLabels {
                 break;
             }
             let d = ["M", x, y, "L", x, (y + 10)];
-            strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
+            strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
         chartSVG.insertAdjacentHTML("beforeend", strText);

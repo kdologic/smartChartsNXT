@@ -893,8 +893,17 @@ class AreaChart extends CoordinateChart {
 
   showAnimatedView(){
     for(let i=0;i<this.CHART_OPTIONS.dataSet.series.length;i++){
-      this.plugins.animator.createBounce(this.CHART_DATA.chartSVG.querySelector("#series_actual_"+i), 200, 0, true, null) ;
-      this.plugins.animator.createBounce(this.CHART_DATA.chartSVG.querySelector("#series_"+i), 200, 0, true, null) ;
+      let bbox = this.CHART_DATA.chartSVG.querySelector("#series_"+i).getBBox(); 
+      let options = {
+        baseWidth: bbox.width,
+        baseHeight: bbox.height,
+        elasticity: 0.99,
+        amplitude: bbox.height / 4,
+        impactOn: "top",
+        preTransform: []
+      };
+      //this.plugins.animator.createElastic(this.CHART_DATA.chartSVG.querySelector("#series_actual_"+i), options, null) ;
+      //this.plugins.animator.createElastic(this.CHART_DATA.chartSVG.querySelector("#series_"+i), options, null) ;
     }
   }
 

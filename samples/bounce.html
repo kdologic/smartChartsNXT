@@ -12,7 +12,7 @@
       ];
       for (let i = 0; i < trnsOprtns.length; i++) {
         let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
-          return v !== ""
+          return v !== "";
         });
         switch (arrOpr[0]) {
           case "rotate":
@@ -245,7 +245,7 @@
 
       let timenow = window.performance.now ?
         (performance.now() + performance.timing.navigationStart) : Date.now();
-      let intervalId = requestAnimationFrame((timestamp) => {
+      requestAnimationFrame((timestamp) => {
         let starttime = window.performance.now ?
           (performance.now() + performance.timing.navigationStart) : Date.now();
         moveIt(starttime - timenow);
@@ -304,7 +304,7 @@
 
         let timenow = window.performance.now ?
           (performance.now() + performance.timing.navigationStart) : Date.now();
-        intervarId = requestAnimationFrame((timestamp) => {
+        requestAnimationFrame((timestamp) => {
           let starttime = window.performance.now ?
             (performance.now() + performance.timing.navigationStart) : Date.now();
           moveIt(starttime - timenow);

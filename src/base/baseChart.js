@@ -73,7 +73,7 @@ class BaseChart {
         this.event.dispatchEvent(onInitEvent);
 
         let strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
-            "viewBox='0 0 " + this.CHART_CONST.FIX_WIDTH + " " + this.CHART_CONST.FIX_HEIGHT + "'" +
+            //"viewBox='0 0 " + this.CHART_CONST.FIX_WIDTH + " " + this.CHART_CONST.FIX_HEIGHT + "'" +
             "version='1.1'" +
             "width='" + this.CHART_OPTIONS.width + "'" +
             "height='" + this.CHART_OPTIONS.height + "'" +

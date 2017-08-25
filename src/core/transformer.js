@@ -14,12 +14,12 @@ class Transformer {
     constructor() {}
 
     /*
-    * @param {Array of String} trnsOprtns - Array of transformation operations like ["scaleX(1.5)","skewY(0.5)","translateY(200)"]
-    * @return {Array of Numbers} 
-    */
-    getTransformMatrix(trnsOprtns) {
-        let self = this; 
-        let matrix = [
+     * @param {Array of String} trnsOprtns - Array of transformation operations like ["scaleX(1.5)","skewY(0.5)","translateY(200)"]
+     * @param {Arry of Number} baseMatrix - Array of pre-exist transformation matrix.
+     * @return {string}  Of transformation matrix 
+     */
+    getTransformMatrix(trnsOprtns, baseMatrix) {
+        let matrix = baseMatrix || [
             [1, 0, 0],
             [0, 1, 0],
             [0, 0, 1]
@@ -30,49 +30,49 @@ class Transformer {
             });
             switch (arrOpr[0]) {
                 case "rotate":
-                    matrix = self.multiply(matrix, [
-                        [Math.cos(self.degToRad(arrOpr[1])), (-1) * Math.sin(self.degToRad(arrOpr[1])), 0],
-                        [Math.sin(self.degToRad(arrOpr[1])), Math.cos(self.degToRad(arrOpr[1])), 0],
+                    matrix = this.multiply(matrix, [
+                        [Math.cos(degToRad(arrOpr[1])), (-1) * Math.sin(degToRad(arrOpr[1])), 0],
+                        [Math.sin(degToRad(arrOpr[1])), Math.cos(degToRad(arrOpr[1])), 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "scale":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [arrOpr[1], 0, 0],
                         [0, arrOpr[1], 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "scaleX":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [arrOpr[1], 0, 0],
                         [0, 1, 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "scaleY":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [1, 0, 0],
                         [0, arrOpr[1], 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "translate":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [1, 0, arrOpr[1]],
                         [0, 1, arrOpr[2]],
                         [0, 0, 1]
                     ]);
                     break;
                 case "translateX":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [1, 0, arrOpr[1]],
                         [0, 1, 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "translateY":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [1, 0, 0],
                         [0, 1, arrOpr[1]],
                         [0, 0, 1]
@@ -80,29 +80,61 @@ class Transformer {
                     break;
                 case "skew":
                     var angle =
-                        matrix = self.multiply(matrix, [
-                            [1, Math.tan(self.degToRad(arrOpr[1])), 0],
-                            [Math.tan(self.degToRad(arrOpr[2])), 1, 0],
+                        matrix = this.multiply(matrix, [
+                            [1, Math.tan(degToRad(arrOpr[1])), 0],
+                            [Math.tan(degToRad(arrOpr[2])), 1, 0],
                             [0, 0, 1]
                         ]);
                     break;
                 case "skewX":
-                    matrix = self.multiply(matrix, [
-                        [1, Math.tan(self.degToRad(arrOpr[1])), 0],
+                    matrix = this.multiply(matrix, [
+                        [1, Math.tan(degToRad(arrOpr[1])), 0],
                         [0, 1, 0],
                         [0, 0, 1]
                     ]);
                     break;
                 case "skewY":
-                    matrix = self.multiply(matrix, [
+                    matrix = this.multiply(matrix, [
                         [1, 0, 0],
-                        [Math.tan(self.degToRad(arrOpr[1])), 1, 0],
+                        [Math.tan(degToRad(arrOpr[1])), 1, 0],
                         [0, 0, 1]
                     ]);
                     break;
             }
         }
         return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
+    }
+
+    convertTransformMatrix(strMatrix) {
+        let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
+        if (!strMatrix || arr.length < 6) {
+            return null;
+        }
+        let arrMatrix = [
+            [arr[0], arr[2], arr[4]],
+            [arr[1], arr[3], arr[5]],
+            [0, 0, 1]
+        ];
+        return arrMatrix;
+    }
+
+    getElementTransformation(element) {
+        if (element) {
+            let computedStyle = window.getComputedStyle(element);
+            return this.convertTransformMatrix(computedStyle.transform);
+        }
+        return null;
+
+    }
+
+    setElementTransformation(element, strTrns) {
+        if (element) {
+            element.style["-webkit-transform"] = strTrns;
+            element.style["-moz-transform"] = strTrns;
+            element.style["-ms-transform"] = strTrns;
+            element.style["-o-transform"] = strTrns;
+            element.style["transform"] = strTrns;
+        }
     }
 
     degToRad(x) {

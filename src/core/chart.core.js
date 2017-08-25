@@ -8,6 +8,7 @@
 
 "use strict";
 
+let polyfills = require("./../shims/polyfills");
 let AreaChart = require("./../coordinateChart/areaChart/areaChart"); 
 let LineChart = require("./../coordinateChart/lineChart/lineChart"); 
 
