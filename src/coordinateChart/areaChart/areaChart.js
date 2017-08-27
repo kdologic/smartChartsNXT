@@ -323,6 +323,7 @@ class AreaChart extends CoordinateChart {
   } /*End drawFullSeries()*/
 
   prepareDataSet(dataSet) {
+    let self = this; 
     let maxSet = [];
     let minSet = [];
     let categories = [];
@@ -524,7 +525,7 @@ class AreaChart extends CoordinateChart {
         if (txWidth + 15 > this.CHART_DATA.hLabelHeight) {
           let fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
           if (fontSize > 9) {
-            arrHText.forEach(function (elem) {
+            arrHText.forEach((elem) => {
               elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
             });
           }
@@ -569,7 +570,6 @@ class AreaChart extends CoordinateChart {
   } /*End resetTextPositions()*/
 
   bindEvents() {
-    let self = this;
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       let legend = this.CHART_DATA.chartSVG.querySelector("#series_legend_" + index);
       if (legend) {
@@ -624,33 +624,33 @@ class AreaChart extends CoordinateChart {
   } /*End onHTextLabelHover() */
 
   onHTextLabelMouseLeave(e) {
-    this.tooltip.hide(); 
+    this.tooltip.hide();
   } /*End onHTextLabelMouseLeave()*/
 
   onWindowResize() {
     let self = this;
     let containerDiv = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
     if (this.runId != containerDiv.getAttribute("runId")) {
-      window.removeEventListener('resize', self.onWindowResize);
+      window.removeEventListener('resize', this.onWindowResize);
       if (timeOut != null) {
         clearTimeout(timeOut);
       }
       return;
     }
     if (containerDiv.offsetWidth !== this.CHART_CONST.FIX_WIDTH || containerDiv.offsetHeight !== this.CHART_CONST.FIX_HEIGHT) {
-      if (self.timeOut != null) {
-        clearTimeout(self.timeOut);
+      if (this.timeOut != null) {
+        clearTimeout(this.timeOut);
       }
       callChart();
 
       function callChart() {
         if (containerDiv) {
           if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
-            self.timeOut = setTimeout(function () {
+            self.timeOut = setTimeout(() => {
               callChart();
             }, 100);
           } else {
-            self.timeOut = setTimeout(function () {
+            self.timeOut = setTimeout(() => {
               self.init();
             }, 500);
           }
@@ -822,7 +822,7 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.newDataSet = [];
     this.CHART_DATA.newCatgList = [];
     let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
-    
+
     for (let i = this.CHART_DATA.windowLeftIndex; i <= this.CHART_DATA.windowRightIndex; i++) {
       this.CHART_DATA.newCatgList.push(this.CHART_OPTIONS.dataSet.xAxis.categories[i % this.CHART_OPTIONS.dataSet.xAxis.categories.length]);
     }
@@ -891,9 +891,9 @@ class AreaChart extends CoordinateChart {
     }
   } /*End round()*/
 
-  showAnimatedView(){
-    for(let i=0;i<this.CHART_OPTIONS.dataSet.series.length;i++){
-      let bbox = this.CHART_DATA.chartSVG.querySelector("#series_"+i).getBBox(); 
+  showAnimatedView() {
+    for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+      let bbox = this.CHART_DATA.chartSVG.querySelector("#series_" + i).getBBox();
       let options = {
         baseWidth: bbox.width,
         baseHeight: bbox.height,

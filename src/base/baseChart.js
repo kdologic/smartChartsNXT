@@ -38,7 +38,7 @@ class BaseChart {
             MIN_WIDTH: 250,
             MIN_HEIGHT: 400
         };
-        this.runId = chartType + "_" + Math.round(Math.random() * 1000000001);
+        this.runId = chartType + "_" + this.util.uuidv4(); 
     }
 
     initBase() {

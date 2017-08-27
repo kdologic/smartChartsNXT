@@ -12,7 +12,7 @@
 "use strict";
 
 class UtilCore {
-    constructor() {}
+    constructor() { }
 
     mergeRecursive(obj1, obj2) {
         //iterate over all the properties in the object which is being consumed
@@ -96,14 +96,14 @@ class UtilCore {
         if (ranbowFlag) {
             index = index % 12;
             Colors.rainbow.length;
-            for (let prop in Colors.rainbow){
+            for (let prop in Colors.rainbow) {
                 if (index === count++) {
                     result = Colors.rainbow[prop];
                 }
             }
         } else {
             index = index % Colors.names.length;
-            for (let prop in Colors.names){
+            for (let prop in Colors.names) {
                 if (index === count++) {
                     result = Colors.names[prop];
                 }
@@ -177,7 +177,7 @@ class UtilCore {
                     window.frames["chartFrame"].focus();
                     window.frames["chartFrame"].print();
                     iframe.parentNode.removeChild(iframe);
-                    if (typeof opts.saveSuccess === "function"){
+                    if (typeof opts.saveSuccess === "function") {
                         opts.saveSuccess.call(this);
                     }
                 }, 0);
@@ -223,6 +223,13 @@ class UtilCore {
     assemble(literal, params) {
         return new Function(params, "return `" + literal + "`;"); // TODO: Proper escaping
     } /*End assemble()*/
+
+    /* will generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant*/
+    uuidv4() {
+        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+            (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+    }/*End assemble()*/
 }
 
 module.exports = UtilCore;
