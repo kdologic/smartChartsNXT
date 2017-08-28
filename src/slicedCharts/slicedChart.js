@@ -15,9 +15,8 @@ class SlicedChart extends BaseChart {
 
   constructor(chartType, opts) {
     super(chartType, opts);
-    
     this.tooltip = new Tooltip(); 
   }
 }
 
-module.exports = CoordinateChart;
+module.exports = SlicedChart;

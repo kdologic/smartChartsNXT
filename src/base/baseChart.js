@@ -1,3 +1,5 @@
+"use strict";
+
 /*
  * BaseChart.js
  * @CreatedOn: 10-May-2017
@@ -14,7 +16,7 @@ let UtilCore = require("./../core/util.core");
 let EventCore = require("./../core/event.core");
 let Event = require("./../core/event");
 let Point = require("./../core/point");
-let transformer = require("./../core/transformer"); 
+let transformer = require("./../core/transformer");
 
 /* ------------- Require pulgIns --------------*/
 let animator = require("./../plugIns/animator");
@@ -25,7 +27,7 @@ class BaseChart {
         this.geom = new GeomCore();
         this.event = new EventCore();
         this.ui = new UiCore();
-        this.transformer = transformer; 
+        this.transformer = transformer;
         this.plugins = {
             animator: animator
         };
@@ -38,7 +40,8 @@ class BaseChart {
             MIN_WIDTH: 250,
             MIN_HEIGHT: 400
         };
-        this.runId = chartType + "_" + this.util.uuidv4(); 
+        this.runId = chartType + "_" + this.util.uuidv4();
+        this.timeOut = null;
     }
 
     initBase() {
@@ -85,15 +88,57 @@ class BaseChart {
         this.CHART_DATA.container.insertAdjacentHTML("beforeend", strSVG);
         this.CHART_DATA.chartSVG = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + this.chartType);
 
-        let svgWidth = parseInt(this.CHART_DATA.chartSVG.getAttribute("width"));
-        let svgHeight = parseInt(this.CHART_DATA.chartSVG.getAttribute("height"));
-        this.CHART_DATA.svgCenter = new Point((svgWidth / 2), (svgHeight / 2));
+        this.CHART_DATA.svgWidth = parseInt(this.CHART_DATA.chartSVG.getAttribute("width"));
+        this.CHART_DATA.svgHeight = parseInt(this.CHART_DATA.chartSVG.getAttribute("height"));
+        this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
+
+        if (this.CHART_OPTIONS.canvasBorder) {
+            let strSVG = "<g>";
+            strSVG += "   <rect x='0' y='0' width='" + (this.CHART_DATA.svgWidth - 1) + "' height='" + (this.CHART_DATA.svgHeight - 1) + "' shape-rendering='optimizeSpeed' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
+            strSVG += "   <\/g>";
+            this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
+        }
 
         setTimeout(function () {
             self.ui.appendMenu2(self.CHART_OPTIONS.targetElem, self.CHART_DATA.svgCenter, null, null, self);
             self.ui.appendWaterMark(self.CHART_OPTIONS.targetElem, self.CHART_DATA.scaleX, self.CHART_DATA.scaleY);
         }, 100);
+
     } /* End of Init() */
+
+    onWindowResize(callBackInit) {
+        let self = this;
+        let containerDiv = this.CHART_DATA.container;
+        if (this.getRunId() != containerDiv.getAttribute("runId")) {
+            window.removeEventListener('resize', this.onWindowResize);
+            if (this.timeOut != null) {
+                clearTimeout(this.timeOut);
+            }
+            return;
+        }
+        if (containerDiv.offsetWidth !== this.CHART_CONST.FIX_WIDTH || containerDiv.offsetHeight !== this.CHART_CONST.FIX_HEIGHT) {
+            if (this.timeOut != null) {
+                clearTimeout(this.timeOut);
+            }
+            callChart();
+
+            function callChart() {
+                if (containerDiv) {
+                    if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
+                        self.timeOut = setTimeout(() => {
+                            callChart();
+                        }, 100);
+                    } else {
+                        self.timeOut = setTimeout(() => {
+                            if(typeof callBackInit === "function"){
+                                callBackInit.call(self); 
+                            }
+                        }, 500);
+                    }
+                }
+            }
+        }
+    } /*End onWindowResize()*/
 
     render() {
         //fire event afterRender

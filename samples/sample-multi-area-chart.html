@@ -23,7 +23,7 @@
           "title": "Multi Series Chart",
           "subTitle": "Area Chart",
           "targetElem": "chartContainer",
-          "canvasBorder": false,
+          "canvasBorder": true,
           "bgColor": "none",
           "animated": true,
           "toolTip": {
@@ -46,6 +46,7 @@
                 "color": "#FFC107",
                 "name": 'Raphael',
                 "areaOpacity": "0.3",
+                "smoothedLine": true,
                 "data": generateData(10, 50, 45)
               },
               {
@@ -53,7 +54,7 @@
                 "color": "#F44336",
                 "noPointMarker": false,
                 "markerRadius": 3.5,
-                "smoothedLine": false,
+                "smoothedLine": true,
                 "showGradient": true,
                 "areaOpacity": "0.5",
                 "name": 'Wilson',
@@ -96,7 +97,7 @@
 
 <body>
   <div>
-    <div id='chartContainer' style="width:100%; height:100%;border:1px solid gray">
+    <div id='chartContainer' style="width:100%; height:100%;">
     </div>
   </div>
 </body>
