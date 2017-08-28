@@ -323,7 +323,7 @@ class AreaChart extends CoordinateChart {
   } /*End drawFullSeries()*/
 
   prepareDataSet(dataSet) {
-    let self = this; 
+    let self = this;
     let maxSet = [];
     let minSet = [];
     let categories = [];
@@ -427,8 +427,9 @@ class AreaChart extends CoordinateChart {
     area.push.apply(area, d);
 
     strSeries += "<path id='area_" + index + "' stroke='none' fill='" + fill + "' d='" + area.join(" ") + "' stroke-width='1' opacity='" + areaOpacity + "'></path>";
-    strSeries += "<path id='line_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
-
+    if (this.CHART_OPTIONS.dataSet.series[index].smoothedLine) {
+      strSeries += "<path id='line_" + index + "' stroke='" + color + "' fill='none' d='" + line.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
+    }
     let radius = this.CHART_OPTIONS.dataSet.series[index].markerRadius || 4;
     if (!this.CHART_OPTIONS.dataSet.series[index].noPointMarker) {
       for (let point = 0; point + 2 < arrPointsSet.length; point++) {
@@ -892,61 +893,45 @@ class AreaChart extends CoordinateChart {
   } /*End round()*/
 
   showAnimatedView() {
+    let dataSet = [];
+    let self = this;
+    let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex).length;
+    let pointIndex = 0;
+
     for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
-      let bbox = this.CHART_DATA.chartSVG.querySelector("#series_" + i).getBBox();
-      let options = {
-        baseWidth: bbox.width,
-        baseHeight: bbox.height,
-        elasticity: 0.99,
-        amplitude: bbox.height / 4,
-        impactOn: "top",
-        preTransform: []
+      let set = {
+        "data": this.CHART_OPTIONS.dataSet.series[i].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex)
       };
-      //this.plugins.animator.createElastic(this.CHART_DATA.chartSVG.querySelector("#series_actual_"+i), options, null) ;
-      //this.plugins.animator.createElastic(this.CHART_DATA.chartSVG.querySelector("#series_"+i), options, null) ;
+      dataSet.push(set);
     }
-  }
+    this.prepareDataSet(dataSet);
+    this.CHART_DATA.series = [];
 
-  // showAnimatedView() {
-  //   let dataSet = [];
-  //   let self = this;
-  //   let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex).length;
-  //   let pointIndex = 0;
+    let maxLen = 0;
+    for (let i = 0; i < dataSet.length; i++) {
+      let len = dataSet[i].data.length;
+      if (len > maxLen) {
+        maxLen = len;
+      }
+    }
 
-  //   for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
-  //     let set = {
-  //       "data": this.CHART_OPTIONS.dataSet.series[i].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex)
-  //     };
-  //     dataSet.push(set);
-  //   }
-  //   this.prepareDataSet(dataSet);
-  //   this.CHART_DATA.series = [];
+    /*if there is more than 50 points then skip the animation*/
+    if (maxLen > 50) {
+      pointIndex = maxLen;
+    }
+    let timoutId = setInterval(function () {
 
-  //   let maxLen = 0;
-  //   for (let i = 0; i < dataSet.length; i++) {
-  //     let len = dataSet[i].data.length;
-  //     if (len > maxLen) {
-  //       maxLen = len;
-  //     }
-  //   }
+      for (let index = 0; index < dataSet.length; index++) {
+        self.createSeries(dataSet[index].data.slice(0, pointIndex), index, scaleX);
+      }
 
-  //   /*if there is more than 50 points then skip the animation*/
-  //   if (maxLen > 50) {
-  //     pointIndex = maxLen;
-  //   }
-  //   let timoutId = setInterval(function () {
-
-  //     for (let index = 0; index < dataSet.length; index++) {
-  //       self.createSeries(dataSet[index].data.slice(0, pointIndex), index, scaleX);
-  //     }
-
-  //     if (pointIndex === maxLen) {
-  //       clearInterval(timoutId);
-  //       self.reDrawSeries();
-  //     }
-  //     pointIndex++;
-  //   }, 50);
-  // } /*End showAnimatedView()*/
+      if (pointIndex === maxLen) {
+        clearInterval(timoutId);
+        self.reDrawSeries();
+      }
+      pointIndex++;
+    }, 50);
+  } /*End showAnimatedView()*/
 
 
 } /*End of AreaChart()*/
