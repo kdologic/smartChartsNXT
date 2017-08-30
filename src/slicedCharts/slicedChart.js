@@ -10,12 +10,14 @@
 
 let BaseChart = require("./../base/baseChart");
 let Tooltip = require("./../components/tooltip");
+let LegendBox = require("./../components/legendBox");
 
 class SlicedChart extends BaseChart {
 
   constructor(chartType, opts) {
     super(chartType, opts);
     this.tooltip = new Tooltip(); 
+    this.legendBox = new LegendBox(); 
   }
 }
 

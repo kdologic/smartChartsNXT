@@ -124,7 +124,7 @@ class AreaChart extends CoordinateChart {
       zoomOutBoxHeight: 40
     }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS); 
+    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
     this.CHART_CONST = this.util.extends({
       FIX_WIDTH: 800,
       FIX_HEIGHT: 600,
@@ -188,9 +188,9 @@ class AreaChart extends CoordinateChart {
       }
 
       this.prepareChart();
-      this.tooltip.createTooltip(this, this.CHART_DATA.chartSVG);
+      this.tooltip.createTooltip(this);
     } catch (ex) {
-      this.handleError(ex, "Error in AreaChart");
+        this.handleError(ex, "Error in AreaChart");
     }
 
   } /*End init()*/
@@ -596,7 +596,7 @@ class AreaChart extends CoordinateChart {
     /*Add events for resize chart window */
     window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
     window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
-    
+
   } /*End bindEvents()*/
 
 

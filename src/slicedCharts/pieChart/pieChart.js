@@ -83,7 +83,11 @@ class PieChart extends SlicedChart {
     }, this.CHART_CONST);
 
     this.EVENT_BINDS = {
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init)
+      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+      onPieClickBind: self.onPieClick.bind(self),
+      onLegendHoverBind: self.onLegendHover.bind(self),
+      onLegendLeaveBind: self.onLegendLeave.bind(self),
+      onLegendClickBind: self.onLegendClick.bind(self)
     };
 
     this.init();
@@ -117,7 +121,7 @@ class PieChart extends SlicedChart {
       }
 
       this.prepareChart();
-      this.tooltip.createTooltip(this, this.CHART_DATA.chartSVG);
+      this.tooltip.createTooltip(this);
     } catch (ex) {
       this.handleError(ex, "Error in PieChart");
     }
@@ -132,6 +136,7 @@ class PieChart extends SlicedChart {
   } /*End initDataSet()*/
 
   prepareChart() {
+    let self = this;
     this.prepareDataSet();
     let strSVG = "";
     strSVG += "<g>";
@@ -152,16 +157,29 @@ class PieChart extends SlicedChart {
 
     let startAngle;
     let endAngle = 0;
+    let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "node";
     for (let i in this.CHART_DATA.uniqueDataSet) {
       startAngle = endAngle;
-      endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 36 / 10);
-      let color = (this.CHART_OPTIONS.dataSet[i].color ? this.CHART_OPTIONS.dataSet[i].color : this.util.getColor(i));
-      this.createPie(startAngle, endAngle, color, i);
+      endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 3.6);
+      let color = this.CHART_DATA.uniqueDataSet[i].color;
+      this.createPie(startAngle, endAngle, color, strokeColor, i);
     }
 
     this.resetTextPos();
     if (this.CHART_OPTIONS.showLegend) {
-      this.createLegands();
+      let lSet = [];
+      this.CHART_DATA.uniqueDataSet.map((data, index) => {
+        lSet.push({
+          label: data.label,
+          value: data.value,
+          color: data.color
+        });
+      });
+      this.legendBox.createLegends(this, "legendContainer", {
+        left: self.CHART_DATA.pieCenter.x + self.CHART_DATA.pieWithTextSpan,
+        top: self.CHART_DATA.pieCenter.y - self.CHART_DATA.pieHeight - 50,
+        legendSet: lSet
+      });
     }
     this.bindEvents();
     this.slicedOutOnSettings();
@@ -170,18 +188,17 @@ class PieChart extends SlicedChart {
   } /*End prepareChart()*/
 
 
-  createPie(startAngle, endAngle, color, index) {
-    let percent = parseFloat((endAngle - startAngle) * 100 / 360).toFixed(2);
+  createPie(startAngle, endAngle, color, strokeColor, index) {
+    let percent = this.CHART_DATA.uniqueDataSet[index].percent.toFixed(2);
     let strSVG = "";
     strSVG += "  <rect class='pie" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='pie" + index + "' id='txtPieGrpPie" + index + "' fill='#717171' font-family='Lato' >";
     strSVG += "  <tspan class='pie" + index + "' id='txtPie" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
     strSVG += "  <path class='pie" + index + "' id='pieHover" + index + "' fill-opacity='0.4' fill='" + color + "' stroke='none' stroke-width='0' style='cursor:pointer;' \/> ";
-    strSVG += "  <path class='pie" + index + "'  id='upperArcPie" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
+    strSVG += "  <path class='pie" + index + "'  id='upperArcPie" + index + "'  fill='" + color + "' stroke='" + strokeColor + "' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='pie" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
 
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
-
     let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, startAngle, endAngle, 0);
     this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + index).setAttribute("d", upperArcPath.d);
     let textLabel = this.CHART_DATA.uniqueDataSet[index]["label"];
@@ -240,103 +257,10 @@ class PieChart extends SlicedChart {
 
   } /*End describePieArc()*/
 
-
-  createLegands() {
-    let self = this;
-    this.CHART_DATA.chartSVG.querySelector("#legendContainer").innerHTML = "";
-    /*Creating series legend*/
-    let lengendBBox = {
-      left: self.CHART_DATA.pieCenter.x + self.CHART_DATA.pieWithTextSpan,
-      top: self.CHART_DATA.pieCenter.y - self.CHART_DATA.pieHeight - 50
-    };
-
-    let strSVG = "";
-    for (let index in this.CHART_DATA.uniqueDataSet) {
-      let color = (this.CHART_OPTIONS.dataSet[index].color ? this.CHART_OPTIONS.dataSet[index].color : this.util.getColor(index));
-      strSVG += "<g id='series_legend_" + index + "' class='pie_legend" + index + "'style='cursor:pointer;'>";
-      strSVG += "<rect id='legend_color_" + index + "' class='pie_legend" + index + "' x='" + lengendBBox.left + "' y='" + (lengendBBox.top + (index * 45)) + "' width='15' height='15' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-      strSVG += "<text id='legend_txt_" + index + "' class='pie_legend" + index + "' font-size='16' x='" + (lengendBBox.left + 20) + "' y='" + (lengendBBox.top + (index * 45) + 14) + "' fill='#717171' font-family='Lato' >" + this.CHART_DATA.uniqueDataSet[index]["label"] + "</text>";
-      strSVG += "<text id='legend_value_" + index + "' class='pie_legend" + index + "' font-size='16' x='" + (lengendBBox.left + this.CHART_DATA.maxTextLen) + "' y='" + (lengendBBox.top + (index * 45) + 15) + "' fill='#717171' font-family='Lato' >" + this.CHART_DATA.uniqueDataSet[index]["value"] + "</text>";
-      strSVG += "</g>";
-    }
-    this.CHART_DATA.chartSVG.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
-
-    let legendContainer = this.CHART_DATA.chartSVG.querySelector("#legendContainer");
-    let legendBox = legendContainer.getBoundingClientRect();
-    let remainingWidth = (this.CHART_OPTIONS.width - lengendBBox.left);
-
-
-    if (legendBox.width > remainingWidth) {
-      let maxTxtLen = 0;
-      for (let index in this.CHART_DATA.uniqueDataSet) {
-        let eachLegendGrp = this.CHART_DATA.chartSVG.querySelector("#legendContainer #series_legend_" + index);
-        let lgntTxt = eachLegendGrp.querySelector("#legend_txt_" + index);
-        let lgntVal = eachLegendGrp.querySelector("#legend_value_" + index);
-        lgntTxt.setAttribute("font-size", 12);
-        lgntVal.setAttribute("font-size", 12);
-        let txtLen = lgntTxt.getComputedTextLength();
-        if (txtLen > maxTxtLen) {
-          maxTxtLen = txtLen;
-        }
-      }
-      for (let index in this.CHART_DATA.uniqueDataSet) {
-        let lgntVal = this.CHART_DATA.chartSVG.querySelector("#legendContainer #legend_value_" + index);
-        lgntVal.setAttribute("x", (lengendBBox.left + maxTxtLen + 30));
-      }
-      legendBox = legendContainer.getBoundingClientRect();
-      if (legendBox.width > remainingWidth) {
-        for (let index in this.CHART_DATA.uniqueDataSet) {
-          let lgntVal = this.CHART_DATA.chartSVG.querySelector("#legendContainer #legend_value_" + index);
-          lgntVal.setAttribute("x", (lengendBBox.left + 20));
-          lgntVal.setAttribute("y", (lengendBBox.top + (index * 45) + 35));
-        }
-      }
-    }
-
-    for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
-      let pieLegend = this.CHART_DATA.chartSVG.querySelector("#pieChart #series_legend_" + pieIndex);
-      pieLegend.addEventListener("mouseover", (e) => {
-        let elemId = e.target.getAttribute("class");
-        let pieIndex = elemId.substring("pie_legend".length);
-
-        let pieData;
-        for (let i in this.CHART_DATA.pieSet) {
-          if (this.CHART_DATA.pieSet[i].id === ("pie" + pieIndex)) {
-            pieData = this.CHART_DATA.pieSet[i];
-          }
-        }
-        let pieHover = this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex);
-        let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
-        hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
-        hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
-        let pieHoverPath;
-        if (pieData.slicedOut) {
-          let shiftIndex = 15;
-          let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
-          pieHoverPath = this.describePieArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-        } else {
-          pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-        }
-        pieHover.setAttribute("d", pieHoverPath.d);
-      }, false);
-
-      pieLegend.addEventListener("mouseleave", (e) => {
-        let elemId = e.target.getAttribute("class");
-        let pieIndex = elemId.substring("pie_legend".length);
-        this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
-      }, false);
-    }
-
-  } /*End createLegands()*/
-
   bindEvents() {
     let mouseDownPos;
-    let onPieClickBind = this.onPieClick.bind(this);
+    let self = this;
     try {
-      if (this.CHART_DATA.uniqueDataSet.length <= 1) {
-        return void 0;
-      }
-
       for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
         let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex);
         upperArcPie.addEventListener("mousedown", (e) => {
@@ -361,7 +285,15 @@ class PieChart extends SlicedChart {
           e.stopPropagation();
           this.CHART_DATA.mouseDown = 0;
           if (this.CHART_DATA.mouseDrag === 0) {
-            onPieClickBind(e);
+            let elemClass = e.target.getAttribute("class");
+            let pieIndex = elemClass.substring("pie".length);
+            //fire Event onLegendClick
+            let onPieClick = new this.event.Event("onPieClick", {
+              srcElement: self,
+              originEvent: e,
+              pieIndex: pieIndex
+            });
+            this.event.dispatchEvent(onPieClick);
           }
           this.CHART_DATA.mouseDrag = 0;
         }, false);
@@ -373,6 +305,9 @@ class PieChart extends SlicedChart {
         }, false);
 
         upperArcPie.addEventListener("mousemove", (e) => {
+          if(this.CHART_DATA.uniqueDataSet.length <= 1){
+            return; 
+          }
           if (this.CHART_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
             let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
             let dragAngle = this.getAngle(this.CHART_DATA.pieCenter, dragStartPoint);
@@ -464,6 +399,20 @@ class PieChart extends SlicedChart {
         this.CHART_DATA.mouseDrag = 0;
       }, false);
 
+      /*Bind event for pie click */
+      this.event.off("onPieClick", this.EVENT_BINDS.onPieClickBind);
+      this.event.on("onPieClick", this.EVENT_BINDS.onPieClickBind);
+
+
+      /*Add event for legends */
+      this.event.off("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+      this.event.on("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+      this.event.off("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+      this.event.on("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+      this.event.off("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+      this.event.on("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+
+
       /*Add events for resize chart window */
       window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
       window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
@@ -474,18 +423,13 @@ class PieChart extends SlicedChart {
   } /*End bindEvents()*/
 
   onPieClick(e) {
-    let pieData;
-    let elemId = e.target.getAttribute("class");
-    let sliceOut;
-    let index = elemId.substring("pie".length);
-
-    for (let i in this.CHART_DATA.pieSet) {
-      if (this.CHART_DATA.pieSet[i].id === elemId) {
-        pieData = this.CHART_DATA.pieSet[i];
-        sliceOut = this.CHART_DATA.pieSet[i].slicedOut;
-        this.CHART_DATA.pieSet[i].slicedOut = !this.CHART_DATA.pieSet[i].slicedOut;
-      }
+    if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+      return void 0;
     }
+    let index = e.pieIndex;
+    let pieData = this.CHART_DATA.pieSet[index];
+    let sliceOut = this.CHART_DATA.pieSet[index].slicedOut;
+    this.CHART_DATA.pieSet[index].slicedOut = !sliceOut;
     let shiftIndex = sliceOut ? 15 : 1;
     let shiftInterval = setInterval(() => {
       let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
@@ -511,6 +455,40 @@ class PieChart extends SlicedChart {
     }, 10);
   } /*End onPieClick()*/
 
+  onLegendHover(e) {
+    let pieIndex = e.legendIndex;
+    let pieData = this.CHART_DATA.pieSet[pieIndex];
+    let pieHover = this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex);
+    let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
+    hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
+    hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
+    let pieHoverPath;
+    if (pieData.slicedOut) {
+      let shiftIndex = 15;
+      let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
+      pieHoverPath = this.describePieArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
+    } else {
+      pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
+    }
+    pieHover.setAttribute("d", pieHoverPath.d);
+  }
+
+  onLegendLeave(e) {
+    let pieIndex = e.legendIndex;
+    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+  }
+
+  onLegendClick(e) {
+    let self = this;
+    this.CHART_DATA.chartSVG.querySelector("#pieHover" + e.legendIndex).setAttribute("d", "");
+    //fire Event onLegendClick
+    let onPieClick = new this.event.Event("onPieClick", {
+      srcElement: self,
+      originEvent: e.originEvent,
+      pieIndex: e.legendIndex
+    });
+    this.event.dispatchEvent(onPieClick);
+  }
 
   getAngle(point1, point2) {
     let deltaX = point2.x - point1.x;
@@ -525,18 +503,13 @@ class PieChart extends SlicedChart {
     for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
       let pieData;
       let elemId = "pie" + pieIndex;
-      for (let i in this.CHART_DATA.pieSet) {
-        if (this.CHART_DATA.pieSet[i].id === elemId) {
-          pieData = this.CHART_DATA.pieSet[i];
-        }
-        this.CHART_DATA.pieSet[i].slicedOut = false;
-      }
+      pieData = this.CHART_DATA.pieSet[pieIndex];
+      this.CHART_DATA.pieSet[pieIndex].slicedOut = false;
 
       let pieGroup = this.CHART_DATA.chartSVG.querySelectorAll(".pie" + pieIndex);
       for (let i = 0; i < pieGroup.length; i++) {
         pieGroup[i].setAttribute("transform", "");
       }
-
       let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, (pieData["upperArcPath"].startAngle + rotationIndex), (pieData["upperArcPath"].endAngle + rotationIndex), 0);
       let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex).setAttribute("d", upperArcPath.d);
       let midAngle = (((pieData["upperArcPath"].startAngle + rotationIndex) + (pieData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
@@ -583,18 +556,21 @@ class PieChart extends SlicedChart {
         newTextPos.x -= txtLen;
       }
 
-      let otrTextPos;
-      if ((pieData.midAngle > 90 && pieData.midAngle <= 180) || (pieData.midAngle > 270 && pieData.midAngle <= 360)) {
-        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieHeight + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieSet[Math.abs(pieIndex - 1)].midAngle), this.CHART_DATA.pieSet[Math.abs(pieIndex - 1)].midAngle);
-      } else if ((pieData.midAngle > 0 && pieData.midAngle <= 90) || (pieData.midAngle > 180 && pieData.midAngle <= 270)) {
-        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieHeight + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieSet[(pieIndex + 1) % this.CHART_DATA.pieSet.length].midAngle), this.CHART_DATA.pieSet[(pieIndex + 1) % this.CHART_DATA.pieSet.length].midAngle);
-      }
 
-      if (Math.abs(otrTextPos.y - newTextPos.y) < 50) {
-        if (pieData.midAngle > 90 && pieData.midAngle < 270) {
-          newTextPos.y = (otrTextPos.y + 50);
-        } else {
-          newTextPos.y = (otrTextPos.y - 50);
+      if (this.CHART_DATA.uniqueDataSet.length > 1) {
+        let otrTextPos;
+        if ((pieData.midAngle > 90 && pieData.midAngle <= 180) || (pieData.midAngle > 270 && pieData.midAngle <= 360)) {
+          otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieHeight + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieSet[Math.abs(pieIndex - 1)].midAngle), this.CHART_DATA.pieSet[Math.abs(pieIndex - 1)].midAngle);
+        } else if ((pieData.midAngle > 0 && pieData.midAngle <= 90) || (pieData.midAngle > 180 && pieData.midAngle <= 270)) {
+          otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieHeight + this.CHART_DATA.offsetWidth - (maxOverFlow / 2), this.CHART_DATA.pieSet[(pieIndex + 1) % this.CHART_DATA.pieSet.length].midAngle), this.CHART_DATA.pieSet[(pieIndex + 1) % this.CHART_DATA.pieSet.length].midAngle);
+        }
+
+        if (Math.abs(otrTextPos.y - newTextPos.y) < 50) {
+          if (pieData.midAngle > 90 && pieData.midAngle < 270) {
+            newTextPos.y = (otrTextPos.y + 50);
+          } else {
+            newTextPos.y = (otrTextPos.y - 50);
+          }
         }
       }
 
@@ -690,13 +666,11 @@ class PieChart extends SlicedChart {
         this.CHART_DATA.uniqueDataSet.push({
           "label": self.CHART_OPTIONS.dataSet[i].label,
           "value": self.CHART_OPTIONS.dataSet[i].value,
+          "color": this.CHART_OPTIONS.dataSet[i].color || this.util.getColor(i),
           "slicedOut": self.CHART_OPTIONS.dataSet[i].slicedOut || false
         });
       } else {
-        this.CHART_DATA.uniqueDataSet[found] = {
-          "label": self.CHART_OPTIONS.dataSet[i].label,
-          "value": parseFloat(self.CHART_OPTIONS.dataSet[i].value) + parseFloat(self.CHART_DATA.uniqueDataSet[j].value)
-        };
+        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(self.CHART_OPTIONS.dataSet[i].value) + parseFloat(self.CHART_DATA.uniqueDataSet[found].value);
       }
       this.CHART_DATA.totalValue += parseFloat(this.CHART_OPTIONS.dataSet[i].value);
     }
@@ -772,7 +746,8 @@ class PieChart extends SlicedChart {
         }
 
         let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : this.util.getColor(pieIndex));
-        self.createPie(startAngle, endAngle, color, pieIndex);
+        let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "node";
+        self.createPie(startAngle, endAngle, color, strokeColor, pieIndex);
         angleCalc["pie" + pieIndex] = {
           "startAngle": startAngle,
           "endAngle": endAngle

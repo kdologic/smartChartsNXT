@@ -7,7 +7,7 @@
     var settings = {
       "title": "Browser Statistics and Trends",
       "outline": 2,
-      "canvasBorder": false,
+      "canvasBorder": true,
       "subTitle": "As of Q1, 2016",
       "targetElem": "chartContainer",
       "bgColor": "white",
@@ -28,7 +28,7 @@
         },
         {
           "label": "Firefox",
-          "value": "16.9",
+          "value": "16.91",
           "color": "#FFC107",
           "slicedOut":false
         },
@@ -36,30 +36,30 @@
           "label": "Opera",
           "value": "1.2"
         }
-      ],
-      events: {
-        afterRender: function (e) {
-          console.log(e, "event after rendering complete");
-        },
-        onInit: function (e) {
-          console.log(e, "event onInit");
-        },
-        afterParseData: function (e) {
-          console.log(e, "event afterParseData");
-        },
-        beforeSave: function (e) {
-          console.log(e, "event beforeSave");
-        },
-        afterSave: function (e) {
-          console.log(e, "event afterSave");
-        },
-        beforePrint: function (e) {
-          console.log(e, "event beforePrint");
-        },
-        afterPrint: function (e) {
-          console.log(e, "event afterPrint");
-        }
-      }
+      ]//,
+      // events: {
+      //   afterRender: function (e) {
+      //     console.log(e, "event after rendering complete");
+      //   },
+      //   onInit: function (e) {
+      //     console.log(e, "event onInit");
+      //   },
+      //   afterParseData: function (e) {
+      //     console.log(e, "event afterParseData");
+      //   },
+      //   beforeSave: function (e) {
+      //     console.log(e, "event beforeSave");
+      //   },
+      //   afterSave: function (e) {
+      //     console.log(e, "event afterSave");
+      //   },
+      //   beforePrint: function (e) {
+      //     console.log(e, "event beforePrint");
+      //   },
+      //   afterPrint: function (e) {
+      //     console.log(e, "event afterPrint");
+      //   }
+      // }
     };
 
     window.onload = function () {

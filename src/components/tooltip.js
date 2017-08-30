@@ -16,9 +16,9 @@ class Tooltip {
         this.ui = new UiCore();
     }
 
-    createTooltip(objChart, chartSVG) {
+    createTooltip(objChart) {
         this.objChart = objChart;
-        this.chartSVG = chartSVG;
+        this.chartSVG = this.objChart.CHART_DATA.chartSVG;
         this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
         if (this.tooltipContainer) {
             this.tooltipContainer.parentNode.removeChild(this.tooltipContainer);
