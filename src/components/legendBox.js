@@ -8,8 +8,12 @@
 
 "use strict";
 
-class LegendBox {
-    constructor() {}
+let Draggable = require("./draggable"); 
+
+class LegendBox extends Draggable{
+    constructor() {
+        super();
+    }
 
     createLegends(objChart, targetElem, opts) {
         let self = this;
@@ -33,7 +37,7 @@ class LegendBox {
         for (let index in this.opts.legendSet) {
             let color = this.opts.legendSet[index].color;
             strSVG += "<g id='series_legend_" + index + "' class='legend" + index + "'style='cursor:pointer;'>";
-            strSVG += "<rect id='legend_color_" + index + "' class='legend" + index + "' x='" + (this.legendBBox.left + this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + (index * 30)) + "' width='" + this.colorContWidth + "' height='" + this.colorContWidth + "' fill='" + color + "' shape-rendering='optimizeSpeed' stroke='none' stroke-width='1' opacity='1'></rect>";
+            strSVG += "<rect id='legend_color_" + index + "' class='legend" + index + "' x='" + (this.legendBBox.left + this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + (index * 30)) + "' width='" + this.colorContWidth + "' height='" + this.colorContWidth + "' fill='" + color + "'  shape-rendering='optimizeSpeed' stroke='none' stroke-width='1' opacity='1'></rect>";
             strSVG += "<text id='legend_txt_" + index + "' class='legend" + index + "' font-size='" + this.fontSize + "' x='" + (this.legendBBox.left + this.colorContWidth + 2 * this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + (index * 30) + 14) + "' fill='#717171' font-family='Lato' >" + this.opts.legendSet[index].label + "</text>";
             strSVG += "<text id='legend_value_" + index + "' class='legend" + index + "' font-size='" + this.fontSize + "' x='" + (this.legendBBox.left + this.colorContWidth + 2 * this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + (index * 30) + 15) + "' fill='#717171' font-family='Lato' >" + this.opts.legendSet[index].value + "</text>";
             strSVG += "</g>";
@@ -42,6 +46,7 @@ class LegendBox {
         let legendBox = this.legendContainer.getBoundingClientRect();
         this.resetPositions();
         this.bindEvents();
+        this.doDraggable(this.legendContainer);
     } /*End createLegends()*/
 
     resetPositions() {
