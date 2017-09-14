@@ -3,16 +3,18 @@
  * @Version:1.0.0
  * @CreatedOn:28-Aug-2017
  * @Author:SmartChartsNXT
- * @Description: This components will create legends to use in charts.
+ * @Description: This components will create a box that contains legends. 
+ * Legends are used to identify a set of data which used in charts.
  */
 
 "use strict";
 
 let Draggable = require("./draggable"); 
-
+let UiCore = require("./../core/ui.core");
 class LegendBox extends Draggable{
     constructor() {
         super();
+        this.ui = new UiCore(); 
     }
 
     createLegends(objChart, targetElem, opts) {
@@ -43,6 +45,7 @@ class LegendBox extends Draggable{
             strSVG += "</g>";
         }
         this.legendContainer.insertAdjacentHTML("beforeend", strSVG);
+        this.legendContainer.querySelector("#legend_container_border").setAttribute("filter", this.ui.dropShadow(this.targetElem));
         let legendBox = this.legendContainer.getBoundingClientRect();
         this.resetPositions();
         this.bindEvents();

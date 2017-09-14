@@ -25,7 +25,7 @@ class Tooltip {
         }
 
         let strSVG = "<g id='toolTipContainer' pointer-events='none'>";
-        strSVG += "  <path id='toolTip'  filter='" + this.ui.dropShadow(this.chartSVG.parentNode.getAttribute("id")) + "' fill='white' stroke='rgb(124, 181, 236)' fill='none' d='' stroke-width='1' opacity='0.9'></path>";
+        strSVG += "  <path id='toolTip'  filter='' fill='white' stroke='rgb(124, 181, 236)' fill='none' d='' stroke-width='1' opacity='0.9'></path>";
         strSVG += "  <g id='txtToolTipGrp' fill='#717171' font-family='Lato' >";
 
         strSVG += "<foreignobject id='toolTipHTML'>";
@@ -37,6 +37,7 @@ class Tooltip {
         strSVG += "</g>";
         this.chartSVG.insertAdjacentHTML("beforeend", strSVG);
         this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
+        this.tooltipContainer.querySelector("#toolTip").setAttribute("filter", this.ui.dropShadow("toolTipContainer"));
         this.toolTipHtml = this.tooltipContainer.querySelector("#toolTipHTML");
         this.toolTip = this.tooltipContainer.querySelector("#toolTip");
     }

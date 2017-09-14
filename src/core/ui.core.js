@@ -17,7 +17,7 @@ class UiCore {
     constructor() {}
 
     dropShadow(parentID) {
-        let shadow = document.querySelectorAll("#" + parentID + " svg #" + parentID + "-smartCharts-dropshadow");
+        let shadow = document.querySelectorAll("#" + parentID + "-smartCharts-dropshadow");
         if (shadow.length < 1) {
             let strSVG = "";
             strSVG = "<filter id='" + parentID + "-smartCharts-dropshadow' height='130%'>";
@@ -28,7 +28,7 @@ class UiCore {
             strSVG += "    <feMergeNode in='SourceGraphic'/>";
             strSVG += "  </feMerge>";
             strSVG += "</filter>";
-            document.querySelector("#" + parentID + " svg").insertAdjacentHTML("beforeend", strSVG);
+            document.querySelector("#" + parentID).insertAdjacentHTML("beforeend", strSVG);
         }
         return "url(#" + parentID + "-smartCharts-dropshadow)";
     } /*End appendDropShadow()*/
@@ -51,7 +51,7 @@ class UiCore {
         scaleY = scaleY || 1;
         let strSVG = "";
         strSVG += "<g id='smartCharts-menu2'>";
-        strSVG += "  <path id='smartCharts-menu-icon' d='" + chartObj.geom.describeRoundedRect(((svgCenter.x * 2) - 50 + (scaleX / 2)), (25 - (scaleY / 2)), 35, 30, 5).join(" ") + "' filter='" + this.dropShadow(targetElem) + "' fill='white' stroke-width='0.5' stroke='#717171' style='cursor:pointer;' />";
+        strSVG += "  <path id='smartCharts-menu-icon' d='" + chartObj.geom.describeRoundedRect(((svgCenter.x * 2) - 50 + (scaleX / 2)), (25 - (scaleY / 2)), 35, 30, 5).join(" ") + "' pointer-events='all' fill='none' stroke-width='0.5' opacity='0' stroke='#717171' style='cursor:pointer;' />";
         strSVG += " <g class='vBarIcon'>";
         strSVG += "  <line  x1='" + ((svgCenter.x * 2) - 45 + (scaleX / 2)) + "' y1='" + (32 - (scaleY / 2)) + "' x2='" + ((svgCenter.x * 2) - 20 + (scaleX / 2)) + "' y2='" + (32 - (scaleY / 2)) + "' style='stroke:#333;stroke-width:1;cursor:pointer;' />";
         strSVG += "  <line  x1='" + ((svgCenter.x * 2) - 45 + (scaleX / 2)) + "' y1='" + (39 - (scaleY / 2)) + "' x2='" + ((svgCenter.x * 2) - 20 + (scaleX / 2)) + "' y2='" + (39 - (scaleY / 2)) + "' style='stroke:#333;stroke-width:1;cursor:pointer;' />";
