@@ -15,6 +15,7 @@ let HorizonalLabels = require("./../components/horizontalLabels");
 let HorizontalScroller = require("./../components/horizontalScroller");
 let ZoomOutBox = require("./../components/zoomOutBox");
 let Tooltip = require("./../components/tooltip");
+let LegendBox = require("./../components/legendBox");
 
 class CoordinateChart extends BaseChart {
 
@@ -26,6 +27,7 @@ class CoordinateChart extends BaseChart {
     this.hScroller = new HorizontalScroller();
     this.zoomOutBox = new ZoomOutBox(); 
     this.tooltip = new Tooltip(); 
+    this.legendBox = new LegendBox(); 
   }
 }
 

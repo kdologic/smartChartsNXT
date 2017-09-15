@@ -16,17 +16,23 @@ let transformer = require("./../core/transformer");
 class Draggable {
     constructor() {
         this.geom = new Geom();
-        this.handlerLength = 20;
     }
 
     doDraggable(targetElemObj) {
         this.targetElemObj = targetElemObj;
         this.targetElemId = targetElemObj.getAttribute("id") || Math.round(Math.random() * 1000);
+        
+        this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
+        console.log(this.objDragHandle);
+        if (this.objDragHandle) {
+            this.objDragHandle.parentNode.removeChild(this.objDragHandle);
+        }
+        
         let bbox = this.targetElemObj.getBBox();
 
         let strSVG = "";
         strSVG += "<g id='drag_handler_container_" + this.targetElemId + "' class='dragger' style='cursor: move;'>";
-        strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height+10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";
+        strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height + 10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";
         strSVG += "</g>";
         this.targetElemObj.insertAdjacentHTML("beforeend", strSVG);
         this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
@@ -43,7 +49,7 @@ class Draggable {
         var delay = 200;
         var prevent = false;
 
-        this.targetElemObj.setAttribute("pointer-events",'all');
+        this.targetElemObj.setAttribute("pointer-events", 'all');
         this.targetElemObj.addEventListener("click", (e) => {
             timer = setTimeout(function () {
                 if (!prevent) {
@@ -60,8 +66,8 @@ class Draggable {
         });
 
         this.objDragHandle.addEventListener("dblclick", (e) => {
-            e.stopPropagation(); 
-            this.hideHandler(); 
+            e.stopPropagation();
+            this.hideHandler();
         });
 
         this.objDragHandle.addEventListener("mousedown", (e) => {

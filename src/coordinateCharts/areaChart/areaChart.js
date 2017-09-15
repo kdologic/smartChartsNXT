@@ -190,7 +190,7 @@ class AreaChart extends CoordinateChart {
       this.prepareChart();
       this.tooltip.createTooltip(this);
     } catch (ex) {
-        this.handleError(ex, "Error in AreaChart");
+      this.handleError(ex, "Error in AreaChart");
     }
 
   } /*End init()*/
@@ -342,6 +342,7 @@ class AreaChart extends CoordinateChart {
       let minVal = Math.min.apply(null, arrData);
       maxSet.push(maxVal);
       minSet.push(minVal);
+      dataSet[i].color = dataSet[i].color || this.util.getColor(i);
     }
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
@@ -384,8 +385,7 @@ class AreaChart extends CoordinateChart {
       d.push(p.y);
       arrPointsSet.push(p);
     }
-
-    let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
+    let color = this.CHART_OPTIONS.dataSet.series[index].color; //|| this.util.getColor(index);
     let strokeWidth = this.CHART_OPTIONS.dataSet.series[index].lineWidth || 1;
     let areaOpacity = this.CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.3;
     areaOpacity = this.CHART_OPTIONS.dataSet.series[index].showGradient ? 1 : areaOpacity;
@@ -457,21 +457,23 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
-  createLegands(index) {
-    let seriesLegend = this.CHART_DATA.chartSVG.querySelector("#legendContainer #series_legend_" + index);
-    if (seriesLegend) {
-      seriesLegend.parentNode.removeChild(seriesLegend);
-    }
+  // createLegands(index) {
+  //   let seriesLegend = this.CHART_DATA.chartSVG.querySelector("#legendContainer #series_legend_" + index);
+  //   if (seriesLegend) {
+  //     seriesLegend.parentNode.removeChild(seriesLegend);
+  //   }
 
-    /*Creating series legend*/
-    let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
-    let strSVG = "";
-    strSVG = "<g id='series_legend_" + index + "' style='cursor:pointer;'>";
-    strSVG += "<rect id='legend_color_" + index + "' x='" + this.CHART_DATA.marginLeft + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-    strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (this.CHART_DATA.marginLeft + 20) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + this.CHART_OPTIONS.dataSet.series[index].name + "</text>";
-    strSVG += "</g>";
-    this.CHART_DATA.chartSVG.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
-  }
+  //   /*Creating series legend*/
+  //   let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
+  //   let strSVG = "";
+  //   strSVG = "<g id='series_legend_" + index + "' style='cursor:pointer;'>";
+  //   strSVG += "<rect id='legend_color_" + index + "' x='" + this.CHART_DATA.marginLeft + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
+  //   strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (this.CHART_DATA.marginLeft + 20) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + this.CHART_OPTIONS.dataSet.series[index].name + "</text>";
+  //   strSVG += "</g>";
+  //   this.CHART_DATA.chartSVG.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
+  //   let draggable = new Draggable();
+  //   draggable.doDraggable(this.CHART_DATA.chartSVG.querySelector("#legendContainer"));
+  // }
 
   resetTextPositions(categories) {
     let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
@@ -530,29 +532,29 @@ class AreaChart extends CoordinateChart {
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
-    /*Set position for legend text*/
-    let arrLegendText = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer text");
-    let arrLegendColor = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer rect");
-    let width = 0;
-    let row = 0;
-    for (let i = 0; i < arrLegendText.length; i++) {
-      arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
-      arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-      arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
-      arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
-      width += (arrLegendText[i].getBBox().width + 50);
+    // /*Set position for legend text*/
+    // let arrLegendText = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer text");
+    // let arrLegendColor = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer rect");
+    // let width = 0;
+    // let row = 0;
+    // for (let i = 0; i < arrLegendText.length; i++) {
+    //   arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
+    //   arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
+    //   arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
+    //   arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
+    //   width += (arrLegendText[i].getBBox().width + 50);
 
-      if (width > this.CHART_CONST.FIX_WIDTH) {
-        width = 0;
-        row++;
-        arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
-        arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-        arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
-        arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
-        width += (arrLegendText[i].getBBox().width + 50);
-      }
+    //   if (width > this.CHART_CONST.FIX_WIDTH) {
+    //     width = 0;
+    //     row++;
+    //     arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
+    //     arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
+    //     arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
+    //     arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
+    //     width += (arrLegendText[i].getBBox().width + 50);
+    //   }
 
-    }
+    // }
 
   } /*End resetTextPositions()*/
 
@@ -769,6 +771,7 @@ class AreaChart extends CoordinateChart {
   } /*End onRightSliderMove()*/
 
   reDrawSeries() {
+    let self = this; 
     this.CHART_DATA.newDataSet = [];
     this.CHART_DATA.newCatgList = [];
     let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
@@ -778,9 +781,14 @@ class AreaChart extends CoordinateChart {
     }
 
     for (let setIndex = 0; setIndex < this.CHART_OPTIONS.dataSet.series.length; setIndex++) {
-      let set = {
-        data: this.CHART_OPTIONS.dataSet.series[setIndex].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1)
-      };
+      let set = {};
+      for (let key in this.CHART_OPTIONS.dataSet.series[setIndex]) {
+        if (key === "data") {
+          set["data"] = this.CHART_OPTIONS.dataSet.series[setIndex].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1);
+        } else {
+          set[key] = JSON.parse(JSON.stringify(this.CHART_OPTIONS.dataSet.series[setIndex][key]));
+        }
+      }
       this.CHART_DATA.newDataSet.push(set);
     }
     this.prepareDataSet(this.CHART_DATA.newDataSet);
@@ -807,10 +815,21 @@ class AreaChart extends CoordinateChart {
     );
 
     this.CHART_DATA.series = [];
+    let legendSet = [];
     for (let i = 0; i < this.CHART_DATA.newDataSet.length; i++) {
       this.createSeries(this.CHART_DATA.newDataSet[i].data, i, scaleX);
-      if (this.CHART_OPTIONS.dataSet.series.length > 1) {
-        this.createLegands(i);
+      if (this.CHART_OPTIONS.showLegend) {
+        legendSet.push({
+          label: self.CHART_DATA.newDataSet[i].name,
+          value: "",
+          color: self.CHART_DATA.newDataSet[i].color
+        });
+        this.legendBox.createLegends(this, "legendContainer", {
+          left: self.CHART_DATA.marginLeft,
+          top: self.CHART_DATA.marginTop,
+          legendSet: legendSet,
+          type:"horizontal"
+        });
       }
     }
 

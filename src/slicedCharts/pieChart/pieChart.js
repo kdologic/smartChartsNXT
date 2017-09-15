@@ -178,7 +178,8 @@ class PieChart extends SlicedChart {
       this.legendBox.createLegends(this, "legendContainer", {
         left: self.CHART_DATA.pieCenter.x + self.CHART_DATA.pieWithTextSpan,
         top: self.CHART_DATA.pieCenter.y - self.CHART_DATA.pieHeight - 50,
-        legendSet: lSet
+        legendSet: lSet,
+        type:"vertical"
       });
     }
     this.bindEvents();
