@@ -27,6 +27,7 @@ class LegendBox extends Draggable {
         this.opts = opts;
         this.fontSize = 16;
         this.colorContWidth = 15;
+        this.isToggleType = !!opts.isToggleType;
         /*Creating series legend*/
         this.legendBBox = {
             left: opts.left,
@@ -35,7 +36,7 @@ class LegendBox extends Draggable {
         };
 
         let strSVG = "";
-        strSVG += "  <path id='legend_container_border' d=''  fill='none' stroke-width='1' stroke='#717171' />";
+        strSVG += "  <path id='legend_container_border' d=''  fill='none' stroke-width='1' stroke='#717171' stroke-opacity='" + (opts.border ? 1 : 0) + "' />";
 
         if (this.opts.type === "vertical") {
             for (let index in this.opts.legendSet) {
@@ -49,8 +50,8 @@ class LegendBox extends Draggable {
         } else if (this.opts.type === "horizontal") {
             for (let index in this.opts.legendSet) {
                 let color = this.opts.legendSet[index].color;
-                strSVG += "<g id='series_legend_" + index + "' class='legend" + index + "'style='cursor:pointer;'>";
-                strSVG += "<rect id='legend_color_" + index + "' class='legend" + index + "' x='" + (this.legendBBox.left + this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding) + "' width='" + this.colorContWidth + "' height='" + this.colorContWidth + "' fill='" + color + "'  shape-rendering='optimizeSpeed' stroke='none' stroke-width='1' opacity='1'></rect>";
+                strSVG += "<g id='series_legend_" + index + "' class='legend" + index + "' style='cursor:pointer;'>";
+                strSVG += "<rect id='legend_color_" + index + "' class='legend" + index + "' x='" + (this.legendBBox.left + this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding) + "' width='" + this.colorContWidth + "' height='" + this.colorContWidth + "' fill='" + color + "' shape-rendering='optimizeSpeed' stroke='none' stroke-width='1' opacity='1'></rect>";
                 strSVG += "<text id='legend_txt_" + index + "' class='legend" + index + "' font-size='" + this.fontSize + "' x='" + (this.legendBBox.left + this.colorContWidth + 2 * this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + this.colorContWidth) + "' fill='#717171' font-family='Lato' >" + this.opts.legendSet[index].label + "</text>";
                 strSVG += "<text id='legend_value_" + index + "' class='legend" + index + "' font-size='" + this.fontSize + "' x='" + (this.legendBBox.left + this.colorContWidth + 2 * this.legendBBox.padding) + "' y='" + (this.legendBBox.top + this.legendBBox.padding + this.colorContWidth) + "' fill='#717171' font-family='Lato' >" + this.opts.legendSet[index].value + "</text>";
                 strSVG += "</g>";
@@ -69,11 +70,17 @@ class LegendBox extends Draggable {
     } /*End createLegends()*/
 
     resetHorizontalPositions() {
-        let eachLegendLenth = 0;
+        let nextLegendLength = 0;
+        this.legendContainerWidth = (2 * this.legendBBox.padding);
+        this.legendContainerHeight = (2 * this.legendBBox.padding) + this.colorContWidth;
+
         for (let i in this.opts.legendSet) {
-            let legendBBox = this.legendContainer.querySelector("#series_legend_" + i).getBBox();
-            console.log(legendBBox);
+            let eachLegendCont = this.legendContainer.querySelector("#series_legend_" + i);
+            eachLegendCont.setAttribute("transform", "translate(" + nextLegendLength + ")");
+            nextLegendLength = eachLegendCont.getBBox().width + 30;
+            this.legendContainerWidth += nextLegendLength;
         }
+        this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
     }
 
     resetVerticalPositions() {
@@ -110,7 +117,7 @@ class LegendBox extends Draggable {
 
         this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
         if (this.opts.left + this.legendContainerWidth > this.objChart.CHART_DATA.svgWidth && this.fontSize > 8) {
-            this.resetPositions();
+            this.resetVerticalPositions();
         }
     }
 
@@ -142,13 +149,28 @@ class LegendBox extends Draggable {
             }, false);
 
             this.legendContainer.querySelector("#series_legend_" + i).addEventListener("click", (e) => {
+                let eachLegend = e.target.parentNode; 
                 let elemClass = e.target.getAttribute("class");
+                let toggleColor = "#eee";
                 let legendIndex = elemClass.substring("legend".length);
+                let toggeled = true;
+                
+                if (this.isToggleType) {
+                    let legendColorBox = eachLegend.querySelector("#legend_color_" + legendIndex);
+                    let colorFill = legendColorBox.getAttribute("fill");
+                    if (colorFill === toggleColor) {
+                        toggleColor = this.opts.legendSet[legendIndex].color;
+                        toggeled = false; 
+                    }
+                    legendColorBox.setAttribute("fill", toggleColor);
+                }
+
                 //fire Event onLegendClick
                 let onLegendClick = new this.objChart.event.Event("onLegendClick", {
                     srcElement: self,
                     originEvent: e,
                     legendIndex: legendIndex,
+                    toggeled: toggeled,
                     legendData: this.opts.legendSet[legendIndex]
                 });
                 this.objChart.event.dispatchEvent(onLegendClick);

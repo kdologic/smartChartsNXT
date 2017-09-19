@@ -21,15 +21,11 @@ class Draggable {
     doDraggable(targetElemObj) {
         this.targetElemObj = targetElemObj;
         this.targetElemId = targetElemObj.getAttribute("id") || Math.round(Math.random() * 1000);
-        
         this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
-        console.log(this.objDragHandle);
         if (this.objDragHandle) {
             this.objDragHandle.parentNode.removeChild(this.objDragHandle);
         }
-        
         let bbox = this.targetElemObj.getBBox();
-
         let strSVG = "";
         strSVG += "<g id='drag_handler_container_" + this.targetElemId + "' class='dragger' style='cursor: move;'>";
         strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height + 10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";

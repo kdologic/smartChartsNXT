@@ -179,7 +179,8 @@ class PieChart extends SlicedChart {
         left: self.CHART_DATA.pieCenter.x + self.CHART_DATA.pieWithTextSpan,
         top: self.CHART_DATA.pieCenter.y - self.CHART_DATA.pieHeight - 50,
         legendSet: lSet,
-        type:"vertical"
+        type:"vertical",
+        border:true
       });
     }
     this.bindEvents();

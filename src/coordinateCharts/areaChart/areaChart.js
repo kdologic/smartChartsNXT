@@ -532,41 +532,9 @@ class AreaChart extends CoordinateChart {
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
-    // /*Set position for legend text*/
-    // let arrLegendText = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer text");
-    // let arrLegendColor = this.CHART_DATA.chartSVG.querySelectorAll("#legendContainer rect");
-    // let width = 0;
-    // let row = 0;
-    // for (let i = 0; i < arrLegendText.length; i++) {
-    //   arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
-    //   arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-    //   arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
-    //   arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
-    //   width += (arrLegendText[i].getBBox().width + 50);
-
-    //   if (width > this.CHART_CONST.FIX_WIDTH) {
-    //     width = 0;
-    //     row++;
-    //     arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
-    //     arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
-    //     arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 10 + (row * 20)));
-    //     arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.hScrollBoxHeight + 20 + (row * 20)));
-    //     width += (arrLegendText[i].getBBox().width + 50);
-    //   }
-
-    // }
-
   } /*End resetTextPositions()*/
 
   bindEvents() {
-    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
-      let legend = this.CHART_DATA.chartSVG.querySelector("#series_legend_" + index);
-      if (legend) {
-        legend.removeEventListener("click", this.EVENT_BINDS.onLegendClickBind);
-        legend.addEventListener("click", this.EVENT_BINDS.onLegendClickBind, false);
-      }
-    }
-
     let gridRect = this.CHART_DATA.chartSVG.querySelector("#gridRect");
     if (gridRect) {
       gridRect.removeEventListener("mousemove", this.EVENT_BINDS.onMouseMoveBind);
@@ -594,6 +562,10 @@ class AreaChart extends CoordinateChart {
     this.event.on("onRightSliderMove", this.EVENT_BINDS.onRightSliderMoveBind);
     this.event.off("onHorizontalScroll", this.EVENT_BINDS.onHorizontalScrollBind);
     this.event.on("onHorizontalScroll", this.EVENT_BINDS.onHorizontalScrollBind);
+
+    /*Add events for legends to show/hide a series */
+    this.event.off("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+    this.event.on("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
 
     /*Add events for resize chart window */
     window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
@@ -721,24 +693,16 @@ class AreaChart extends CoordinateChart {
   } /*End onMouseLeave()*/
 
   onLegendClick(e) {
-    let seriesIndex = e.target.id.split("_")[2];
-    let legendColor = this.CHART_DATA.chartSVG.querySelector("#legend_color_" + seriesIndex);
-    let area = this.CHART_DATA.chartSVG.querySelector("#series_" + seriesIndex);
-    let actualArea = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + seriesIndex);
-    let color = this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
-
-    if (legendColor.getAttribute("fill") === "#eee") {
-      legendColor.setAttribute("fill", color);
-      area.style.display = "block";
-      if (actualArea) {
-        actualArea.style.display = "block";
-      }
-    } else {
-      legendColor.setAttribute("fill", "#eee");
-      area.style.display = "none";
-      if (actualArea) {
-        actualArea.style.display = "none";
-      }
+    let seriesIndex = e.legendIndex; 
+    let areaBorder = this.CHART_DATA.chartSVG.querySelector("#series_" + seriesIndex);
+    let areaActual = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + seriesIndex);
+    let color = e.legendData.color; 
+    let doShow = e.toggeled ? "none" : "block";
+    if (areaBorder) {
+      areaBorder.style.display = doShow;
+    }
+    if (areaActual) {
+      areaActual.style.display = doShow;
     }
   } /*End onLegendClick()*/
 
@@ -771,7 +735,7 @@ class AreaChart extends CoordinateChart {
   } /*End onRightSliderMove()*/
 
   reDrawSeries() {
-    let self = this; 
+    let self = this;
     this.CHART_DATA.newDataSet = [];
     this.CHART_DATA.newCatgList = [];
     let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
@@ -826,9 +790,11 @@ class AreaChart extends CoordinateChart {
         });
         this.legendBox.createLegends(this, "legendContainer", {
           left: self.CHART_DATA.marginLeft,
-          top: self.CHART_DATA.marginTop,
+          top: self.CHART_DATA.marginTop - 35,
           legendSet: legendSet,
-          type:"horizontal"
+          type: "horizontal",
+          border: false,
+          isToggleType: true
         });
       }
     }
