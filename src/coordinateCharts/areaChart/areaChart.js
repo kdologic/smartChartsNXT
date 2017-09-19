@@ -457,24 +457,6 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFill()*/
 
-  // createLegands(index) {
-  //   let seriesLegend = this.CHART_DATA.chartSVG.querySelector("#legendContainer #series_legend_" + index);
-  //   if (seriesLegend) {
-  //     seriesLegend.parentNode.removeChild(seriesLegend);
-  //   }
-
-  //   /*Creating series legend*/
-  //   let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
-  //   let strSVG = "";
-  //   strSVG = "<g id='series_legend_" + index + "' style='cursor:pointer;'>";
-  //   strSVG += "<rect id='legend_color_" + index + "' x='" + this.CHART_DATA.marginLeft + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 130) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-  //   strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (this.CHART_DATA.marginLeft + 20) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 140) + "' fill='#717171' font-family='Verdana' >" + this.CHART_OPTIONS.dataSet.series[index].name + "</text>";
-  //   strSVG += "</g>";
-  //   this.CHART_DATA.chartSVG.querySelector("#legendContainer").insertAdjacentHTML("beforeend", strSVG);
-  //   let draggable = new Draggable();
-  //   draggable.doDraggable(this.CHART_DATA.chartSVG.querySelector("#legendContainer"));
-  // }
-
   resetTextPositions(categories) {
     let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
     let txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
