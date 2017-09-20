@@ -16,7 +16,9 @@
       "targetElem":"chartContainer",
       "canvasBorder":false,
       "bgColor":"none",
-      "animated":false,
+      "showLegend":true, 
+      "animated": true,
+      "hideHorizontalScroller":true,
       "toolTip":{
         "content":'<table>'+
               '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
@@ -92,6 +94,8 @@
 
 let CoordinateChart = require("./../coordinateChart");
 let Point = require("./../../core/point");
+let HorizontalScroller = require("./../../components/horizontalScroller");
+let ZoomOutBox = require("./../../components/zoomOutBox");
 
 class AreaChart extends CoordinateChart {
 
@@ -238,19 +242,22 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1));
 
     this.grid.createGrid(this, this.CHART_DATA.chartSVG, this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
-    this.prepareFullSeriesDataset();
-    this.hScroller.createScrollBox(this,
-      this.CHART_DATA.chartSVG,
-      "scrollerCont",
-      this.CHART_DATA.marginLeft,
-      this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight,
-      this.CHART_DATA.gridBoxWidth,
-      this.CHART_DATA.hScrollBoxHeight
-    );
+    
+    if (!this.CHART_OPTIONS.hideHorizontalScroller) {
+      this.prepareFullSeriesDataset();
+      this.hScroller = new HorizontalScroller(this,
+        this.CHART_DATA.chartSVG,
+        "scrollerCont",
+        this.CHART_DATA.marginLeft,
+        this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight,
+        this.CHART_DATA.gridBoxWidth,
+        this.CHART_DATA.hScrollBoxHeight
+      );
 
-    /* ploting full series actual points */
-    for (let index = 0; index < this.CHART_DATA.fullSeries.length; index++) {
-      this.drawFullSeries(this.CHART_DATA.fullSeries[index], index);
+      /* ploting full series actual points */
+      for (let index = 0; index < this.CHART_DATA.fullSeries.length; index++) {
+        this.drawFullSeries(this.CHART_DATA.fullSeries[index], index);
+      }
     }
 
     /*Creating horizontal and vertical subtitles*/
@@ -259,9 +266,10 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
 
-    if (this.CHART_DATA.chartSVG.querySelector("#scrollerCont #outerFrame")) {
-      this.zoomOutBox.createZoomOutBox(
-        this, this.CHART_DATA.chartSVG,
+    if (this.hScroller) {
+      this.zoomOutBox = new ZoomOutBox(
+        this, 
+        this.CHART_DATA.chartSVG,
         this.CHART_DATA.marginTop - this.CHART_DATA.zoomOutBoxHeight,
         this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth,
         this.CHART_DATA.zoomOutBoxWidth,
@@ -269,9 +277,11 @@ class AreaChart extends CoordinateChart {
       );
     }
 
+    if (this.hScroller) {
+      this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
+      this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
+    }
     this.reDrawSeries();
-    this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
-    this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
   } /*End prepareChart()*/
 
   prepareFullSeriesDataset() {
@@ -675,10 +685,10 @@ class AreaChart extends CoordinateChart {
   } /*End onMouseLeave()*/
 
   onLegendClick(e) {
-    let seriesIndex = e.legendIndex; 
+    let seriesIndex = e.legendIndex;
     let areaBorder = this.CHART_DATA.chartSVG.querySelector("#series_" + seriesIndex);
     let areaActual = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + seriesIndex);
-    let color = e.legendData.color; 
+    let color = e.legendData.color;
     let doShow = e.toggeled ? "none" : "block";
     if (areaBorder) {
       areaBorder.style.display = doShow;

@@ -15,12 +15,9 @@ let Point = require("./../core/point");
 
 class HorizontalScroller {
 
-    constructor() {
+    constructor(objChart, chartSVG, targetElem, posX, posY, scrollBoxWidth, scrollBoxHeight) {
         this.ui = new UiCore();
         this.geom = new GeomCore();
-    }
-
-    createScrollBox(objChart, chartSVG, targetElem, posX, posY, scrollBoxWidth, scrollBoxHeight) {
         this.objChart = objChart;
         this.chartSVG = chartSVG;
         this.targetElem = targetElem;
@@ -28,6 +25,15 @@ class HorizontalScroller {
         this.posY = posY;
         this.scrollBoxWidth = scrollBoxWidth;
         this.scrollBoxHeight = scrollBoxHeight;
+        this.createScrollBox(); 
+    }
+
+    createScrollBox() {
+        let posX = this.posX; 
+        let posY = this.posY;
+        let scrollBoxWidth = this.scrollBoxWidth; 
+        let scrollBoxHeight = this.scrollBoxHeight; 
+        
         let strSVG = "";
         strSVG += "<g id='hChartScrollerCont'></g>";
         strSVG += "<rect id='sliderLeftOffset' x='" + posX + "' y='" + posY + "' width='0' height='" + scrollBoxHeight + "' fill= 'rgba(128,179,236,0.5)'  fill-opacity=0.7 style='stroke-width:0.1;stroke:#717171;' \/>";
@@ -56,7 +62,7 @@ class HorizontalScroller {
         strSVG += "  <path id='slideRSel' stroke='rgb(178, 177, 182)' fill='#fafafa' d='' stroke-width='1' opacity='1'></path>";
         strSVG += "  <path id='slideRSelInner' stroke='rgb(178, 177, 182)' fill='none' d='' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         strSVG += "</g>";
-        chartSVG.querySelector("#" + targetElem).insertAdjacentHTML("beforeend", strSVG);
+        this.chartSVG.querySelector("#" + this.targetElem).insertAdjacentHTML("beforeend", strSVG);
 
         this.slideRSel = this.chartSVG.querySelector("#slideRSel");
         this.slideLSel = this.chartSVG.querySelector("#slideLSel");

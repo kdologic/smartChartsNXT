@@ -12,8 +12,6 @@ let BaseChart = require("./../base/baseChart");
 let Grid = require("./../components/grid");
 let VerticalLabels = require("./../components/verticalLabels");
 let HorizonalLabels = require("./../components/horizontalLabels");
-let HorizontalScroller = require("./../components/horizontalScroller");
-let ZoomOutBox = require("./../components/zoomOutBox");
 let Tooltip = require("./../components/tooltip");
 let LegendBox = require("./../components/legendBox");
 
@@ -24,8 +22,6 @@ class CoordinateChart extends BaseChart {
     this.grid = new Grid(this.CHART_OPTIONS.targetElem, this.chartType);
     this.vLabel = new VerticalLabels(); 
     this.hLabel = new HorizonalLabels(); 
-    this.hScroller = new HorizontalScroller();
-    this.zoomOutBox = new ZoomOutBox(); 
     this.tooltip = new Tooltip(); 
     this.legendBox = new LegendBox(); 
   }
