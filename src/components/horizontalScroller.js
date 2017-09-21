@@ -211,7 +211,7 @@ class HorizontalScroller {
 
         if (e.type === "touchmove") {
             if (mousePointer.x > sliderRsel.x) {
-                let eventMouseEnter = new Event("mouseenter");
+                let eventMouseEnter = new window.Event("mouseenter");
                 this.resetSliderPos("left", sliderPosX);
                 this.resetSliderPos("right", mousePointer.x);
                 this.sliderRightHandle.dispatchEvent(eventMouseEnter);
@@ -241,7 +241,7 @@ class HorizontalScroller {
 
         if (e.type === "touchmove") {
             if (sliderRsel.x < sliderLsel.x + sliderLsel.width) {
-                let eventMouseEnter = new Event("mouseenter");
+                let eventMouseEnter = new window.Event("mouseenter");
                 this.resetSliderPos("right", sliderPosX);
                 this.resetSliderPos("left", mousePointer.x);
                 this.sliderLeftHandle.dispatchEvent(eventMouseEnter);
