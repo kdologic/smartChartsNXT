@@ -1,0 +1,502 @@
+<html>
+<head>
+<script src="jquery1.11.3.min.js" type="text/javascript"></script>
+<!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>-->
+<script>
+  $(document).ready(function(){
+    drawPieChart();
+  });
+  
+  function drawPieChart(opts)
+  {
+    var objChart = this;
+    var PAGE_OPTIONS = {
+      "title":"Sales Report of ABC Group",
+      "subTitle":"Report for the month of March, 2016",
+      "targetElem":"chartContainer",
+      "dataSet":[
+        {
+          "label":"Sumit Bag",
+          "value":"372"
+        },
+        {
+          "label":"Ashimt Dutta",
+          "value":"110"
+        },
+        {
+          "label":"Naren Mitra",
+          "value":"547"
+        },
+        {
+          "label":"Rames Tiwari",
+          "value":"270"
+        },
+        {
+          "label":"Rimi Sen",
+          "value":"90"
+        },
+        {
+          "label":"Jogesh Xing",
+          "value":"180"
+        }
+        
+      ]
+    };
+    
+    var PAGE_DATA = {
+      svgCenter:0,
+      pieCenter:0,
+      pieThickness:20,
+      uniqueDataSet:[],
+      totalValue:0,
+      pieWidth:200,
+      pieHeight:100,
+      pieSet:[]
+    };
+    
+    function init()
+    {
+      $.extend(true,PAGE_OPTIONS,opts);
+      var svgWidth = parseInt($("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").attr("width"));
+      var svgHeight = parseInt($("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").attr("height"));
+      PAGE_DATA.svgCenter = new Point((svgWidth/2),(svgHeight/2)) ;
+      PAGE_DATA.pieCenter = new Point(PAGE_DATA.svgCenter.x,PAGE_DATA.svgCenter.y+50) ;
+      
+      prepareChart();
+    
+      setInterval(function(){rotateChart();},300);
+        
+     
+    }/*End init()*/
+    
+    function prepareChart()
+    {
+      var startAngle,endAngle=0;
+      prepareDataSet();
+      //console.log(PAGE_DATA.uniqueDataSet);
+      
+      var strSVG="";
+      strSVG += "<g>";
+      strSVG += "  <rect width='"+(PAGE_DATA.svgCenter.x*2)+"' height='"+(PAGE_DATA.svgCenter.y*2)+"' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
+      strSVG += "<\/g>";
+      strSVG += "<g>";
+      strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Verdana' >";
+      strSVG += "    <tspan id='txtTitle' x='100' y='50' font-size='25'><\/tspan>";
+      strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='15'><\/tspan>";
+      strSVG += "  <\/text>";
+      strSVG += "<\/g>";
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").append(strSVG);
+      
+      /*Set Title of chart*/
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#txtTitleGrp").find("#txtTitle").text(PAGE_OPTIONS.title);
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#txtSubtitle").text(PAGE_OPTIONS.subTitle);
+      
+    
+      for(var i=0;i<PAGE_DATA.uniqueDataSet.length;i++)
+      {
+         startAngle = endAngle;
+         endAngle += (PAGE_DATA.uniqueDataSet[i].percent*360/100);
+         createPie(startAngle,endAngle,rainbow(PAGE_DATA.uniqueDataSet.length,i),i);
+      }
+      $("#"+PAGE_OPTIONS.targetElem).html($("#"+PAGE_OPTIONS.targetElem).html());
+      resetOrdering();  
+      bindEvents();
+      resetTextPos();
+      
+      
+    }/*End prepareChart()*/
+    
+    function createPie(startAngle,endAngle,color,index)
+    {
+      //console.log(color);
+      //console.log("startAngle:"+startAngle+", endAngl:"+endAngle);
+      var darkShade = colorLuminance(color,-0.1);
+      var lighterShade = colorLuminance(color,0.2);
+      //console.log("dark shade:"+darkShade+", light Shade:"+lighterShade);
+      var strSVG="";
+      strSVG += "<g class='pie' id='pie"+index+"' stroke-width='0' >";
+      strSVG += "  <path id='lowerArcPie"+index+"' fill='"+color+"' stroke='"+darkShade+"' stroke-width='0' \/> ";
+      strSVG += "  <path id='sideBPie"+index+"'  fill='"+darkShade+"' stroke='"+darkShade+"'\/>";
+      strSVG += "  <path id='sideCPie"+index+"'  fill='"+darkShade+"' stroke='"+darkShade+"' \/>";
+      strSVG += "  <path id='sideAPie"+index+"'  fill='"+darkShade+"' stroke='"+darkShade+"' \/>";
+      strSVG += "  <text id='txtPieGrpPie"+index+"' fill='#717171' font-family='Verdana' >";
+      strSVG += "  <tspan id='txtPie"+index+"' x='100' y='50' font-size='12'><\/tspan></text>";
+      strSVG += "  <path id='txtPathPie"+index+"'  stroke-width='0.7' style='fill: none; stroke: rgb(216, 220, 197); stroke-opacity: 1;'\/>";
+      strSVG += "  <path id='upperArcPie"+index+"'  fill='"+lighterShade+"' stroke='"+darkShade+"' \/>";
+      strSVG += "<\/g>";
+
+      strSVG += "<defs>";
+      strSVG += "  <radialGradient gradientUnits = 'userSpaceOnUse' id='gradRadialPie"+index+"' cx='50%' cy='50%' r='70%' fx='40%' fy='100%'>";
+      strSVG += "    <stop offset='0%' style='stop-color:"+lighterShade+";stop-opacity:0.8' \/>";
+      strSVG += "    <stop offset='100%' style='stop-color:"+darkShade+";stop-opacity:1' \/>";
+      strSVG += "  <\/radialGradient>";
+      
+      /*var linearGradStart = polarToCartesian(300,300, getEllipticalRadious(300,150,180), 180) ;
+      var linearGradEnd = polarToCartesian(300,300, getEllipticalRadious(300,150,0), 0) ;
+     
+      strSVG += "   <linearGradient gradientUnits = 'userSpaceOnUse' id='gradLinearPie"+index+"' x1='"+linearGradStart.x+"' y1='"+linearGradStart.y+"' x2='"+linearGradEnd.x+"' y2='"+linearGradEnd.y+"'>";
+      strSVG += "     <stop offset='2%' style='stop-color:"+lighterShade+";stop-opacity:1' \/>";
+      strSVG += "     <stop offset='100%' style='stop-color:"+darkShade+";stop-opacity:1' \/>";
+      strSVG += "   <\/linearGradient>";*/
+
+      strSVG += "<\/defs>";
+
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").append(strSVG);
+      
+      var upperArcPath = describeEllipticalArc(PAGE_DATA.pieCenter.x,PAGE_DATA.pieCenter.y,PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,startAngle,endAngle,0);
+      var lowerArcPath = describeEllipticalArc(PAGE_DATA.pieCenter.x,(PAGE_DATA.pieCenter.y+PAGE_DATA.pieThickness),PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,startAngle,endAngle,0);
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#upperArcPie"+index).attr("d",upperArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#lowerArcPie"+index).attr("d",lowerArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideAPie"+index).attr("d", describeRect(upperArcPath.center, upperArcPath.start,lowerArcPath.start, lowerArcPath.center));
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideBPie"+index).attr("d", describeRect(upperArcPath.center ,upperArcPath.end,lowerArcPath.end, lowerArcPath.center));
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideCPie"+index).attr("d", describeArcFill(upperArcPath, lowerArcPath));//.attr("fill","url(#gradLinearPie"+index+")");
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#txtPie"+index).text(PAGE_DATA.uniqueDataSet[index]["label"]+", "+PAGE_DATA.uniqueDataSet[index]["value"]);
+     
+      var midAngle = (startAngle+endAngle)/2;
+      var pie = {
+        "id":"pie"+index,
+        "upperArcPath":upperArcPath,
+        "lowerArcPath": lowerArcPath,
+        "midAngle": midAngle,
+        "slicedOut":false
+      };
+      PAGE_DATA.pieSet.push(pie);
+    }/*End createPie()*/
+    
+    function bindEvents()
+    {
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find(".pie").each(function(){
+        $(this).off("click");
+        $(this).on("click",function(e){
+          e.preventDefault();
+          var pieData,elemId = $(this).attr("id"),sliceOut;
+          for(var i=0;i<PAGE_DATA.pieSet.length;i++)
+            if(PAGE_DATA.pieSet[i].id === elemId)
+            {
+              pieData = PAGE_DATA.pieSet[i];
+              sliceOut = PAGE_DATA.pieSet[i].slicedOut;
+              PAGE_DATA.pieSet[i].slicedOut = !PAGE_DATA.pieSet[i].slicedOut;
+            }
+
+          var index = elemId.substring("pie".length);
+          var shiftIndex = sliceOut?15:1;
+          var shiftInterval = setInterval(function(){
+            var shiftedCentre = polarToCartesian(PAGE_DATA.pieCenter.x,PAGE_DATA.pieCenter.y, getEllipticalRadious((shiftIndex*2),shiftIndex,pieData.midAngle), pieData.midAngle) ;
+            var upperArcPath = describeEllipticalArc(shiftedCentre.x,shiftedCentre.y,PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,pieData["upperArcPath"].startAngle,pieData["upperArcPath"].endAngle,0);
+            var lowerArcPath = describeEllipticalArc(shiftedCentre.x,(shiftedCentre.y+20),PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,pieData["lowerArcPath"].startAngle,pieData["lowerArcPath"].endAngle,0);
+            if(shiftIndex === 0)
+            {
+              var upperArcPath = pieData.upperArcPath;
+              var lowerArcPath = pieData.lowerArcPath;
+            }
+            $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#upperArcPie"+index).attr("d",upperArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+            $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#lowerArcPie"+index).attr("d",lowerArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+            $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideAPie"+index).attr("d", describeRect(upperArcPath.center, upperArcPath.start,lowerArcPath.start, lowerArcPath.center));
+            $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideBPie"+index).attr("d", describeRect(upperArcPath.center ,upperArcPath.end,lowerArcPath.end, lowerArcPath.center));
+            $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideCPie"+index).attr("d", describeArcFill(upperArcPath, lowerArcPath));
+            
+            shiftIndex = sliceOut?shiftIndex-1:shiftIndex+1;
+            if((!sliceOut && shiftIndex === 15)||(sliceOut && shiftIndex === -1))
+              clearInterval(shiftInterval);
+          },10);
+          
+        });
+      });
+      
+    }/*End bindEvents()*/
+    
+    function rotateChart()
+    {
+      var rotationIndex = 1;
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find(".pie").each(function(){
+        var elemId = $(this).attr("id");
+        var pieData,index = elemId.substring("pie".length);
+        for(var i=0;i<PAGE_DATA.pieSet.length;i++){
+          if(PAGE_DATA.pieSet[i].id === elemId)
+          {
+            pieData = PAGE_DATA.pieSet[i];
+          }
+        }
+        
+        var upperArcPath = describeEllipticalArc(PAGE_DATA.pieCenter.x,PAGE_DATA.pieCenter.y,PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,(pieData["upperArcPath"].startAngle+rotationIndex),(pieData["upperArcPath"].endAngle+rotationIndex),0);
+        var lowerArcPath = describeEllipticalArc(PAGE_DATA.pieCenter.x,(PAGE_DATA.pieCenter.y+PAGE_DATA.pieThickness),PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,(pieData["lowerArcPath"].startAngle+rotationIndex),(pieData["lowerArcPath"].endAngle+rotationIndex),0);
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#upperArcPie"+index).attr("d",upperArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#lowerArcPie"+index).attr("d",lowerArcPath.d).attr("fill","url(#gradRadialPie"+index+")");
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideAPie"+index).attr("d", describeRect(upperArcPath.center, upperArcPath.start,lowerArcPath.start, lowerArcPath.center));
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideBPie"+index).attr("d", describeRect(upperArcPath.center ,upperArcPath.end,lowerArcPath.end, lowerArcPath.center));
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#sideCPie"+index).attr("d", describeArcFill(upperArcPath, lowerArcPath));//.attr("fill","url(#gradLinearPie"+index+")");
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#txtPie"+index).text(PAGE_DATA.uniqueDataSet[index]["label"]+", "+PAGE_DATA.uniqueDataSet[index]["value"]);
+        var midAngle = ((pieData["upperArcPath"].startAngle+rotationIndex)+(pieData["upperArcPath"].endAngle+rotationIndex)/2)%360.00;
+
+        PAGE_DATA.pieSet[index]["upperArcPath"] = upperArcPath;
+        PAGE_DATA.pieSet[index]["lowerArcPath"] = lowerArcPath;
+        PAGE_DATA.pieSet[index]["midAngle"] = midAngle;
+        
+        console.log(PAGE_DATA.pieSet);
+      });
+      resetOrdering();  
+     
+    }/*End rotateChart()*/
+    
+    function resetTextPos()
+    {
+      var titleBoundBox = document.querySelector("#"+PAGE_OPTIONS.targetElem+" #pieChart3D #txtTitleGrp #txtTitle").getBBox();
+      var subTitleBoundBox = document.querySelector("#"+PAGE_OPTIONS.targetElem+" #pieChart3D #txtTitleGrp #txtSubtitle").getBBox();
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#txtTitleGrp").find("#txtTitle").attr("x",(PAGE_DATA.svgCenter.x-(titleBoundBox.width/2))).attr("y",(titleBoundBox.height));
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#txtTitleGrp").find("#txtSubtitle").attr("x",(PAGE_DATA.svgCenter.x-(subTitleBoundBox.width/2))).attr("y",(subTitleBoundBox.height+25));
+    
+      $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find(".pie").each(function(){
+        var elemId = $(this).attr("id");
+        var pieData,index = elemId.substring("pie".length);
+        for(var i=0;i<PAGE_DATA.pieSet.length;i++){
+          if(PAGE_DATA.pieSet[i].id === elemId)
+          {
+            pieData = PAGE_DATA.pieSet[i];
+          }
+        }
+          
+        
+        var textPos = polarToCartesian(PAGE_DATA.pieCenter.x,PAGE_DATA.pieCenter.y, getEllipticalRadious(PAGE_DATA.pieWidth+100,PAGE_DATA.pieHeight+50,pieData.midAngle), pieData.midAngle) ;
+        var txtLineStart = polarToCartesian(PAGE_DATA.pieCenter.x,PAGE_DATA.pieCenter.y, getEllipticalRadious(PAGE_DATA.pieWidth,PAGE_DATA.pieHeight,pieData.midAngle), pieData.midAngle) ;
+        var txtLineEnd;
+        
+        var txtBoundingRect = document.querySelector("#"+PAGE_OPTIONS.targetElem+" #pieChart3D #pie"+index+" #txtPie"+index).getBBox();//getBoundingClientRect();
+        if(pieData.midAngle > 180)
+        {
+          txtLineEnd = new Point((textPos.x),(textPos.y+(txtBoundingRect.height/2)));
+        }else{
+          txtLineEnd = textPos;
+        }
+      
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#txtPie"+index).attr("x",textPos.x-(txtBoundingRect.width/2)).attr("y",textPos.y);
+
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#pie"+index).find("#txtPathPie"+index).attr("d",["M",txtLineStart.x,txtLineStart.y,"L",txtLineEnd.x,txtLineEnd.y].join(" "));
+        console.log(textPos);
+      });
+    }/*End resetTextPos()*/
+    
+    
+    var Point = function(x,y)
+    {
+      var obj = this;
+      this.x = x;
+      this.y = y;
+      this.toString = function()
+      {
+        return "x:"+obj.x+", y:"+obj.y;
+      };
+    };
+    
+    function polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+      var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+
+      return {
+        x: centerX + (radius * Math.cos(angleInRadians)),
+        y: centerY + (radius * Math.sin(angleInRadians))
+      };
+    }/*End polarToCartesian()*/
+
+    
+    function describeEllipticalArc(cx, cy, rx,ry, startAngle, endAngle, sweepFlag){
+      //console.log("start Angle:"+startAngle+" ,end angle:"+endAngle);
+      //startAngle = startAngle%360.00;
+      //endAngle = endAngle%360.00;
+      //console.log("start Angle:"+startAngle+" ,end angle:"+endAngle);
+      var start = polarToCartesian(cx, cy, getEllipticalRadious(rx,ry,endAngle), endAngle);
+      var end = polarToCartesian(cx, cy, getEllipticalRadious(rx,ry,startAngle), startAngle);
+      var largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+
+      var d = [
+          "M", start.x, start.y, 
+          "A", rx, ry, 0, largeArcFlag, sweepFlag, end.x, end.y,
+          "L", cx, cy,
+          "Z"
+      ].join(" ");
+
+      var path = {
+        "d":d,
+        "arc": [rx, ry, 0, largeArcFlag, sweepFlag, end.x, end.y].join(" "),
+        "start":start,
+        "end":end,
+        "center":new Point(cx,cy),
+        "rx":rx,
+        "ry":ry,
+        "startAngle":startAngle,
+        "endAngle":endAngle
+      };
+      return path;       
+    }/*End describeEllipticalArc()*/
+    
+    function describeRect(p1,p2,p3,p4){
+
+      var d = [
+          "M", p1.x, p1.y, 
+          "L", p2.x, p2.y,
+          "L", p3.x, p3.y,
+          "L", p4.x, p4.y,
+          "Z"
+      ].join(" ");
+
+      return d;
+    }/*End describeRect()*/
+    
+    function describeArcFill(arc1,arc2){
+      var revArc2 = describeEllipticalArc(arc2["center"].x,arc2["center"].y,arc2.rx,arc2.ry,arc2.endAngle,arc2.startAngle,1);
+      var d = [
+        "M", arc1["start"].x, arc1["start"].y,
+        "A", arc1["arc"],
+        "L", arc2["end"].x, arc2["end"].y,
+        "A", revArc2["arc"],
+        "Z"
+      ].join(" ");
+      
+      return d;
+    }/*End describeArcFill()*/
+    
+    function getEllipticalRadious(rx,ry,angleInDegrees)
+    {
+      var angleInRadians = (angleInDegrees-90) * Math.PI / 180.0;
+      var r = (rx*ry)/Math.sqrt(((rx*rx)*(Math.sin(angleInRadians)*Math.sin(angleInRadians)))+((ry*ry)*(Math.cos(angleInRadians)*Math.cos(angleInRadians))));
+      return r;
+    }/*End getEllipticalRadious()*/
+    
+    function rainbow(numOfSteps, step) {
+      // This function generates vibrant, "evenly spaced" colours (i.e. no clustering). This is ideal for creating easily distinguishable vibrant markers in Google Maps and other apps.
+      // Adam Cole, 2011-Sept-14
+      // HSV to RBG adapted from: http://mjijackson.com/2008/02/rgb-to-hsl-and-rgb-to-hsv-color-model-conversion-algorithms-in-javascript
+      var r, g, b;
+      var h = step / numOfSteps;
+      var i = ~~(h * 6);
+      var f = h * 6 - i;
+      var q = 1 - f;
+      switch(i % 6){
+          case 0: r = 1; g = f; b = 0; break;
+          case 1: r = q; g = 1; b = 0; break;
+          case 2: r = 0; g = 1; b = f; break;
+          case 3: r = 0; g = q; b = 1; break;
+          case 4: r = f; g = 0; b = 1; break;
+          case 5: r = 1; g = 0; b = q; break;
+      }
+      var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+      return (c);
+    }/*End rainbow()*/
+    
+    function colorLuminance(hex, lum) {
+
+      // validate hex string
+      hex = String(hex).replace(/[^0-9a-f]/gi, '');
+      if (hex.length < 6) {
+        hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+      }
+      lum = lum || 0;
+
+      // convert to decimal and change luminosity
+      var rgb = "#", c, i;
+      for (i = 0; i < 3; i++) {
+        c = parseInt(hex.substr(i*2,2), 16);
+        c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+        rgb += ("00"+c).substr(c.length);
+      }
+
+      return rgb;
+    }/*End colorLuminance()*/
+   
+    
+    function resetOrdering()
+    {
+      //console.log(PAGE_DATA.pieSet);
+      /*PAGE_DATA.pieSet.sort(function(a, b) {
+        return parseFloat(a.midAngle) - parseFloat(b.midAngle);
+      });*/
+      var midPie;
+      for(var pieId = 0;pieId < PAGE_DATA.pieSet.length ;pieId++)
+        if(PAGE_DATA.pieSet[pieId]["lowerArcPath"].startAngle < 180 && PAGE_DATA.pieSet[pieId]["lowerArcPath"].endAngle > 180)
+          midPie = pieId;
+      
+      for(var pieId = 0;pieId < midPie ;pieId++)
+        reAppend(pieId);
+      
+      for(var pieId = PAGE_DATA.pieSet.length-1 ;pieId > midPie ;pieId--)
+        reAppend(pieId);
+      
+      reAppend(midPie);
+      function reAppend(index)
+      {
+        console.log(index);
+        var pie = $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#"+PAGE_DATA.pieSet[index].id);
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").find("#"+PAGE_DATA.pieSet[index].id).remove();
+        $("#"+PAGE_OPTIONS.targetElem).find("#pieChart3D").append(pie);
+      }
+      
+    }/*End resetOrdering()*/
+    
+
+    
+    function prepareDataSet()
+    {
+      for(var i=0;i<PAGE_OPTIONS.dataSet.length;i++)
+      {
+        var found=0;
+        for(var j=0;j<PAGE_DATA.uniqueDataSet.length;j++)
+        {
+          if(PAGE_OPTIONS.dataSet[i].label.toLowerCase() === PAGE_DATA.uniqueDataSet[j].label.toLowerCase()) 
+            found = j;
+            break;
+        }
+        if(found === 0) {
+          PAGE_DATA.uniqueDataSet.push({"label":PAGE_OPTIONS.dataSet[i].label,"value":PAGE_OPTIONS.dataSet[i].value});
+        }else {
+          PAGE_DATA.uniqueDataSet[j]={"label":PAGE_OPTIONS.dataSet[i].label,"value":parseFloat(PAGE_OPTIONS.dataSet[i].value)+parseFloat(PAGE_DATA.uniqueDataSet[j].value)};
+        }
+        PAGE_DATA.totalValue += parseFloat(PAGE_OPTIONS.dataSet[i].value);
+      }
+      for(var i=0;i<PAGE_DATA.uniqueDataSet.length;i++)
+      {
+        var percent = 100*parseFloat(PAGE_DATA.uniqueDataSet[i].value)/PAGE_DATA.totalValue;
+        PAGE_DATA.uniqueDataSet[i]["percent"] = percent;
+      }
+    }/*End prepareDataSet()*/
+    
+    init();
+  }/*End of drawPieChart()*/
+  
+</script>
+</head>
+<body>
+  <div>
+    <div id='chartContainer'>
+      <svg 
+          xmlns:svg="http://www.w3.org/2000/svg"
+          xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink"
+          version="1.1"
+          width="800" 
+          height="500"
+          id="pieChart3D">
+       
+
+        <!--
+        <g id="pie1" stroke-width="0" >
+          <path id="lowerArc" fill="rgb(243, 202, 25)" stroke="rgb(243, 202, 25)" fill-opacity="0.5" stroke-width="0" /> 
+          <path id="sideB"  fill="rgb(193, 157, 0)" stroke="rgb(243, 202, 25)"/>
+          <path id="sideC"  fill="rgb(193, 157, 0)" stroke="rgb(243, 202, 25)" />
+          <path id="sideA"  fill="rgb(193, 157, 0)" stroke="rgb(243, 202, 25)" />
+          <path id="upperArc"  fill="rgb(243, 202, 25)" stroke="rgb(243, 202, 25)" />
+
+        </g>
+        <g id="pie2"  stroke-width="0">
+          
+         
+          <path id="lowerArc" fill="rgb(244, 91, 0)" stroke="rgb(245, 107, 25)" fill-opacity="0.5" stroke-width="0" />
+          <path id="sideB" fill="rgb(195, 72, 0)"  stroke="rgb(245, 107, 25)" />
+          <path id="sideC" fill="rgb(195, 72, 0)"  stroke="rgb(245, 107, 25)"/>
+          <path id="sideA" fill="rgb(195, 72, 0)"  stroke="rgb(245, 107, 25)" />
+          <path id="upperArc" fill="rgb(244, 91, 0)" stroke="rgb(245, 107, 25)" />
+          
+        </g>
+       -->
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
