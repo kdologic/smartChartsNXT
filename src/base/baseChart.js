@@ -153,7 +153,7 @@ class BaseChart {
     }
 
     handleError(ex, msg) {
-        console.log(ex);
+        //console.log(ex);
         console.error("SmartChartsNXT:" + msg);
     } /*End handleError()*/
 }

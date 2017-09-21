@@ -18,7 +18,7 @@
       "bgColor":"none",
       "showLegend":true, 
       "animated": true,
-      "hideHorizontalScroller":true,
+      "hideHorizontalScroller":false,
       "toolTip":{
         "content":'<table>'+
               '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
@@ -112,7 +112,7 @@ class AreaChart extends CoordinateChart {
       marginBottom: 0,
       gridBoxWidth: 0,
       gridBoxHeight: 0,
-      hScrollBoxHeight: 60,
+      hScrollBoxHeight: opts.hideHorizontalScroller ? 0 : 60,
       fullSeries: [],
       fsScaleX: 0,
       vLabelWidth: 70,
@@ -164,7 +164,7 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
       this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
       this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
-      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + 170;
+      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 110;
 
       let longestSeries = 0;
       let longSeriesLen = 0;
@@ -242,7 +242,7 @@ class AreaChart extends CoordinateChart {
     this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1));
 
     this.grid.createGrid(this, this.CHART_DATA.chartSVG, this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
-    
+
     if (!this.CHART_OPTIONS.hideHorizontalScroller) {
       this.prepareFullSeriesDataset();
       this.hScroller = new HorizontalScroller(this,
@@ -268,7 +268,7 @@ class AreaChart extends CoordinateChart {
 
     if (this.hScroller) {
       this.zoomOutBox = new ZoomOutBox(
-        this, 
+        this,
         this.CHART_DATA.chartSVG,
         this.CHART_DATA.marginTop - this.CHART_DATA.zoomOutBoxHeight,
         this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth,
@@ -277,11 +277,12 @@ class AreaChart extends CoordinateChart {
       );
     }
 
+    this.reDrawSeries();
+
     if (this.hScroller) {
       this.hScroller.resetSliderPos("left", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowLeftIndex].x);
       this.hScroller.resetSliderPos("right", this.CHART_DATA.fullSeries[this.CHART_DATA.longestSeries][this.CHART_DATA.windowRightIndex].x);
     }
-    this.reDrawSeries();
   } /*End prepareChart()*/
 
   prepareFullSeriesDataset() {

@@ -54,6 +54,7 @@ class GeomCore {
         newElement.setAttribute("fill", color); //Set fill colour
         newElement.setAttribute("opacity", opacity || 1);
         newElement.setAttribute("stroke-width", strokeWidth || 1); //Set stroke width
+        newElement.setAttribute("pointer-events", "none"); //set no pointer event for dot
         svg.appendChild(newElement);
     } /*End createDot()*/
 
