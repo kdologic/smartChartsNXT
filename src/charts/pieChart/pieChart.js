@@ -123,7 +123,8 @@ class PieChart extends SlicedChart {
       this.prepareChart();
       this.tooltip.createTooltip(this);
     } catch (ex) {
-      this.handleError(ex, "Error in PieChart");
+      ex.errorIn = `Error in PieChart with runId:${this.getRunId()}`;
+      throw ex;
     }
 
 
@@ -179,8 +180,8 @@ class PieChart extends SlicedChart {
         left: self.CHART_DATA.pieCenter.x + self.CHART_DATA.pieWithTextSpan,
         top: self.CHART_DATA.pieCenter.y - self.CHART_DATA.pieHeight - 50,
         legendSet: lSet,
-        type:"vertical",
-        border:true
+        type: "vertical",
+        border: true
       });
     }
     this.bindEvents();
@@ -307,8 +308,8 @@ class PieChart extends SlicedChart {
         }, false);
 
         upperArcPie.addEventListener("mousemove", (e) => {
-          if(this.CHART_DATA.uniqueDataSet.length <= 1){
-            return; 
+          if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+            return;
           }
           if (this.CHART_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
             let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
@@ -420,7 +421,8 @@ class PieChart extends SlicedChart {
       window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
 
     } catch (ex) {
-      this.handleError(ex, "Error in PieChart events");
+      ex.errorIn = `Error in PieChart events with runId:${this.getRunId()}`;
+      throw ex;
     }
   } /*End bindEvents()*/
 

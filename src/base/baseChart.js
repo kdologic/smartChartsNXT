@@ -151,11 +151,6 @@ class BaseChart {
     getRunId(chartType) {
         return this.runId;
     }
-
-    handleError(ex, msg) {
-        //console.log(ex);
-        console.error("SmartChartsNXT:" + msg);
-    } /*End handleError()*/
 }
 
 module.exports = BaseChart;
