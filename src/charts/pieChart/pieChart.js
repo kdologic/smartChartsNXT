@@ -1,5 +1,3 @@
-"use strict";
-
 /*
  * SVG Pie Chart 2D
  * @Version:1.1.0
@@ -45,6 +43,7 @@
     let pieChart = new SmartChartsNXT.PieChart(settings);
   });
  */
+"use strict";
 
 let SlicedChart = require("./../../base/slicedChart");
 let Point = require("./../../core/point");

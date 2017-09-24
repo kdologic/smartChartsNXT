@@ -1,5 +1,3 @@
-"use strict";
-
 /*
  * SVG Area Chart 
  * @Version:1.1.0

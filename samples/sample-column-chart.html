@@ -1,8 +1,8 @@
 <html>
 
 <head>
-  <script src="./../core/smartChartsNXT.core.js" type="text/javascript"></script>
-  <!--script src="./columnChart.js" type="text/javascript"></script-->
+  <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
+
   <script>
     window.onload = function () {
       SmartChartsNXT.ready(function () {
@@ -14,10 +14,10 @@
           "bgColor": "none",
           "toolTip": {
             "content": '<table>' +
-              '<tr><td>on <b>{{point.label}}</b></tr>' +
-              '<tr><td>{{point.series.name}} is</td></tr>' +
-              '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>' +
-              '</table>'
+            '<tr><td>on <b>{{point.label}}</b></tr>' +
+            '<tr><td>{{point.series.name}} is</td></tr>' +
+            '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>' +
+            '</table>'
           },
           "dataSet": {
             "xAxis": {
