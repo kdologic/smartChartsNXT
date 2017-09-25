@@ -26,7 +26,7 @@
           "targetElem": "chartContainer",
           "canvasBorder": false,
           "bgColor": "none",
-          "overlapColumns": false,
+          "overlapColumns": true, //Only applicable for multi series 
           "toolTip": {
             "content": '<table>' +
             '<tr><td>on <b>{{point.label}}</b></tr>' +
@@ -52,7 +52,7 @@
               "gradient": "none",
               "color": "#FF9800",
               "name": "Expense",
-              "data": generateData(10, 30, 20)
+              "data": generateData(10, 30, 10)
             }
             ]
           }

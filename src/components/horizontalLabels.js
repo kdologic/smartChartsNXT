@@ -14,12 +14,19 @@ class HorizontalLabels {
 
     constructor() {}
 
-    createHorizontalLabel(objChart, chartSVG, posX, posY, componentWidth, componentHeight, categories, scaleX) {
+    createHorizontalLabel(objChart, targetElem, posX, posY, componentWidth, componentHeight, categories, scaleX) {
         let self = this;
-        let hTextLabel = chartSVG.querySelector("#hTextLabel");
-        if (hTextLabel) {
-            hTextLabel.parentNode.removeChild(hTextLabel);
-        }
+        this.objChart = objChart;
+        this.chartSVG = this.objChart.CHART_DATA.chartSVG;
+        this.targetElem = targetElem; 
+        this.hLabelContainer = this.chartSVG.querySelector("#" + targetElem);
+        this.posX = posX;
+        this.posY = posY;
+        this.componentWidth = componentWidth;
+        this.componentHeight = componentHeight;
+        this.categories = categories;
+        this.scaleX = scaleX;
+       
         let interval = scaleX || (componentWidth / categories.length);
         /*if there is too much categories then discard some categories*/
         if (interval < 30) {
@@ -54,34 +61,72 @@ class HorizontalLabels {
             strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
-        chartSVG.insertAdjacentHTML("beforeend", strText);
+        this.hLabelContainer.innerHTML = strText;
+        this.adjustTextPositions();
+        this.bindEvents(); 
+    }
 
+    /*Adjust horzontal text label size*/
+    adjustTextPositions() {
+        let totalHTextWidth = 0;
+        let arrHText = this.hLabelContainer.querySelectorAll("#hTextLabel text");
+        for (let i = 0; i < arrHText.length; i++) {
+            let txWidth = arrHText[i].getComputedTextLength();
+            totalHTextWidth += (txWidth);
+        }
+        let interval = this.componentWidth / this.categories.length;
+        if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(this.componentWidth)) {
+            for (let i = 0; i < arrHText.length; i++) {
+                let cx = arrHText[i].getAttribute("x");
+                let cy = arrHText[i].getAttribute("y");
+
+                let txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
+                arrHText[i].setAttribute("transform", "translate(-" + interval / 2 + "," + (10) + ")rotate(-45," + (cx) + "," + (cy) + ")");
+
+                if (txWidth + 15 > this.componentHeight) {
+                    let fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
+                    if (fontSize > 9) {
+                        arrHText.forEach((elem) => {
+                            elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
+                        });
+                    }
+                    txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
+                }
+                while (txWidth + 15 > this.componentHeight) {
+                    arrHText[i].querySelector("tspan").textContent = arrHText[i].querySelector("tspan").textContent.substring(0, (arrHText[i].querySelector("tspan").textContent.length - 4)) + "...";
+                    txWidth = (arrHText[i].querySelector("tspan").getComputedTextLength());
+                }
+            }
+        }
+    }
+
+    bindEvents() {
         /*bind hover event*/
-        let hTextLabels = chartSVG.querySelectorAll("#hTextLabel text");
+        let self = this; 
+        let hTextLabels = this.hLabelContainer.querySelectorAll("#hTextLabel text");
 
         for (let i = 0; i < hTextLabels.length; i++) {
-            hTextLabels[i].addEventListener("mouseenter", function (e) {
+            hTextLabels[i].addEventListener("mouseenter",  (e) =>{
                 e.stopPropagation();
                 //fire Event Hover
                 let onHoverEvent = new Event("onHTextLabelHover", {
-                    srcElement: chartSVG,
+                    srcElement: self.chartSVG,
                     originEvent: e
                 });
-                objChart.event.dispatchEvent(onHoverEvent);
+                this.objChart.event.dispatchEvent(onHoverEvent);
             }, false);
 
-            hTextLabels[i].addEventListener("mouseleave", function (e) {
+            hTextLabels[i].addEventListener("mouseleave", (e) => {
                 e.stopPropagation();
                 //fire Event mouseLeave
                 let onMouseLeaveEvent = new Event("onHTextLabelMouseLeave", {
-                    srcElement: chartSVG,
+                    srcElement: self.chartSVG,
                     originEvent: e
                 });
-                objChart.event.dispatchEvent(onMouseLeaveEvent);
+                this.objChart.event.dispatchEvent(onMouseLeaveEvent);
             }, false);
         }
-
-    } /*End createHorizontalLabel()*/
+    }
 }
 
 module.exports = HorizontalLabels;

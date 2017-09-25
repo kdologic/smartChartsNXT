@@ -221,6 +221,12 @@ class AreaChart extends CoordinateChart {
     strSVG += "<g id='legendContainer'>";
     strSVG += "<\/g>";
 
+    strSVG += "<g id='verticalLabelContainer'>";
+    strSVG += "<\/g>";
+
+    strSVG += "<g id='horizontalLabelContainer'>";
+    strSVG += "<\/g>";
+
     strSVG += "<g id='scrollerCont'>";
     strSVG += "</g>";
 
@@ -487,38 +493,6 @@ class AreaChart extends CoordinateChart {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
-    /*Adjust horzontal text label size*/
-    let totalHTextWidth = 0;
-    let arrHText = this.CHART_DATA.chartSVG.querySelectorAll("#hTextLabel text");
-    for (let i = 0; i < arrHText.length; i++) {
-      let txWidth = arrHText[i].getComputedTextLength();
-      totalHTextWidth += (txWidth);
-    }
-    let interval = this.CHART_DATA.gridBoxWidth / categories.length;
-    if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(this.CHART_DATA.gridBoxWidth)) {
-      for (let i = 0; i < arrHText.length; i++) {
-        let cx = arrHText[i].getAttribute("x");
-        let cy = arrHText[i].getAttribute("y");
-
-        let txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
-        arrHText[i].setAttribute("transform", "translate(-" + interval / 2 + "," + (10) + ")rotate(-45," + (cx) + "," + (cy) + ")");
-
-        if (txWidth + 15 > this.CHART_DATA.hLabelHeight) {
-          let fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
-          if (fontSize > 9) {
-            arrHText.forEach((elem) => {
-              elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
-            });
-          }
-          txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
-        }
-        while (txWidth + 15 > this.CHART_DATA.hLabelHeight) {
-          arrHText[i].querySelector("tspan").textContent = arrHText[i].querySelector("tspan").textContent.substring(0, (arrHText[i].querySelector("tspan").textContent.length - 4)) + "...";
-          txWidth = (arrHText[i].querySelector("tspan").getComputedTextLength());
-        }
-      }
-    }
-
     let vTxtSubTitle = this.CHART_DATA.chartSVG.querySelector("#vTextSubTitle");
     vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (this.CHART_DATA.marginLeft - this.CHART_DATA.vLabelWidth - 10) + "," + (this.CHART_DATA.svgCenter.y) + ")");
     vTxtSubTitle.setAttribute("x", 0);
@@ -665,7 +639,8 @@ class AreaChart extends CoordinateChart {
         }
       }
     } catch (ex) {
-      this.handleError(ex);
+      ex.errorIn = `Error in AreaChart with runId:${this.getRunId()}`;
+      throw ex;
     }
   } /*End onMouseMove()*/
 
@@ -748,8 +723,9 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.newDataSet.push(set);
     }
     this.prepareDataSet(this.CHART_DATA.newDataSet);
+
     this.vLabel.createVerticalLabel(this,
-      this.CHART_DATA.chartSVG,
+      "verticalLabelContainer",
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop,
       this.CHART_DATA.maxima,
@@ -761,7 +737,7 @@ class AreaChart extends CoordinateChart {
     );
 
     this.hLabel.createHorizontalLabel(this,
-      this.CHART_DATA.chartSVG,
+      "horizontalLabelContainer",
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight,
       this.CHART_DATA.gridBoxWidth,

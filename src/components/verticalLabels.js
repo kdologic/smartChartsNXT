@@ -12,15 +12,23 @@ class VerticalLabels {
 
     constructor() {}
 
-    createVerticalLabel(objChart, chartSVG, posX, posY, maxVal, minVal, maxWidth, gridHeight, lableCount, labelPrefix) {
-        let vTextLabel = chartSVG.querySelector("#vTextLabel");
-        if (vTextLabel) {
-            vTextLabel.parentNode.removeChild(vTextLabel);
-        }
-
-        let interval = (maxVal) / (lableCount - 1);
+    createVerticalLabel(objChart, targetElem, posX, posY, maxVal, minVal, maxWidth, gridHeight, labelCount, labelPrefix) {
+        this.objChart = objChart; 
+        this.targetElem = targetElem; 
+        this.chartSVG = this.objChart.CHART_DATA.chartSVG;
+        this.vLabelContainer = this.chartSVG.querySelector("#" + targetElem);
+        this.posX = posX; 
+        this.posY = posY;
+        this.maxVal = maxVal; 
+        this.minVal = minVal; 
+        this.maxWidth = maxWidth; 
+        this.gridHeight = gridHeight; 
+        this.labelCount = labelCount; 
+        this.labelPrefix = labelPrefix; 
+       
+        let interval = (maxVal) / (labelCount - 1);
         let strText = "<g id='vTextLabel'>";
-        for (let gridCount = lableCount - 1, i = 0; gridCount >= 0; gridCount--) {
+        for (let gridCount = labelCount - 1, i = 0; gridCount >= 0; gridCount--) {
             let value = (i++ * interval);
             value = this.formatTextValue(value);
             strText += "<text font-family='Lato' fill='black'><tspan x='" + (posX - maxWidth) + "' y='" + (posY + (gridCount * gridHeight) + 5) + "' font-size='12' >" + (labelPrefix ? labelPrefix : "") + value + "<\/tspan></text>";
@@ -28,16 +36,16 @@ class VerticalLabels {
             strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
-        chartSVG.insertAdjacentHTML("beforeend", strText);
-        this.adjustFontSize(chartSVG, maxWidth);
+        this.vLabelContainer.innerHTML = strText; 
+        this.adjustFontSize();
     } /*End createVerticalLabel()*/
 
-    adjustFontSize(chartSVG, maxWidth) {
+    adjustFontSize() {
         /*Adjust vertical text label size*/
-        let arrVTextLabels = chartSVG.querySelectorAll("#vTextLabel text");
+        let arrVTextLabels = this.vLabelContainer.querySelectorAll("#vTextLabel text");
         for (let i = 0; i < arrVTextLabels.length; i++) {
             let txtWidth = arrVTextLabels[i].getComputedTextLength();
-            if (txtWidth > maxWidth - 10) {
+            if (txtWidth > this.maxWidth - 10) {
                 let fontSize = arrVTextLabels[i].querySelector("tspan").getAttribute("font-size");
                 arrVTextLabels.forEach(elem => {
                     elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
