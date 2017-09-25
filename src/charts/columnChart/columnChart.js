@@ -1,171 +1,213 @@
 /*
  * SVG Column Chart 
- * @Version:1.0.0
+ * @Version:1.1.0
  * @CreatedOn:26-Aug-2016
  * @Author:SmartChartsNXT
  * @description: SVG Column Chart, that shows series of data as coulmns.
  * @JSFiddle:
  * @Sample caller code:
    SmartChartsNXT.ready(function(){
-    var columnChart = new SmartChartsNXT.ColumnChart({
-      "title":"Grouped Sales Report",
-      "subTitle":"Report for the year, 2016",
-      "targetElem":"chartContainer",
-      "canvasBorder":false,
-      "bgColor":"none",
-      "overlapColumns":false,
-      "animated":false,
-      "toolTip":{
-        "content":'<table>'+
-          '<tr><td>on <b>{{point.label}}</b></tr>' +
-          '<tr><td>{{point.series.name}} is</td></tr>' +
-          '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>'+
-          '</table>'
+    let columnChart = new SmartChartsNXT.ColumnChart({
+      "title": "Sales Report",
+      "subTitle": "Report for the year, 2016",
+      "targetElem": "chartContainer",
+      "canvasBorder": false,
+      "bgColor": "none",
+      "toolTip": {
+        "content": '<table>' +
+        '<tr><td>on <b>{{point.label}}</b></tr>' +
+        '<tr><td>{{point.series.name}} is</td></tr>' +
+        '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>' +
+        '</table>'
       },
-      "dataSet":{
-        "xAxis":{
-          "title":"Date"
+      "dataSet": {
+        "xAxis": {
+          "title": "Date"
         },
-        "yAxis":{
-          "title":"Total Sales",
-          "prefix":"Rs. "
+        "yAxis": {
+          "title": "Amount",
+          "prefix": "Rs. "
         },
-        "series":[
-          {
-            "gradient":"none", // [oval|linear|none]
-            "color":"#c62828",
-            "name": "Sales",
-            "data":  generateData(10,50,10)
-          },
-          {
-            "gradient":"none", 
-            "color":"#FF9800",
-            "name": "Expense",
-            "data":generateData(10,30,10)
-          }
-        ]
+        "series": [{
+          "gradient": "linear", // [oval|linear|none]
+          "color": "#03A9F4",
+          "name": 'Sales',
+          "data": [{
+            "color": "#ff0f00",
+            "label": "1-11-2016",
+            "value": 36
+          }, {
+            "color": "#ff6600",
+            "label": "2-11-2016",
+            "value": 27
+          }, {
+            "color": "#ff9e01",
+            "label": "3-11-2016",
+            "value": 67
+          }]
+        }]
+      },
+      events: {
+        afterRender: function (e) {
+          console.log(e, "event after rendering complete");
+        },
+        onInit: function (e) {
+          console.log(e, "event onInit");
+        },
+        afterParseData: function (e) {
+          console.log(e, "event afterParseData");
+        },
+        beforeSave: function (e) {
+          console.log(e, "event beforeSave");
+        },
+        afterSave: function (e) {
+          console.log(e, "event afterSave");
+        },
+        beforePrint: function (e) {
+          console.log(e, "event beforePrint");
+        },
+        afterPrint: function (e) {
+          console.log(e, "event afterPrint");
+        }
       }
     });
   });
 
 */
 
-window.SmartChartsNXT.ColumnChart = function (opts) {
-  var PAGE_OPTIONS = {};
-  var self = this;
-  var PAGE_DATA = {
-    scaleX: 0,
-    scaleY: 0,
-    svgCenter: 0,
-    chartCenter: 0,
-    maxima: 0,
-    minima: 0,
-    marginLeft: 0,
-    marginRight: 0,
-    marginTop: 0,
-    marginBottom: 0,
-    gridBoxWidth: 0,
-    gridBoxHeight: 0,
-    longestSeries: 0,
-    columns: {}
-  };
+"use strict";
 
-  var PAGE_CONST = {
-    FIX_WIDTH: 800,
-    FIX_HEIGHT: 500,
-    MIN_WIDTH: 250,
-    MIN_HEIGHT: 400,
-    hGridCount: 9,
-    runId: "columncart_" + Math.round(Math.random() * 1000000001)
-  };
+let CoordinateChart = require("./../../base/coordinateChart");
+let Point = require("./../../core/point");
 
+class ColumnChart extends CoordinateChart {
 
-  function init() {
+  constructor(opts) {
+    super("columnChart", opts);
+    let self = this;
+    this.CHART_DATA = this.util.extends({
+      scaleX: 0,
+      scaleY: 0,
+      svgCenter: 0,
+      chartCenter: 0,
+      maxima: 0,
+      minima: 0,
+      marginLeft: 0,
+      marginRight: 0,
+      marginTop: 0,
+      marginBottom: 0,
+      gridBoxWidth: 0,
+      gridBoxHeight: 0,
+      longestSeries: 0,
+      columns: {}
+    }, this.CHART_DATA);
+
+    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+    this.CHART_CONST = this.util.extends({
+      FIX_WIDTH: 800,
+      FIX_HEIGHT: 500,
+      MIN_WIDTH: 250,
+      MIN_HEIGHT: 400,
+      hGridCount: 9
+    }, this.CHART_CONST);
+
+    this.EVENT_BINDS = {
+
+    };
+    this.init();
+
+    if (this.CHART_OPTIONS.animated !== false) {
+      this.showAnimatedView();
+    }
+  }
+
+  init() {
     try {
-      PAGE_OPTIONS = $SC.util.extends(opts, PAGE_OPTIONS);
-      var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
-      PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = containerDiv.offsetWidth || PAGE_CONST.FIX_WIDTH;
-      PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = containerDiv.offsetHeight || PAGE_CONST.FIX_HEIGHT;
+      super.initBase();
+      //this.CHART_OPTIONS = this.util.extends(opts, this.CHART_OPTIONS);
+      //let containerDiv = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
+      //this.CHART_OPTIONS.width = this.CHART_CONST.FIX_WIDTH = containerDiv.offsetWidth || this.CHART_CONST.FIX_WIDTH;
+      //this.CHART_OPTIONS.height = this.CHART_CONST.FIX_HEIGHT = containerDiv.offsetHeight || this.CHART_CONST.FIX_HEIGHT;
 
-      if (PAGE_OPTIONS.width < PAGE_CONST.MIN_WIDTH)
-        PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = PAGE_CONST.MIN_WIDTH;
-      if (PAGE_OPTIONS.height < PAGE_CONST.MIN_HEIGHT)
-        PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = PAGE_CONST.MIN_HEIGHT;
+      // if (this.CHART_OPTIONS.width < this.CHART_CONST.MIN_WIDTH)
+      //   this.CHART_OPTIONS.width = this.CHART_CONST.FIX_WIDTH = this.CHART_CONST.MIN_WIDTH;
+      // if (this.CHART_OPTIONS.height < this.CHART_CONST.MIN_HEIGHT)
+      //   this.CHART_OPTIONS.height = this.CHART_CONST.FIX_HEIGHT = this.CHART_CONST.MIN_HEIGHT;
 
-      if (PAGE_OPTIONS.events && typeof PAGE_OPTIONS.events === "object") {
-        for (var e in PAGE_OPTIONS.events) {
-          self.off(e, PAGE_OPTIONS.events[e]);
-          self.on(e, PAGE_OPTIONS.events[e]);
-        }
-      }
+      // if (this.CHART_OPTIONS.events && typeof this.CHART_OPTIONS.events === "object") {
+      //   for (let e in this.CHART_OPTIONS.events) {
+      //     self.off(e, this.CHART_OPTIONS.events[e]);
+      //     self.on(e, this.CHART_OPTIONS.events[e]);
+      //   }
+      // }
 
-      console.log(PAGE_OPTIONS);
-      PAGE_DATA.scaleX = PAGE_CONST.FIX_WIDTH - PAGE_OPTIONS.width;
-      PAGE_DATA.scaleY = PAGE_CONST.FIX_HEIGHT - PAGE_OPTIONS.height;
+      // console.log(this.CHART_OPTIONS);
+      // this.CHART_DATA.scaleX = this.CHART_CONST.FIX_WIDTH - this.CHART_OPTIONS.width;
+      // this.CHART_DATA.scaleY = this.CHART_CONST.FIX_HEIGHT - this.CHART_OPTIONS.height;
 
       //fire Event onInit
-      var onInitEvent = new self.Event("onInit", {
-        srcElement: self
-      });
-      self.dispatchEvent(onInitEvent);
+      // let onInitEvent = new self.Event("onInit", {
+      //   srcElement: self
+      // });
+      // self.dispatchEvent(onInitEvent);
 
-      var strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
-        "viewBox='0 0 " + PAGE_CONST.FIX_WIDTH + " " + PAGE_CONST.FIX_HEIGHT + "'" +
-        "version='1.1'" +
-        "width='" + PAGE_OPTIONS.width + "'" +
-        "height='" + PAGE_OPTIONS.height + "'" +
-        "id='columnChart'" +
-        "style='background:" + (PAGE_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
-        "> <\/svg>";
+      // let strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
+      //   "viewBox='0 0 " + this.CHART_CONST.FIX_WIDTH + " " + this.CHART_CONST.FIX_HEIGHT + "'" +
+      //   "version='1.1'" +
+      //   "width='" + this.CHART_OPTIONS.width + "'" +
+      //   "height='" + this.CHART_OPTIONS.height + "'" +
+      //   "id='columnChart'" +
+      //   "style='background:" + (this.CHART_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
+      //   "> <\/svg>";
 
-      document.getElementById(PAGE_OPTIONS.targetElem).setAttribute("runId", PAGE_CONST.runId);
-      document.getElementById(PAGE_OPTIONS.targetElem).innerHTML = "";
-      document.getElementById(PAGE_OPTIONS.targetElem).insertAdjacentHTML("beforeend", strSVG);
+      // document.getElementById(this.CHART_OPTIONS.targetElem).setAttribute("runId", this.CHART_CONST.runId);
+      // document.getElementById(this.CHART_OPTIONS.targetElem).innerHTML = "";
+      // document.getElementById(this.CHART_OPTIONS.targetElem).insertAdjacentHTML("beforeend", strSVG);
 
-      createColumnDropShadow();
+      this.createColumnDropShadow();
 
-      var svgWidth = parseInt(document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").getAttribute("width"));
-      var svgHeight = parseInt(document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").getAttribute("height"));
-      PAGE_DATA.svgCenter = new $SC.geom.Point((svgWidth / 2), (svgHeight / 2));
-      PAGE_DATA.chartCenter = new $SC.geom.Point(PAGE_DATA.svgCenter.x, PAGE_DATA.svgCenter.y + 50);
-      PAGE_DATA.marginLeft = ((-1) * PAGE_DATA.scaleX / 2) + 100, PAGE_DATA.marginRight = ((-1) * PAGE_DATA.scaleX / 2) + 10;
-      PAGE_DATA.marginTop = ((-1) * PAGE_DATA.scaleY / 2) + 150;
-      PAGE_DATA.marginBottom = ((-1) * PAGE_DATA.scaleY / 2) + 100;
+      //let svgWidth = parseInt(document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").getAttribute("width"));
+      //let svgHeight = parseInt(document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").getAttribute("height"));
+      //this.CHART_DATA.svgCenter = new this.geom.Point((svgWidth / 2), (svgHeight / 2));
+      this.CHART_DATA.chartCenter = new this.geom.Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+      this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100, this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 10;
+      this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 150;
+      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + 100;
 
-      var longestSeries = 0,
-        longSeriesLen = 0;
-      for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
+      let longestSeries = 0;
+      let longSeriesLen = 0;
+      for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
 
-        if (PAGE_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
+        if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
           longestSeries = index;
-          longSeriesLen = PAGE_OPTIONS.dataSet.series[index].data.length;
+          longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
         }
       }
+      this.CHART_DATA.longestSeries = longestSeries;
 
-      PAGE_DATA.longestSeries = longestSeries;
-
-      $SC.appendWaterMark(PAGE_OPTIONS.targetElem, PAGE_DATA.scaleX, PAGE_DATA.scaleY);
-      $SC.ui.appendMenu2(PAGE_OPTIONS.targetElem, PAGE_DATA.svgCenter, PAGE_DATA.scaleX, PAGE_DATA.scaleY, self);
-      prepareChart();
-
+      //this.appendWaterMark(this.CHART_OPTIONS.targetElem, this.CHART_DATA.scaleX, this.CHART_DATA.scaleY);
+      //this.ui.appendMenu2(this.CHART_OPTIONS.targetElem, this.CHART_DATA.svgCenter, this.CHART_DATA.scaleX, this.CHART_DATA.scaleY, self);
+      this.prepareChart();
+      this.tooltip.createTooltip(this);
     } catch (ex) {
-      $SC.handleError(ex, "Error in ColumnChart");
+      ex.errorIn = `Error in ColumnChart with runId:${this.getRunId()}`;
+      throw ex;
     }
 
   } /*End init()*/
 
-  function prepareChart() {
-    prepareDataSet();
+  prepareChart() {
+    this.prepareDataSet();
 
-    var strSVG = "";
-    if (PAGE_OPTIONS.canvasBorder) {
-      strSVG += "<g>";
-      strSVG += "  <rect x='" + ((-1) * PAGE_DATA.scaleX / 2) + "' y='" + ((-1) * PAGE_DATA.scaleY / 2) + "' width='" + ((PAGE_DATA.svgCenter.x * 2) + PAGE_DATA.scaleX) + "' height='" + ((PAGE_DATA.svgCenter.y * 2) + PAGE_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
-      strSVG += "<\/g>";
-    }
+    // if (this.CHART_OPTIONS.canvasBorder) {
+    //   strSVG += "<g>";
+    //   strSVG += "  <rect x='" + ((-1) * this.CHART_DATA.scaleX / 2) + "' y='" + ((-1) * this.CHART_DATA.scaleY / 2) + "' width='" + ((this.CHART_DATA.svgCenter.x * 2) + this.CHART_DATA.scaleX) + "' height='" + ((this.CHART_DATA.svgCenter.y * 2) + this.CHART_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
+    //   strSVG += "<\/g>";
+    // }
+    let strSVG = "";
     strSVG += "<g>";
     strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
-    strSVG += "    <tspan id='txtTitle' x='" + (100 / PAGE_CONST.FIX_WIDTH * PAGE_OPTIONS.width) + "' y='" + (50 / PAGE_CONST.FIX_HEIGHT * PAGE_OPTIONS.height) + "' font-size='20'><\/tspan>";
+    strSVG += "    <tspan id='txtTitle' x='" + (100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width) + "' y='" + (50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height) + "' font-size='20'><\/tspan>";
     strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='13'><\/tspan>";
     strSVG += "  <\/text>";
     strSVG += "<\/g>";
@@ -174,132 +216,135 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
     strSVG += "<g id='legendContainer'>";
     strSVG += "<\/g>";
 
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").textContent = PAGE_OPTIONS.title;
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtSubtitle").textContent = PAGE_OPTIONS.subTitle;
+    this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
+    this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
 
+    this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
+    this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
+    this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1));
 
-    createGrid();
-    var scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length;
-    for (var index = 0; index < PAGE_OPTIONS.dataSet.series.length; index++) {
-      createColumns(PAGE_OPTIONS.dataSet.series[index].data, index, scaleX);
-      if (PAGE_OPTIONS.dataSet.series.length > 1)
-        createLegands(index);
+    this.grid.createGrid(this, this.CHART_DATA.chartSVG, this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, this.CHART_DATA.gridBoxWidth, this.CHART_DATA.gridBoxHeight, this.CHART_DATA.gridHeight, this.CHART_CONST.hGridCount);
+
+    let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
+    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
+      this.createColumns(this.CHART_OPTIONS.dataSet.series[index].data, index, scaleX);
+      // if (this.CHART_OPTIONS.dataSet.series.length > 1)
+      //   this.createLegands(index);
     }
 
 
-    var catList = [],
-      scaleX = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length;
-    for (var i = 0; i < PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length; i++)
-      catList.push(PAGE_OPTIONS.dataSet.xAxis.categories[i % PAGE_OPTIONS.dataSet.xAxis.categories.length]);
+    // let catList = [];
+    // scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
+    // for (let i = 0; i < this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length; i++)
+    //   catList.push(this.CHART_OPTIONS.dataSet.xAxis.categories[i % this.CHART_OPTIONS.dataSet.xAxis.categories.length]);
 
-    createHorizontalLabel(catList, scaleX);
+    // createHorizontalLabel(catList, scaleX);
 
     /*Creating horizontal and vertical subtitles*/
-    strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (PAGE_DATA.marginLeft + (PAGE_DATA.gridBoxWidth / 2) - 30) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 70) + "' font-size='15' >" + PAGE_OPTIONS.dataSet.xAxis.title + "<\/text>";
-    strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (PAGE_DATA.marginLeft - 30) + "' y='" + (PAGE_DATA.marginTop + (PAGE_DATA.gridBoxHeight / 2) - 5) + "' font-size='15' >" + PAGE_OPTIONS.dataSet.yAxis.title + "<\/text>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
+    strSVG = "<text id='hTextSubTitle' fill='#717171' font-family='Lato'  x='" + (this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2) - 30) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 70) + "' font-size='15' >" + this.CHART_OPTIONS.dataSet.xAxis.title + "<\/text>";
+    strSVG += "<text id='vTextSubTitle' fill='#717171' font-family='Lato'  x='" + (this.CHART_DATA.marginLeft - 30) + "' y='" + (this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2) - 5) + "' font-size='15' >" + this.CHART_OPTIONS.dataSet.yAxis.title + "<\/text>";
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
-    resetTextPositions();
+    this.resetTextPositions();
 
-    bindEvents();
+    //bindEvents();
 
     //fire event afterRender
-    var aftrRenderEvent = new self.Event("afterRender", {
-      srcElement: self
-    });
-    self.dispatchEvent(aftrRenderEvent);
+    // let aftrRenderEvent = new self.Event("afterRender", {
+    //   srcElement: self
+    // });
+    // self.dispatchEvent(aftrRenderEvent);
 
   } /*End prepareChart()*/
 
+  prepareDataSet(dataSet) {
+    let maxSet = [];
+    let minSet = [];
+    let categories = [];
+    dataSet = dataSet || this.CHART_OPTIONS.dataSet.series;
 
-  function prepareDataSet(dataSet) {
-    var maxSet = [],
-      minSet = [],
-      categories = [];
-    dataSet = dataSet || PAGE_OPTIONS.dataSet.series;
-
-    for (var i = 0; i < dataSet.length; i++) {
-      var arrData = [];
-      for (var j = 0; j < dataSet[i].data.length; j++) {
+    for (let i = 0; i < dataSet.length; i++) {
+      let arrData = [];
+      for (let j = 0; j < dataSet[i].data.length; j++) {
         arrData.push(dataSet[i].data[j].value);
         if (categories.indexOf(dataSet[i].data[j].label) < 0)
           categories.push(dataSet[i].data[j].label);
       }
-      var maxVal = Math.max.apply(null, arrData);
-      var minVal = Math.min.apply(null, arrData);
+      let maxVal = Math.max.apply(null, arrData);
+      let minVal = Math.min.apply(null, arrData);
       maxSet.push(maxVal);
       minSet.push(minVal);
     }
-    PAGE_OPTIONS.dataSet.xAxis.categories = categories;
-    PAGE_DATA.maxima = Math.max.apply(null, maxSet);
-    PAGE_DATA.minima = Math.min.apply(null, minSet);
-    PAGE_DATA.maxima = round(PAGE_DATA.maxima);
+    this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
+    this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
+    this.CHART_DATA.minima = Math.min.apply(null, minSet);
+    this.CHART_DATA.maxima = round(this.CHART_DATA.maxima);
 
     //fire Event afterParseData
-    var afterParseDataEvent = new self.Event("afterParseData", {
+    let afterParseDataEvent = new self.Event("afterParseData", {
       srcElement: self
     });
     self.dispatchEvent(afterParseDataEvent);
 
   } /*End prepareDataSet()*/
 
-  function createColumns(dataSet, index, scaleX) {
-    var d = [];
-    var interval = PAGE_DATA.gridBoxWidth / PAGE_OPTIONS.dataSet.series[PAGE_DATA.longestSeries].data.length;
-    var eachInterval = (interval - (interval / 5)) / PAGE_OPTIONS.dataSet.series.length;
-    var colHalfWidth = (eachInterval - 4) / 2;
-    if (PAGE_OPTIONS.overlapColumns)
+  createColumns(dataSet, index, scaleX) {
+    let d = [];
+    let interval = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
+    let eachInterval = (interval - (interval / 5)) / this.CHART_OPTIONS.dataSet.series.length;
+    let colHalfWidth = (eachInterval - 4) / 2;
+    if (this.CHART_OPTIONS.overlapColumns)
       colHalfWidth = (interval - (interval / 5) - (index * 8)) / 2;
 
     colHalfWidth = colHalfWidth < 2 ? 2 : colHalfWidth;
     colHalfWidth = colHalfWidth > 15 ? 15 : colHalfWidth;
-    var scaleY = PAGE_DATA.gridBoxHeight / (PAGE_DATA.maxima);
-    var arrPointsSet = [],
-      strSeries = "";
-    var strSeries = "<g id='column_set_" + index + "' class='columns'>";
+    let scaleY = this.CHART_DATA.gridBoxHeight / (this.CHART_DATA.maxima);
+    let arrPointsSet = [];
+    let strSeries = "<g id='column_set_" + index + "' class='columns'>";
+    let colCenter;
 
-    for (var dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      if (PAGE_OPTIONS.overlapColumns)
-        var colCenter = new $SC.geom.Point(PAGE_DATA.marginLeft + (dataCount * interval) + (interval / 2), ((PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
+    for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
+      if (this.CHART_OPTIONS.overlapColumns)
+        colCenter = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval / 2), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
       else
-        var colCenter = new $SC.geom.Point(PAGE_DATA.marginLeft + (dataCount * interval) + (interval / 10) + (eachInterval * index) + (eachInterval / 2), ((PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
+        colCenter = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval / 10) + (eachInterval * index) + (eachInterval / 2), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
 
       if (dataSet.length > 50)
-        $SC.geom.createDot(colCenter, "red", "2", null, null, "columnChart");
+        this.createDot(colCenter, "red", "2", null, null, "columnChart");
 
-      var cornerRadius = 2;
+      let cornerRadius = 2;
       d = [
         "M", colCenter.x - colHalfWidth + (cornerRadius), colCenter.y,
         "L", colCenter.x + colHalfWidth - (cornerRadius), colCenter.y,
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, cornerRadius,
-        "L", colCenter.x + colHalfWidth, (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight),
-        "L", colCenter.x - colHalfWidth, (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight),
+        "L", colCenter.x + colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight),
+        "L", colCenter.x - colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight),
         "L", colCenter.x - colHalfWidth, colCenter.y + (cornerRadius),
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, -cornerRadius,
         "Z"
       ];
       arrPointsSet.push(colCenter);
 
-      if (PAGE_OPTIONS.dataSet.series.length > 1)
-        var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+      if (this.CHART_OPTIONS.dataSet.series.length > 1)
+        let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
       else
-        var color = PAGE_OPTIONS.dataSet.series[index].data[dataCount].color || PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+        let color = this.CHART_OPTIONS.dataSet.series[index].data[dataCount].color || this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
 
-      var fill = color,
+      let fill = color,
         filter = "";
-      switch (PAGE_OPTIONS.dataSet.series[index].gradient) {
+      switch (this.CHART_OPTIONS.dataSet.series[index].gradient) {
         case "oval":
           appendGradFillOval(index, dataCount);
-          fill = "url(#" + PAGE_OPTIONS.targetElem + "-columnchart-gradOval" + index + "_" + dataCount + ")";
-          filter = "url(#" + PAGE_OPTIONS.targetElem + "-columnchart-dropshadow)";
+          fill = "url(#" + this.CHART_OPTIONS.targetElem + "-columnchart-gradOval" + index + "_" + dataCount + ")";
+          filter = "url(#" + this.CHART_OPTIONS.targetElem + "-columnchart-dropshadow)";
           break;
         case "linear":
           appendGradFillLinear(index, dataCount);
-          fill = "url(#" + PAGE_OPTIONS.targetElem + "-columnchart-gradLinear" + index + "_" + dataCount + ")";
-          filter = "url(#" + PAGE_OPTIONS.targetElem + "-columnchart-dropshadow)";
+          fill = "url(#" + this.CHART_OPTIONS.targetElem + "-columnchart-gradLinear" + index + "_" + dataCount + ")";
+          filter = "url(#" + this.CHART_OPTIONS.targetElem + "-columnchart-dropshadow)";
           break;
         default:
         case "none":
@@ -307,122 +352,122 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
       }
 
       strSeries += "<path id='column_" + index + "_" + dataCount + "' filter='" + filter + "'  stroke='" + color + "'  fill='" + fill + "' d='" + d.join(" ") + "' stroke-width='1' opacity='1'></path>";
-      PAGE_DATA.columns["column_" + index + "_" + dataCount] = {
+      this.CHART_DATA.columns["column_" + index + "_" + dataCount] = {
         topMid: colCenter,
         path: d,
         colHalfWidth: colHalfWidth,
-        label: PAGE_OPTIONS.dataSet.xAxis.categories[dataCount % PAGE_OPTIONS.dataSet.xAxis.categories.length],
-        value: (PAGE_OPTIONS.dataSet.yAxis.prefix ? PAGE_OPTIONS.dataSet.yAxis.prefix + " " : "") + dataSet[dataCount].value
+        label: this.CHART_OPTIONS.dataSet.xAxis.categories[dataCount % this.CHART_OPTIONS.dataSet.xAxis.categories.length],
+        value: (this.CHART_OPTIONS.dataSet.yAxis.prefix ? this.CHART_OPTIONS.dataSet.yAxis.prefix + " " : "") + dataSet[dataCount].value
       };
     }
     strSeries += "</g>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSeries);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSeries);
 
   } /*End createColumns()*/
 
 
-  function createLegands(index) {
-    var color = PAGE_OPTIONS.dataSet.series[index].color || $SC.util.getColor(index);
+  createLegands(index) {
+    let color = this.CHART_OPTIONS.dataSet.series[index].color || this.util.getColor(index);
     /*Creating series legend*/
-    var strSVG = "";
+    let strSVG = "";
     strSVG = "<g id='series_legend_" + index + "' style='cursor:pointer;'>";
-    strSVG += "<rect id='legend_color_" + index + "' x='" + PAGE_DATA.marginLeft + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 60) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-    strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (PAGE_DATA.marginLeft + 20) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 70) + "' fill='#717171' font-family='Verdana' >" + PAGE_OPTIONS.dataSet.series[index].name + "</text>";
+    strSVG += "<rect id='legend_color_" + index + "' x='" + this.CHART_DATA.marginLeft + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 60) + "' width='10' height='10' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
+    strSVG += "<text id='legend_txt_" + index + "' font-size='12' x='" + (this.CHART_DATA.marginLeft + 20) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 70) + "' fill='#717171' font-family='Verdana' >" + this.CHART_OPTIONS.dataSet.series[index].name + "</text>";
     strSVG += "</g>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #legendContainer").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #legendContainer").insertAdjacentHTML("beforeend", strSVG);
   }
 
-  function createGrid() {
-    PAGE_DATA.gridBoxWidth = (PAGE_DATA.svgCenter.x * 2) - PAGE_DATA.marginLeft - PAGE_DATA.marginRight;
-    PAGE_DATA.gridBoxHeight = (PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom;
-    PAGE_DATA.gridHeight = (((PAGE_DATA.svgCenter.y * 2) - PAGE_DATA.marginTop - PAGE_DATA.marginBottom) / (PAGE_CONST.hGridCount - 1));
-    var hGrid = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #hGrid");
-    if (hGrid) hGrid.parentNode.removeChild(hGrid);
+  // createGrid() {
+  //   this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
+  //   this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
+  //   this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1));
+  //   let hGrid = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #hGrid");
+  //   if (hGrid) hGrid.parentNode.removeChild(hGrid);
 
-    var strGrid = "";
-    strGrid += "<g id='hGrid' >";
-    for (var gridCount = 0; gridCount < PAGE_CONST.hGridCount; gridCount++) {
-      var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight), "L", PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth, PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight)];
-      strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' stroke-width='1' stroke-opacity='1'></path>";
-    }
-    var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop, "L", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 10];
-    strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    strGrid += "<path id='hLine' fill='none' stroke='#D8D8D8' stroke-width='1' opacity='1'></path>";
-    strGrid += "<path id='vLine' fill='none' stroke='#D8D8D8' stroke-width='1' opacity='1'></path>";
-    strGrid += "</g>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strGrid);
-    createVerticalLabel();
-  } /*End createGrid()*/
+  //   let strGrid = "";
+  //   strGrid += "<g id='hGrid' >";
+  //   for (let gridCount = 0; gridCount < this.CHART_CONST.hGridCount; gridCount++) {
+  //     let d = ["M", this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + (gridCount * this.CHART_DATA.gridHeight), "L", this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth, this.CHART_DATA.marginTop + (gridCount * this.CHART_DATA.gridHeight)];
+  //     strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' stroke-width='1' stroke-opacity='1'></path>";
+  //   }
+  //   let d = ["M", this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop, "L", this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 10];
+  //   strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
+  //   strGrid += "<path id='hLine' fill='none' stroke='#D8D8D8' stroke-width='1' opacity='1'></path>";
+  //   strGrid += "<path id='vLine' fill='none' stroke='#D8D8D8' stroke-width='1' opacity='1'></path>";
+  //   strGrid += "</g>";
+  //   document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strGrid);
+  //   createVerticalLabel();
+  // } /*End createGrid()*/
 
-  function createVerticalLabel() {
-    var vTextLabel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #vTextLabel");
+  createVerticalLabel() {
+    let vTextLabel = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #vTextLabel");
     if (vTextLabel) vTextLabel.parentNode.removeChild(vTextLabel);
 
-    var interval = (PAGE_DATA.maxima) / (PAGE_CONST.hGridCount - 1);
-    var strText = "<g id='vTextLabel'>";
-    for (var gridCount = PAGE_CONST.hGridCount - 1, i = 0; gridCount >= 0; gridCount--) {
-      var value = (i++ * interval);
+    let interval = (this.CHART_DATA.maxima) / (this.CHART_CONST.hGridCount - 1);
+    let strText = "<g id='vTextLabel'>";
+    for (let gridCount = this.CHART_CONST.hGridCount - 1, i = 0; gridCount >= 0; gridCount--) {
+      let value = (i++ * interval);
       value = (value >= 1000 ? (value / 1000).toFixed(2) + "K" : value.toFixed(2));
-      strText += "<text font-family='Lato' fill='black'><tspan x='" + (PAGE_DATA.marginLeft - 55) + "' y='" + (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight) + 5) + "' font-size='12' >" + ((PAGE_OPTIONS.dataSet.yAxis.prefix) ? PAGE_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
-      var d = ["M", PAGE_DATA.marginLeft, (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight)), "L", (PAGE_DATA.marginLeft - 5), (PAGE_DATA.marginTop + (gridCount * PAGE_DATA.gridHeight))];
+      strText += "<text font-family='Lato' fill='black'><tspan x='" + (this.CHART_DATA.marginLeft - 55) + "' y='" + (this.CHART_DATA.marginTop + (gridCount * this.CHART_DATA.gridHeight) + 5) + "' font-size='12' >" + ((this.CHART_OPTIONS.dataSet.yAxis.prefix) ? this.CHART_OPTIONS.dataSet.yAxis.prefix : "") + value + "<\/tspan></text>";
+      let d = ["M", this.CHART_DATA.marginLeft, (this.CHART_DATA.marginTop + (gridCount * this.CHART_DATA.gridHeight)), "L", (this.CHART_DATA.marginLeft - 5), (this.CHART_DATA.marginTop + (gridCount * this.CHART_DATA.gridHeight))];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
     strText += "</g>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strText);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strText);
 
-    var overFlow = 0;
-    var vTextLabel = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #vTextLabel tspan");
-    for (var i = 0; i < vTextLabel.length; i++) {
-      if ((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
-        overFlow = Math.abs((PAGE_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
+    let overFlow = 0;
+    let vTextLabel = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #vTextLabel tspan");
+    for (let i = 0; i < vTextLabel.length; i++) {
+      if ((this.CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50) < 0)
+        overFlow = Math.abs((this.CHART_DATA.marginLeft - vTextLabel[i].getComputedTextLength() - 50));
     }
     if (overFlow !== 0) {
-      PAGE_DATA.marginLeft = PAGE_DATA.marginLeft + overFlow;
+      this.CHART_DATA.marginLeft = this.CHART_DATA.marginLeft + overFlow;
       createGrid();
     }
   } /*End createVerticalLabel()*/
 
-  function createHorizontalLabel(categories, scaleX) {
-    var hTextLabel = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #hTextLabel");
+  createHorizontalLabel(categories, scaleX) {
+    let hTextLabel = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #hTextLabel");
     if (hTextLabel) hTextLabel.parentNode.removeChild(hTextLabel);
 
-    var interval = scaleX || (PAGE_DATA.gridBoxWidth / (categories.length));
+    let interval = scaleX || (this.CHART_DATA.gridBoxWidth / (categories.length));
 
     /*if there is too much categories then discurd some categories*/
     if (interval < 30) {
-      var newCategories = [],
+      let newCategories = [],
         skipLen = Math.ceil(30 / interval);
-      for (var i = 0; i < categories.length; i += skipLen) {
+      for (let i = 0; i < categories.length; i += skipLen) {
         newCategories.push(categories[i]);
       }
       categories = newCategories;
       interval *= skipLen;
     }
-    var strText = "<g id='hTextLabel'>";
-    for (var hText = 0; hText < categories.length; hText++) {
-      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + (PAGE_DATA.marginLeft + (hText * interval) + (interval / 2)) + "' y='" + (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 20) + "' ><tspan  font-size='12' >" + categories[hText] + "<\/tspan></text>";
+    let strText = "<g id='hTextLabel'>";
+    for (let hText = 0; hText < categories.length; hText++) {
+      strText += "<text font-family='Lato' text-anchor='middle' dominant-baseline='central' fill='black' title='" + categories[hText] + "' x='" + (this.CHART_DATA.marginLeft + (hText * interval) + (interval / 2)) + "' y='" + (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 20) + "' ><tspan  font-size='12' >" + categories[hText] + "<\/tspan></text>";
     }
 
-    for (var hText = 0; hText < categories.length; hText++) {
-      var d = ["M", (PAGE_DATA.marginLeft + (hText * interval) + (interval)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight), "L", (PAGE_DATA.marginLeft + (hText * interval) + (interval)), (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 10)];
+    for (let hText = 0; hText < categories.length; hText++) {
+      let d = ["M", (this.CHART_DATA.marginLeft + (hText * interval) + (interval)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight), "L", (this.CHART_DATA.marginLeft + (hText * interval) + (interval)), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 10)];
       strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' stroke-width='1' opacity='1'></path>";
     }
-    var d = ["M", PAGE_DATA.marginLeft, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight, "L", PAGE_DATA.marginLeft + PAGE_DATA.gridBoxWidth, PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight];
+    let d = ["M", this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight, "L", this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight];
     strText += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
     strText += "</g>";
 
     /*bind hover event*/
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strText);
-    var hTextLabels = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #hTextLabel text");
-    var totalHTextWidth = 0;
-    for (var i = 0; i < hTextLabels.length; i++) {
-      var txWidth = hTextLabels[i].getComputedTextLength();
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strText);
+    let hTextLabels = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #hTextLabel text");
+    let totalHTextWidth = 0;
+    for (let i = 0; i < hTextLabels.length; i++) {
+      let txWidth = hTextLabels[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
     }
 
-    for (var i = 0; i < hTextLabels.length; i++) {
-      var txtWidth = hTextLabels[i].querySelector("tspan").getComputedTextLength();
-      if (parseFloat(totalHTextWidth + (hTextLabels.length * 5)) < parseFloat(PAGE_DATA.gridBoxWidth)) {
+    for (let i = 0; i < hTextLabels.length; i++) {
+      let txtWidth = hTextLabels[i].querySelector("tspan").getComputedTextLength();
+      if (parseFloat(totalHTextWidth + (hTextLabels.length * 5)) < parseFloat(this.CHART_DATA.gridBoxWidth)) {
         while (txtWidth + 5 > interval) {
           hTextLabels[i].querySelector("tspan").textContent = hTextLabels[i].querySelector("tspan").textContent.substring(0, (hTextLabels[i].querySelector("tspan").textContent.length - 4)) + "...";
           txtWidth = (hTextLabels[i].querySelector("tspan").getComputedTextLength());
@@ -431,13 +476,13 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
 
       hTextLabels[i].addEventListener("mouseenter", function (e) {
         e.stopPropagation();
-        var mousePointer = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, mousePointer, "#555", e.target.getAttribute("title"));
+        let mousePointer = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+        this.ui.toolTip(this.CHART_OPTIONS.targetElem, mousePointer, "#555", e.target.getAttribute("title"));
       }, false);
 
       hTextLabels[i].addEventListener("mouseleave", function (e) {
         e.stopPropagation();
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
+        this.ui.toolTip(this.CHART_OPTIONS.targetElem, "hide");
       }, false);
 
     }
@@ -445,51 +490,51 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
   } /*End createHorizontalLabel()*/
 
 
-  function resetTextPositions() {
-    var txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getComputedTextLength();
-    var txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
-    var txtTitleGrp = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp");
+  resetTextPositions() {
+    let txtTitleLen = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getComputedTextLength();
+    let txtSubTitleLen = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
+    let txtTitleGrp = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp");
 
 
-    if (txtTitleLen > PAGE_CONST.FIX_WIDTH) {
-      var fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getAttribute("font-size");
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
+    if (txtTitleLen > this.CHART_CONST.FIX_WIDTH) {
+      let fontSize = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getAttribute("font-size");
+      document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      txtTitleLen = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
-    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
     txtTitleGrp.querySelector("#txtTitle").setAttribute("y", 70);
-    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtSubTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 90);
 
     /*Reset vertical text label*/
-    var arrVLabels = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #vTextLabel");
-    var vLabelwidth = arrVLabels[0].getBBox().width;
-    var arrVText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #vTextLabel tspan");
-    for (var i = 0; i < arrVText.length; i++)
-      arrVText[i].setAttribute("x", (PAGE_DATA.marginLeft - vLabelwidth - 10));
+    let arrVLabels = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #vTextLabel");
+    let vLabelwidth = arrVLabels[0].getBBox().width;
+    let arrVText = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #vTextLabel tspan");
+    for (let i = 0; i < arrVText.length; i++)
+      arrVText[i].setAttribute("x", (this.CHART_DATA.marginLeft - vLabelwidth - 10));
 
     /*Reset horzontal text label*/
-    var totalHTextWidth = 0;
-    var arrHText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #hTextLabel text");
-    for (var i = 0; i < arrHText.length; i++) {
-      var txWidth = arrHText[i].getComputedTextLength();
+    let totalHTextWidth = 0;
+    let arrHText = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #hTextLabel text");
+    for (let i = 0; i < arrHText.length; i++) {
+      let txWidth = arrHText[i].getComputedTextLength();
       totalHTextWidth += (txWidth);
     }
-    var interval = 70;
-    if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(PAGE_DATA.gridBoxWidth)) {
-      for (var i = 0; i < arrHText.length; i++) {
-        var cx = arrHText[i].getAttribute("x");
-        var cy = arrHText[i].getAttribute("y");
+    let interval = 70;
+    if (parseFloat(totalHTextWidth + (arrHText.length * 10)) > parseFloat(this.CHART_DATA.gridBoxWidth)) {
+      for (let i = 0; i < arrHText.length; i++) {
+        let cx = arrHText[i].getAttribute("x");
+        let cy = arrHText[i].getAttribute("y");
 
         txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
         arrHText[i].setAttribute("transform", "translate(0," + (10) + ")rotate(-45," + (cx) + "," + (cy) + ")");
 
         if (txWidth + 15 > interval) {
-          var fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
+          let fontSize = arrHText[i].querySelector("tspan").getAttribute("font-size");
           arrHText[i].querySelector("tspan").setAttribute("font-size", (fontSize - 2));
           txWidth = arrHText[i].querySelector("tspan").getComputedTextLength();
         }
@@ -500,32 +545,32 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
       }
     }
 
-    var vTxtSubTitle = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #vTextSubTitle");
-    var vTxtLen = vTxtSubTitle.getComputedTextLength();
-    vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (PAGE_DATA.marginLeft - vLabelwidth - 20) + "," + (PAGE_DATA.svgCenter.y + vTxtLen) + ")");
+    let vTxtSubTitle = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #vTextSubTitle");
+    let vTxtLen = vTxtSubTitle.getComputedTextLength();
+    vTxtSubTitle.setAttribute("transform", "matrix(0,-1,1,0," + (this.CHART_DATA.marginLeft - vLabelwidth - 20) + "," + (this.CHART_DATA.svgCenter.y + vTxtLen) + ")");
     vTxtSubTitle.setAttribute("x", 0);
     vTxtSubTitle.setAttribute("y", 0);
 
     /*Set position for legend text*/
-    var arrLegendText = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #legendContainer text");
-    var arrLegendColor = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #columnChart #legendContainer rect");
+    let arrLegendText = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #legendContainer text");
+    let arrLegendColor = document.querySelectorAll("#" + this.CHART_OPTIONS.targetElem + " #columnChart #legendContainer rect");
 
-    var width = 0,
+    let width = 0,
       row = 0;
-    for (var i = 0; i < arrLegendText.length; i++) {
-      arrLegendColor[i].setAttribute("x", (width + PAGE_DATA.marginLeft - 60));
-      arrLegendText[i].setAttribute("x", (width + PAGE_DATA.marginLeft + 20 - 60));
-      arrLegendColor[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 80 + (row * 20)));
-      arrLegendText[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 90 + (row * 20)));
+    for (let i = 0; i < arrLegendText.length; i++) {
+      arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
+      arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
+      arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 80 + (row * 20)));
+      arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 90 + (row * 20)));
       width += (arrLegendText[i].getBBox().width + 50);
 
-      if (width > PAGE_CONST.FIX_WIDTH) {
+      if (width > this.CHART_CONST.FIX_WIDTH) {
         width = 0;
         row++;
-        arrLegendColor[i].setAttribute("x", (width + PAGE_DATA.marginLeft - 60));
-        arrLegendText[i].setAttribute("x", (width + PAGE_DATA.marginLeft + 20 - 60));
-        arrLegendColor[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 80 + (row * 20)));
-        arrLegendText[i].setAttribute("y", (PAGE_DATA.marginTop + PAGE_DATA.gridBoxHeight + 90 + (row * 20)));
+        arrLegendColor[i].setAttribute("x", (width + this.CHART_DATA.marginLeft - 60));
+        arrLegendText[i].setAttribute("x", (width + this.CHART_DATA.marginLeft + 20 - 60));
+        arrLegendColor[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 80 + (row * 20)));
+        arrLegendText[i].setAttribute("y", (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + 90 + (row * 20)));
         width += (arrLegendText[i].getBBox().width + 50);
       }
 
@@ -533,19 +578,19 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
 
   } /*End resetTextPositions()*/
 
-  function appendGradFillOval(seriesIndex, dataIndex) {
+  appendGradFillOval(seriesIndex, dataIndex) {
     /*Creating gradient fill for area*/
-    var color, gradId = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #ovalGradDef_" + seriesIndex + "_" + dataIndex);
+    let color, gradId = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #ovalGradDef_" + seriesIndex + "_" + dataIndex);
     if (gradId) return;
-    if (PAGE_OPTIONS.dataSet.series.length > 1) {
-      color = PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+    if (this.CHART_OPTIONS.dataSet.series.length > 1) {
+      color = this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
     } else {
-      color = PAGE_OPTIONS.dataSet.series[seriesIndex].data[dataIndex].color || PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+      color = this.CHART_OPTIONS.dataSet.series[seriesIndex].data[dataIndex].color || this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
     }
 
-    var strSVG = "";
+    let strSVG = "";
     strSVG += "<defs id='ovalGradDef_" + seriesIndex + "_" + dataIndex + "'>";
-    strSVG += "<linearGradient  id='" + PAGE_OPTIONS.targetElem + "-columnchart-gradOval" + seriesIndex + "_" + dataIndex + "' x1='0%' y1='0%' x2='100%' y2='0%'>  ";
+    strSVG += "<linearGradient  id='" + this.CHART_OPTIONS.targetElem + "-columnchart-gradOval" + seriesIndex + "_" + dataIndex + "' x1='0%' y1='0%' x2='100%' y2='0%'>  ";
     strSVG += "<stop offset='0%' style='stop-color:" + color + ";'></stop> ";
     strSVG += "<stop offset='5%' style='stop-color:#fff;'></stop>  ";
     strSVG += "<stop offset='15%' style='stop-color:" + color + ";stop-opacity:0.5;'></stop> ";
@@ -556,36 +601,36 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
     strSVG += "</<linearGradient> ";
     strSVG += "</defs>";
 
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFillOval()*/
 
-  function appendGradFillLinear(seriesIndex, dataIndex) {
+  appendGradFillLinear(seriesIndex, dataIndex) {
     /*Creating gradient fill for area*/
-    var color, gradId = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #linearGradDef_" + seriesIndex + "_" + dataIndex);
+    let color, gradId = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #linearGradDef_" + seriesIndex + "_" + dataIndex);
     if (gradId) return;
-    if (PAGE_OPTIONS.dataSet.series.length > 1) {
-      color = PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+    if (this.CHART_OPTIONS.dataSet.series.length > 1) {
+      color = this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
     } else {
-      color = PAGE_OPTIONS.dataSet.series[seriesIndex].data[dataIndex].color || PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+      color = this.CHART_OPTIONS.dataSet.series[seriesIndex].data[dataIndex].color || this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
     }
 
-    var strSVG = "";
+    let strSVG = "";
     strSVG += "<defs id='linearGradDef_" + seriesIndex + "_" + dataIndex + "'>";
-    strSVG += "<linearGradient  id='" + PAGE_OPTIONS.targetElem + "-columnchart-gradLinear" + seriesIndex + "_" + dataIndex + "' x1='0%' y1='0%' x2='0%' y2='100%'>  ";
+    strSVG += "<linearGradient  id='" + this.CHART_OPTIONS.targetElem + "-columnchart-gradLinear" + seriesIndex + "_" + dataIndex + "' x1='0%' y1='0%' x2='0%' y2='100%'>  ";
     strSVG += "<stop offset='0%' style='stop-color:#fff;'></stop>  ";
     strSVG += "<stop offset='100%' style='stop-color:" + color + ";'></stop> ";
     strSVG += "</<linearGradient> ";
     strSVG += "</defs>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart").insertAdjacentHTML("beforeend", strSVG);
   } /*End appendGradFillLinear()*/
 
 
-  function showAnimatedView() {
-    var scaleY = 0.0;
+  showAnimatedView() {
+    let scaleY = 0.0;
 
-    var timeoutId = setInterval(function () {
-      for (var col in PAGE_DATA.columns) {
-        var column = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #" + col);
+    let timeoutId = setInterval(function () {
+      for (let col in this.CHART_DATA.columns) {
+        let column = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #" + col);
         scaleYElem(column, 1, scaleY);
       }
       scaleY += 0.1;
@@ -594,30 +639,30 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
     }, 50);
   } /*End showAnimatedView()*/
 
-  function scaleYElem(elementNode, scaleX, scaleY) {
-    var bbox = elementNode.getBBox();
-    var cx = bbox.x + (bbox.width / 2),
+  scaleYElem(elementNode, scaleX, scaleY) {
+    let bbox = elementNode.getBBox();
+    let cx = bbox.x + (bbox.width / 2),
       cy = bbox.y + (bbox.height); // finding center of element
-    var saclestr = scaleX + ',' + scaleY;
-    var tx = -cx * (scaleX - 1);
-    var ty = -cy * (scaleY - 1);
-    var translatestr = parseFloat(tx).toFixed(3) + ',' + parseFloat(ty).toFixed(3);
+    let saclestr = scaleX + ',' + scaleY;
+    let tx = -cx * (scaleX - 1);
+    let ty = -cy * (scaleY - 1);
+    let translatestr = parseFloat(tx).toFixed(3) + ',' + parseFloat(ty).toFixed(3);
 
     elementNode.setAttribute('transform', 'translate(' + translatestr + ') scale(' + saclestr + ')');
   } /*End scaleYElem()*/
 
-  function bindEvents() {
-    for (var sindex = 0; sindex < PAGE_OPTIONS.dataSet.series.length; sindex++) {
-      for (var dindex = 0; dindex < PAGE_OPTIONS.dataSet.series[sindex].data.length; dindex++) {
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("mouseenter", onMouseOver);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("mouseenter", onMouseOver, false);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("click", onMouseOver);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("click", onMouseOver, false);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("mouseleave", onMouseLeave);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("mouseleave", onMouseLeave, false);
+  bindEvents() {
+    for (let sindex = 0; sindex < this.CHART_OPTIONS.dataSet.series.length; sindex++) {
+      for (let dindex = 0; dindex < this.CHART_OPTIONS.dataSet.series[sindex].data.length; dindex++) {
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("mouseenter", onMouseOver);
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("mouseenter", onMouseOver, false);
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("click", onMouseOver);
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("click", onMouseOver, false);
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).removeEventListener("mouseleave", onMouseLeave);
+        document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #column_" + sindex + "_" + dindex).addEventListener("mouseleave", onMouseLeave, false);
       }
 
-      var legend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #series_legend_" + sindex);
+      let legend = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #series_legend_" + sindex);
       if (legend) {
         legend.removeEventListener("click", onLegendClick);
         legend.addEventListener("click", onLegendClick, false);
@@ -629,81 +674,81 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
   } /*End bindEvents()*/
 
 
-  var timeOut = null;
-  var onWindowResize = function () {
-    var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
-    if (PAGE_CONST.runId != containerDiv.getAttribute("runId")) {
-      window.removeEventListener('resize', onWindowResize);
-      if (timeOut != null) {
-        clearTimeout(timeOut);
-      }
-      return;
-    }
-    if (containerDiv.offsetWidth !== PAGE_CONST.FIX_WIDTH || containerDiv.offsetHeight !== PAGE_CONST.FIX_HEIGHT) {
-      if (timeOut != null) {
-        clearTimeout(timeOut);
-      }
-      callChart();
+  // let timeOut = null;
+  // let onWindowResize = function () {
+  //   let containerDiv = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
+  //   if (this.CHART_CONST.runId != containerDiv.getAttribute("runId")) {
+  //     window.removeEventListener('resize', onWindowResize);
+  //     if (timeOut != null) {
+  //       clearTimeout(timeOut);
+  //     }
+  //     return;
+  //   }
+  //   if (containerDiv.offsetWidth !== this.CHART_CONST.FIX_WIDTH || containerDiv.offsetHeight !== this.CHART_CONST.FIX_HEIGHT) {
+  //     if (timeOut != null) {
+  //       clearTimeout(timeOut);
+  //     }
+  //     callChart();
 
-      function callChart() {
-        if (containerDiv) {
-          if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
-            timeOut = setTimeout(function () {
-              callChart();
-            }, 100);
-          } else {
-            timeOut = setTimeout(function () {
-              init();
-            }, 500);
-          }
-        }
-      }
-    }
-  }; /*End onWindowResize()*/
+  //     function callChart() {
+  //       if (containerDiv) {
+  //         if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
+  //           timeOut = setTimeout(function () {
+  //             callChart();
+  //           }, 100);
+  //         } else {
+  //           timeOut = setTimeout(function () {
+  //             init();
+  //           }, 500);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }; /*End onWindowResize()*/
 
-  function onMouseOver(e) {
+  onMouseOver(e) {
     try {
-      var columnId = e.target.id;
-      var column = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #" + columnId);
+      let columnId = e.target.id;
+      let column = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #" + columnId);
       column.setAttribute("opacity", 0.5);
-      var toolTipPoint = new $SC.geom.Point(PAGE_DATA.columns[columnId].topMid.x, PAGE_DATA.columns[columnId].topMid.y + 18);
-      var seriesIndex = columnId.split("_")[1];
-      var index = columnId.split("_")[2];
-      var color = PAGE_OPTIONS.dataSet.series[seriesIndex].data[index].color || PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
-      var toolTipRow1 = PAGE_DATA.columns[columnId].label,
-        toolTipRow2 = PAGE_DATA.columns[columnId].value;
+      let toolTipPoint = new Point(this.CHART_DATA.columns[columnId].topMid.x, this.CHART_DATA.columns[columnId].topMid.y + 18);
+      let seriesIndex = columnId.split("_")[1];
+      let index = columnId.split("_")[2];
+      let color = this.CHART_OPTIONS.dataSet.series[seriesIndex].data[index].color || this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
+      let toolTipRow1 = this.CHART_DATA.columns[columnId].label,
+        toolTipRow2 = this.CHART_DATA.columns[columnId].value;
 
       /*point should be available globally*/
-      var point = PAGE_OPTIONS.dataSet.series[seriesIndex].data[index];
+      let point = this.CHART_OPTIONS.dataSet.series[seriesIndex].data[index];
       point["series"] = {
-        name: PAGE_OPTIONS.dataSet.series[seriesIndex].name
+        name: this.CHART_OPTIONS.dataSet.series[seriesIndex].name
       };
 
-      if (PAGE_OPTIONS.toolTip && PAGE_OPTIONS.toolTip.content) {
-        var toolTipContent = PAGE_OPTIONS.toolTip.content.replace(/{{/g, "${").replace(/}}/g, "}");
-        var genContent = $SC.util.assemble(toolTipContent, "point");
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
+      if (this.CHART_OPTIONS.toolTip && this.CHART_OPTIONS.toolTip.content) {
+        let toolTipContent = this.CHART_OPTIONS.toolTip.content.replace(/{{/g, "${").replace(/}}/g, "}");
+        let genContent = this.util.assemble(toolTipContent, "point");
+        this.ui.toolTip(this.CHART_OPTIONS.targetElem, toolTipPoint, color, genContent(point), "html");
       } else
-        $SC.ui.toolTip(PAGE_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
+        this.ui.toolTip(this.CHART_OPTIONS.targetElem, toolTipPoint, color, toolTipRow1, toolTipRow2);
 
     } catch (ex) {
       console.log(ex);
     }
   }
 
-  function onMouseLeave(e) {
-    var columnId = e.target.id;
-    var column = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #columnChart #" + columnId);
+  onMouseLeave(e) {
+    let columnId = e.target.id;
+    let column = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #columnChart #" + columnId);
     column.setAttribute("opacity", 1);
-    $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
+    this.ui.toolTip(this.CHART_OPTIONS.targetElem, "hide");
   }
 
-  function onLegendClick(e) {
-    var columnId = e.target.id;
-    var seriesIndex = columnId.split("_")[2];
-    var legendColor = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #legend_color_" + seriesIndex);
-    var columnSet = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #column_set_" + seriesIndex);
-    var color = PAGE_OPTIONS.dataSet.series[seriesIndex].color || $SC.util.getColor(seriesIndex);
+  onLegendClick(e) {
+    let columnId = e.target.id;
+    let seriesIndex = columnId.split("_")[2];
+    let legendColor = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #legend_color_" + seriesIndex);
+    let columnSet = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #column_set_" + seriesIndex);
+    let color = this.CHART_OPTIONS.dataSet.series[seriesIndex].color || this.util.getColor(seriesIndex);
     if (legendColor.getAttribute("fill") === "#eee") {
       legendColor.setAttribute("fill", color);
       columnSet.style.display = "block";
@@ -714,9 +759,9 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
   } /*End onLegendClick()*/
 
 
-  function createColumnDropShadow() {
-    var strSVG = "";
-    strSVG = "<filter id='" + PAGE_OPTIONS.targetElem + "-columnchart-dropshadow' height='130%'>";
+  createColumnDropShadow() {
+    let strSVG = "";
+    strSVG = "<filter id='" + this.CHART_OPTIONS.targetElem + "-columnchart-dropshadow' height='130%'>";
     strSVG += "  <feGaussianBlur in='SourceGraphic' stdDeviation='1'/>";
     strSVG += "  <feOffset dx='2' dy='0' result='offsetblur'/>";
     strSVG += "  <feMerge>";
@@ -724,21 +769,24 @@ window.SmartChartsNXT.ColumnChart = function (opts) {
     strSVG += "    <feMergeNode in='SourceGraphic'/>";
     strSVG += "  </feMerge>";
     strSVG += "</filter>";
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
+    document.querySelector("#" + this.CHART_OPTIONS.targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
 
-  } /*End appendDropShadow()*/
+  } /*End createColumnDropShadow()*/
 
-  function round(val) {
+  round(val) {
     val = Math.round(val);
-    var digitCount = val.toString().length;
-    var nextVal = Math.pow(10, digitCount - 1);
-    var roundVal = Math.ceil(val / nextVal) * nextVal;
+    let digitCount = val.toString().length;
+    let nextVal = Math.pow(10, digitCount - 1);
+    let roundVal = Math.ceil(val / nextVal) * nextVal;
     if (val < roundVal / 2)
       return roundVal / 2;
     else
       return roundVal;
   } /*End round()*/
 
-  init();
-  if (PAGE_OPTIONS.animated !== false) showAnimatedView();
-}; /*End of drawPieChart3D()*/
+  // init();
+  // if (this.CHART_OPTIONS.animated !== false) showAnimatedView();
+
+} /*End of Column Chart class */
+
+module.exports = ColumnChart;

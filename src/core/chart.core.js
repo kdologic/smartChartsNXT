@@ -12,14 +12,16 @@ let polyfills = require("./../shims/polyfills");
 let WebFonts = require("./../plugIns/webFontsLoader");
 let AreaChart = require("./../charts/areaChart/areaChart");
 let PieChart = require("./../charts/pieChart/pieChart");
+let ColumnChart = require("./../charts/columnChart/columnChart");
 
-const preLoaderImg = "<svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'> <rect y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='30' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='60' width='15' height='140' rx='6'> <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='90' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='120' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect></svg>";
+const PRE_LOADER_IMG = "<svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'> <rect y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='30' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='60' width='15' height='140' rx='6'> <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='90' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='120' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect></svg>";
 
 class Core {
     constructor() {
         this.nameSpaceReadyStatus = false;
         this.AreaChart = AreaChart;
         this.PieChart = PieChart;
+        this.ColumnChart = ColumnChart; 
         this.initCore();
     }
 
@@ -39,6 +41,11 @@ class Core {
                 if (typeof cb === "function") {
                     cb();
                 }
+            },
+            inactive: function () {
+                if (typeof cb === "function") {
+                    cb();
+                }
             }
         });
     } /*End addFont()*/
@@ -49,9 +56,12 @@ class Core {
             if (this.nameSpaceReadyStatus) {
                 clearInterval(statusCheck);
                 if (typeof successBack === "function") {
-                    var startTime = window.performance.now();
-
-                    successBack.call(this);
+                    let startTime = window.performance.now();
+                    try {
+                        successBack.call(this);
+                    } catch (ex) {
+                        this.handleError(ex);
+                    }
 
                     let endTitme = window.performance.now();
                     console.log("Time elapsed for chart: %c" + (endTitme - startTime) + " Ms", "color:green");
@@ -59,6 +69,12 @@ class Core {
             }
         }, 100);
     } /*End ready()*/
+
+    handleError(ex, msg) {
+        console.error("SmartChartsNXT:" + ex.errorIn);
+        console.log(ex.stack);
+    } /*End handleError()*/
+
 }
 
 module.exports = Core;

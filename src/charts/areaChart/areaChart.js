@@ -1,5 +1,3 @@
-"use strict";
-
 /*
  * SVG Area Chart 
  * @Version:1.1.0
@@ -194,7 +192,8 @@ class AreaChart extends CoordinateChart {
       this.prepareChart();
       this.tooltip.createTooltip(this);
     } catch (ex) {
-      this.handleError(ex, "Error in AreaChart");
+      ex.errorIn = `Error in AreaChart with runId:${this.getRunId()}`;
+      throw ex;
     }
 
   } /*End init()*/
