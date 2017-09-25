@@ -155,10 +155,11 @@ class UtilCore {
         img.onload = function () {
             let today = new Date();
             let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
+            let canvas; 
             today = (new Date(Date.now() - tzoffset));
 
             if (opts.type !== "svg") {
-                let canvas = document.createElement("canvas");
+                canvas = document.createElement("canvas");
                 canvas.width = opts.width;
                 canvas.height = opts.height;
                 let ctx = canvas.getContext("2d");

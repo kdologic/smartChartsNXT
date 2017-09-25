@@ -139,7 +139,7 @@ class UiCore {
 
                 let printMenu = document.querySelectorAll("#" + targetElem + " #smartCharts-menu-panel .main-menu-item.print");
                 for (let i = 0; i < printMenu.length; i++) {
-                    printMenu[i].addEventListener("click", function () {
+                    printMenu[i].addEventListener("click",  () => {
                         e.stopPropagation();
                         e.preventDefault();
 
@@ -173,7 +173,7 @@ class UiCore {
                             menuSidePanel[0].parentNode.removeChild(menuSidePanel[0]);
                         }
                         document.querySelector("#" + targetElem + " #smartCharts-menu2").style.visibility = "hidden";
-                        this.util.printChart(opts);
+                        chartObj.util.printChart(opts);
 
                     }, false);
                 }
@@ -247,7 +247,7 @@ class UiCore {
 
                     let saveAsSubmenus = document.querySelectorAll("#" + targetElem + " svg #smartCharts-menu-panel #smartCharts-saveas-submenu .sub-menu-item");
                     for (let i = 0; i < saveAsSubmenus.length; i++) {
-                        saveAsSubmenus[i].addEventListener("click", function (e) {
+                        saveAsSubmenus[i].addEventListener("click",  (e) => {
                             e.stopPropagation();
                             e.preventDefault();
 
@@ -265,7 +265,7 @@ class UiCore {
                                 height: svgCenter.y * 2,
                                 srcElem: "#" + targetElem + " svg",
                                 type: saveAsType,
-                                saveSuccess: function () {
+                                saveSuccess:  () => {
                                     document.querySelector("#" + targetElem + " #smartCharts-menu2").style.visibility = "visible";
                                     let loaderContainter = document.querySelector(opts.srcElem + " #smartsCharts-loader-container");
                                     if (loaderContainter) {
@@ -295,110 +295,6 @@ class UiCore {
         } /*End onMenuClick()*/
 
     } /*End appendMenu2()*/
-
-
-    appendMenu(targetElem, svgCenter) {
-        let strSVG = "";
-        strSVG += "<g id='smartCharts-menu'>";
-        strSVG += "  <path id='smartCharts-menu-icon' d='" + $SC.geom.describeRoundedRect(((svgCenter.x * 2) - 50), 20, 35, 30, 5).join(" ") + "' filter='" + $SC.ui.dropShadow(targetElem) + "' fill='white' stroke-width='0.5' stroke='#717171' />";
-        strSVG += "  <line x1='" + ((svgCenter.x * 2) - 45) + "' y1='30' x2='" + ((svgCenter.x * 2) - 20) + "' y2='30' style='stroke:#333;stroke-width:1' />";
-        strSVG += "  <line x1='" + ((svgCenter.x * 2) - 45) + "' y1='35' x2='" + ((svgCenter.x * 2) - 20) + "' y2='35' style='stroke:#333;stroke-width:1' />";
-        strSVG += "  <line x1='" + ((svgCenter.x * 2) - 45) + "' y1='40' x2='" + ((svgCenter.x * 2) - 20) + "' y2='40' style='stroke:#333;stroke-width:1' />";
-        strSVG += "</g>";
-        document.querySelector("#" + targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
-
-        /*Bind menu events*/
-
-        document.querySelector("#" + targetElem + " #smartCharts-menu ").addEventListener("click", function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            let offSetX = 150,
-                offSetY = 60,
-                intervalId;
-            let menuSidePanel = document.querySelectorAll("#" + targetElem + " #smartCharts-menu-panel");
-            if (menuSidePanel.length > 0) {
-                menuSidePanel[0].parentNode.removeChild(menuSidePanel[0]);
-            } else {
-                strSVG = "  <g id='smartCharts-menu-panel'>";
-                strSVG += "  <rect class='menu-panel-elem' x='" + ((svgCenter.x * 2) - offSetX) + "' y='" + (offSetY) + "' width='" + (offSetX) + "' height='" + (svgCenter.y * 2 - offSetY - 2) + "' fill='white' stroke-width='1' stroke='#333' />";
-                strSVG += "  <rect class='menu-panel-elem' x='" + ((svgCenter.x * 2) - offSetX) + "' y='" + (offSetY) + "' width='" + (offSetX - 1) + "' height='" + (offSetY) + "' fill='#EEF' stroke-width='0' stroke='#333' />";
-                strSVG += "  <text fill='#717171' x='" + ((svgCenter.x * 2) - offSetX + 25) + "' y='" + (offSetY + 32) + "' font-family='Lato' >Download As...</text>";
-
-                strSVG += "  <rect class='menu-panel-menu' save-as='jpeg' x='" + ((svgCenter.x * 2) - offSetX) + "' y='" + (2 * offSetY) + "' width='" + (offSetX - 1) + "' height='" + (offSetY) + "' fill='#fff' stroke-width='0' stroke='#333' />";
-                strSVG += "  <rect class='menu-panel-menu' save-as='png' x='" + ((svgCenter.x * 2) - offSetX) + "' y='" + (3 * offSetY) + "' width='" + (offSetX - 1) + "' height='" + (offSetY) + "' fill='#fff' stroke-width='0' stroke='#333' />";
-                strSVG += "  <rect class='menu-panel-menu' save-as='svg' x='" + ((svgCenter.x * 2) - offSetX) + "' y='" + (4 * offSetY) + "' width='" + (offSetX - 1) + "' height='" + (offSetY) + "' fill='#fff' stroke-width='0' stroke='#333' />";
-
-
-                strSVG += "  <text fill='#717171' x='" + ((svgCenter.x * 2) - offSetX + 25) + "' y='" + (2 * offSetY + 32) + "' font-family='Lato' >JPEG</text>";
-                strSVG += "  <text fill='#717171' x='" + ((svgCenter.x * 2) - offSetX + 25) + "' y='" + (3 * offSetY + 32) + "' font-family='Lato' >PNG</text>";
-                strSVG += "  <text fill='#717171' x='" + ((svgCenter.x * 2) - offSetX + 25) + "' y='" + (4 * offSetY + 32) + "' font-family='Lato' >SVG</text>";
-
-                strSVG += "  <line x1='" + ((svgCenter.x * 2) - offSetX + 15) + "' y1='" + (3 * offSetY) + "' x2='" + (svgCenter.x * 2 - 15) + "' y2='" + (3 * offSetY) + "' style='stroke:#eee;stroke-width:1' />";
-                strSVG += "  <line x1='" + ((svgCenter.x * 2) - offSetX + 15) + "' y1='" + (4 * offSetY) + "' x2='" + (svgCenter.x * 2 - 15) + "' y2='" + (4 * offSetY) + "' style='stroke:#eee;stroke-width:1' />";
-                strSVG += "  <line x1='" + ((svgCenter.x * 2) - offSetX + 15) + "' y1='" + (5 * offSetY) + "' x2='" + (svgCenter.x * 2 - 15) + "' y2='" + (5 * offSetY) + "' style='stroke:#eee;stroke-width:1' />";
-                strSVG += "  <line x1='" + ((svgCenter.x * 2) - offSetX + 15) + "' y1='" + (6 * offSetY) + "' x2='" + (svgCenter.x * 2 - 15) + "' y2='" + (6 * offSetY) + "' style='stroke:#eee;stroke-width:1' />";
-
-                strSVG += "  </g>";
-                document.querySelector("#" + targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
-
-                /*submenu bind event*/
-                let menuPanel = document.querySelector("#" + targetElem + " #smartCharts-menu-panel");
-                let submenus = menuPanel.querySelectorAll(".menu-panel-menu");
-                for (let i = 0; i < submenus.length; i++) {
-                    submenus[i].addEventListener("click", function (e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        let saveAsType = e.target.getAttribute("save-as");
-                        let opts = {
-                            width: svgCenter.x * 2,
-                            height: svgCenter.y * 2,
-                            srcElem: "#" + targetElem + " svg",
-                            type: saveAsType,
-                            saveSuccess: function () {
-                                document.querySelector("#" + targetElem + " #smartCharts-menu").style.visibility = "visible";
-                            }
-                        };
-                        let menuSidePanel = document.querySelectorAll("#" + targetElem + " #smartCharts-menu-panel");
-                        if (menuSidePanel.length > 0) {
-                            menuSidePanel[0].parentNode.removeChild(menuSidePanel[0]);
-                        }
-                        document.querySelector("#" + targetElem + " #smartCharts-menu").style.visibility = "hidden";
-                        $SC.util.saveAsImage(opts);
-
-                    }, false);
-
-                    submenus[i].addEventListener("mouseenter", function (e) {
-                        e.target.setAttribute("fill", "#d7d7ed");
-                    }, false);
-                    submenus[i].addEventListener("mouseleave", function (e) {
-                        e.target.setAttribute("fill", "#fff");
-                    }, false);
-                }
-
-                menuPanel.style["transform"] = "translate(" + offSetX + "px," + 0 + "px)";
-
-                let slideOffset = offSetX;
-                let shiftBy = 1.1;
-                intervalId = setInterval(function () {
-                    if (slideOffset < 0) {
-                        slideOffset = Math.round(slideOffset) + 4;
-                    } else {
-                        shiftBy += Math.pow(1.1, 2);
-                        slideOffset -= shiftBy;
-                    }
-                    menuPanel = document.querySelector("#" + targetElem + " #smartCharts-menu-panel");
-                    if (menuPanel) {
-                        menuPanel.style["transform"] = "translate(" + (slideOffset) + "px," + 0 + "px)";
-                    } else {
-                        clearInterval(intervalId);
-                    }
-                    if (slideOffset === 0) {
-                        clearInterval(intervalId);
-                    }
-                }, 50);
-            }
-        }, false);
-    } /*End appendMenu()*/
 
     appendWaterMark(targetElem, scaleX, scaleY) {
         let strSVG = "<g id='smartCharts-watermark'>";
