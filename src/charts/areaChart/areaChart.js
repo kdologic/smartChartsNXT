@@ -37,7 +37,11 @@
             "lineWidth":2,
             "color":"#FFC107",
             "name": 'Raphael',
-            "data": generateData(10,50,45)
+            "data": [
+              {label:"Jan",value:"2311"},{label:"Feb",value:"553"},{label:"Mar",value:"196"},{label:"Apr",value:"4422"},
+              {label:"May",value:"3312"},{label:"Jun",value:"663"},{label:"Jul",value:"9663"},{label:"Aug",value:"114"},
+              {label:"Sep",value:"2231"},{label:"Oct",value:"55"},{label:"Nov",value:"274"},{label:"Dec",value:"3467"}
+            ]
           },
           {
             "lineWidth":2,
@@ -162,7 +166,7 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
       this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
       this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
-      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 110;
+      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 90;
 
       let longestSeries = 0;
       let longSeriesLen = 0;
@@ -450,7 +454,7 @@ class AreaChart extends CoordinateChart {
       for (let point = 0; point + 2 < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + radius + "' class='dot' style='fill:" + color + "; opacity: 1; stroke-width: 1px;'></circle>";
-          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='2' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
+          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + (radius-1) + "' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
         }
       }
     }

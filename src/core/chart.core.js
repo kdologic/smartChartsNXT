@@ -11,6 +11,7 @@
 let polyfills = require("./../shims/polyfills");
 let WebFonts = require("./../plugIns/webFontsLoader");
 let AreaChart = require("./../charts/areaChart/areaChart");
+let LineChart = require("./../charts/lineChart/lineChart");
 let PieChart = require("./../charts/pieChart/pieChart");
 let ColumnChart = require("./../charts/columnChart/columnChart");
 
@@ -20,6 +21,7 @@ class Core {
     constructor() {
         this.nameSpaceReadyStatus = false;
         this.AreaChart = AreaChart;
+        this.LineChart = LineChart; 
         this.PieChart = PieChart;
         this.ColumnChart = ColumnChart; 
         this.initCore();

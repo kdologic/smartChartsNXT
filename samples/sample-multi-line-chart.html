@@ -27,7 +27,8 @@
           "targetElem": "chartContainer",
           "canvasBorder": false,
           "bgColor": "none",
-          "animated": false,
+          "animated": true,
+          "showLegend":true, 
           "toolTip": {
             "content": '<table>' +
               '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
@@ -57,12 +58,6 @@
                 "color": "#F44336",
                 "name": 'Wilson',
                 "data": generateData(5, 20, 45)
-              },
-              {
-                "lineWidth": 2,
-                "color": "#1C6346",
-                "name": 'Kate',
-                "data": generateData(10, 20, 45)
               }
             ]
           },

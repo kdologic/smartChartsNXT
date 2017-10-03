@@ -306,8 +306,8 @@ class ColumnChart extends CoordinateChart {
         "M", colCenter.x - colHalfWidth + (cornerRadius), colCenter.y,
         "L", colCenter.x + colHalfWidth - (cornerRadius), colCenter.y,
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, cornerRadius,
-        "L", colCenter.x + colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight),
-        "L", colCenter.x - colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight),
+        "L", colCenter.x + colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight -1 ),
+        "L", colCenter.x - colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight -1 ),
         "L", colCenter.x - colHalfWidth, colCenter.y + (cornerRadius),
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, -cornerRadius,
         "Z"
