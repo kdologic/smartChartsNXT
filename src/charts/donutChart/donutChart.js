@@ -199,8 +199,8 @@ class DonutChart extends SlicedChart {
     let strSVG = "";
     strSVG += "  <rect class='donut" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='donut" + index + "' id='txtDonutGrpDonut" + index + "' fill='#717171' font-family='Lato' >";
-    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
-    strSVG += "  <path class='donut" + index + "' id='donutHover" + index + "' fill-opacity='0.4' fill='" + color + "' stroke='none' stroke-width='0' style='cursor:pointer;' \/> ";
+    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>"; 
+    strSVG += "  <path class='donut" + index + "' id='donutHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
     strSVG += "  <path class='donut" + index + "'  id='upperArcDonut" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='donut" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
 
@@ -336,7 +336,6 @@ class DonutChart extends SlicedChart {
             }
             let row1 = this.CHART_DATA.uniqueDataSet[donutIndex].label + ", " + this.CHART_DATA.uniqueDataSet[donutIndex].value;
             let row2 = this.CHART_DATA.uniqueDataSet[donutIndex].percent.toFixed(2) + "%";
-            //let color = (this.CHART_OPTIONS.dataSet[donutIndex].color ? this.CHART_OPTIONS.dataSet[donutIndex].color : this.util.getColor(donutIndex));
             let color = this.CHART_DATA.uniqueDataSet[donutIndex].color;
             this.tooltip.updateTip(mousePos, color, row1, row2);
           }
@@ -379,13 +378,14 @@ class DonutChart extends SlicedChart {
               donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
             }
             donutHover.setAttribute("d", donutHoverPath.d);
+            donutHover.style["fill-opacity"] = 0.4; 
           }
         }, false);
 
         upperArcDonut.addEventListener("mouseleave", (e) => {
           let elemId = e.target.getAttribute("class");
           let donutIndex = elemId.substring("donut".length);
-          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
+          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
           this.tooltip.hide();
         }, false);
 
@@ -475,11 +475,12 @@ class DonutChart extends SlicedChart {
       donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
     }
     donutHover.setAttribute("d", donutHoverPath.d);
+    donutHover.style["fill-opacity"] = 0.4; 
   }
 
   onLegendLeave(e) {
     let donutIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
+    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
   }
 
   onLegendClick(e) {

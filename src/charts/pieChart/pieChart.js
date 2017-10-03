@@ -196,7 +196,7 @@ class PieChart extends SlicedChart {
     strSVG += "  <rect class='pie" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='pie" + index + "' id='txtPieGrpPie" + index + "' fill='#717171' font-family='Lato' >";
     strSVG += "  <tspan class='pie" + index + "' id='txtPie" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
-    strSVG += "  <path class='pie" + index + "' id='pieHover" + index + "' fill-opacity='0.4' fill='" + color + "' stroke='none' stroke-width='0' style='cursor:pointer;' \/> ";
+    strSVG += "  <path class='pie" + index + "' id='pieHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
     strSVG += "  <path class='pie" + index + "'  id='upperArcPie" + index + "'  fill='" + color + "' stroke='" + strokeColor + "' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='pie" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
 
@@ -376,13 +376,14 @@ class PieChart extends SlicedChart {
               pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
             }
             pieHover.setAttribute("d", pieHoverPath.d);
+            pieHover.style["fill-opacity"] = 0.4; 
           }
         }, false);
 
         upperArcPie.addEventListener("mouseleave", (e) => {
           let elemId = e.target.getAttribute("class");
           let pieIndex = elemId.substring("pie".length);
-          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0; 
           this.tooltip.hide();
         }, false);
 
@@ -474,11 +475,12 @@ class PieChart extends SlicedChart {
       pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
     }
     pieHover.setAttribute("d", pieHoverPath.d);
+    pieHover.style["fill-opacity"] = 0.4; 
   }
 
   onLegendLeave(e) {
     let pieIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0; 
   }
 
   onLegendClick(e) {
