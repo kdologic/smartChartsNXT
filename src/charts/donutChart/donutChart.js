@@ -1,13 +1,13 @@
 /*
  * SVG Donut Chart
- * @Version:1.0.0
+ * @Version:1.1.0
  * @CreatedOn:20-Sep-2016
  * @LastUpdated:12-Oct-2016
  * @Author:SmartChartsNXT
  * @description:This will generate a 2d Donut chart. Using SVG 1.1 elements and HTML 5 standard. 
  * @JSFiddle:
  * @Sample caller code:
- * var settings = {
+ * let settings = {
       "title":"Browser Statistics and Trends",
       "outline":2,
       "canvasBorder":true,
@@ -15,7 +15,7 @@
       "targetElem":"chartContainer",
       "bgColor":"gray",
       "showLegend":true,
-      "animated":false,
+      "animated":true,
       "dataSet":[
         {
           "label":"Chrome",
@@ -24,6 +24,7 @@
         {
           "label":"IE",
           "value":"5.7"
+          "color": "#F44336"
         },
         {
           "label":"Safari",
@@ -41,135 +42,111 @@
       ]
     }; 
   SmartChartsNXT.ready(function(){
-    var donutChart = new SmartChartsNXT.DonutChart(settings);
+    let donutChart = new SmartChartsNXT.DonutChart(settings);
   });
  */
 
+"use strict";
 
-window.SmartChartsNXT.DonutChart = function (opts) {
-  var PAGE_OPTIONS = {};
-  var self = this;
-  var PAGE_DATA = {
-    scaleX: 0,
-    scaleY: 0,
-    svgCenter: 0,
-    donutCenter: 0,
-    uniqueDataSet: [],
-    totalValue: 0,
-    donutWidth: 160,
-    donutHeight: 160,
-    innerWidth: 80,
-    innerHeight: 80,
-    donutSet: [],
-    dragStartAngle: 0,
-    dragEndPoint: null,
-    mouseDown: 0,
-    mouseDrag: 0,
-    donutWithTextSpan: 0,
-    maxTextLen: 0
-  };
+let SlicedChart = require("./../../base/slicedChart");
+let Point = require("./../../core/point");
 
-  var PAGE_CONST = {
-    FIX_WIDTH: 800,
-    FIX_HEIGHT: 600,
-    MIN_WIDTH: 300,
-    MIN_HEIGHT: 400,
-    runId: "donutchart_" + Math.round(Math.random() * 1000000001)
-  };
+class DonutChart extends SlicedChart {
+  constructor(opts) {
+    super("donutChart", opts);
+    let self = this;
+    this.CHART_DATA = this.util.extends({
+      scaleX: 0,
+      scaleY: 0,
+      svgCenter: 0,
+      donutCenter: 0,
+      uniqueDataSet: [],
+      totalValue: 0,
+      donutWidth: 160,
+      donutHeight: 160,
+      innerWidth: 80,
+      innerHeight: 80,
+      donutSet: [],
+      dragStartAngle: 0,
+      dragEndPoint: null,
+      mouseDown: 0,
+      mouseDrag: 0,
+      donutWithTextSpan: 0,
+      maxTextLen: 0
+    }, this.CHART_DATA);
 
-  function init() {
-    PAGE_OPTIONS = $SC.util.extends(opts, PAGE_OPTIONS);
-    var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
-    PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = containerDiv.offsetWidth || PAGE_CONST.FIX_WIDTH;
-    PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = containerDiv.offsetHeight || PAGE_CONST.FIX_HEIGHT;
+    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
 
-    if (PAGE_OPTIONS.width < PAGE_CONST.MIN_WIDTH)
-      PAGE_OPTIONS.width = PAGE_CONST.FIX_WIDTH = PAGE_CONST.MIN_WIDTH;
-    if (PAGE_OPTIONS.height < PAGE_CONST.MIN_HEIGHT)
-      PAGE_OPTIONS.height = PAGE_CONST.FIX_HEIGHT = PAGE_CONST.MIN_HEIGHT;
+    this.CHART_CONST = this.util.extends({
+      FIX_WIDTH: 800,
+      FIX_HEIGHT: 600,
+      MIN_WIDTH: 300,
+      MIN_HEIGHT: 400
+    }, this.CHART_CONST);
 
-    if (PAGE_OPTIONS.showLegend) {
-      PAGE_CONST.MIN_WIDTH = 300;
+    this.EVENT_BINDS = {
+      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+      onDonutClickBind: self.onDonutClick.bind(self),
+      onLegendHoverBind: self.onLegendHover.bind(self),
+      onLegendLeaveBind: self.onLegendLeave.bind(self),
+      onLegendClickBind: self.onLegendClick.bind(self)
+    };
+
+    this.init();
+    if (this.CHART_OPTIONS.animated !== false) {
+      this.showAnimatedView();
     }
+  }
 
-    if (PAGE_OPTIONS.events && typeof PAGE_OPTIONS.events === "object") {
-      for (var e in PAGE_OPTIONS.events) {
-        self.off(e, PAGE_OPTIONS.events[e]);
-        self.on(e, PAGE_OPTIONS.events[e]);
-      }
-    }
-
-    PAGE_DATA.scaleX = PAGE_CONST.FIX_WIDTH - PAGE_OPTIONS.width;
-    PAGE_DATA.scaleY = PAGE_CONST.FIX_HEIGHT - PAGE_OPTIONS.height;
-
-    if (PAGE_OPTIONS.showLegend) {
-      if (PAGE_OPTIONS.width <= 480) {
-        PAGE_DATA.donutWidth = PAGE_DATA.donutHeight = Math.min((PAGE_OPTIONS.width * 7 / 10) / 2, (PAGE_OPTIONS.height - 200)) * 20 / 100;
-        PAGE_DATA.innerWidth = PAGE_DATA.innerHeight = Math.min((PAGE_OPTIONS.width * 7 / 10) / 2, (PAGE_OPTIONS.height - 200)) * 10 / 100;
+  init() {
+    try {
+      super.initBase();
+      this.initDataSet();
+      if (this.CHART_OPTIONS.showLegend) {
+        if (this.CHART_OPTIONS.width <= 480) {
+          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
+        } else {
+          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 40 / 100;
+          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+        }
       } else {
-        PAGE_DATA.donutWidth = PAGE_DATA.donutHeight = Math.min((PAGE_OPTIONS.width * 7 / 10) / 2, (PAGE_OPTIONS.height - 200)) * 40 / 100;
-        PAGE_DATA.innerWidth = PAGE_DATA.innerHeight = Math.min((PAGE_OPTIONS.width * 7 / 10) / 2, (PAGE_OPTIONS.height - 200)) * 20 / 100;
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, this.CHART_OPTIONS.height) * 20 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, this.CHART_OPTIONS.height) * 10 / 100;
       }
-    } else {
-      PAGE_DATA.donutWidth = PAGE_DATA.donutHeight = Math.min(PAGE_OPTIONS.width, PAGE_OPTIONS.height) * 20 / 100;
-      PAGE_DATA.innerWidth = PAGE_DATA.innerHeight = Math.min(PAGE_OPTIONS.width, PAGE_OPTIONS.height) * 10 / 100;
+
+      if (this.CHART_OPTIONS.showLegend) {
+        this.CHART_DATA.donutCenter = new Point((this.CHART_DATA.svgWidth * 7 / 10) / 2, this.CHART_DATA.svgCenter.y + 50);
+      } else {
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+      }
+
+      this.prepareChart();
+      this.tooltip.createTooltip(this);
+    } catch (ex) {
+      ex.errorIn = `Error in DonutChart with runId:${this.getRunId()}`;
+      throw ex;
     }
-
-    //fire Event onInit
-    var onInitEvent = new self.Event("onInit", {
-      srcElement: self
-    });
-    self.dispatchEvent(onInitEvent);
-
-    var strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
-      "viewBox='0 0 " + PAGE_CONST.FIX_WIDTH + " " + PAGE_CONST.FIX_HEIGHT + "'" +
-      "version='1.1'" +
-      "width='" + PAGE_OPTIONS.width + "'" +
-      "height='" + PAGE_OPTIONS.height + "'" +
-      "id='donutChart'" +
-      "style='background:" + (PAGE_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
-      "> <\/svg>";
-
-    document.getElementById(PAGE_OPTIONS.targetElem).setAttribute("runId", PAGE_CONST.runId);
-    document.getElementById(PAGE_OPTIONS.targetElem).innerHTML = "";
-    document.getElementById(PAGE_OPTIONS.targetElem).insertAdjacentHTML("beforeend", strSVG);
-
-    var svgWidth = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").getAttribute("width");
-    var svgHeight = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").getAttribute("height");
-    PAGE_DATA.svgCenter = new $SC.geom.Point((svgWidth / 2), (svgHeight / 2));
-
-    if (PAGE_OPTIONS.showLegend)
-      PAGE_DATA.donutCenter = new $SC.geom.Point((svgWidth * 7 / 10) / 2, PAGE_DATA.svgCenter.y + 50);
-    else
-      PAGE_DATA.donutCenter = new $SC.geom.Point(PAGE_DATA.svgCenter.x, PAGE_DATA.svgCenter.y + 50);
-
-
-    console.log(PAGE_DATA);
-    initDataSet();
-    prepareChart();
-
-    $SC.ui.appendMenu2(PAGE_OPTIONS.targetElem, PAGE_DATA.svgCenter, PAGE_DATA.scaleX, PAGE_DATA.scaleY, self);
-    $SC.appendWaterMark(PAGE_OPTIONS.targetElem, PAGE_DATA.scaleX, PAGE_DATA.scaleY);
   } /*End init()*/
 
-  function initDataSet() {
-    PAGE_DATA.donutSet = [];
-    PAGE_DATA.uniqueDataSet = [];
-    PAGE_DATA.totalValue = 0;
+  initDataSet() {
+    this.CHART_DATA.donutSet = [];
+    this.CHART_DATA.uniqueDataSet = [];
+    this.CHART_DATA.totalValue = 0;
   } /*End initDataSet()*/
 
-  function prepareChart() {
-    var startAngle, endAngle = 0;
-    prepareDataSet();
-    var strSVG = "";
-    if (PAGE_OPTIONS.canvasBorder) {
+  prepareChart() {
+    let self = this;
+    this.prepareDataSet();
+    let strSVG = "";
+    if (this.CHART_OPTIONS.canvasBorder) {
       strSVG += "<g>";
-      strSVG += "  <rect x='" + ((-1) * PAGE_DATA.scaleX / 2) + "' y='" + ((-1) * PAGE_DATA.scaleY / 2) + "' width='" + ((PAGE_DATA.svgCenter.x * 2) + PAGE_DATA.scaleX) + "' height='" + ((PAGE_DATA.svgCenter.y * 2) + PAGE_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
+      strSVG += "  <rect x='" + ((-1) * this.CHART_DATA.scaleX / 2) + "' y='" + ((-1) * this.CHART_DATA.scaleY / 2) + "' width='" + ((this.CHART_DATA.svgCenter.x * 2) + this.CHART_DATA.scaleX) + "' height='" + ((this.CHART_DATA.svgCenter.y * 2) + this.CHART_DATA.scaleY) + "' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
       strSVG += "<\/g>";
     }
     strSVG += "<g>";
     strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
-    strSVG += "    <tspan id='txtTitle' x='" + (100 / PAGE_CONST.FIX_WIDTH * PAGE_OPTIONS.width) + "' y='" + (50 / PAGE_CONST.FIX_HEIGHT * PAGE_OPTIONS.height) + "' font-size='25'><\/tspan>";
+    strSVG += "    <tspan id='txtTitle' x='" + (100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width) + "' y='" + (50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height) + "' font-size='25'><\/tspan>";
     strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='15'><\/tspan>";
     strSVG += "  <\/text>";
     strSVG += "<\/g>";
@@ -177,77 +154,89 @@ window.SmartChartsNXT.DonutChart = function (opts) {
     strSVG += "<g id='legendContainer'>";
     strSVG += "<\/g>";
 
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtTitle").textContent = PAGE_OPTIONS.title;
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtSubtitle").textContent = PAGE_OPTIONS.subTitle;
+    this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
+    this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
 
-    for (var i = 0; i < PAGE_DATA.uniqueDataSet.length; i++) {
+    let startAngle;
+    let endAngle = 0;
+    let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
+    for (let i = 0; i < this.CHART_DATA.uniqueDataSet.length; i++) {
       startAngle = endAngle;
-      endAngle += (PAGE_DATA.uniqueDataSet[i].percent * 36 / 10);
-      var color = (PAGE_OPTIONS.dataSet[i].color ? PAGE_OPTIONS.dataSet[i].color : $SC.util.getColor(i));
-      createDonut(startAngle, endAngle, color, i);
+      endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 3.6);
+      let color = this.CHART_DATA.uniqueDataSet[i].color;
+      this.createDonut(startAngle, endAngle, color, strokeColor, i);
     }
 
-    resetTextPos();
-    if (PAGE_OPTIONS.showLegend) createLegands();
-    bindEvents();
-    slicedOutOnSettings();
-
-    //fire event afterRender
-    var aftrRenderEvent = new self.Event("afterRender", {
-      srcElement: self
-    });
-    self.dispatchEvent(aftrRenderEvent);
-
+    this.resetTextPos();
+    if (this.CHART_OPTIONS.showLegend) {
+      let lSet = [];
+      this.CHART_DATA.uniqueDataSet.map((data, index) => {
+        lSet.push({
+          label: data.label,
+          value: data.value,
+          color: data.color
+        });
+      });
+      this.legendBox.createLegends(this, "legendContainer", {
+        left: self.CHART_DATA.donutCenter.x + self.CHART_DATA.donutWithTextSpan,
+        top: self.CHART_DATA.donutCenter.y - self.CHART_DATA.donutHeight - 50,
+        legendSet: lSet,
+        type: "vertical",
+        border: true
+      });
+    }
+    this.bindEvents();
+    this.slicedOutOnSettings();
+    this.render();
   } /*End prepareChart()*/
 
-
-
-  function createDonut(startAngle, endAngle, color, index) {
-    var percent = parseFloat((endAngle - startAngle) * 100 / 360).toFixed(2);
-    var strSVG = "";
+  createDonut(startAngle, endAngle, color, strokeColor, index) {
+    let self = this;
+    let percent = parseFloat((endAngle - startAngle) * 10 / 36).toFixed(2);
+    let strSVG = "";
     strSVG += "  <rect class='donut" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='donut" + index + "' id='txtDonutGrpDonut" + index + "' fill='#717171' font-family='Lato' >";
     strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
     strSVG += "  <path class='donut" + index + "' id='donutHover" + index + "' fill-opacity='0.4' fill='" + color + "' stroke='none' stroke-width='0' style='cursor:pointer;' \/> ";
-    strSVG += "  <path class='donut" + index + "'  id='upperArcDonut" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (PAGE_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
+    strSVG += "  <path class='donut" + index + "'  id='upperArcDonut" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='donut" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
 
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
-    var upperArcPath = describeDonutArc(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, PAGE_DATA.donutWidth, PAGE_DATA.donutHeight, PAGE_DATA.innerWidth, PAGE_DATA.innerHeight, startAngle, endAngle, 0);
-    var upperArcDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #upperArcDonut" + index);
+    let upperArcPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, this.CHART_DATA.innerWidth, this.CHART_DATA.innerHeight, startAngle, endAngle, 0);
+    let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + index);
     upperArcDonut.setAttribute("d", upperArcPath.d);
-    var textLabel = PAGE_DATA.uniqueDataSet[index]["label"];
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + index).textContent = (textLabel + " [" + percent + "%]");
+    let textLabel = this.CHART_DATA.uniqueDataSet[index]["label"];
+    this.CHART_DATA.chartSVG.querySelector("#txtDonut" + index).textContent = (textLabel + " [" + percent + "%]");
 
-    var midAngle = (startAngle + endAngle) / 2;
-    var donut = {
+    let midAngle = (startAngle + endAngle) / 2;
+    let donut = {
       "id": "donut" + index,
       "upperArcPath": upperArcPath,
       "midAngle": midAngle,
-      "slicedOut": PAGE_DATA.uniqueDataSet[index].slicedOut,
+      "slicedOut": self.CHART_DATA.uniqueDataSet[index].slicedOut,
       "percent": percent
     };
-    PAGE_DATA.donutSet.push(donut);
+    this.CHART_DATA.donutSet.push(donut);
   } /*End createDonut()*/
 
-  function describeDonutArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag) {
-    var fullArc = false;
+  describeDonutArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag) {
+    let fullArc = false;
     if (startAngle % 360 === endAngle % 360) {
       endAngle--;
       fullArc = true;
     }
 
-    var outerArcStart = $SC.geom.polarToCartesian(cx, cy, $SC.geom.getEllipticalRadious(rMaxX, rMaxY, endAngle), endAngle);
-    var outerArcEnd = $SC.geom.polarToCartesian(cx, cy, $SC.geom.getEllipticalRadious(rMaxX, rMaxY, startAngle), startAngle);
-    var innerArcStart = $SC.geom.polarToCartesian(cx, cy, $SC.geom.getEllipticalRadious(rMinX, rMinY, endAngle), endAngle);
-    var innerArcEnd = $SC.geom.polarToCartesian(cx, cy, $SC.geom.getEllipticalRadious(rMinX, rMinY, startAngle), startAngle);
-    var largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
+    let outerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, endAngle), endAngle);
+    let outerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, startAngle), startAngle);
+    let innerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, endAngle), endAngle);
+    let innerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, startAngle), startAngle);
+    let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
 
-    var d = [
+    let d = [
       "M", outerArcStart.x, outerArcStart.y,
       "A", rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y,
       "L", innerArcEnd.x, innerArcEnd.y,
@@ -255,9 +244,10 @@ window.SmartChartsNXT.DonutChart = function (opts) {
       "Z"
     ];
 
-    if (fullArc)
+    if (fullArc) {
       d.push("L", outerArcStart.x, outerArcStart.y);
-    var path = {
+    }
+    let path = {
       "d": d.join(" "),
       "outerArc": [rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y].join(" "),
       "outerArcStart": outerArcStart,
@@ -265,459 +255,406 @@ window.SmartChartsNXT.DonutChart = function (opts) {
       "innerArc": [rMinX, rMinY, 0, largeArcFlag, sweepFlag, innerArcStart.x, innerArcStart.y].join(" "),
       "innerArcStart": innerArcStart,
       "innerArcEnd": innerArcEnd,
-      "center": new $SC.geom.Point(cx, cy),
+      "center": new Point(cx, cy),
       "rMaxX": rMaxX,
       "rMaxY": rMaxY,
       "startAngle": startAngle,
       "endAngle": endAngle
     };
     return path;
-
-
   } /*End describeDonutArc()*/
 
-
-  function createLegands() {
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer").innerHTML = "";
-
-    /*Creating series legend*/
-    var lengendBBox = {
-      left: PAGE_DATA.donutCenter.x + PAGE_DATA.donutWithTextSpan,
-      top: (PAGE_DATA.donutCenter.y - PAGE_DATA.donutHeight - 50)
-    };
-
-    var strSVG = "";
-    for (var index = 0; index < PAGE_DATA.uniqueDataSet.length; index++) {
-      var color = (PAGE_OPTIONS.dataSet[index].color ? PAGE_OPTIONS.dataSet[index].color : $SC.util.getColor(index));
-      strSVG += "<g id='series_legend_" + index + "' class='donut_legend" + index + "'style='cursor:pointer;'>";
-      strSVG += "<rect id='legend_color_" + index + "' class='donut_legend" + index + "' x='" + lengendBBox.left + "' y='" + (lengendBBox.top + (index * 45)) + "' width='15' height='15' fill='" + color + "' stroke='none' stroke-width='1' opacity='1'></rect>";
-      strSVG += "<text id='legend_txt_" + index + "' class='donut_legend" + index + "' font-size='16' x='" + (lengendBBox.left + 20) + "' y='" + (lengendBBox.top + (index * 45) + 14) + "' fill='#717171' font-family='Lato' >" + PAGE_DATA.uniqueDataSet[index]["label"] + "</text>";
-      strSVG += "<text id='legend_value_" + index + "' class='donut_legend" + index + "' font-size='16' x='" + (lengendBBox.left + PAGE_DATA.maxTextLen) + "' y='" + (lengendBBox.top + (index * 45) + 15) + "' fill='#717171' font-family='Lato' >" + PAGE_DATA.uniqueDataSet[index]["value"] + "</text>";
-      strSVG += "</g>";
-    }
-    document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer").insertAdjacentHTML("beforeend", strSVG);
-
-    var legendContainer = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer");
-    var legendBox = legendContainer.getBoundingClientRect();
-    var remainingWidth = (PAGE_OPTIONS.width - lengendBBox.left);
-
-    if (legendBox.width > remainingWidth) {
-      var maxTxtLen = 0;
-      for (var index = 0; index < PAGE_DATA.uniqueDataSet.length; index++) {
-        var eachLegendGrp = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer #series_legend_" + index);
-        var lgntTxt = eachLegendGrp.querySelector("#legend_txt_" + index);
-        var lgntVal = eachLegendGrp.querySelector("#legend_value_" + index);
-        lgntTxt.setAttribute("font-size", 12);
-        lgntVal.setAttribute("font-size", 12);
-        var txtLen = lgntTxt.getComputedTextLength();
-        if (txtLen > maxTxtLen) maxTxtLen = txtLen;
-      }
-      for (var index = 0; index < PAGE_DATA.uniqueDataSet.length; index++) {
-        var lgntVal = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer #legend_value_" + index);
-        lgntVal.setAttribute("x", (lengendBBox.left + maxTxtLen + 30));
-      }
-      legendBox = legendContainer.getBoundingClientRect();
-      if (legendBox.width > remainingWidth) {
-        for (var index = 0; index < PAGE_DATA.uniqueDataSet.length; index++) {
-          var lgntVal = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #legendContainer #legend_value_" + index);
-          lgntVal.setAttribute("x", (lengendBBox.left + 20));
-          lgntVal.setAttribute("y", (lengendBBox.top + (index * 45) + 35));
-        }
-      }
-    }
-    for (var donutIndex = 0; donutIndex < PAGE_DATA.uniqueDataSet.length; donutIndex++) {
-      var donutLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #series_legend_" + donutIndex);
-      donutLegend.addEventListener("mouseover", function (e) {
-        var elemId = e.target.getAttribute("class");
-        var donutIndex = elemId.substring("donut_legend".length);
-        var donutData;
-
-        for (var i = 0; i < PAGE_DATA.donutSet.length; i++)
-          if (PAGE_DATA.donutSet[i].id === ("donut" + donutIndex))
-            donutData = PAGE_DATA.donutSet[i];
-        var donutHover = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #donutHover" + donutIndex);
-        var donutHoverPath;
-        var hoverWidth = Math.round(PAGE_DATA.innerWidth * 30 / 100);
-        hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
-        hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
-        if (donutData.slicedOut) {
-
-          var shiftIndex = 15;
-          var shiftedCentre = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
-          donutHoverPath = describeDonutArc(shiftedCentre.x, shiftedCentre.y, PAGE_DATA.donutWidth + hoverWidth, PAGE_DATA.donutHeight + hoverWidth, PAGE_DATA.innerWidth + hoverWidth, PAGE_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
-        } else
-          donutHoverPath = describeDonutArc(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, PAGE_DATA.donutWidth + hoverWidth, PAGE_DATA.donutHeight + hoverWidth, PAGE_DATA.innerWidth + hoverWidth, PAGE_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
-        donutHover.setAttribute("d", donutHoverPath.d);
-      }, false);
-
-      donutLegend.addEventListener("mouseleave", function (e) {
-        var elemId = e.target.getAttribute("class");
-        var donutIndex = elemId.substring("donut_legend".length);
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #donutHover" + donutIndex).setAttribute("d", "");
-      }, false);
-    }
-
-  } /*End createLegands()*/
-
-  function bindEvents() {
-    var mouseDownPos;
+  bindEvents() {
+    let mouseDownPos;
     try {
-      if (PAGE_DATA.uniqueDataSet.length <= 1) return;
-
-      for (var donutIndex = 0; donutIndex < PAGE_DATA.uniqueDataSet.length; donutIndex++) {
-
-        function onClick(e) {
-          var donutData, elemId = e.target.getAttribute("class"),
-            sliceOut;
-          var index = elemId.substring("donut".length);
-
-          for (var i = 0; i < PAGE_DATA.donutSet.length; i++) {
-            if (PAGE_DATA.donutSet[i].id === elemId) {
-              donutData = PAGE_DATA.donutSet[i];
-              sliceOut = PAGE_DATA.donutSet[i].slicedOut;
-              PAGE_DATA.donutSet[i].slicedOut = !PAGE_DATA.donutSet[i].slicedOut;
-            }
-          }
-          var shiftIndex = sliceOut ? 15 : 1;
-          var shiftInterval = setInterval(function () {
-            var shiftedCentre = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
-            if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y))
-              shiftedCentre = PAGE_DATA.donutCenter;
-
-            var upperArcDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #upperArcDonut" + index);
-            upperArcDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - PAGE_DATA.donutCenter.x) + "," + (shiftedCentre.y - PAGE_DATA.donutCenter.y) + ")");
-            var txtDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonutGrpDonut" + index);
-            txtDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - PAGE_DATA.donutCenter.x) + "," + (shiftedCentre.y - PAGE_DATA.donutCenter.y) + ")");
-
-            var pathToLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #pathToLegend" + index);
-            pathToLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - PAGE_DATA.donutCenter.x) + "," + (shiftedCentre.y - PAGE_DATA.donutCenter.y) + ")");
-
-            var colorLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #colorLegend" + index);
-            colorLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - PAGE_DATA.donutCenter.x) + "," + (shiftedCentre.y - PAGE_DATA.donutCenter.y) + ")");
-
-            shiftIndex = sliceOut ? shiftIndex - 1 : shiftIndex + 1;
-            if ((!sliceOut && shiftIndex === 15) || (sliceOut && shiftIndex === -1))
-              clearInterval(shiftInterval);
-          }, 10);
-        } /*End onClick()*/
-
-        var upperArcDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #upperArcDonut" + donutIndex);
-        upperArcDonut.addEventListener("mousedown", function (e) {
+      if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+        return;
+      }
+      for (let donutIndex in this.CHART_DATA.uniqueDataSet) {
+        let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + donutIndex);
+        upperArcDonut.addEventListener("mousedown", (e) => {
           e.stopPropagation();
           mouseDownPos = {
             x: e.clientX,
             y: e.clientY
           };
-          var elemId = e.target.getAttribute("class");
-          var donutIndex = elemId.substring("donut".length);
-          document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #donutHover" + donutIndex).setAttribute("d", "");
-          PAGE_DATA.mouseDown = 1;
-
+          let elemId = e.target.getAttribute("class");
+          let donutIndex = elemId.substring("donut".length);
+          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
+          this.CHART_DATA.mouseDown = 1;
         }, false);
 
-        upperArcDonut.addEventListener("touchstart", function (e) {
+        upperArcDonut.addEventListener("touchstart", (e) => {
           e.stopPropagation();
-          PAGE_DATA.mouseDown = 1;
+          this.CHART_DATA.mouseDown = 1;
         }, false);
 
-        upperArcDonut.addEventListener("mouseup", function (e) {
+        upperArcDonut.addEventListener("mouseup", (e) => {
           e.stopPropagation();
-          PAGE_DATA.mouseDown = 0;
-          if (PAGE_DATA.mouseDrag === 0)
-            onClick(e);
-          PAGE_DATA.mouseDrag = 0;
+          this.CHART_DATA.mouseDown = 0;
+          if (this.CHART_DATA.mouseDrag === 0) {
+            let elemClass = e.target.getAttribute("class");
+            let donutIndex = elemClass.substring("donut".length);
+            let onDonutClick = new this.event.Event("onDonutClick", {
+              srcElement: self,
+              originEvent: e,
+              donutIndex: donutIndex
+            });
+            this.event.dispatchEvent(onDonutClick);
+          }
+          this.CHART_DATA.mouseDrag = 0;
         }, false);
 
-        upperArcDonut.addEventListener("touchend", function (e) {
+        upperArcDonut.addEventListener("touchend", (e) => {
           e.stopPropagation();
-          PAGE_DATA.mouseDown = 0;
-          PAGE_DATA.mouseDrag = 0;
+          this.CHART_DATA.mouseDown = 0;
+          this.CHART_DATA.mouseDrag = 0;
         }, false);
 
-        upperArcDonut.addEventListener("mousemove", function (e) {
-          if (PAGE_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
-            var dragStartPoint = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-            var dragAngle = getAngle(PAGE_DATA.donutCenter, dragStartPoint);
+        upperArcDonut.addEventListener("mousemove", (e) => {
+          if (this.CHART_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
+            let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+            let dragAngle = this.getAngle(this.CHART_DATA.donutCenter, dragStartPoint);
 
-            if (dragAngle > PAGE_DATA.dragStartAngle)
-              rotateChart(2, false);
-            else
-              rotateChart(-2, false);
-            PAGE_DATA.dragStartAngle = dragAngle;
-            PAGE_DATA.mouseDrag = 1;
-            $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
+            if (dragAngle > this.CHART_DATA.dragStartAngle) {
+              this.rotateChart(2, false);
+            } else {
+              this.rotateChart(-2, false);
+            }
+            this.CHART_DATA.dragStartAngle = dragAngle;
+            this.CHART_DATA.mouseDrag = 1;
+            this.tooltip.hide();
           } else {
-            var mousePos = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e);
-            var donutData, elemId = e.target.getAttribute("class");
-            var donutIndex = elemId.substring("donut".length);
+            let mousePos = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+            let donutData, elemId = e.target.getAttribute("class");
+            let donutIndex = elemId.substring("donut".length);
 
-            for (var i = 0; i < PAGE_DATA.donutSet.length; i++)
-              if (PAGE_DATA.donutSet[i].id === elemId)
-                donutData = PAGE_DATA.donutSet[i];
-            var row1 = PAGE_DATA.uniqueDataSet[donutIndex].label + ", " + PAGE_DATA.uniqueDataSet[donutIndex].value;
-            var row2 = PAGE_DATA.uniqueDataSet[donutIndex].percent.toFixed(2) + "%";
-            var color = (PAGE_OPTIONS.dataSet[donutIndex].color ? PAGE_OPTIONS.dataSet[donutIndex].color : $SC.util.getColor(donutIndex));
-            $SC.ui.toolTip(PAGE_OPTIONS.targetElem, mousePos, color, row1, row2);
+            for (let i = 0; i < this.CHART_DATA.donutSet.length; i++) {
+              if (this.CHART_DATA.donutSet[i].id === elemId) {
+                donutData = this.CHART_DATA.donutSet[i];
+              }
+            }
+            let row1 = this.CHART_DATA.uniqueDataSet[donutIndex].label + ", " + this.CHART_DATA.uniqueDataSet[donutIndex].value;
+            let row2 = this.CHART_DATA.uniqueDataSet[donutIndex].percent.toFixed(2) + "%";
+            //let color = (this.CHART_OPTIONS.dataSet[donutIndex].color ? this.CHART_OPTIONS.dataSet[donutIndex].color : this.util.getColor(donutIndex));
+            let color = this.CHART_DATA.uniqueDataSet[donutIndex].color;
+            this.tooltip.updateTip(mousePos, color, row1, row2);
           }
         }, false);
 
-        upperArcDonut.addEventListener("touchmove", function (e) {
+        upperArcDonut.addEventListener("touchmove", (e) => {
           e.preventDefault();
-          var dragStartPoint = $SC.ui.cursorPoint(PAGE_OPTIONS.targetElem, e.changedTouches[0]);
-          var dragAngle = getAngle(PAGE_DATA.donutCenter, dragStartPoint);
+          let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.changedTouches[0]);
+          let dragAngle = this.getAngle(this.CHART_DATA.donutCenter, dragStartPoint);
 
-          if (dragAngle > PAGE_DATA.dragStartAngle)
-            rotateChart(2, false);
-          else
-            rotateChart(-2, false);
-          PAGE_DATA.dragStartAngle = dragAngle;
-          PAGE_DATA.mouseDrag = 1;
+          if (dragAngle > this.CHART_DATA.dragStartAngle) {
+            this.rotateChart(2, false);
+          } else {
+            this.rotateChart(-2, false);
+          }
+          this.CHART_DATA.dragStartAngle = dragAngle;
+          this.CHART_DATA.mouseDrag = 1;
         }, false);
 
-        upperArcDonut.addEventListener("mouseenter", function (e) {
-          if (PAGE_DATA.mouseDown === 0) {
-            var donutData, elemId = e.target.getAttribute("class");
-            var donutIndex = elemId.substring("donut".length);
+        upperArcDonut.addEventListener("mouseenter", (e) => {
+          if (this.CHART_DATA.mouseDown === 0) {
+            let donutData, elemId = e.target.getAttribute("class");
+            let donutIndex = elemId.substring("donut".length);
 
-            for (var i = 0; i < PAGE_DATA.donutSet.length; i++)
-              if (PAGE_DATA.donutSet[i].id === elemId)
-                donutData = PAGE_DATA.donutSet[i];
-            var donutHover = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #donutHover" + donutIndex);
-            var donutHoverPath;
-            var hoverWidth = Math.round(PAGE_DATA.innerWidth * 30 / 100);
+            for (let i = 0; i < this.CHART_DATA.donutSet.length; i++) {
+              if (this.CHART_DATA.donutSet[i].id === elemId) {
+                donutData = this.CHART_DATA.donutSet[i];
+              }
+            }
+            let donutHover = this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex);
+            let donutHoverPath;
+            let hoverWidth = Math.round(this.CHART_DATA.innerWidth * 30 / 100);
             hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
             hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
             if (donutData.slicedOut) {
-              var shiftIndex = 15;
-              var shiftedCentre = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
-              donutHoverPath = describeDonutArc(shiftedCentre.x, shiftedCentre.y, PAGE_DATA.donutWidth + hoverWidth, PAGE_DATA.donutHeight + hoverWidth, PAGE_DATA.innerWidth + hoverWidth, PAGE_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
-            } else
-              donutHoverPath = describeDonutArc(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, PAGE_DATA.donutWidth + hoverWidth, PAGE_DATA.donutHeight + hoverWidth, PAGE_DATA.innerWidth + hoverWidth, PAGE_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
+              let shiftIndex = 15;
+              let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
+              donutHoverPath = this.describeDonutArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
+            } else {
+              donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
+            }
             donutHover.setAttribute("d", donutHoverPath.d);
           }
         }, false);
 
-        upperArcDonut.addEventListener("mouseleave", function (e) {
-          var elemId = e.target.getAttribute("class");
-          var donutIndex = elemId.substring("donut".length);
-          document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #donutHover" + donutIndex).setAttribute("d", "");
-          $SC.ui.toolTip(PAGE_OPTIONS.targetElem, "hide");
+        upperArcDonut.addEventListener("mouseleave", (e) => {
+          let elemId = e.target.getAttribute("class");
+          let donutIndex = elemId.substring("donut".length);
+          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
+          this.tooltip.hide();
         }, false);
 
 
       } /*End of for loop*/
 
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").addEventListener("mouseup", function (e) {
+      this.CHART_DATA.chartSVG.addEventListener("mouseup", (e) => {
         e.stopPropagation();
-        PAGE_DATA.mouseDown = 0;
-        PAGE_DATA.mouseDrag = 0;
+        this.CHART_DATA.mouseDown = 0;
+        this.CHART_DATA.mouseDrag = 0;
       }, false);
 
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart").addEventListener("touchend", function (e) {
+      this.CHART_DATA.chartSVG.addEventListener("touchend", (e) => {
         e.stopPropagation();
-        PAGE_DATA.mouseDown = 0;
-        PAGE_DATA.mouseDrag = 0;
+        this.CHART_DATA.mouseDown = 0;
+        this.CHART_DATA.mouseDrag = 0;
       }, false);
 
-      window.onresize = onWindowResize;
+      /*Bind event for donut click */
+      this.event.off("onDonutClick", this.EVENT_BINDS.onDonutClickBind);
+      this.event.on("onDonutClick", this.EVENT_BINDS.onDonutClickBind);
+
+      /*Add event for legends */
+      this.event.off("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+      this.event.on("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+      this.event.off("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+      this.event.on("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+      this.event.off("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+      this.event.on("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+
+      /*Add events for resize chart window */
+      window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
+      window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
+
     } catch (ex) {
-      console.log(ex);
+      ex.errorIn = `Error in DonutChart events with runId:${this.getRunId()}`;
+      throw ex;
     }
   } /*End bindEvents()*/
 
-  var timeOut = null;
-  var onWindowResize = function () {
-    var containerDiv = document.querySelector("#" + PAGE_OPTIONS.targetElem);
-    if (PAGE_CONST.runId != containerDiv.getAttribute("runId")) {
-      window.removeEventListener('resize', onWindowResize);
-      if (timeOut != null) {
-        clearTimeout(timeOut);
-      }
-      return;
+  onDonutClick(e) {
+    if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+      return void 0;
     }
-    if (containerDiv.offsetWidth !== PAGE_CONST.FIX_WIDTH || containerDiv.offsetHeight !== PAGE_CONST.FIX_HEIGHT) {
-      if (timeOut != null) {
-        clearTimeout(timeOut);
+    let index = e.donutIndex;
+    let donutData = this.CHART_DATA.donutSet[index];
+    let sliceOut = this.CHART_DATA.donutSet[index].slicedOut;
+    this.CHART_DATA.donutSet[index].slicedOut = !sliceOut;
+    let shiftIndex = sliceOut ? 15 : 1;
+    let shiftInterval = setInterval(() => {
+      let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
+      if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
+        shiftedCentre = this.CHART_DATA.donutCenter;
       }
-      callChart();
 
-      function callChart() {
-        if (containerDiv) {
-          if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
-            timeOut = setTimeout(function () {
-              callChart();
-            }, 100);
-          } else {
-            timeOut = setTimeout(function () {
-              init();
-            }, 500);
-          }
-        }
+      let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + index);
+      upperArcDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+      let txtDonut = this.CHART_DATA.chartSVG.querySelector("#txtDonutGrpDonut" + index);
+      txtDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+
+      let pathToLegend = this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + index);
+      pathToLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+
+      let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + index);
+      colorLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+
+      shiftIndex = sliceOut ? shiftIndex - 1 : shiftIndex + 1;
+      if ((!sliceOut && shiftIndex === 15) || (sliceOut && shiftIndex === -1)) {
+        clearInterval(shiftInterval);
       }
+    }, 10);
+  } /*End onDonutClick()*/
+
+  onLegendHover(e) {
+    let donutIndex = e.legendIndex;
+    let donutData = this.CHART_DATA.donutSet[donutIndex];
+    let donutHover = this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex);
+    let hoverWidth = Math.round(this.CHART_DATA.innerWidth * 30 / 100);
+    hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
+    hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
+    let donutHoverPath;
+    if (donutData.slicedOut) {
+      let shiftIndex = 15;
+      let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, donutData.midAngle), donutData.midAngle);
+      donutHoverPath = this.describeDonutArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
+    } else {
+      donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
     }
-  }; /*End onWindowResize()*/
+    donutHover.setAttribute("d", donutHoverPath.d);
+  }
 
+  onLegendLeave(e) {
+    let donutIndex = e.legendIndex;
+    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
+  }
 
-  function getAngle(point1, point2) {
-    var deltaX = point2.x - point1.x;
-    var deltaY = point2.y - point1.y;
-    var rad = Math.atan2(deltaY, deltaX);
-    var deg = rad * 180.0 / Math.PI;
+  onLegendClick(e) {
+    let self = this;
+    this.CHART_DATA.chartSVG.querySelector("#donutHover" + e.legendIndex).setAttribute("d", "");
+    //fire Event onLegendClick
+    let onDonutClick = new this.event.Event("onDonutClick", {
+      srcElement: self,
+      originEvent: e.originEvent,
+      donutIndex: e.legendIndex
+    });
+    this.event.dispatchEvent(onDonutClick);
+  }
+
+  getAngle(point1, point2) {
+    let deltaX = point2.x - point1.x;
+    let deltaY = point2.y - point1.y;
+    let rad = Math.atan2(deltaY, deltaX);
+    let deg = rad * 180.0 / Math.PI;
     deg = (deg < 0) ? deg + 450 : deg + 90;
     return deg % 360;
   }
 
-  function rotateChart(rotationIndex, ignorOrdering) {
-    for (var donutIndex = 0; donutIndex < PAGE_DATA.uniqueDataSet.length; donutIndex++) {
-      var donutData, elemId = "donut" + donutIndex;
-      for (var i = 0; i < PAGE_DATA.donutSet.length; i++) {
-        if (PAGE_DATA.donutSet[i].id === elemId) {
-          donutData = PAGE_DATA.donutSet[i];
+  rotateChart(rotationIndex, ignorOrdering) {
+    for (let donutIndex = 0; donutIndex < this.CHART_DATA.uniqueDataSet.length; donutIndex++) {
+      let donutData, elemId = "donut" + donutIndex;
+      for (let i = 0; i < this.CHART_DATA.donutSet.length; i++) {
+        if (this.CHART_DATA.donutSet[i].id === elemId) {
+          donutData = this.CHART_DATA.donutSet[i];
         }
-        PAGE_DATA.donutSet[i].slicedOut = false;
+        this.CHART_DATA.donutSet[i].slicedOut = false;
       }
 
-      var donutGroup = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #donutChart .donut" + donutIndex);
-      for (var i = 0; i < donutGroup.length; i++)
+      let donutGroup = this.CHART_DATA.chartSVG.querySelectorAll(".donut" + donutIndex);
+      for (let i = 0; i < donutGroup.length; i++) {
         donutGroup[i].setAttribute("transform", "");
+      }
 
-      var upperArcPath = describeDonutArc(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, PAGE_DATA.donutWidth, PAGE_DATA.donutHeight, PAGE_DATA.innerWidth, PAGE_DATA.innerHeight, (donutData["upperArcPath"].startAngle + rotationIndex), (donutData["upperArcPath"].endAngle + rotationIndex), 0);
-      var upperArcDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #upperArcDonut" + donutIndex);
+      let upperArcPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, this.CHART_DATA.innerWidth, this.CHART_DATA.innerHeight, (donutData["upperArcPath"].startAngle + rotationIndex), (donutData["upperArcPath"].endAngle + rotationIndex), 0);
+      let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + donutIndex);
       upperArcDonut.setAttribute("d", upperArcPath.d);
 
-      var midAngle = (((donutData["upperArcPath"].startAngle + rotationIndex) + (donutData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
+      let midAngle = (((donutData["upperArcPath"].startAngle + rotationIndex) + (donutData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
 
-      PAGE_DATA.donutSet[donutIndex]["upperArcPath"] = upperArcPath;
-      PAGE_DATA.donutSet[donutIndex]["midAngle"] = (midAngle < 0 ? 360 + midAngle : midAngle);
-      if (!ignorOrdering)
-        resetTextPos();
+      this.CHART_DATA.donutSet[donutIndex]["upperArcPath"] = upperArcPath;
+      this.CHART_DATA.donutSet[donutIndex]["midAngle"] = (midAngle < 0 ? 360 + midAngle : midAngle);
+      if (!ignorOrdering) {
+        this.resetTextPos();
+      }
     }
-
   } /*End rotateChart()*/
 
-  function resetTextPos() {
-    var txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtTitle").getComputedTextLength();
-    var txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
-    var txtTitleGrp = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp");
+  resetTextPos() {
+    let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    let txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    let txtTitleGrp = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp");
 
 
-    if (txtTitleLen > PAGE_CONST.FIX_WIDTH) {
-      var fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtTitle").getAttribute("font-size");
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      txtTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtTitleGrp #txtSubtitle").getComputedTextLength();
+    if (txtTitleLen > this.CHART_CONST.FIX_WIDTH) {
+      let fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+      fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
+      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+      txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
     }
 
-    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
     txtTitleGrp.querySelector("#txtTitle").setAttribute("y", 80);
-    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (PAGE_DATA.svgCenter.x - (txtSubTitleLen / 2)));
+    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 100);
 
-
-    var maxOverFlow = calcMaxOverflow(0);
-
-    function calcMaxOverflow(round) {
-      var overFlow = 0,
-        maxOverFlow = 0,
-        overflowTxtIndex, maxTextLen = 0;
-
-      for (var donutIndex = 0; donutIndex < PAGE_DATA.donutSet.length; donutIndex++) {
-        var txtLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex).getComputedTextLength();
-        var eachTxtWidth = PAGE_DATA.donutWidth + PAGE_DATA.innerWidth + txtLen;
-        overFlow = (eachTxtWidth > PAGE_DATA.donutCenter.x) ? eachTxtWidth - PAGE_DATA.donutCenter.x : 0;
-        if (overFlow > maxOverFlow) {
-          maxOverFlow = overFlow;
-          overflowTxtIndex = donutIndex;
-        }
-        if (txtLen > maxTextLen)
-          maxTextLen = txtLen;
-      }
-
-      PAGE_DATA.donutWithTextSpan = PAGE_DATA.donutWidth + PAGE_DATA.innerWidth + maxTextLen;
-      PAGE_DATA.maxTextLen = maxTextLen;
-
-      if (maxOverFlow > 20) {
-        /*reduce text length according to the text size*/
-        var content = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + overflowTxtIndex).textContent.split(" ")[0].replace("...", "");
-        content = content.substring(0, (content.length - 1)) + "...";
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + overflowTxtIndex).textContent = (content + " [" + PAGE_DATA.donutSet[overflowTxtIndex].percent + "%]");
-        if (round < 50)
-          maxOverFlow = calcMaxOverflow(round + 1);
-      }
-      return maxOverFlow;
-    } /*End calcMaxOverflow()*/
-
-    for (var donutIndex = 0; donutIndex < PAGE_DATA.donutSet.length; donutIndex++) {
-      var donutData = PAGE_DATA.donutSet[donutIndex];
-
-      var textPos = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(PAGE_DATA.donutWidth + PAGE_DATA.innerWidth - (maxOverFlow / 2), PAGE_DATA.donutHeight + PAGE_DATA.innerWidth - (maxOverFlow / 2), donutData.midAngle), donutData.midAngle);
-
-      var txtBoundingRect = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex).getBoundingClientRect();
-      var txtLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex).getComputedTextLength();
-      var newTextPos = new $SC.geom.Point(textPos.x, textPos.y);
-      if (donutData.midAngle > 180)
+    let maxOverFlow = this.calcMaxOverflow(0);
+    for (let donutIndex = 0; donutIndex < this.CHART_DATA.donutSet.length; donutIndex++) {
+      let donutData = this.CHART_DATA.donutSet[donutIndex];
+      let textPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), donutData.midAngle), donutData.midAngle);
+      let txtBoundingRect = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getBoundingClientRect();
+      let txtLen = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getComputedTextLength();
+      let newTextPos = new Point(textPos.x, textPos.y);
+      if (donutData.midAngle > 180) {
         newTextPos.x -= txtLen;
+      }
 
-      var otrTextPos;
-      if ((donutData.midAngle > 90 && donutData.midAngle <= 180) || (donutData.midAngle > 270 && donutData.midAngle <= 360))
-        otrTextPos = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(PAGE_DATA.donutWidth + PAGE_DATA.innerWidth - (maxOverFlow / 2), PAGE_DATA.donutHeight + PAGE_DATA.innerWidth - (maxOverFlow / 2), PAGE_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle), PAGE_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle);
-      else if ((donutData.midAngle > 0 && donutData.midAngle <= 90) || (donutData.midAngle > 180 && donutData.midAngle <= 270))
-        otrTextPos = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(PAGE_DATA.donutWidth + PAGE_DATA.innerWidth - (maxOverFlow / 2), PAGE_DATA.donutHeight + PAGE_DATA.innerWidth - (maxOverFlow / 2), PAGE_DATA.donutSet[(donutIndex + 1) % PAGE_DATA.donutSet.length].midAngle), PAGE_DATA.donutSet[(donutIndex + 1) % PAGE_DATA.donutSet.length].midAngle);
+      let otrTextPos;
+      if ((donutData.midAngle > 90 && donutData.midAngle <= 180) || (donutData.midAngle > 270 && donutData.midAngle <= 360)) {
+        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle), this.CHART_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle);
+      } else if ((donutData.midAngle > 0 && donutData.midAngle <= 90) || (donutData.midAngle > 180 && donutData.midAngle <= 270)) {
+        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutSet[(donutIndex + 1) % this.CHART_DATA.donutSet.length].midAngle), this.CHART_DATA.donutSet[(donutIndex + 1) % this.CHART_DATA.donutSet.length].midAngle);
+      }
 
-      if (Math.abs(otrTextPos.y - newTextPos.y) < 50)
-        if (donutData.midAngle > 90 && donutData.midAngle < 270)
+      if (Math.abs(otrTextPos.y - newTextPos.y) < 50) {
+        if (donutData.midAngle > 90 && donutData.midAngle < 270) {
           newTextPos.y = (otrTextPos.y + 50);
-        else
+        } else {
           newTextPos.y = (otrTextPos.y - 50);
+        }
+      }
 
-
-      var txtDonut = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex);
+      let txtDonut = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex);
       txtDonut.setAttribute("x", newTextPos.x);
       txtDonut.setAttribute("y", newTextPos.y);
       if (maxOverFlow > 0) {
         txtDonut.setAttribute("font-size", 12);
-        var newTxtLen = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex).getComputedTextLength();
-        txtBoundingRect = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonut" + donutIndex).getBoundingClientRect();
-        if (donutData.midAngle > 180)
+        let newTxtLen = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getComputedTextLength();
+        txtBoundingRect = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getBoundingClientRect();
+        if (donutData.midAngle > 180) {
           textPos.x -= (txtLen - newTxtLen);
+        }
         txtLen = newTxtLen;
-
-
       }
 
-      var indent = Math.round(PAGE_DATA.innerWidth * 20 / 100);
+      let indent = Math.round(this.CHART_DATA.innerWidth * 20 / 100);
       indent = (indent > 15) ? 15 : indent;
       indent = (indent < 5) ? 5 : indent;
 
-      var colorLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #colorLegend" + donutIndex);
+      let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + donutIndex);
       colorLegend.setAttribute("x", newTextPos.x);
       colorLegend.setAttribute("y", newTextPos.y + (txtBoundingRect.height / 2));
       colorLegend.setAttribute("width", txtLen);
       colorLegend.setAttribute("height", indent / 2);
-      if (maxOverFlow > 0) colorLegend.style.display = "none";
+      if (maxOverFlow > 0) {
+        colorLegend.style.display = "none";
+      }
 
-      var sPoint = $SC.geom.polarToCartesian(PAGE_DATA.donutCenter.x, PAGE_DATA.donutCenter.y, $SC.geom.getEllipticalRadious(PAGE_DATA.donutWidth, PAGE_DATA.donutHeight, donutData.midAngle), donutData.midAngle);
-
+      let sPoint = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, donutData.midAngle), donutData.midAngle);
+      let lPath;
       if (donutData.midAngle > 180) {
-        var lPath = ["M", textPos.x + 5, newTextPos.y];
+        lPath = ["M", textPos.x + 5, newTextPos.y];
         lPath.push("L", textPos.x + indent + 5, newTextPos.y);
         lPath.push("L", sPoint.x, sPoint.y);
       } else {
-        var lPath = ["M", textPos.x - 5, newTextPos.y];
+        lPath = ["M", textPos.x - 5, newTextPos.y];
         lPath.push("L", textPos.x - indent - 5, newTextPos.y);
         lPath.push("L", sPoint.x, sPoint.y);
       }
-
-      var pathToLegend = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #pathToLegend" + donutIndex);
+      let pathToLegend = this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + donutIndex);
       pathToLegend.setAttribute("d", lPath.join(" "));
-
     }
   } /*End resetTextPos()*/
 
+  calcMaxOverflow(round) {
+    let overFlow = 0;
+    let maxOverFlow = 0;
+    let overflowTxtIndex, maxTextLen = 0;
 
-  function colorLuminance(hex, lum) {
+    for (let donutIndex = 0; donutIndex < this.CHART_DATA.donutSet.length; donutIndex++) {
+      let txtLen = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getComputedTextLength();
+      let eachTxtWidth = this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth + txtLen;
+      overFlow = (eachTxtWidth > this.CHART_DATA.donutCenter.x) ? eachTxtWidth - this.CHART_DATA.donutCenter.x : 0;
+      if (overFlow > maxOverFlow) {
+        maxOverFlow = overFlow;
+        overflowTxtIndex = donutIndex;
+      }
+      if (txtLen > maxTextLen) {
+        maxTextLen = txtLen;
+      }
+    }
+
+    this.CHART_DATA.donutWithTextSpan = this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth + maxTextLen;
+    this.CHART_DATA.maxTextLen = maxTextLen;
+
+    if (maxOverFlow > 20) {
+      /*reduce text length according to the text size*/
+      let content = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + overflowTxtIndex).textContent.split(" ")[0].replace("...", "");
+      content = content.substring(0, (content.length - 1)) + "...";
+      this.CHART_DATA.chartSVG.querySelector("#txtDonut" + overflowTxtIndex).textContent = (content + " [" + this.CHART_DATA.donutSet[overflowTxtIndex].percent + "%]");
+      if (round < 50) {
+        maxOverFlow = this.calcMaxOverflow(round + 1);
+      }
+    }
+    return maxOverFlow;
+  } /*End calcMaxOverflow()*/
+
+
+  colorLuminance(hex, lum) {
 
     /* validate hex string*/
     hex = String(hex).replace(/[^0-9a-f]/gi, '');
@@ -726,7 +663,7 @@ window.SmartChartsNXT.DonutChart = function (opts) {
     }
     lum = lum || 0;
     /* convert to decimal and change luminosity*/
-    var rgb = "#",
+    let rgb = "#",
       c, i;
     for (i = 0; i < 3; i++) {
       c = parseInt(hex.substr(i * 2, 2), 16);
@@ -737,96 +674,96 @@ window.SmartChartsNXT.DonutChart = function (opts) {
   } /*End colorLuminance()*/
 
 
-  function prepareDataSet() {
-    for (var i = 0; i < PAGE_OPTIONS.dataSet.length; i++) {
-      var found = -1;
-      for (var j = 0; j < PAGE_DATA.uniqueDataSet.length; j++) {
-        if (PAGE_OPTIONS.dataSet[i].label.toLowerCase() === PAGE_DATA.uniqueDataSet[j].label.toLowerCase()) {
+  prepareDataSet() {
+    for (let i = 0; i < this.CHART_OPTIONS.dataSet.length; i++) {
+      let found = -1;
+      for (let j = 0; j < this.CHART_DATA.uniqueDataSet.length; j++) {
+        if (this.CHART_OPTIONS.dataSet[i].label.toLowerCase() === this.CHART_DATA.uniqueDataSet[j].label.toLowerCase()) {
           found = j;
           break;
         }
       }
       if (found === -1) {
-        PAGE_DATA.uniqueDataSet.push({
-          "label": PAGE_OPTIONS.dataSet[i].label,
-          "value": PAGE_OPTIONS.dataSet[i].value,
-          "slicedOut": PAGE_OPTIONS.dataSet[i].slicedOut || false
+        this.CHART_DATA.uniqueDataSet.push({
+          "label": this.CHART_OPTIONS.dataSet[i].label,
+          "value": this.CHART_OPTIONS.dataSet[i].value,
+          "color": this.CHART_OPTIONS.dataSet[i].color || this.util.getColor(i),
+          "slicedOut": this.CHART_OPTIONS.dataSet[i].slicedOut || false
         });
       } else {
-        PAGE_DATA.uniqueDataSet[found] = {
-          "label": PAGE_OPTIONS.dataSet[i].label,
-          "value": parseFloat(PAGE_OPTIONS.dataSet[i].value) + parseFloat(PAGE_DATA.uniqueDataSet[j].value)
-        };
+        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(this.CHART_OPTIONS.dataSet[i].value) + parseFloat(this.CHART_DATA.uniqueDataSet[found].value);
       }
-      PAGE_DATA.totalValue += parseFloat(PAGE_OPTIONS.dataSet[i].value);
+      this.CHART_DATA.totalValue += parseFloat(this.CHART_OPTIONS.dataSet[i].value);
     }
-    for (var i = 0; i < PAGE_DATA.uniqueDataSet.length; i++) {
-      var percent = 100 * parseFloat(PAGE_DATA.uniqueDataSet[i].value) / PAGE_DATA.totalValue;
-      PAGE_DATA.uniqueDataSet[i]["percent"] = percent;
+    for (let i = 0; i < this.CHART_DATA.uniqueDataSet.length; i++) {
+      let percent = 100 * parseFloat(this.CHART_DATA.uniqueDataSet[i].value) / this.CHART_DATA.totalValue;
+      this.CHART_DATA.uniqueDataSet[i]["percent"] = percent;
     }
 
     //fire Event afterParseData
-    var afterParseDataEvent = new self.Event("afterParseData", {
+    let afterParseDataEvent = new self.Event("afterParseData", {
       srcElement: self
     });
     self.dispatchEvent(afterParseDataEvent);
   } /*End prepareDataSet()*/
 
-  function slicedOutOnSettings() {
-    for (var i = 0; i < PAGE_DATA.donutSet.length; i++) {
-      if (PAGE_DATA.donutSet[i].slicedOut) {
+  slicedOutOnSettings() {
+    for (let i = 0; i < this.CHART_DATA.donutSet.length; i++) {
+      if (this.CHART_DATA.donutSet[i].slicedOut) {
 
-        var mouseUp = document.createEvent("SVGEvents");
+        let mouseUp = document.createEvent("SVGEvents");
         mouseUp.initEvent("mouseup", true, true);
-        var upperArc = document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #upperArcDonut" + i);
-        PAGE_DATA.donutSet[i].slicedOut = false;
+        let upperArc = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + i);
+        this.CHART_DATA.donutSet[i].slicedOut = false;
         upperArc.dispatchEvent(mouseUp);
       }
     }
   } /*End slicedOutOnSettings()*/
 
-  function showAnimatedView() {
-    var sAngle = 0,
-      eAngle = 1,
-      angleCalc = {};
-    for (var donutIndex = 0; donutIndex < PAGE_DATA.uniqueDataSet.length; donutIndex++) {
+  showAnimatedView() {
+    let sAngle = 0;
+    let eAngle = 1;
+    let angleCalc = {};
+    for (let donutIndex = 0; donutIndex < this.CHART_DATA.uniqueDataSet.length; donutIndex++) {
       angleCalc["donut" + donutIndex] = {
         "startAngle": sAngle++,
         "endAngle": eAngle++
       };
     }
-    var intervalId = setInterval(function () {
-      PAGE_DATA.donutSet = [];
-      PAGE_DATA.totalValue = 0;
-      for (var donutIndex = 0; donutIndex < PAGE_DATA.uniqueDataSet.length; donutIndex++) {
-        var startAngle = angleCalc["donut" + donutIndex].startAngle;
-        var endAngle = angleCalc["donut" + donutIndex].endAngle;
-        var angleDiff = endAngle - startAngle;
+    let intervalId = setInterval(() => {
+      this.CHART_DATA.donutSet = [];
+      this.CHART_DATA.totalValue = 0;
+      let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
+      for (let donutIndex = 0; donutIndex < this.CHART_DATA.uniqueDataSet.length; donutIndex++) {
+        let startAngle = angleCalc["donut" + donutIndex].startAngle;
+        let endAngle = angleCalc["donut" + donutIndex].endAngle;
+        let angleDiff = endAngle - startAngle;
         if (donutIndex > 0) {
           startAngle = angleCalc["donut" + (donutIndex - 1)].endAngle;
           endAngle = startAngle + angleDiff;
         }
-        var actualEndAngle = (PAGE_DATA.uniqueDataSet[donutIndex].percent * 36 / 10);
+        let actualEndAngle = (this.CHART_DATA.uniqueDataSet[donutIndex].percent * 36 / 10);
         endAngle = (endAngle + 15) > (startAngle + actualEndAngle) ? (startAngle + actualEndAngle) : (endAngle + 15);
-        var donutSet = document.querySelectorAll("#" + PAGE_OPTIONS.targetElem + " #donutChart .donut" + donutIndex);
-        for (var i = 0; i < donutSet.length; i++) donutSet[i].parentNode.removeChild(donutSet[i]);
-
-        var color = (PAGE_OPTIONS.dataSet[donutIndex].color ? PAGE_OPTIONS.dataSet[donutIndex].color : $SC.util.getColor(donutIndex));
-        createDonut(startAngle, endAngle, color, donutIndex);
+        let donutSet = this.CHART_DATA.chartSVG.querySelectorAll(".donut" + donutIndex);
+        for (let i = 0; i < donutSet.length; i++) {
+          donutSet[i].parentNode.removeChild(donutSet[i]);
+        }
+        let color = this.CHART_DATA.uniqueDataSet[donutIndex].color;
+        this.createDonut(startAngle, endAngle, color, strokeColor, donutIndex);
         angleCalc["donut" + donutIndex] = {
           "startAngle": startAngle,
           "endAngle": endAngle
         };
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #colorLegend" + donutIndex).style.display = "none";
-        document.querySelector("#" + PAGE_OPTIONS.targetElem + " #donutChart #txtDonutGrpDonut" + donutIndex).style.display = "none";
+        this.CHART_DATA.chartSVG.querySelector("#colorLegend" + donutIndex).style.display = "none";
+        this.CHART_DATA.chartSVG.querySelector("#txtDonutGrpDonut" + donutIndex).style.display = "none";
         if (endAngle >= 358) {
           clearInterval(intervalId);
-          init();
+          this.init();
         }
       }
     }, 50);
   } /*End showAnimatedView()*/
 
-  init();
-  if (PAGE_OPTIONS.animated !== false) showAnimatedView();
-}; /*End of drawDonutChart3D()*/
+} /*End of Donut Chart class */
+
+module.exports = DonutChart;

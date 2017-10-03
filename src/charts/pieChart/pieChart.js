@@ -157,7 +157,7 @@ class PieChart extends SlicedChart {
 
     let startAngle;
     let endAngle = 0;
-    let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "node";
+    let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
     for (let i in this.CHART_DATA.uniqueDataSet) {
       startAngle = endAngle;
       endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 3.6);
@@ -673,7 +673,7 @@ class PieChart extends SlicedChart {
           "slicedOut": self.CHART_OPTIONS.dataSet[i].slicedOut || false
         });
       } else {
-        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(self.CHART_OPTIONS.dataSet[i].value) + parseFloat(self.CHART_DATA.uniqueDataSet[found].value);
+        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(this.CHART_OPTIONS.dataSet[i].value) + parseFloat(this.CHART_DATA.uniqueDataSet[found].value);
       }
       this.CHART_DATA.totalValue += parseFloat(this.CHART_OPTIONS.dataSet[i].value);
     }
@@ -748,8 +748,8 @@ class PieChart extends SlicedChart {
           pieSet[i].parentNode.removeChild(pieSet[i]);
         }
 
-        let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : this.util.getColor(pieIndex));
-        let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "node";
+        let color = this.CHART_DATA.uniqueDataSet[pieIndex].color; 
+        let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
         self.createPie(startAngle, endAngle, color, strokeColor, pieIndex);
         angleCalc["pie" + pieIndex] = {
           "startAngle": startAngle,
