@@ -76,8 +76,8 @@ class Tooltip {
         temp.style.visibility = 'hidden';
         document.getElementsByTagName("body")[0].appendChild(temp);
         let containBox = {
-            width: temp.offsetWidth + 6,
-            height: temp.offsetHeight
+            width: temp.offsetWidth + 8,
+            height: temp.offsetHeight + 5
         };
         if (temp) {
             temp.parentNode.removeChild(temp);
@@ -99,7 +99,6 @@ class Tooltip {
             "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
             "Z"
         ];
-
         if (topLeft.x + width > chartWidth) {
             cPoint.x -= 20;
             cPoint.y += 20;
@@ -116,6 +115,22 @@ class Tooltip {
                 "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
                 "Z"
             ];
+        } else if(topLeft.x <= 0) {
+            cPoint.x += 10;
+            cPoint.y += 20;
+            topLeft = new Point(cPoint.x + (txtWidth / 2) + padding + 10, cPoint.y - (lineHeight) - 10 - (padding));
+            topLeft.x -= (width / 2);
+            topLeft.y += (height / 2);
+            d = [
+                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
+                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
+                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
+                "L", topLeft.x, (topLeft.y + height), // LINE TO BOTTOM-LEFT CORNER
+                "L", topLeft.x  , cPoint.y + 10, // LINE TO BEFORE C-POINT BEND
+                "L", cPoint.x, cPoint.y, // LINE TO C-POINT
+                "L", topLeft.x, cPoint.y-10, //LINE TO AFTER C-POINT BEND
+                "Z"
+            ];
         } else if (topLeft.y < 0) {
             cPoint.y += 40;
             topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y);
@@ -129,7 +144,7 @@ class Tooltip {
                 "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
                 "Z"
             ];
-        }
+        } 
 
         let textPos = new Point(topLeft.x + 5, topLeft.y + 5);
         if (this.toolTipHtml) {

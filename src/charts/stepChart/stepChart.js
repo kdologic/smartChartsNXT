@@ -780,12 +780,12 @@ class StepChart extends CoordinateChart {
   showAnimatedView() {
     let dataSet = [];
     let self = this;
-    let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex).length;
+    let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(Math.ceil(this.CHART_DATA.windowLeftIndex / 2), Math.ceil((this.CHART_DATA.windowRightIndex) / 2)).length;
     let pointIndex = 0;
 
     for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
       let set = {
-        "data": this.CHART_OPTIONS.dataSet.series[i].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex)
+        "data": this.CHART_OPTIONS.dataSet.series[i].data.slice(Math.ceil(this.CHART_DATA.windowLeftIndex / 2), Math.ceil((this.CHART_DATA.windowRightIndex) / 2))
       };
       dataSet.push(set);
     }
