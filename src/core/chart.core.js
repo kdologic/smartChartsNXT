@@ -12,6 +12,7 @@ let polyfills = require("./../shims/polyfills");
 let WebFonts = require("./../plugIns/webFontsLoader");
 let AreaChart = require("./../charts/areaChart/areaChart");
 let LineChart = require("./../charts/lineChart/lineChart");
+let StepChart = require("./../charts/stepChart/stepChart");
 let PieChart = require("./../charts/pieChart/pieChart");
 let DonutChart = require("./../charts/donutChart/donutChart");
 let ColumnChart = require("./../charts/columnChart/columnChart");
@@ -26,6 +27,7 @@ class Core {
         this.PieChart = PieChart;
         this.DonutChart = DonutChart; 
         this.ColumnChart = ColumnChart; 
+        this.StepChart = StepChart; 
         this.initCore();
     }
 

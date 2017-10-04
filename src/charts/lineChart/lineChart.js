@@ -233,8 +233,8 @@ class LineChart extends CoordinateChart {
     strSVG += "<g id='scrollerCont'>";
     strSVG += "</g>";
 
-    strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
+    strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1' pointer-events='none'></path>";
+    strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1' pointer-events='none'></path>";
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/

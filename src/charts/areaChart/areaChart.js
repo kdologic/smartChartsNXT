@@ -234,8 +234,8 @@ class AreaChart extends CoordinateChart {
     strSVG += "<g id='scrollerCont'>";
     strSVG += "</g>";
 
-    strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
-    strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1'></path>";
+    strSVG += "<path id='hLine' fill='none' stroke='#333' stroke-width='1' opacity='1' pointer-events='none'></path>";
+    strSVG += "<path id='vLine' fill='none' stroke='#333' stroke-width='1' opacity='1' pointer-events='none'></path>";
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
@@ -316,8 +316,7 @@ class AreaChart extends CoordinateChart {
     let strSeries = "<g id='fullSeries_" + index + "' class='fullSeries'>";
     line.push.apply(line, ["M", arrPointsSet[0].x, arrPointsSet[0].y]);
     let point = 0;
-    for (let point = 0;
-      (point + 2) < arrPointsSet.length; point++) {
+    for (let point = 0; point + 2 < arrPointsSet.length; point++) {
       if (this.CHART_OPTIONS.dataSet.series[index].smoothedLine) {
         let curve = this.geom.describeBezireArc(arrPointsSet[point], arrPointsSet[point + 1], arrPointsSet[point + 2]);
         line.push.apply(line, curve);
@@ -454,7 +453,7 @@ class AreaChart extends CoordinateChart {
       for (let point = 0; point + 2 < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + radius + "' class='dot' style='fill:" + color + "; opacity: 1; stroke-width: 1px;'></circle>";
-          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + (radius-1) + "' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
+          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + (radius - 1) + "' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
         }
       }
     }
