@@ -518,6 +518,7 @@ class DonutChart extends SlicedChart {
       for (let i = 0; i < donutGroup.length; i++) {
         donutGroup[i].setAttribute("transform", "");
       }
+      this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).setAttribute("d", "");
 
       let upperArcPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, this.CHART_DATA.innerWidth, this.CHART_DATA.innerHeight, (donutData["upperArcPath"].startAngle + rotationIndex), (donutData["upperArcPath"].endAngle + rotationIndex), 0);
       let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + donutIndex);

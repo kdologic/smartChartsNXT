@@ -376,14 +376,14 @@ class PieChart extends SlicedChart {
               pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
             }
             pieHover.setAttribute("d", pieHoverPath.d);
-            pieHover.style["fill-opacity"] = 0.4; 
+            pieHover.style["fill-opacity"] = 0.4;
           }
         }, false);
 
         upperArcPie.addEventListener("mouseleave", (e) => {
           let elemId = e.target.getAttribute("class");
           let pieIndex = elemId.substring("pie".length);
-          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0; 
+          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0;
           this.tooltip.hide();
         }, false);
 
@@ -475,12 +475,12 @@ class PieChart extends SlicedChart {
       pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
     }
     pieHover.setAttribute("d", pieHoverPath.d);
-    pieHover.style["fill-opacity"] = 0.4; 
+    pieHover.style["fill-opacity"] = 0.4;
   }
 
   onLegendLeave(e) {
     let pieIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0; 
+    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0;
   }
 
   onLegendClick(e) {
@@ -515,6 +515,8 @@ class PieChart extends SlicedChart {
       for (let i = 0; i < pieGroup.length; i++) {
         pieGroup[i].setAttribute("transform", "");
       }
+      this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+      
       let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, (pieData["upperArcPath"].startAngle + rotationIndex), (pieData["upperArcPath"].endAngle + rotationIndex), 0);
       let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex).setAttribute("d", upperArcPath.d);
       let midAngle = (((pieData["upperArcPath"].startAngle + rotationIndex) + (pieData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
@@ -750,7 +752,7 @@ class PieChart extends SlicedChart {
           pieSet[i].parentNode.removeChild(pieSet[i]);
         }
 
-        let color = this.CHART_DATA.uniqueDataSet[pieIndex].color; 
+        let color = this.CHART_DATA.uniqueDataSet[pieIndex].color;
         let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
         self.createPie(startAngle, endAngle, color, strokeColor, pieIndex);
         angleCalc["pie" + pieIndex] = {
