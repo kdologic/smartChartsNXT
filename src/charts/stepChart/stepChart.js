@@ -179,16 +179,17 @@ class StepChart extends CoordinateChart {
 
       /* Will set initial zoom window */
       if (this.CHART_OPTIONS.zoomWindow) {
-        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
-          this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex;
+        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) < (longSeriesLen * 2) - 1){
+          this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex * 2;
         }
-        if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex > this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1) {
-          this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex;
-        } else {
-          this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
+        if (this.CHART_OPTIONS.zoomWindow.rightIndex && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) > (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) <= (longSeriesLen * 2) - 1){
+          this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex * 2;
         }
-      } else {
-        this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
+        else{
+          this.CHART_DATA.windowRightIndex = (longSeriesLen * 2) - 1;
+        }
+      } else{
+        this.CHART_DATA.windowRightIndex = (longSeriesLen * 2) - 1;
       }
 
       this.prepareChart();
@@ -645,7 +646,7 @@ class StepChart extends CoordinateChart {
 
   onLegendClick(e) {
     let seriesIndex = e.legendIndex;
-    let areaBorder = this.CHART_DATA.chartSVG.querySelector("#series_" + seriesIndex);
+    let areaBorder = this.CHART_DATA.chartSVG.querySelector("#series_area_" + seriesIndex);
     let areaActual = this.CHART_DATA.chartSVG.querySelector("#series_actual_" + seriesIndex);
     let color = e.legendData.color;
     let doShow = e.toggeled ? "none" : "block";
