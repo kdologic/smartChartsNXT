@@ -1,0 +1,386 @@
+<html>
+
+<head>
+
+  <script>
+    function getTransformMatrix(trnsOprtns, baseMatrix) {
+      let matrix = baseMatrix || [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+      ];
+      for (let i = 0; i < trnsOprtns.length; i++) {
+        let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
+          return v !== "";
+        });
+        switch (arrOpr[0]) {
+          case "rotate":
+            matrix = multiply(matrix, [
+              [Math.cos(degToRad(arrOpr[1])), (-1) * Math.sin(degToRad(arrOpr[1])), 0],
+              [Math.sin(degToRad(arrOpr[1])), Math.cos(degToRad(arrOpr[1])), 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scale":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleX":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translate":
+            matrix = multiply(matrix, [
+              [1, 0, arrOpr[1]],
+              [0, 1, arrOpr[2]],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateX":
+            matrix = multiply(matrix, [
+              [1, 0, parseFloat(arrOpr[1])],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, 1, parseFloat(arrOpr[1])],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skew":
+            var angle =
+              matrix = multiply(matrix, [
+                [1, Math.tan(degToRad(arrOpr[1])), 0],
+                [Math.tan(degToRad(arrOpr[2])), 1, 0],
+                [0, 0, 1]
+              ]);
+            break;
+          case "skewX":
+            matrix = multiply(matrix, [
+              [1, Math.tan(degToRad(arrOpr[1])), 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skewY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [Math.tan(degToRad(arrOpr[1])), 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+        }
+      }
+      return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
+    }
+
+    function convertTransformMatrix(strMatrix) {
+      let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
+      if (!strMatrix || arr.length < 6) {
+        return null;
+      }
+      let arrMatrix = [
+        [arr[0], arr[2], arr[4]],
+        [arr[1], arr[3], arr[5]],
+        [0, 0, 1]
+      ];
+      return arrMatrix;
+    }
+
+    function getElementTransformation(element) {
+      if (element) {
+        let computedStyle = window.getComputedStyle(element);
+        return convertTransformMatrix(computedStyle.transform);
+      }
+      return null;
+
+    }
+
+    function setElementTransformation(element, strTrns) {
+      if (element) {
+        element.style["-webkit-transform"] = strTrns;
+        element.style["-moz-transform"] = strTrns;
+        element.style["-ms-transform"] = strTrns;
+        element.style["-o-transform"] = strTrns;
+        element.style["transform"] = strTrns;
+      }
+    }
+
+    function degToRad(x) {
+      return Number(x) * Math.PI / 180;
+    }
+
+    function multiply(a, b) {
+      let aNumRows = a.length;
+      let aNumCols = a[0].length;
+      let bNumRows = b.length;
+      let bNumCols = b[0].length;
+      let m = new Array(aNumRows);
+      for (let r = 0; r < aNumRows; ++r) {
+        m[r] = new Array(bNumCols);
+        for (let c = 0; c < bNumCols; ++c) {
+          m[r][c] = 0;
+          for (let i = 0; i < aNumCols; ++i) {
+            m[r][c] += a[r][i] * b[i][c];
+          }
+        }
+      }
+      return m;
+    }
+
+    /*requestAnimationFrame SHIM for all browser*/
+    (function () {
+      var lastTime = 0;
+      var vendors = ['webkit', 'moz'];
+      for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame =
+          window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+      }
+
+      if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function (callback, element) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function () {
+              callback(currTime + timeToCall);
+            },
+            timeToCall);
+          lastTime = currTime + timeToCall;
+          return id;
+        };
+
+      if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function (id) {
+          clearTimeout(id);
+        };
+    }());
+  </script>
+</head>
+
+<body style="position: absolute;">
+
+  <script>
+    //let trnsOprns = ["skew(10,10)", "rotate(-45)"]; //, "translateX(230)", "scale(1.5)"];
+    let screenHeight = 600;//window.innerHeight;
+    let screenWidth = 700;//window.innerWidth;
+    let bouncePlaneY = screenHeight - 50;
+    let marginLeft = 10;
+    let width = 50;
+    //let strHtml = `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY};'><div>`;
+
+    let strHtml =
+      `<svg xmlns:svg="http://www.w3.org/2000/svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="${screenWidth}" height="${screenHeight}" id="svgBox" style="background:none;-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;border:1px solid black;">`;
+    document.querySelector("body").innerHTML = strHtml;
+    strHtml =
+      `<path d="M 0 ${bouncePlaneY} L ${screenWidth} ${bouncePlaneY}" fill="none" stroke="red" stroke-width="1" opacity="1"></path>`;
+    //strHtml += `<rect x='0' y='0' width='${screenWidth}' height='${screenHeight}' style='fill:${getRandomColor()};' \/>`;
+        strHtml += createGrid(); 
+         
+    document.querySelector("#svgBox").insertAdjacentHTML("beforeend", strHtml);
+    for (var i = 0; i < 1; i++) {
+      let top = Math.round(Math.random() * 1000) % (bouncePlaneY - 100);
+      marginLeft += (width + 20);
+      let height = 200; // Math.round(Math.random() * 500);
+      height = height < 100 ? height + 100 : height;
+
+      //height = 500; 
+
+      strHtmli =
+        `<div id="myDivd${i}" style='
+      width: ${width}px;
+      height: ${height}px;
+      background: ${getRandomColor()};
+      margin-left: ${marginLeft+100}px;
+      text-align: center;
+      
+      position:absolute; 
+      top:${bouncePlaneY - height};
+      '>${i}</div>`;
+      strHtml = `<g id='innerBarGrp_${i}'>`;
+      strHtml += createGrid("#89B7AF");
+      strHtml +=
+        `<rect id ='myDiv${i}' x='${marginLeft}' y='${bouncePlaneY-height}' width='${width}' height='${height}' style='fill:${getRandomColor()};' \/>`;
+       
+      //strHtml +=  `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY-height};'><div>`
+      document.querySelector("body").insertAdjacentHTML("beforeend", strHtmli);
+      document.querySelector("#svgBox").insertAdjacentHTML("beforeend", strHtml);
+
+      let myDiv = document.getElementById(`innerBarGrp_${i}`);
+
+      let options = {
+        elementType:"svg",
+        baseWidth: width,
+        baseHeight: height,
+        elasticity: 0.99,
+        amplitude: height / 4,
+        impactOn: "top",
+        canvasWidth: screenWidth, 
+        canvasHeight: screenHeight,
+        preTransform: [],
+        postTansform: []
+      };
+
+
+      setTimeout(() => {
+        createElastic(myDiv, options, () => {
+          console.log("end")
+        });
+      }, i * 50);
+
+      //myDiv.style.transform = "scaleY(0.9)"; 
+
+    }
+
+    function createGrid(color) {
+      let strHtml = "";
+      for (let i = 0; i <= screenHeight; i += 20) {
+        strHtml +=
+          `<path fill='none' d='${["M",0,i,"L", screenWidth, i].join(" ")}' stroke='${color || "#D8D8D8"}' shape-rendering='optimizeSpeed' stroke-width='2' stroke-opacity='1'></path>`;
+      }
+      for (let i = 0; i < screenWidth; i += 20) {
+        strHtml +=
+          `<path fill='none' d='${["M",i,0,"L", i, screenHeight].join(" ")}' stroke='${color || "#D8D8D8"}' shape-rendering='optimizeSpeed' stroke-width='1' stroke-opacity='1'></path>`;
+      }
+      return strHtml;
+    }
+
+
+
+    /*
+     *  Simple harmonic oscillator
+     *  @param {String} options.elemtnType - Type of element [svg | html] 
+     *  @param {Object} element - The target element where harmonic oscillator apply.
+     *  @param {Number} options.elasticity - Elasticity factor of element how it stress
+     *  @param {Number} options.baseWidth - It is the width of the element.
+     *  @param {Number} options.baseHeight - It is the height of the element.
+     *  @param {Number} options.amplitude - Maximum displacement.
+     *  @param {Number} options.impactOn - Positions where impact [top | bottom | right | left]. 
+     *  @param {Number} options.canvasWidth - Total width of the canvas. 
+     *  @param {Number} options.canvasHeight - Total height of the canvas. 
+     *  @param {Array} options.preTransform - Is array of transformation apply before animation.
+     *  @param {Array} options.postTransform - Is array of transformation apply after animation.
+     *  @param {Function} callBack - Function call after completing animation. 
+     */
+    function createElastic(element, options, callBack) {
+      let distTravelled = 1000;
+      let frequency = 1;
+      let period = 1 / frequency;
+      let time = 0;
+      let amp = options.amplitude || 50;
+      let kFactor = options.elasticity || 0.99;
+
+      let baseTransformMatrix = getElementTransformation(element);
+
+      let timenow = window.performance.now ?
+        (performance.now() + performance.timing.navigationStart) : Date.now();
+      requestAnimationFrame((timestamp) => {
+        let starttime = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        moveIt(starttime - timenow);
+      });
+
+      function moveIt(intervalMS) {
+        let omega = (2 * Math.PI * frequency);
+        let displacement = amp * Math.cos(omega * (time / 1000));
+        let modDim, scale, trnsOprns = [];
+
+        switch (options.impactOn) {
+          case "top":
+            //modDim = options.baseHeight + displacement;
+            //scale = options.baseHeight / modDim;
+            modDim = options.baseHeight - displacement;
+            scale = modDim/options.baseHeight;
+
+            if(options.elementType === "svg"){
+              let elemCoordDisplacement = (options.canvasHeight*(1-scale))/scale;
+              let elemDisplacement = (displacement)*(1/scale);
+              let totalDisplacement = elemCoordDisplacement/2;//(elemDisplacement + (elemCoordDisplacement/2));
+              console.log("displacement:",displacement, "elemCoordDisplacement:",elemCoordDisplacement,"totalDisplacement:", totalDisplacement  );
+              trnsOprns.push.apply(trnsOprns, [`scaleY(${scale})`, `translateY(${(totalDisplacement)})`]);
+              debugger;
+            }else {
+              trnsOprns.push.apply(trnsOprns, [`scaleY(${scale})`, `translateY(${(displacement/2)})`]);
+            }
+            break;
+          case "bottom":
+            modDim = options.baseHeight + displacement;
+            scale = options.baseHeight / modDim;
+            trnsOprns.push.apply(trnsOprns, [`scaleY(${scale})`, `translateY(${-(displacement/2)})`]);
+            break;
+          case "left":
+            modDim = options.baseWidth + displacement;
+            scale = options.baseWidth / modDim;
+            trnsOprns.push.apply(trnsOprns, [`scaleX(${scale})`, `translateX(${(displacement/2)})`]);
+            break;
+          case "right":
+            modDim = options.baseWidth + displacement;
+            scale = options.baseWidth / modDim;
+            trnsOprns.push.apply(trnsOprns, [`scaleX(${scale})`, `translateX(${-(displacement/2)})`]);
+            break;
+          case "all":
+          default:
+            trnsOprns.push.apply(trnsOprns, [`translateY(${(displacement)})`]);
+            break;
+        }
+
+        time += intervalMS;
+        amp *= kFactor;
+        console.log("height", options.baseHeight, "displacement", displacement, "scale", scale, "modDim", modDim);
+        //console.log("---------------->",displacement, Math.floor(Math.abs(displacement)));
+
+        if (Math.round(amp) === 0) {
+          if (typeof callBack === "function") {
+            callBack.call(this);
+          }
+          return;
+        }
+        //debugger;
+
+        if (options.preTransform && options.preTransform instanceof Array) {
+          trnsOprns.unshift.apply(trnsOprns, options.preTransform);
+        }
+
+        setElementTransformation(element, getTransformMatrix(trnsOprns, baseTransformMatrix));
+
+        return ;
+
+        let timenow = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        requestAnimationFrame((timestamp) => {
+          let starttime = window.performance.now ?
+            (performance.now() + performance.timing.navigationStart) : Date.now();
+          moveIt(starttime - timenow);
+        });
+
+      } /*End of moveIt()*/
+
+    }
+
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+  </script>
+</body>
+</head>

@@ -1,0 +1,327 @@
+<html>
+
+<head>
+
+
+  <script>
+    function getTransformMatrix(trnsOprtns, baseMatrix) {
+      let matrix = baseMatrix || [
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1]
+      ];
+      for (let i = 0; i < trnsOprtns.length; i++) {
+        let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
+          return v !== "";
+        });
+        switch (arrOpr[0]) {
+          case "rotate":
+            matrix = multiply(matrix, [
+              [Math.cos(degToRad(arrOpr[1])), (-1) * Math.sin(degToRad(arrOpr[1])), 0],
+              [Math.sin(degToRad(arrOpr[1])), Math.cos(degToRad(arrOpr[1])), 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scale":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleX":
+            matrix = multiply(matrix, [
+              [arrOpr[1], 0, 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "scaleY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, arrOpr[1], 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translate":
+            matrix = multiply(matrix, [
+              [1, 0, arrOpr[1]],
+              [0, 1, arrOpr[2]],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateX":
+            matrix = multiply(matrix, [
+              [1, 0, arrOpr[1]],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "translateY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [0, 1, arrOpr[1]],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skew":
+            var angle =
+              matrix = multiply(matrix, [
+                [1, Math.tan(degToRad(arrOpr[1])), 0],
+                [Math.tan(degToRad(arrOpr[2])), 1, 0],
+                [0, 0, 1]
+              ]);
+            break;
+          case "skewX":
+            matrix = multiply(matrix, [
+              [1, Math.tan(degToRad(arrOpr[1])), 0],
+              [0, 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+          case "skewY":
+            matrix = multiply(matrix, [
+              [1, 0, 0],
+              [Math.tan(degToRad(arrOpr[1])), 1, 0],
+              [0, 0, 1]
+            ]);
+            break;
+        }
+      }
+      return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
+    }
+
+    function convertTransformMatrix(strMatrix) {
+      let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
+      if (!strMatrix || arr.length < 6) {
+        return null;
+      }
+      let arrMatrix = [
+        [arr[0], arr[2], arr[4]],
+        [arr[1], arr[3], arr[5]],
+        [0, 0, 1]
+      ];
+      return arrMatrix;
+    }
+
+    function getElementTransformation(element) {
+      if (element) {
+        let computedStyle = window.getComputedStyle(element); 
+        return convertTransformMatrix(computedStyle.transform);
+      }
+      return null;
+
+    }
+
+    function setElementTransformation(element, strTrns) {
+      if (element) {
+        element.style["-webkit-transform"] = strTrns;
+        element.style["-moz-transform"] = strTrns;
+        element.style["-ms-transform"] = strTrns;
+        element.style["-o-transform"] = strTrns;
+        element.style["transform"] = strTrns;
+      }
+    }
+
+    function degToRad(x) {
+      return Number(x) * Math.PI / 180;
+    }
+
+    function multiply(a, b) {
+      let aNumRows = a.length;
+      let aNumCols = a[0].length;
+      let bNumRows = b.length;
+      let bNumCols = b[0].length;
+      let m = new Array(aNumRows);
+      for (let r = 0; r < aNumRows; ++r) {
+        m[r] = new Array(bNumCols);
+        for (let c = 0; c < bNumCols; ++c) {
+          m[r][c] = 0;
+          for (let i = 0; i < aNumCols; ++i) {
+            m[r][c] += a[r][i] * b[i][c];
+          }
+        }
+      }
+      return m;
+    }
+  </script>
+</head>
+
+<body>
+
+  <script>
+    //let trnsOprns = ["skew(10,10)", "rotate(-45)"]; //, "translateX(230)", "scale(1.5)"];
+    let screenHeight = window.innerHeight;
+    let screenWidth = window.innerWidth;
+    let bouncePlaneY = screenHeight - 50;
+    let strHtml =
+      `<div style='border-top:1px solid black;width:${screenWidth}px;position: absolute; top: ${bouncePlaneY};'><div>`;
+    document.querySelector("body").innerHTML = strHtml;
+    for (var i = 0; i < 15; i++) {
+      let top = Math.round(Math.random() * 1000) % (bouncePlaneY - 100);
+      let left = Math.round(Math.random() * 1000) % (screenWidth - 20);
+      let ballDia = Math.round(Math.random() * 70);
+      ballDia = ballDia < 20 ? ballDia + 20 : ballDia;
+      strHtml =
+        `<div id="myDiv${i}" style='
+      width: ${ballDia}px;
+      height: ${ballDia}px;
+      background: ${getRandomColor()};
+      margin-left: ${left}px;
+      text-align: center;
+      border-radius: ${ballDia/2}px ${ballDia/2}px;
+      position:absolute; 
+      top:${top};
+      '>${i}</div>`
+
+
+      document.querySelector("body").insertAdjacentHTML("beforeend", strHtml);
+
+      var myDiv = document.getElementById(`myDiv${i}`);
+      let options = {
+        dropHeight: (bouncePlaneY - top - ballDia),
+        slope: 0,
+        preTransform: [],
+        postTansform: []
+      };
+
+      createBounce(myDiv, options, () => {
+        console.log("end")
+      });
+    }
+
+
+    /*requestAnimationFrame SHIM for all browser*/
+    (function () {
+      var lastTime = 0;
+      var vendors = ['webkit', 'moz'];
+      for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+        window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+        window.cancelAnimationFrame =
+          window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+      }
+
+      if (!window.requestAnimationFrame)
+        window.requestAnimationFrame = function (callback, element) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function () {
+              callback(currTime + timeToCall);
+            },
+            timeToCall);
+          lastTime = currTime + timeToCall;
+          return id;
+        };
+
+      if (!window.cancelAnimationFrame)
+        window.cancelAnimationFrame = function (id) {
+          clearTimeout(id);
+        };
+    }());
+
+    /*
+     *  createBounce Function for bouncy effect. 
+     *  @param {Object} element - The target element where bounce apply.
+     *  @param {Number} options.dropHeight - height where it starts to fallen.
+     *  @param {Number} options.slope - Is the angle in which object moves.
+     *  @param {Array} options.preTransform - is array of transformation apply before animation.
+     *  @param {Array} options.postTransform - is array of transformation apply after animation.
+     *  @param {Function} callBack - Function call after completing animation. 
+     */
+    function createBounce(element, options, callBack) {
+      let feet = 1152;
+      let velocity = 0; //velocity -is the initial velocity. 
+      let acceleration = (1 * feet); //acceleraion -is the acceleration = feet/squire(s) default:1152 [1 feet ~ 1152 pixel].
+      let time = 0; //time -is the time taken.
+      let isInitial = true; //isInitial -true for initial and false for call.
+      let dropHeight = options.dropHeight || 0;
+      let slope = options.slope || 0;
+      let baseHeight = dropHeight; //baseHeight -is the initial height. 
+      let dist = 0;
+      let cor = 0.7; //Coefficient of restitution 0 >= cor <= 1()
+      let shiftY = baseHeight - dropHeight;
+
+      let baseTransformMatrix = getElementTransformation(element);
+
+      let timenow = window.performance.now ?
+        (performance.now() + performance.timing.navigationStart) : Date.now();
+      requestAnimationFrame((timestamp) => {
+        let starttime = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        moveIt(starttime - timenow);
+      });
+
+      function moveIt(intervalMS) {
+        dist = (velocity * time) + ((0.5) * (acceleration * time * time)); // d = u*t + a*squire(t)/2
+        dist = dist > dropHeight ? dropHeight : dist;
+        dist = dist < 0 ? -0.0001 : dist;
+        let height = dist;
+        if (!isInitial) {
+          height = dropHeight - dist;
+        } else {
+          shiftY = 0;
+        }
+
+        time += (intervalMS / 1000);
+
+        //console.log("dist:", dist, "height:", height, "dropHeight", dropHeight, "baseHeight", baseHeight);
+
+        let trnsOprns = [];
+        if (options.preTransform && options.preTransform instanceof Array) {
+          trnsOprns.push.apply(trnsOprns, options.preTransform);
+        }
+        trnsOprns.push.apply(trnsOprns, [`translateY(${shiftY})`, `translateY(${height})`]);
+        if (slope) {
+          trnsOprns.unshift(`rotate(${slope})`);
+          trnsOprns.push(`rotate(${(-1)*slope})`);
+        }
+
+        setElementTransformation(element, getTransformMatrix(trnsOprns, baseTransformMatrix));
+
+        if (dist >= dropHeight || dist < 0) {
+          let fVelocity = Math.sqrt(2 * Math.abs(acceleration) * Math.abs(dropHeight));
+          let vi = cor * fVelocity;
+          let h1 = Math.abs((vi * vi) / (2 * acceleration));
+
+          //console.log("dist:", dist, "fVelocity:", fVelocity);
+          //console.log("vi:", vi, "h1:", h1, "isInitial:", isInitial, "force:", f);
+
+          if (Math.round(dropHeight) === 0) {
+            if (typeof callBack === "function") {
+              callBack.call(this);
+            }
+            return;
+          } else {
+            dist = 0;
+            acceleration = (-1) * Math.abs(acceleration);
+            time = 0;
+            isInitial = false;
+            dropHeight = h1;
+            velocity = vi;
+            shiftY = baseHeight - dropHeight;
+          }
+        }
+
+        let timenow = window.performance.now ?
+          (performance.now() + performance.timing.navigationStart) : Date.now();
+        requestAnimationFrame((timestamp) => {
+          let starttime = window.performance.now ?
+            (performance.now() + performance.timing.navigationStart) : Date.now();
+          moveIt(starttime - timenow);
+        });
+
+      } /*End of moveIt()*/
+
+    }
+
+    function getRandomColor() {
+      var letters = '0123456789ABCDEF';
+      var color = '#';
+      for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+      }
+      return color;
+    }
+  </script>
+</body>
+</head>

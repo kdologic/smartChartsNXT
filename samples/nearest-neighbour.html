@@ -1,0 +1,135 @@
+<html>
+
+<head>
+
+    <script>
+        /*requestAnimationFrame SHIM for all browser*/
+        (function () {
+            var lastTime = 0;
+            var vendors = ['webkit', 'moz'];
+            for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame'];
+                window.cancelAnimationFrame =
+                    window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
+            }
+
+            if (!window.requestAnimationFrame)
+                window.requestAnimationFrame = function (callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function () {
+                        callback(currTime + timeToCall);
+                    },
+                        timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+
+            if (!window.cancelAnimationFrame)
+                window.cancelAnimationFrame = function (id) {
+                    clearTimeout(id);
+                };
+        }());
+    </script>
+</head>
+
+<body>
+
+    <script>
+        let screenHeight = window.innerHeight;
+        let screenWidth = window.innerWidth;
+        var strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
+            "version='1.1'" +
+            "width='" + screenWidth + "'" +
+            "height='" + screenHeight + "'" +
+            "id='nearNbr'" +
+            "style='background:none;-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
+            "> "+
+            "<rect id ='containerRect' x='0' y='0' width='" + screenWidth + "'" + "height='" + screenHeight + "' style='fill:none;' \/>"+
+            "<\/svg>";
+        document.querySelector("body").insertAdjacentHTML("beforeend", strSVG);
+        createBubbleDropShadow("nearNbr");
+        let bubbleSet = [];
+
+        for (let index = 0; index < 50; index++) {
+            let cx = Math.round(Math.random() * 1000) % (screenWidth - 20);
+            let cy = Math.round(Math.random() * 1000) % (screenHeight - 100);
+
+            let radius = 10;
+            let color = getRandomColor(); //"#663313";//
+            appendGradFill("nearNbr", index, color);
+
+            let strBubble = "<circle id='bubble_" + index + "' cx='" + cx + "' cy='" + cy + "' r='" + radius + "' fill='url(#bubble-gradRadial-" + index + ")' filter='url(#bubble-dropshadow)'  fill-opacity='1' />";
+
+            document.querySelector("body #nearNbr").insertAdjacentHTML("beforeend", strBubble);
+            let data = {
+                cx: cx,
+                cy: cy,
+                r: radius,
+                color: color,
+                objSVG: document.querySelector("body #nearNbr #bubble_" + index)
+            }
+            bubbleSet.push(data);
+        }
+
+
+        bindEvents();
+
+
+        function bindEvents() {
+            document.querySelector("#nearNbr #containerRect").addEventListener("mousemove", mouseMoveEvent);
+            document.querySelector("#nearNbr #containerRect").addEventListener("mousedown`", mouseMoveEvent);
+        }
+
+        function mouseMoveEvent(e) {
+            let mousePointer = cursorPoint("nearNbr");
+            console.log(cursorPoint);
+        }
+
+        function cursorPoint(targetElem, evt) {
+            if (typeof targetElem === "string") {
+                targetElem = document.querySelector("#" + targetElem);
+            }
+            let pt = targetElem.createSVGPoint();
+            pt.x = evt.clientX;
+            pt.y = evt.clientY;
+            return pt.matrixTransform(targetElem.getScreenCTM().inverse());
+        } /*End cursorPoint()*/
+
+        function appendGradFill(svgId, index, color) {
+            /*Creating radial gradient fill for bubble*/
+            var strSVG = "  <defs>";
+            strSVG += "    <radialGradient  id='bubble-gradRadial-" + index + "'";
+            strSVG += "      gradientUnits='objectBoundingBox' fx='30%' fy='30%'>";
+            strSVG += "      <stop offset='0%' style='stop-color:#fff; stop-opacity: 0.2;'><\/stop>";
+            strSVG += "      <stop offset='100%' style='stop-color: " + color + "; stop-opacity: 0.9;'><\/stop>";
+            strSVG += "    <\/radialGradient>";
+            strSVG += "  <\/defs>";
+            document.querySelector("#" + svgId).insertAdjacentHTML("beforeend", strSVG);
+        }/*End appendGradFill()*/
+
+        function createBubbleDropShadow(svgId) {
+            var strSVG = "";
+            strSVG = "<filter id='bubble-dropshadow' width='130%' height='130%'>";
+            strSVG += "  <feGaussianBlur in='SourceGraphic' stdDeviation='1'/>";
+            strSVG += "  <feOffset dx='2' dy='2' result='offsetblur'/>";
+            strSVG += "  <feMerge>";
+            strSVG += "    <feMergeNode/>";
+            strSVG += "    <feMergeNode in='SourceGraphic'/>";
+            strSVG += "  </feMerge>";
+            strSVG += "</filter>";
+            document.querySelector("#" + svgId).insertAdjacentHTML("beforeend", strSVG);
+
+        };/*End appendDropShadow()*/
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+    </script>
+</body>
+</head>

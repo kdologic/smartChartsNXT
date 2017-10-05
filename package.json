@@ -1,0 +1,34 @@
+{
+  "name": "smartcharts-nxt",
+  "version": "1.1.0",
+  "description": "Simple , easy to use SVG with JavaScript charts for Mobile, Web and App",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kausikongit/smartChartsNXT.git"
+  },
+  "author": "SmartChartsNXT",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kausikongit/smartChartsNXT/issues"
+  },
+  "homepage": "https://github.com/kausikongit/smartChartsNXT#readme",
+  "devDependencies": {
+    "browserify": "^14.3.0",
+    "gulp": "3.9.x",
+    "gulp-browserify": "^0.5.1",
+    "gulp-concat": "~2.1.x",
+    "gulp-connect": "~2.0.5",
+    "gulp-eslint": "^3.0.0",
+    "gulp-insert": "~0.5.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-replace": "^0.5.4",
+    "gulp-uglify": "^3.0.0",
+    "gulp-util": "~2.2.x",
+    "uglify-es": "^3.0.24",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
