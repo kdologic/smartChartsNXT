@@ -617,8 +617,8 @@ class AreaChart extends CoordinateChart {
 
           let color = this.CHART_OPTIONS.dataSet.series[indx].color || this.util.getColor(indx);
           let radius = this.CHART_OPTIONS.dataSet.series[indx].markerRadius || 4;
-          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", "areaChart", color);
-          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", "areaChart");
+          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", this.CHART_DATA.chartSVG, color);
+          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", this.CHART_DATA.chartSVG);
 
           let toolTipRow1, toolTipRow2;
           toolTipRow1 = (this.CHART_OPTIONS.dataSet.xAxis.title + " " + this.CHART_DATA.newCatgList[npIndex]);
@@ -759,16 +759,16 @@ class AreaChart extends CoordinateChart {
           value: "",
           color: self.CHART_DATA.newDataSet[i].color
         });
-        this.legendBox.createLegends(this, "legendContainer", {
-          left: self.CHART_DATA.marginLeft,
-          top: self.CHART_DATA.marginTop - 35,
-          legendSet: legendSet,
-          type: "horizontal",
-          border: false,
-          isToggleType: true
-        });
       }
     }
+    this.legendBox.createLegends(this, "legendContainer", {
+      left: self.CHART_DATA.marginLeft,
+      top: self.CHART_DATA.marginTop - 35,
+      legendSet: legendSet,
+      type: "horizontal",
+      border: false,
+      isToggleType: true
+    });
 
     this.resetTextPositions(this.CHART_OPTIONS.dataSet.xAxis.categories);
     this.bindEvents();

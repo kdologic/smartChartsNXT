@@ -41,7 +41,11 @@ class GeomCore {
     createDot(center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
         let svg;
         if (targetElem) {
-            svg = document.getElementById(targetElem);
+            if (typeof targetElem === "object") {
+                svg = targetElem;
+            } else if (typeof targetElem === "string") {
+                svg = document.getElementById(targetElem);
+            }
         } else {
             svg = document.getElementsByTagName('svg')[0]; //Get svg element
         }

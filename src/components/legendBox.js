@@ -71,16 +71,26 @@ class LegendBox extends Draggable {
 
     resetHorizontalPositions() {
         let nextLegendLength = 0;
+        let legendsWidth = 0; 
         this.legendContainerWidth = (2 * this.legendBBox.padding);
         this.legendContainerHeight = (2 * this.legendBBox.padding) + this.colorContWidth;
 
-        for (let i in this.opts.legendSet) {
+        for (let i =0; i< this.opts.legendSet.length;i++) {
             let eachLegendCont = this.legendContainer.querySelector("#series_legend_" + i);
-            eachLegendCont.setAttribute("transform", "translate(" + nextLegendLength + ")");
+            eachLegendCont.setAttribute("transform", "translate(" + (legendsWidth) + ")");
             nextLegendLength = eachLegendCont.getBBox().width + 30;
+            legendsWidth += nextLegendLength; 
             this.legendContainerWidth += nextLegendLength;
         }
         this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
+        if (this.opts.left + this.legendContainerWidth > this.objChart.CHART_DATA.svgWidth && this.fontSize > 8) {
+            this.fontSize -= 1;
+            for (let i in this.opts.legendSet) {
+                this.legendContainer.querySelector("#legend_txt_" + i).setAttribute("font-size", this.fontSize);
+                this.legendContainer.querySelector("#legend_value_" + i).setAttribute("font-size", this.fontSize);
+            }
+            this.resetHorizontalPositions();
+        }
     }
 
     resetVerticalPositions() {
@@ -149,18 +159,18 @@ class LegendBox extends Draggable {
             }, false);
 
             this.legendContainer.querySelector("#series_legend_" + i).addEventListener("click", (e) => {
-                let eachLegend = e.target.parentNode; 
+                let eachLegend = e.target.parentNode;
                 let elemClass = e.target.getAttribute("class");
                 let toggleColor = "#eee";
                 let legendIndex = elemClass.substring("legend".length);
                 let toggeled = true;
-                
+
                 if (this.isToggleType) {
                     let legendColorBox = eachLegend.querySelector("#legend_color_" + legendIndex);
                     let colorFill = legendColorBox.getAttribute("fill");
                     if (colorFill === toggleColor) {
                         toggleColor = this.opts.legendSet[legendIndex].color;
-                        toggeled = false; 
+                        toggeled = false;
                     }
                     legendColorBox.setAttribute("fill", toggleColor);
                 }

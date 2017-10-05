@@ -298,7 +298,7 @@ class ColumnChart extends CoordinateChart {
         colCenter = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval / 10) + (eachInterval * index) + (eachInterval / 2), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
       }
       if (dataSet.length > 50) {
-        this.createDot(colCenter, "red", "2", null, null, "columnChart");
+        this.createDot(colCenter, "red", "2", null, null, this.CHART_DATA.chartSVG);
       }
 
       let cornerRadius = 2;

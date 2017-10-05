@@ -179,16 +179,15 @@ class StepChart extends CoordinateChart {
 
       /* Will set initial zoom window */
       if (this.CHART_OPTIONS.zoomWindow) {
-        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) < (longSeriesLen * 2) - 1){
+        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) < (longSeriesLen * 2) - 1) {
           this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex * 2;
         }
-        if (this.CHART_OPTIONS.zoomWindow.rightIndex && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) > (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) <= (longSeriesLen * 2) - 1){
+        if (this.CHART_OPTIONS.zoomWindow.rightIndex && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) > (this.CHART_OPTIONS.zoomWindow.leftIndex * 2) && (this.CHART_OPTIONS.zoomWindow.rightIndex * 2) <= (longSeriesLen * 2) - 1) {
           this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex * 2;
-        }
-        else{
+        } else {
           this.CHART_DATA.windowRightIndex = (longSeriesLen * 2) - 1;
         }
-      } else{
+      } else {
         this.CHART_DATA.windowRightIndex = (longSeriesLen * 2) - 1;
       }
 
@@ -384,8 +383,8 @@ class StepChart extends CoordinateChart {
     /* ploting actual points */
     let strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none'>";
     for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      let p1 = new Point(this.CHART_DATA.marginLeft + (dataCount * interval), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
-      let p2 = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
+      let p1 = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + 1, ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
+      let p2 = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval) + 1, ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
       if (dataCount === 0) {
         d.push("M");
         area.push("M");
@@ -408,7 +407,7 @@ class StepChart extends CoordinateChart {
     let strokeWidth = this.CHART_OPTIONS.dataSet.series[index].lineWidth || 2;
     let areaOpacity = this.CHART_OPTIONS.dataSet.series[index].areaOpacity || 0.2;
 
-    strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1'></path>";
+    strSeries += "<path stroke='" + color + "' fill='none' d='" + d.join(" ") + "' stroke-width='" + strokeWidth + "' opacity='1' shape-rendering='optimizeSpeed'></path>";
     strSeries += "</g>";
     this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSeries);
 
@@ -425,7 +424,7 @@ class StepChart extends CoordinateChart {
       strSeries = "<g id='series_area_" + index + "' class='columns series' pointer-events='none'>";
       let colHalfWidth = (interval) / 2;
       for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval / 2), ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
+        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * interval) + (interval / 2) + 1, ((this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY)));
         let col = [
           "M", p.x - colHalfWidth, p.y,
           "L", p.x + colHalfWidth, p.y,
@@ -599,13 +598,13 @@ class StepChart extends CoordinateChart {
 
           let color = this.CHART_OPTIONS.dataSet.series[indx].color || this.util.getColor(indx);
           let radius = this.CHART_OPTIONS.dataSet.series[indx].markerRadius || 4;
-          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", "stepChart", color);
-          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", "stepChart");
+          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", this.CHART_DATA.chartSVG, color);
+          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", this.CHART_DATA.chartSVG);
 
           let toolTipRow1, toolTipRow2;
           toolTipRow1 = (this.CHART_OPTIONS.dataSet.xAxis.title + " " + this.CHART_DATA.newCatgList[Math.ceil((npIndex - 1) / 2)]);
           toolTipRow2 = (this.CHART_OPTIONS.dataSet.yAxis.title + " " + (this.CHART_OPTIONS.dataSet.yAxis.prefix || "") + " " + this.CHART_DATA.newDataSet[indx].data[Math.ceil((npIndex - 1) / 2)].value);
-          
+
           /*point should be available globally*/
           var point = this.CHART_DATA.newDataSet[indx].data[Math.ceil((npIndex - 1) / 2)];
           point["series"] = {
@@ -740,16 +739,16 @@ class StepChart extends CoordinateChart {
           value: "",
           color: self.CHART_DATA.newDataSet[i].color
         });
-        this.legendBox.createLegends(this, "legendContainer", {
-          left: self.CHART_DATA.marginLeft,
-          top: self.CHART_DATA.marginTop - 35,
-          legendSet: legendSet,
-          type: "horizontal",
-          border: false,
-          isToggleType: true
-        });
       }
     }
+    this.legendBox.createLegends(this, "legendContainer", {
+      left: self.CHART_DATA.marginLeft,
+      top: self.CHART_DATA.marginTop - 35,
+      legendSet: legendSet,
+      type: "horizontal",
+      border: false,
+      isToggleType: true
+    });
 
     this.resetTextPositions(this.CHART_OPTIONS.dataSet.xAxis.categories);
     this.bindEvents();

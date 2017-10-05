@@ -404,7 +404,7 @@ class LineChart extends CoordinateChart {
       d.push(p.y);
       arrPointsSet.push(p);
     }
-    let color = this.CHART_OPTIONS.dataSet.series[index].color; 
+    let color = this.CHART_OPTIONS.dataSet.series[index].color;
     let strokeWidth = this.CHART_OPTIONS.dataSet.series[index].lineWidth || 1;
     let fill = this.CHART_OPTIONS.dataSet.series[index].showGradient ? "url(#" + this.CHART_OPTIONS.targetElem + "-linechart-gradLinear" + index + ")" : color;
 
@@ -445,7 +445,7 @@ class LineChart extends CoordinateChart {
       for (let point = 0; point + 2 < arrPointsSet.length; point++) {
         if (dataSet.length < 30) {
           strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + radius + "' class='dot' style='fill:" + color + "; opacity: 1; stroke-width: 1px;'></circle>";
-          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + (radius-2) + "' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
+          strSeries += "<circle cx=" + arrPointsSet[point + 1].x + " cy=" + arrPointsSet[point + 1].y + " r='" + (radius - 2) + "' class='dot' style='fill:white; opacity: 1; stroke-width: 1px;'></circle>";
         }
       }
     }
@@ -609,8 +609,8 @@ class LineChart extends CoordinateChart {
 
           let color = this.CHART_OPTIONS.dataSet.series[indx].color || this.util.getColor(indx);
           let radius = this.CHART_OPTIONS.dataSet.series[indx].markerRadius || 4;
-          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", "lineChart", color);
-          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", "lineChart");
+          this.geom.createDot(toolTipPoint, "#FFF", (radius + 2), 1, "tooTipPoint", this.CHART_DATA.chartSVG, color);
+          this.geom.createDot(toolTipPoint, color, radius, 1, "tooTipPoint", this.CHART_DATA.chartSVG);
 
           let toolTipRow1, toolTipRow2;
           toolTipRow1 = (this.CHART_OPTIONS.dataSet.xAxis.title + " " + this.CHART_DATA.newCatgList[npIndex]);
@@ -751,16 +751,17 @@ class LineChart extends CoordinateChart {
           value: "",
           color: self.CHART_DATA.newDataSet[i].color
         });
-        this.legendBox.createLegends(this, "legendContainer", {
-          left: self.CHART_DATA.marginLeft,
-          top: self.CHART_DATA.marginTop - 35,
-          legendSet: legendSet,
-          type: "horizontal",
-          border: false,
-          isToggleType: true
-        });
       }
     }
+
+    this.legendBox.createLegends(this, "legendContainer", {
+      left: self.CHART_DATA.marginLeft,
+      top: self.CHART_DATA.marginTop - 35,
+      legendSet: legendSet,
+      type: "horizontal",
+      border: false,
+      isToggleType: true
+    });
 
     this.resetTextPositions(this.CHART_OPTIONS.dataSet.xAxis.categories);
     this.bindEvents();
