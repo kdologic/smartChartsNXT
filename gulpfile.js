@@ -1,36 +1,30 @@
 "use strict";
 
-var gulp = require('gulp');
-var insert = require('gulp-insert');
-//var replace = require('gulp-replace');
-//var concat = require('gulp-concat');
-var connect = require('gulp-connect');
-//var streamify = require('gulp-streamify');
+let gulp = require('gulp');
+let insert = require('gulp-insert');
+let connect = require('gulp-connect');
 
 
-var uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
-var composer = require('gulp-uglify/composer');
-var minify = composer(uglifyEs, console);
+let uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
+let composer = require('gulp-uglify/composer');
+let minify = composer(uglifyEs, console);
 
-var util = require('gulp-util');
-//var notify = require("gulp-notify");
-var browserify = require('gulp-browserify');
-var rename = require('gulp-rename');
-//var source = require('vinyl-source-stream');
-//var merge = require('merge-stream');
-var pkg = require('./package.json');
+let util = require('gulp-util');
+let browserify = require('gulp-browserify');
+let rename = require('gulp-rename');
+let pkg = require('./package.json');
 
 
-var srcDir = './src/';
-var buildDir = './public/';
-var testDir = './test/';
+let srcDir = './src/';
+let buildDir = './public/';
+let testDir = './test/';
 
 
 gulp.task('build', buildTask);
 gulp.task('watch', watchTask);
 gulp.task('default', ['build', 'watch']);
 
-var header = `/*
+let header = `/*
 * smartChartsNXT v${pkg.version}
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
