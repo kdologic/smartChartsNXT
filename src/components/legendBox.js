@@ -11,6 +11,7 @@
 
 let Draggable = require("./draggable");
 let UiCore = require("./../core/ui.core");
+let transformer = require("./../core/transformer");
 class LegendBox extends Draggable {
     constructor() {
         super();
@@ -36,7 +37,7 @@ class LegendBox extends Draggable {
         };
 
         let strSVG = "";
-        strSVG += "  <path id='legend_container_border' d=''  fill='none' stroke-width='1' stroke='#717171' stroke-opacity='" + (opts.border ? 1 : 0) + "' />";
+        strSVG += "  <path id='legend_container_border' d=''  fill='" + (opts.background || "none") + "' stroke-width='1' stroke='#717171' stroke-opacity='" + (opts.border ? 1 : 0) + "' />";
 
         if (this.opts.type === "vertical") {
             for (let index in this.opts.legendSet) {
@@ -58,8 +59,6 @@ class LegendBox extends Draggable {
             }
         }
         this.legendContainer.insertAdjacentHTML("beforeend", strSVG);
-        this.legendContainer.querySelector("#legend_container_border").setAttribute("filter", this.ui.dropShadow(this.targetElem));
-        let legendBox = this.legendContainer.getBoundingClientRect();
         if (this.opts.type === "vertical") {
             this.resetVerticalPositions();
         } else if (this.opts.type === "horizontal") {
@@ -71,26 +70,38 @@ class LegendBox extends Draggable {
 
     resetHorizontalPositions() {
         let nextLegendLength = 0;
-        let legendsWidth = 0; 
-        this.legendContainerWidth = (2 * this.legendBBox.padding);
-        this.legendContainerHeight = (2 * this.legendBBox.padding) + this.colorContWidth;
-
-        for (let i =0; i< this.opts.legendSet.length;i++) {
+        let legendsWidth = 0;
+        this.legendContainerWidth = 0;
+        this.legendContainerHeight = 0;
+        this.maxLabelLen = 0;
+        this.maxValLen = 0;
+        let lineCounter = 0;
+        let maxLegendWidth = 0;
+        for (let i in this.opts.legendSet) {
+            let textLen = this.legendContainer.querySelector("#legend_txt_" + i).getComputedTextLength();
+            this.maxLabelLen = textLen > this.maxLabelLen ? textLen : this.maxLabelLen;
+            textLen = this.legendContainer.querySelector("#legend_value_" + i).getComputedTextLength();
+            this.maxValLen = textLen > this.maxValLen ? textLen : this.maxValLen;
+        }
+        let legendValLeft = this.legendBBox.left + this.colorContWidth + 3 * this.legendBBox.padding + this.maxLabelLen;
+        for (let i in this.opts.legendSet) {
+            this.legendContainer.querySelector("#legend_value_" + i).setAttribute("x", legendValLeft);
             let eachLegendCont = this.legendContainer.querySelector("#series_legend_" + i);
-            eachLegendCont.setAttribute("transform", "translate(" + (legendsWidth) + ")");
             nextLegendLength = eachLegendCont.getBBox().width + 30;
-            legendsWidth += nextLegendLength; 
-            this.legendContainerWidth += nextLegendLength;
+            maxLegendWidth = nextLegendLength > maxLegendWidth ? nextLegendLength : maxLegendWidth;
         }
-        this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
-        if (this.opts.left + this.legendContainerWidth > this.objChart.CHART_DATA.svgWidth && this.fontSize > 8) {
-            this.fontSize -= 1;
-            for (let i in this.opts.legendSet) {
-                this.legendContainer.querySelector("#legend_txt_" + i).setAttribute("font-size", this.fontSize);
-                this.legendContainer.querySelector("#legend_value_" + i).setAttribute("font-size", this.fontSize);
+        for (let i in this.opts.legendSet) {    
+            if (this.opts.left + legendsWidth + maxLegendWidth > this.objChart.CHART_DATA.svgWidth && this.fontSize > 8) {
+                lineCounter++;
+                legendsWidth = 0;
             }
-            this.resetHorizontalPositions();
+            let eachLegendCont = this.legendContainer.querySelector("#series_legend_" + i);
+            transformer.setElementTransformation(eachLegendCont, transformer.getTransformMatrix(["translateX(" + (legendsWidth) + ")", "translateY(" + (lineCounter * 30) + ")"]));
+            legendsWidth += maxLegendWidth;
         }
+        this.legendContainerWidth = this.legendContainer.getBBox().width + (2 * this.legendBBox.padding);
+        this.legendContainerHeight = this.legendContainer.getBBox().height + (2 * this.legendBBox.padding);
+        this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
     }
 
     resetVerticalPositions() {
