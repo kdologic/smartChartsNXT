@@ -33,7 +33,8 @@ class LegendBox extends Draggable {
         this.legendBBox = {
             left: opts.left,
             top: opts.top,
-            padding: 10
+            padding: 10, 
+            width : opts.width || (this.objChart.CHART_DATA.svgWidth - opts.left)
         };
 
         let strSVG = "";
@@ -91,7 +92,7 @@ class LegendBox extends Draggable {
             maxLegendWidth = nextLegendLength > maxLegendWidth ? nextLegendLength : maxLegendWidth;
         }
         for (let i in this.opts.legendSet) {    
-            if (this.opts.left + legendsWidth + maxLegendWidth > this.objChart.CHART_DATA.svgWidth && this.fontSize > 8) {
+            if (legendsWidth + maxLegendWidth > this.legendBBox.width && this.fontSize > 8) {
                 lineCounter++;
                 legendsWidth = 0;
             }
@@ -99,7 +100,7 @@ class LegendBox extends Draggable {
             transformer.setElementTransformation(eachLegendCont, transformer.getTransformMatrix(["translateX(" + (legendsWidth) + ")", "translateY(" + (lineCounter * 30) + ")"]));
             legendsWidth += maxLegendWidth;
         }
-        this.legendContainerWidth = this.legendContainer.getBBox().width + (2 * this.legendBBox.padding);
+        this.legendContainerWidth = this.legendBBox.width;
         this.legendContainerHeight = this.legendContainer.getBBox().height + (2 * this.legendBBox.padding);
         this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));
     }
