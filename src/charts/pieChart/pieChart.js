@@ -79,7 +79,7 @@ class PieChart extends SlicedChart {
       FIX_WIDTH: 800,
       FIX_HEIGHT: 600,
       MIN_WIDTH: 300,
-      MIN_HEIGHT: 500
+      MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
     }, this.CHART_CONST);
 
     this.EVENT_BINDS = {
@@ -102,10 +102,6 @@ class PieChart extends SlicedChart {
       this.initDataSet();
 
       if (this.CHART_OPTIONS.showLegend) {
-        this.CHART_CONST.MIN_WIDTH = 300;
-      }
-
-      if (this.CHART_OPTIONS.showLegend) {
         if (this.CHART_OPTIONS.width <= 480) {
           this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
           this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
@@ -120,7 +116,7 @@ class PieChart extends SlicedChart {
         this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
         this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
       }
-
+      this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
       this.prepareChart();
       this.tooltip.createTooltip(this);
     } catch (ex) {
