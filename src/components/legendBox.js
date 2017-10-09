@@ -33,8 +33,8 @@ class LegendBox extends Draggable {
         this.legendBBox = {
             left: opts.left,
             top: opts.top,
-            padding: 10, 
-            width : opts.width || (this.objChart.CHART_DATA.svgWidth - opts.left)
+            padding: 10,
+            width: opts.width || (this.objChart.CHART_DATA.svgWidth - opts.left)
         };
 
         let strSVG = "";
@@ -91,8 +91,19 @@ class LegendBox extends Draggable {
             nextLegendLength = eachLegendCont.getBBox().width + 30;
             maxLegendWidth = nextLegendLength > maxLegendWidth ? nextLegendLength : maxLegendWidth;
         }
-        for (let i in this.opts.legendSet) {    
-            if (legendsWidth + maxLegendWidth > this.legendBBox.width && this.fontSize > 8) {
+
+
+        for (let i in this.opts.legendSet) {
+            if (legendsWidth + maxLegendWidth > this.legendBBox.width && this.fontSize > 9) {
+                this.fontSize--;
+                for (let j in this.opts.legendSet) {
+                    this.legendContainer.querySelector("#legend_txt_" + j).setAttribute("font-size", this.fontSize);
+                    this.legendContainer.querySelector("#legend_value_" + j).setAttribute("font-size", this.fontSize);
+                }
+                this.resetHorizontalPositions();
+                break;
+            }
+            if (legendsWidth + maxLegendWidth > this.legendBBox.width) {
                 lineCounter++;
                 legendsWidth = 0;
             }
@@ -100,6 +111,7 @@ class LegendBox extends Draggable {
             transformer.setElementTransformation(eachLegendCont, transformer.getTransformMatrix(["translateX(" + (legendsWidth) + ")", "translateY(" + (lineCounter * 30) + ")"]));
             legendsWidth += maxLegendWidth;
         }
+        this.legendContainer.querySelector("#legend_container_border").setAttribute("d",""); 
         this.legendContainerWidth = this.legendBBox.width;
         this.legendContainerHeight = this.legendContainer.getBBox().height + (2 * this.legendBBox.padding);
         this.legendContainer.querySelector("#legend_container_border").setAttribute("d", this.objChart.geom.describeRoundedRect(this.legendBBox.left, this.legendBBox.top, this.legendContainerWidth, this.legendContainerHeight, 10).join(" "));

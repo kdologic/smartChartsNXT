@@ -79,7 +79,7 @@ class PieChart extends SlicedChart {
       FIX_WIDTH: 800,
       FIX_HEIGHT: 600,
       MIN_WIDTH: 300,
-      MIN_HEIGHT: 400
+      MIN_HEIGHT: 500
     }, this.CHART_CONST);
 
     this.EVENT_BINDS = {
@@ -107,13 +107,13 @@ class PieChart extends SlicedChart {
 
       if (this.CHART_OPTIONS.showLegend) {
         if (this.CHART_OPTIONS.width <= 480) {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 55 / 100;
+          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
           this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
         } else if (this.CHART_OPTIONS.width <= 680) {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 300)) * 50 / 100;
-          this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+          this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
         } else {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
           this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
         }
       } else {
@@ -180,7 +180,7 @@ class PieChart extends SlicedChart {
       this.legendBox.createLegends(this, "legendContainer", {
         left: 10,
         top: self.CHART_DATA.pieCenter.y + (self.CHART_DATA.pieHeight) + self.CHART_DATA.offsetHeight + 20,
-        width : self.CHART_DATA.width - this.left,
+        width: self.CHART_DATA.width - this.left,
         legendSet: lSet,
         type: "horizontal",
         border: false,
