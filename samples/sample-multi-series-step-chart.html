@@ -17,54 +17,53 @@
       return dataSet;
     }
 
-    var settings = {
-      "title": "Production Report",
-      "subTitle": "Report for the year, 2016",
-      "targetElem": "chartContainer",
-      "canvasBorder": false,
-      "bgColor": "none",
-      "noRiser": false,
-      "showAreaOffset": true,
-      "showLegend": true,
-      "toolTip": {
-        "content": '<table>' +
-          '<tr><td>In the month of <b>{{point.label}}</b> </td></tr>' +
-          '<tr><td>Total Sales produced </td></tr>' +
-          '<tr><td>by {{point.series.name}} is <b>Rs. {{point.value}}</b></tr>' +
-          '</table>'
-      },
-      "dataSet": {
-        "xAxis": {
-          "title": "Months"
-        },
-        "yAxis": {
-          "title": "Total Sales",
-          "prefix": "Rs. "
-        },
-        "series": [{
-            "color": "#d32f2f",
-            "name": 'John',
-            "lineWidth": '1',
-            "areaOpacity": "0.3",
-            "data": generateData(20, 50, 30)
-          },
-          {
-            "color": "#2f81d3",
-            "name": 'Kate',
-            "areaOpacity": "0.3",
-            "data": generateData(5, 10, 30)
-          }
-        ]
-      },
-      zoomWindow: {
-        leftIndex: 0,
-        rightIndex: 30
-      }
-    };
-
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var stepChart = new SmartChartsNXT.StepChart(settings);
+        let stepChart = new SmartChartsNXT.Chart({
+          "type": "StepChart",
+          "title": "Production Report",
+          "subTitle": "Report for the year, 2016",
+          "targetElem": "chartContainer",
+          "canvasBorder": false,
+          "bgColor": "none",
+          "noRiser": false,
+          "showAreaOffset": true,
+          "showLegend": true,
+          "toolTip": {
+            "content": '<table>' +
+              '<tr><td>In the month of <b>{{point.label}}</b> </td></tr>' +
+              '<tr><td>Total Sales produced </td></tr>' +
+              '<tr><td>by {{point.series.name}} is <b>Rs. {{point.value}}</b></tr>' +
+              '</table>'
+          },
+          "dataSet": {
+            "xAxis": {
+              "title": "Months"
+            },
+            "yAxis": {
+              "title": "Total Sales",
+              "prefix": "Rs. "
+            },
+            "series": [{
+                "color": "#d32f2f",
+                "name": 'John',
+                "lineWidth": '1',
+                "areaOpacity": "0.3",
+                "data": generateData(20, 50, 30)
+              },
+              {
+                "color": "#2f81d3",
+                "name": 'Kate',
+                "areaOpacity": "0.3",
+                "data": generateData(5, 10, 30)
+              }
+            ]
+          },
+          zoomWindow: {
+            leftIndex: 0,
+            rightIndex: 30
+          }
+        });
       });
     };
   </script>

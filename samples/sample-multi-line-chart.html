@@ -21,14 +21,15 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var lineChart = new SmartChartsNXT.LineChart({
+        let lineChart = new SmartChartsNXT.Chart({
+          "type": "LineChart",
           "title": "Multi Line Chart",
           "subTitle": "Demo series",
           "targetElem": "chartContainer",
           "canvasBorder": false,
           "bgColor": "none",
           "animated": true,
-          "showLegend":true, 
+          "showLegend": true,
           "toolTip": {
             "content": '<table>' +
               '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +

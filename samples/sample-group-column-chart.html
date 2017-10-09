@@ -20,7 +20,8 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var columnChart = new SmartChartsNXT.ColumnChart({
+        var columnChart = new SmartChartsNXT.Chart({
+          "type": "ColumnChart",
           "title": "Grouped Sales Report",
           "subTitle": "Report for the year, 2017",
           "targetElem": "chartContainer",
@@ -29,10 +30,10 @@
           "overlapColumns": true, //Only applicable for multi series 
           "toolTip": {
             "content": '<table>' +
-            '<tr><td>on <b>{{point.label}}</b></tr>' +
-            '<tr><td>{{point.series.name}} is</td></tr>' +
-            '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>' +
-            '</table>'
+              '<tr><td>on <b>{{point.label}}</b></tr>' +
+              '<tr><td>{{point.series.name}} is</td></tr>' +
+              '<tr><td><span style="font-size:20px;color:#4285f4;"><b>Rs. {{point.value}} </b></span></tr>' +
+              '</table>'
           },
           "dataSet": {
             "xAxis": {
@@ -43,17 +44,17 @@
               "prefix": "Rs. "
             },
             "series": [{
-              "gradient": "none", // [oval|linear|none]
-              "color": "#c62828",
-              "name": "Sales",
-              "data": generateData(10, 50, 10)
-            },
-            {
-              "gradient": "none",
-              "color": "#FF9800",
-              "name": "Expense",
-              "data": generateData(10, 30, 10)
-            }
+                "gradient": "none", // [oval|linear|none]
+                "color": "#c62828",
+                "name": "Sales",
+                "data": generateData(10, 50, 10)
+              },
+              {
+                "gradient": "none",
+                "color": "#FF9800",
+                "name": "Expense",
+                "data": generateData(10, 30, 10)
+              }
             ]
           }
         });

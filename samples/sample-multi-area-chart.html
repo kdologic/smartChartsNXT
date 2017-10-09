@@ -19,15 +19,16 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        let areaChart = new SmartChartsNXT.AreaChart({
+        let areaChart = new SmartChartsNXT.Chart({
+          "type": "AreaChart",
           "title": "Multi Series Chart",
           "subTitle": "Area Chart",
           "targetElem": "chartContainer",
           "canvasBorder": true,
           "bgColor": "none",
-          "showLegend":true, 
+          "showLegend": true,
           "animated": true,
-          "hideHorizontalScroller":false,
+          "hideHorizontalScroller": false,
           "toolTip": {
             "content": '<table>' +
               '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +

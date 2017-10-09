@@ -20,7 +20,8 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var areaChart = new SmartChartsNXT.AreaChart({
+        var areaChart = new SmartChartsNXT.Chart({
+          "type":"AreaChart",
           "title": "Area Chart",
           "subTitle": "Single series",
           "targetElem": "chartContainer",

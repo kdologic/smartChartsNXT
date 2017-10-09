@@ -19,12 +19,13 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var lineChart = new SmartChartsNXT.LineChart({
+        var lineChart = new SmartChartsNXT.Chart({
+          "type": "LineChart",
           "title": "Basic Line Chart",
           "subTitle": "Single series",
           "targetElem": "chartContainer",
           "canvasBorder": false,
-          "showLegend":false, 
+          "showLegend": false,
           "bgColor": "none",
           "toolTip": {
             "content": '<table>' +
