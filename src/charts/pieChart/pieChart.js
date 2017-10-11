@@ -51,80 +51,79 @@ let Point = require("./../../core/point");
 class PieChart extends SlicedChart {
 
   constructor(opts) {
-    super("pieChart", opts);
-    let self = this;
-    this.CHART_DATA = this.util.extends({
-      scaleX: 0,
-      scaleY: 0,
-      svgCenter: 0,
-      pieCenter: 0,
-      uniqueDataSet: [],
-      totalValue: 0,
-      pieWidth: 160,
-      pieHeight: 160,
-      offsetWidth: 20, // distance of text label from left and right side 
-      offsetHeight: 80, // distance of text label from top and bottom side 
-      pieSet: [],
-      dragStartAngle: 0,
-      dragEndPoint: null,
-      mouseDown: 0,
-      mouseDrag: 0,
-      pieWithTextSpan: 0,
-      maxTextLen: 0
-    }, this.CHART_DATA);
+    super(opts);
+    try {
+      let self = this;
+      this.CHART_DATA = this.util.extends({
+        scaleX: 0,
+        scaleY: 0,
+        svgCenter: 0,
+        pieCenter: 0,
+        uniqueDataSet: [],
+        totalValue: 0,
+        pieWidth: 160,
+        pieHeight: 160,
+        offsetWidth: 20, // distance of text label from left and right side 
+        offsetHeight: 80, // distance of text label from top and bottom side 
+        pieSet: [],
+        dragStartAngle: 0,
+        dragEndPoint: null,
+        mouseDown: 0,
+        mouseDrag: 0,
+        pieWithTextSpan: 0,
+        maxTextLen: 0
+      }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
 
-    this.CHART_CONST = this.util.extends({
-      FIX_WIDTH: 800,
-      FIX_HEIGHT: 600,
-      MIN_WIDTH: 300,
-      MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
-    }, this.CHART_CONST);
+      this.CHART_CONST = this.util.extends({
+        FIX_WIDTH: 800,
+        FIX_HEIGHT: 600,
+        MIN_WIDTH: 300,
+        MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
+      }, this.CHART_CONST);
 
-    this.EVENT_BINDS = {
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      onPieClickBind: self.onPieClick.bind(self),
-      onLegendHoverBind: self.onLegendHover.bind(self),
-      onLegendLeaveBind: self.onLegendLeave.bind(self),
-      onLegendClickBind: self.onLegendClick.bind(self)
-    };
+      this.EVENT_BINDS = {
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+        onPieClickBind: self.onPieClick.bind(self),
+        onLegendHoverBind: self.onLegendHover.bind(self),
+        onLegendLeaveBind: self.onLegendLeave.bind(self),
+        onLegendClickBind: self.onLegendClick.bind(self)
+      };
 
-    this.init();
-    if (this.CHART_OPTIONS.animated !== false) {
-      this.showAnimatedView();
+      this.init();
+      if (this.CHART_OPTIONS.animated !== false) {
+        this.showAnimatedView();
+      }
+    } catch (ex) {
+      ex.errorIn = `Error in PieChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex;
     }
   }
 
   init() {
-    try {
-      super.initBase();
-      this.initDataSet();
+    super.initBase();
+    this.initDataSet();
 
-      if (this.CHART_OPTIONS.showLegend) {
-        if (this.CHART_OPTIONS.width <= 480) {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-          this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
-        } else if (this.CHART_OPTIONS.width <= 680) {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-          this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
-        } else {
-          this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-          this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
-        }
-      } else {
+    if (this.CHART_OPTIONS.showLegend) {
+      if (this.CHART_OPTIONS.width <= 480) {
         this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
+        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+      } else if (this.CHART_OPTIONS.width <= 680) {
+        this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
+      } else {
+        this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
       }
-      this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
-      this.prepareChart();
-      this.tooltip.createTooltip(this);
-    } catch (ex) {
-      ex.errorIn = `Error in PieChart with runId:${this.getRunId()}`;
-      throw ex;
+    } else {
+      this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+      this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
-
-
+    this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
+    this.prepareChart();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   initDataSet() {

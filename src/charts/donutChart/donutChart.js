@@ -53,84 +53,85 @@ let Point = require("./../../core/point");
 
 class DonutChart extends SlicedChart {
   constructor(opts) {
-    super("donutChart", opts);
-    let self = this;
-    this.CHART_DATA = this.util.extends({
-      scaleX: 0,
-      scaleY: 0,
-      svgCenter: 0,
-      donutCenter: 0,
-      uniqueDataSet: [],
-      totalValue: 0,
-      donutWidth: 160,
-      donutHeight: 160,
-      innerWidth: 80,
-      innerHeight: 80,
-      offsetWidth: 20, // distance of text label from left and right side 
-      offsetHeight: 80, // distance of text label from top and bottom side 
-      donutSet: [],
-      dragStartAngle: 0,
-      dragEndPoint: null,
-      mouseDown: 0,
-      mouseDrag: 0,
-      donutWithTextSpan: 0,
-      maxTextLen: 0
-    }, this.CHART_DATA);
+    super(opts);
+    try {
+      let self = this;
+      this.CHART_DATA = this.util.extends({
+        scaleX: 0,
+        scaleY: 0,
+        svgCenter: 0,
+        donutCenter: 0,
+        uniqueDataSet: [],
+        totalValue: 0,
+        donutWidth: 160,
+        donutHeight: 160,
+        innerWidth: 80,
+        innerHeight: 80,
+        offsetWidth: 20, // distance of text label from left and right side 
+        offsetHeight: 80, // distance of text label from top and bottom side 
+        donutSet: [],
+        dragStartAngle: 0,
+        dragEndPoint: null,
+        mouseDown: 0,
+        mouseDrag: 0,
+        donutWithTextSpan: 0,
+        maxTextLen: 0
+      }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
 
-    this.CHART_CONST = this.util.extends({
-      FIX_WIDTH: 800,
-      FIX_HEIGHT: 600,
-      MIN_WIDTH: 300,
-      MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
-    }, this.CHART_CONST);
+      this.CHART_CONST = this.util.extends({
+        FIX_WIDTH: 800,
+        FIX_HEIGHT: 600,
+        MIN_WIDTH: 300,
+        MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
+      }, this.CHART_CONST);
 
-    this.EVENT_BINDS = {
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      onDonutClickBind: self.onDonutClick.bind(self),
-      onLegendHoverBind: self.onLegendHover.bind(self),
-      onLegendLeaveBind: self.onLegendLeave.bind(self),
-      onLegendClickBind: self.onLegendClick.bind(self)
-    };
+      this.EVENT_BINDS = {
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+        onDonutClickBind: self.onDonutClick.bind(self),
+        onLegendHoverBind: self.onLegendHover.bind(self),
+        onLegendLeaveBind: self.onLegendLeave.bind(self),
+        onLegendClickBind: self.onLegendClick.bind(self)
+      };
 
-    this.init();
-    if (this.CHART_OPTIONS.animated !== false) {
-      this.showAnimatedView();
+      this.init();
+      if (this.CHART_OPTIONS.animated !== false) {
+        this.showAnimatedView();
+      }
+    } catch (ex) {
+      ex.errorIn = `Error in DonutChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex;
     }
   }
 
   init() {
-    try {
-      super.initBase();
-      this.initDataSet();
+    super.initBase();
+    this.initDataSet();
 
-      if (this.CHART_OPTIONS.showLegend) {
-        if (this.CHART_OPTIONS.width <= 480) {
-          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
-          this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
-        } else if (this.CHART_OPTIONS.width <= 680) {
-          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
-          this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
-        } else {
-          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
-          this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
-        }
-      } else {
+    if (this.CHART_OPTIONS.showLegend) {
+      if (this.CHART_OPTIONS.width <= 480) {
         this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
         this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
-        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+      } else if (this.CHART_OPTIONS.width <= 680) {
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
+      } else {
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
       }
-      this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.donutWidth - 10, this.CHART_DATA.offsetHeight);
-      this.prepareChart();
-      this.tooltip.createTooltip(this);
-    } catch (ex) {
-      ex.errorIn = `Error in DonutChart with runId:${this.getRunId()}`;
-      throw ex;
+    } else {
+      this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+      this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
+      this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
+    this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.donutWidth - 10, this.CHART_DATA.offsetHeight);
+    this.prepareChart();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   initDataSet() {
@@ -205,7 +206,7 @@ class DonutChart extends SlicedChart {
     let strSVG = "";
     strSVG += "  <rect class='donut" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='donut" + index + "' id='txtDonutGrpDonut" + index + "' fill='#717171' font-family='Lato' >";
-    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>"; 
+    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
     strSVG += "  <path class='donut" + index + "' id='donutHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
     strSVG += "  <path class='donut" + index + "'  id='upperArcDonut" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='donut" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
@@ -384,14 +385,14 @@ class DonutChart extends SlicedChart {
               donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
             }
             donutHover.setAttribute("d", donutHoverPath.d);
-            donutHover.style["fill-opacity"] = 0.4; 
+            donutHover.style["fill-opacity"] = 0.4;
           }
         }, false);
 
         upperArcDonut.addEventListener("mouseleave", (e) => {
           let elemId = e.target.getAttribute("class");
           let donutIndex = elemId.substring("donut".length);
-          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
+          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0;
           this.tooltip.hide();
         }, false);
 
@@ -485,12 +486,12 @@ class DonutChart extends SlicedChart {
       donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
     }
     donutHover.setAttribute("d", donutHoverPath.d);
-    donutHover.style["fill-opacity"] = 0.4; 
+    donutHover.style["fill-opacity"] = 0.4;
   }
 
   onLegendLeave(e) {
     let donutIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
+    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0;
   }
 
   onLegendClick(e) {

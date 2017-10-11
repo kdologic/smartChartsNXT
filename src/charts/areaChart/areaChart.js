@@ -152,7 +152,7 @@ class AreaChart extends CoordinateChart {
         onRightSliderMoveBind: self.onRightSliderMove.bind(self),
         onHorizontalScrollBind: self.onHorizontalScroll.bind(self)
       };
-      this.initi();
+      this.init();
 
       if (this.CHART_OPTIONS.animated !== false) {
         this.showAnimatedView();

@@ -84,83 +84,83 @@ let Point = require("./../../core/point");
 class ColumnChart extends CoordinateChart {
 
   constructor(opts) {
-    super("columnChart", opts);
-    let self = this;
-    this.CHART_DATA = this.util.extends({
-      scaleX: 0,
-      scaleY: 0,
-      svgCenter: 0,
-      chartCenter: 0,
-      maxima: 0,
-      minima: 0,
-      marginLeft: 0,
-      marginRight: 0,
-      marginTop: 0,
-      marginBottom: 0,
-      gridBoxWidth: 0,
-      gridBoxHeight: 0,
-      vLabelWidth: 70,
-      hLabelHeight: 80,
-      longestSeries: 0,
-      columns: {}
-    }, this.CHART_DATA);
+    super(opts);
+    try {
+      let self = this;
+      this.CHART_DATA = this.util.extends({
+        scaleX: 0,
+        scaleY: 0,
+        svgCenter: 0,
+        chartCenter: 0,
+        maxima: 0,
+        minima: 0,
+        marginLeft: 0,
+        marginRight: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        gridBoxWidth: 0,
+        gridBoxHeight: 0,
+        vLabelWidth: 70,
+        hLabelHeight: 80,
+        longestSeries: 0,
+        columns: {}
+      }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
-    this.CHART_CONST = this.util.extends({
-      FIX_WIDTH: 800,
-      FIX_HEIGHT: 500,
-      MIN_WIDTH: 250,
-      MIN_HEIGHT: 400,
-      hGridCount: 9
-    }, this.CHART_CONST);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+      this.CHART_CONST = this.util.extends({
+        FIX_WIDTH: 800,
+        FIX_HEIGHT: 500,
+        MIN_WIDTH: 250,
+        MIN_HEIGHT: 400,
+        hGridCount: 9
+      }, this.CHART_CONST);
 
-    this.EVENT_BINDS = {
-      onMouseOverBind: self.onMouseOver.bind(self),
-      onMouseLeaveBind: self.onMouseLeave.bind(self),
-      onLegendClickBind: self.onLegendClick.bind(self),
-      onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
-      onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init)
-    };
-    this.init();
+      this.EVENT_BINDS = {
+        onMouseOverBind: self.onMouseOver.bind(self),
+        onMouseLeaveBind: self.onMouseLeave.bind(self),
+        onLegendClickBind: self.onLegendClick.bind(self),
+        onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
+        onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init)
+      };
+      this.init();
 
-    if (this.CHART_OPTIONS.animated !== false) {
-      this.showAnimatedView();
+      if (this.CHART_OPTIONS.animated !== false) {
+        this.showAnimatedView();
+      }
+    } catch (ex) {
+      ex.errorIn = `Error in ColumnChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex;
     }
   }
 
   init() {
-    try {
-      super.initBase();
-      this.createColumnDropShadow();
-      
-      this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-      this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100, this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 10;
-      this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 150;
-      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + 100;
+    super.initBase();
+    this.createColumnDropShadow();
 
-      let longestSeries = 0;
-      let longSeriesLen = 0;
-      for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
-        if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
-          longestSeries = index;
-          longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
-        }
+    this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+    this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100, this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 10;
+    this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 150;
+    this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + 100;
+
+    let longestSeries = 0;
+    let longSeriesLen = 0;
+    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
+      if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
+        longestSeries = index;
+        longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
       }
-      this.CHART_DATA.longestSeries = longestSeries;
-
-      this.prepareChart();
-      this.render();
-      this.tooltip.createTooltip(this);
-    } catch (ex) {
-      ex.errorIn = `Error in ColumnChart with runId:${this.getRunId()}`;
-      throw ex;
     }
+    this.CHART_DATA.longestSeries = longestSeries;
 
+    this.prepareChart();
+    this.render();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   prepareChart() {
-    let self = this; 
+    let self = this;
     this.prepareDataSet();
 
     let strSVG = "";
@@ -214,7 +214,7 @@ class ColumnChart extends CoordinateChart {
 
 
     let scaleX = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
-    let legendSet = []; 
+    let legendSet = [];
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       this.createColumns(this.CHART_OPTIONS.dataSet.series[index].data, index, scaleX);
       if (this.CHART_OPTIONS.dataSet.series.length > 1) {
@@ -279,10 +279,10 @@ class ColumnChart extends CoordinateChart {
   createColumns(dataSet, index, scaleX) {
     let d = [];
     let interval = this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
-    let colMaxWidth = (interval-8) > 25 ? 25 : (interval-8);
+    let colMaxWidth = (interval - 8) > 25 ? 25 : (interval - 8);
     let eachInterval = (interval - (interval / 5)) / this.CHART_OPTIONS.dataSet.series.length;
-    let colHalfWidth = (colMaxWidth - (index*8))/2;
-    if(this.CHART_OPTIONS.dataSet.series.length > 1 && !this.CHART_OPTIONS.overlapColumns){
+    let colHalfWidth = (colMaxWidth - (index * 8)) / 2;
+    if (this.CHART_OPTIONS.dataSet.series.length > 1 && !this.CHART_OPTIONS.overlapColumns) {
       colHalfWidth = (eachInterval - 4) / 2;
     }
     colHalfWidth = colHalfWidth < 2 ? 2 : colHalfWidth;
@@ -306,8 +306,8 @@ class ColumnChart extends CoordinateChart {
         "M", colCenter.x - colHalfWidth + (cornerRadius), colCenter.y,
         "L", colCenter.x + colHalfWidth - (cornerRadius), colCenter.y,
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, cornerRadius,
-        "L", colCenter.x + colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight -1 ),
-        "L", colCenter.x - colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight -1 ),
+        "L", colCenter.x + colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight - 1),
+        "L", colCenter.x - colHalfWidth, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight - 1),
         "L", colCenter.x - colHalfWidth, colCenter.y + (cornerRadius),
         "a", cornerRadius, cornerRadius, " 0 0 1 ", cornerRadius, -cornerRadius,
         "Z"
@@ -523,8 +523,8 @@ class ColumnChart extends CoordinateChart {
     let doShow = e.toggeled ? "none" : "block";
     let legendColor = this.CHART_DATA.chartSVG.querySelector("#legend_color_" + seriesIndex);
     let columnSet = this.CHART_DATA.chartSVG.querySelector("#column_set_" + seriesIndex);
-    if(columnSet) {
-      columnSet.style.display = doShow; 
+    if (columnSet) {
+      columnSet.style.display = doShow;
     }
   } /*End onLegendClick()*/
 
