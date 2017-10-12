@@ -137,7 +137,7 @@ class AreaChart extends CoordinateChart {
         FIX_HEIGHT: 600,
         MIN_WIDTH: 250,
         MIN_HEIGHT: 400,
-        hGridCount: 9
+        hGridCount: 10
       }, this.CHART_CONST);
 
       this.EVENT_BINDS = {
@@ -295,14 +295,18 @@ class AreaChart extends CoordinateChart {
   } /*End prepareChart()*/
 
   prepareFullSeriesDataset() {
-    let scaleX = this.CHART_DATA.fsScaleX = (this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length);
-    let scaleYfull = (this.CHART_DATA.hScrollBoxHeight / this.CHART_DATA.maxima);
+    let margin = (this.CHART_DATA.hScrollBoxHeight*0.1);
+    this.CHART_DATA.fsScaleX = (this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length);
+    this.CHART_DATA.maxRange = this.CHART_DATA.maxima;
+    this.CHART_DATA.minRange = this.CHART_DATA.minima > 0 ? 0 : this.CHART_DATA.minima;
+    this.CHART_DATA.fsScaleY = ((this.CHART_DATA.hScrollBoxHeight-margin) / (this.CHART_DATA.maxRange - this.CHART_DATA.minRange));
+    this.CHART_DATA.fsBaseLine = (this.CHART_DATA.maxRange*this.CHART_DATA.fsScaleY) + (margin/2);
 
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       let arrPointsSet = [];
       let dataSet = this.CHART_OPTIONS.dataSet.series[index].data;
       for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
+        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * this.CHART_DATA.fsScaleX) + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine ) - (dataSet[dataCount].value * this.CHART_DATA.fsScaleY));
         arrPointsSet.push(p);
       }
       this.CHART_DATA.fullSeries.push(arrPointsSet);
@@ -330,7 +334,7 @@ class AreaChart extends CoordinateChart {
     }
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine), "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='fLine_" + index + "' stroke='#000' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='0.6'></path>";
@@ -366,7 +370,6 @@ class AreaChart extends CoordinateChart {
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
     this.CHART_DATA.minima = Math.min.apply(null, minSet);
-    this.CHART_DATA.maxima = this.round(this.CHART_DATA.maxima);
 
     //fire Event afterParseData
     let afterParseDataEvent = new this.event.Event("afterParseData", {
@@ -390,15 +393,19 @@ class AreaChart extends CoordinateChart {
       return void 0;
     }
 
+    let minLabelVal = this.vLabel.interval * Math.floor((this.vLabel.minVal > 0 ? 0 : this.vLabel.minVal) / this.vLabel.interval);
+    let maxLabelVal = minLabelVal + ((this.CHART_CONST.hGridCount-1) * this.vLabel.interval);
+    
     let interval = scaleX || (this.CHART_DATA.gridBoxWidth / (dataSet.length));
-    let scaleY = (this.CHART_DATA.gridBoxHeight / this.CHART_DATA.maxima);
+    let scaleY = (this.CHART_DATA.gridBoxHeight / (maxLabelVal-minLabelVal));
+    let baseLine = maxLabelVal * scaleY ;
     let arrPointsSet = [];
     let strSeries = "";
 
     /* ploting actual points */
     strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
+      let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + baseLine) - (dataSet[dataCount].value * scaleY));
       d.push(!dataCount ? "M" : "L");
       d.push(p.x);
       d.push(p.y);
@@ -441,7 +448,7 @@ class AreaChart extends CoordinateChart {
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
 
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight, "L", this.CHART_DATA.marginLeft + (interval / 2), this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight, "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, this.CHART_DATA.marginTop + baseLine, "L", this.CHART_DATA.marginLeft + (interval / 2), this.CHART_DATA.marginTop + baseLine, "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='area_" + index + "' stroke='none' fill='" + fill + "' d='" + area.join(" ") + "' stroke-width='1' opacity='" + areaOpacity + "'></path>";
@@ -732,7 +739,7 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop,
       this.CHART_DATA.maxima,
-      0,
+      this.CHART_DATA.minima,
       this.CHART_DATA.vLabelWidth,
       this.CHART_DATA.gridHeight,
       this.CHART_CONST.hGridCount,
