@@ -9,16 +9,13 @@ let uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
 let composer = require('gulp-uglify/composer');
 let minify = composer(uglifyEs, console);
 
-let gutil = require('gulp-util');
-let gBrowserify = require('gulp-browserify');
-let browserify = require('browserify');
-let babelify = require('babelify');
-let source = require('vinyl-source-stream'); //to convert text-stream into vinyl-stram
-let buffer = require("vinyl-buffer"); // to conver stream-vinyl into bufferd-vinyl
+let util = require('gulp-util');
 let rename = require('gulp-rename');
+
+let webpack = require("webpack-stream");
+let webpackConfig = require('./webpack.config.js');
+
 let pkg = require('./package.json');
-
-
 let srcDir = './src/';
 let buildDir = './public/';
 let testDir = './test/';
@@ -45,42 +42,17 @@ https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
  */
 
 function buildTask() {
-    return gulp.src(srcDir + 'build.core.js')
-        .pipe(gBrowserify({
-            insertGlobals: false
-        }))
-        .pipe(rename('smartChartsNXT.bundle.js'))
-        .pipe(headerComment(header))
-        .pipe(gulp.dest(buildDir))
-        .pipe(minify({}))
-        .pipe(rename('smartChartsNXT.bundle.min.js'))
-        .pipe(headerComment(header))
-        .pipe(gulp.dest(buildDir));
+  return gulp.src(srcDir + 'build.core.js')
+    .pipe(webpack(webpackConfig))
+    .pipe(rename('smartChartsNXT.bundle.js'))
+    .pipe(insert.prepend(header))
+    .pipe(gulp.dest(buildDir))
+    .pipe(minify({}))
+    .pipe(rename('smartChartsNXT.bundle.min.js'))
+    .pipe(insert.prepend(header))
+    .pipe(gulp.dest(buildDir));
 }
-
-function buildTaskWithTranspiler() {
-    return browserify({
-            entries: srcDir + 'build.core.js',
-            debug: false,
-            insertGlobals: false
-        })
-        .transform(babelify, {presets: ["es2015"],extensions: ['.js']})
-        .bundle().on('error', err => {
-            gutil.log("Browserify Error", gutil.colors.red(err.message));
-        })
-        .pipe(source('smartChartsNXT.bundle.js'))
-        .pipe(headerComment(header))
-        .pipe(gulp.dest(buildDir))
-        .pipe(buffer())
-        .pipe(uglify()).on('error', err => {
-            gutil.log("Minification Error", gutil.colors.red(err));
-        })
-        .pipe(rename('smartChartsNXT.bundle.min.js'))
-        .pipe(headerComment(header))
-        .pipe(gulp.dest(buildDir));
-}
-
 
 function watchTask() {
-    return gulp.watch('./src/**', ['build']);
+  return gulp.watch('./src/**', ['build']);
 }
