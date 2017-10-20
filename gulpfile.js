@@ -1,10 +1,10 @@
 "use strict";
 
 let gulp = require('gulp');
+let insert = require('gulp-insert');
 let connect = require('gulp-connect');
-let headerComment = require('gulp-header-comment');
 
-let uglify = require("gulp-uglify"); // for minify es5 codes
+
 let uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
 let composer = require('gulp-uglify/composer');
 let minify = composer(uglifyEs, console);
@@ -22,19 +22,18 @@ let testDir = './test/';
 
 
 gulp.task('build', buildTask);
-gulp.task('buildTaskWithTranspiler', buildTaskWithTranspiler);
 gulp.task('watch', watchTask);
-gulp.task('release', ['buildTaskWithTranspiler', 'watch']);
 gulp.task('default', ['build', 'watch']);
 
-let header = `
-SmartChartsNXT
-http://www.smartcharts.cf
-Version:${pkg.version}
-
-Copyright 2017 Kausik Dey
-Released under the MIT license
-https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
+let header = `/** 
+* SmartChartsNXT
+* http://www.smartcharts.cf
+* Version:${pkg.version}
+* 
+* Copyright 2017 Kausik Dey
+* Released under the MIT license
+* https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
+*/
 `;
 
 /*
