@@ -45,6 +45,7 @@ class VerticalLabels {
     adjustFontSize() {
         /*Adjust vertical text label size*/
         let arrVTextLabels = this.vLabelContainer.querySelectorAll("#vTextLabel text");
+        console.log(arrVTextLabels);
         for (let i = 0; i < arrVTextLabels.length; i++) {
             let txtWidth = arrVTextLabels[i].getComputedTextLength();
             if (txtWidth > this.maxWidth - 10) {

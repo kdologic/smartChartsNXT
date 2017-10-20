@@ -18,6 +18,8 @@ let Event = require("./../core/event");
 let Point = require("./../core/point");
 let transformer = require("./../core/transformer");
 
+import {render, h} from "./../core/pView.core";
+
 /* ------------- Require pulgIns --------------*/
 let animator = require("./../plugIns/animator");
 
@@ -81,16 +83,25 @@ class BaseChart {
         });
         this.event.dispatchEvent(onInitEvent);
 
-        let strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
-            "version='1.1'" +
-            "width='" + this.CHART_OPTIONS.width + "'" +
-            "height='" + this.CHART_OPTIONS.height + "'" +
-            "id='" + this.chartType + "'" +
-            "style='background:" + (this.CHART_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
-            "> <\/svg>";
+        // let strSVG = "<svg xmlns:svg='http:\/\/www.w3.org\/2000\/svg' xmlns='http:\/\/www.w3.org\/2000\/svg' xmlns:xlink='http:\/\/www.w3.org\/1999\/xlink'" +
+        //     "version='1.1'" +
+        //     "width='" + this.CHART_OPTIONS.width + "'" +
+        //     "height='" + this.CHART_OPTIONS.height + "'" +
+        //     "id='" + this.chartType + "'" +
+        //     "style='background:" + (this.CHART_OPTIONS.bgColor || "none") + ";-moz-tap-highlight-color: rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-khtml-user-select: none;-moz-user-select:none;-ms-user-select:none;-o-user-select:none;user-select:none;'" +
+        //     "> <\/svg>";
 
+        let vSvg = render(
+          <svg xmlns='http:\/\/www.w3.org\/2000\/svg'
+            version={'1.1'}
+            width= {this.CHART_OPTIONS.width}
+            height={this.CHART_OPTIONS.height}
+            id={this.chartType}
+            > </svg>
+        );
         this.CHART_DATA.container.innerHTML = "";
-        this.CHART_DATA.container.insertAdjacentHTML("beforeend", strSVG);
+        //this.CHART_DATA.container.insertAdjacentHTML("beforeend", vSvg);
+        this.CHART_DATA.container.appendChild(vSvg);
         this.CHART_DATA.chartSVG = document.querySelector("#" + this.CHART_OPTIONS.targetElem + " #" + this.chartType);
 
         this.CHART_DATA.svgWidth = parseInt(this.CHART_DATA.chartSVG.getAttribute("width"));
@@ -158,6 +169,7 @@ class BaseChart {
     }
 
     showErrorScreen(opts, ex, mgs) {
+        return; 
         let container = document.querySelector("#" + opts.targetElem);
         let width = container.offsetWidth;
         let height = container.offsetHeight;

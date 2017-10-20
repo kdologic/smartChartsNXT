@@ -10,7 +10,12 @@ module.exports = {
         path.resolve(__dirname, "node_modules")
       ],
       query: {
-        plugins: ['transform-runtime'],
+        plugins: [
+          ["transform-react-jsx", {
+            "pragma": "h" // default pragma is React.createElement
+          }],
+          ['transform-runtime']
+        ],
         presets: ['es2015']
       }
     }]
