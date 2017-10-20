@@ -10,12 +10,11 @@ let composer = require('gulp-uglify/composer');
 let minify = composer(uglifyEs, console);
 
 let util = require('gulp-util');
+let browserify = require('gulp-browserify');
 let rename = require('gulp-rename');
-
-let webpack = require("webpack-stream");
-let webpackConfig = require('./webpack.config.js');
-
 let pkg = require('./package.json');
+
+
 let srcDir = './src/';
 let buildDir = './public/';
 let testDir = './test/';
@@ -36,18 +35,20 @@ let header = `/*
  */
 
 function buildTask() {
-  return gulp.src(srcDir + 'build.core.js')
-    .pipe(webpack(webpackConfig))
-    .pipe(rename('smartChartsNXT.bundle.js'))
-    .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir))
-    .pipe(minify({}))
-    .pipe(rename('smartChartsNXT.bundle.min.js'))
-    .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir));
+    return gulp.src(srcDir + 'build.core.js')
+        .pipe(browserify({
+            insertGlobals: false
+        }))
+        .pipe(rename('smartChartsNXT.bundle.js'))
+        .pipe(insert.prepend(header))
+        .pipe(gulp.dest(buildDir))
+        .pipe(minify({}))
+        .pipe(rename('smartChartsNXT.bundle.min.js'))
+        .pipe(insert.prepend(header))
+        .pipe(gulp.dest(buildDir));
 }
 
 
 function watchTask() {
-  return gulp.watch('./src/**', ['build']);
+    return gulp.watch('./src/**', ['build']);
 }
