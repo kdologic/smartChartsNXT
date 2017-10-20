@@ -102,104 +102,104 @@ let ZoomOutBox = require("./../../components/zoomOutBox");
 class AreaChart extends CoordinateChart {
 
   constructor(opts) {
-    super("areaChart", opts);
-    let self = this;
-    this.CHART_DATA = this.util.extends({
-      chartCenter: 0,
-      maxima: 0,
-      minima: 0,
-      marginLeft: 0,
-      marginRight: 0,
-      marginTop: 0,
-      marginBottom: 0,
-      gridBoxWidth: 0,
-      gridBoxHeight: 0,
-      hScrollBoxHeight: opts.hideHorizontalScroller ? 0 : 60,
-      fullSeries: [],
-      fsScaleX: 0,
-      vLabelWidth: 70,
-      hLabelHeight: 80,
-      windowLeftIndex: 0,
-      windowRightIndex: -1,
-      longestSeries: 0,
-      series: [],
-      mouseDown: 0,
-      newDataSet: [],
-      newCatgList: [],
-      zoomOutBoxWidth: 40,
-      zoomOutBoxHeight: 40
-    }, this.CHART_DATA);
+    super(opts);
+    try {
+      let self = this;
+      this.CHART_DATA = this.util.extends({
+        chartCenter: 0,
+        maxima: 0,
+        minima: 0,
+        marginLeft: 0,
+        marginRight: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        gridBoxWidth: 0,
+        gridBoxHeight: 0,
+        hScrollBoxHeight: opts.hideHorizontalScroller ? 0 : 60,
+        fullSeries: [],
+        fsScaleX: 0,
+        vLabelWidth: 70,
+        hLabelHeight: 80,
+        windowLeftIndex: 0,
+        windowRightIndex: -1,
+        longestSeries: 0,
+        series: [],
+        mouseDown: 0,
+        newDataSet: [],
+        newCatgList: [],
+        zoomOutBoxWidth: 40,
+        zoomOutBoxHeight: 40
+      }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
-    this.CHART_CONST = this.util.extends({
-      FIX_WIDTH: 800,
-      FIX_HEIGHT: 600,
-      MIN_WIDTH: 250,
-      MIN_HEIGHT: 400,
-      hGridCount: 9
-    }, this.CHART_CONST);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+      this.CHART_CONST = this.util.extends({
+        FIX_WIDTH: 800,
+        FIX_HEIGHT: 600,
+        MIN_WIDTH: 250,
+        MIN_HEIGHT: 400,
+        hGridCount: 10
+      }, this.CHART_CONST);
 
-    this.EVENT_BINDS = {
-      onLegendClickBind: self.onLegendClick.bind(self),
-      onMouseMoveBind: self.onMouseMove.bind(self),
-      onMouseLeaveBind: self.onMouseLeave.bind(self),
-      onZoomOutBind: self.onZoomOut.bind(self),
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
-      onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
-      onLeftSliderMoveBind: self.onLeftSliderMove.bind(self),
-      onRightSliderMoveBind: self.onRightSliderMove.bind(self),
-      onHorizontalScrollBind: self.onHorizontalScroll.bind(self)
-    };
-    this.init();
+      this.EVENT_BINDS = {
+        onLegendClickBind: self.onLegendClick.bind(self),
+        onMouseMoveBind: self.onMouseMove.bind(self),
+        onMouseLeaveBind: self.onMouseLeave.bind(self),
+        onZoomOutBind: self.onZoomOut.bind(self),
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+        onHTextLabelHoverBind: self.onHTextLabelHover.bind(self),
+        onHTextLabelMouseLeaveBind: self.onHTextLabelMouseLeave.bind(self),
+        onLeftSliderMoveBind: self.onLeftSliderMove.bind(self),
+        onRightSliderMoveBind: self.onRightSliderMove.bind(self),
+        onHorizontalScrollBind: self.onHorizontalScroll.bind(self)
+      };
+      this.init();
 
-    if (this.CHART_OPTIONS.animated !== false) {
-      this.showAnimatedView();
+      if (this.CHART_OPTIONS.animated !== false) {
+        this.showAnimatedView();
+      }
+    } catch (ex) {
+      ex.errorIn = `Error in AreaChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex;
     }
   }
 
   init() {
-    try {
-      super.initBase();
-      this.initDataSet();
-      this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-      this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
-      this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
-      this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
-      this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 90;
+    super.initBase();
+    this.initDataSet();
+    this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+    this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
+    this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
+    this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
+    this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 90;
 
-      let longestSeries = 0;
-      let longSeriesLen = 0;
-      for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
+    let longestSeries = 0;
+    let longSeriesLen = 0;
+    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
 
-        if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
-          longestSeries = index;
-          longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
-        }
+      if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
+        longestSeries = index;
+        longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
       }
-      this.CHART_DATA.longestSeries = longestSeries;
+    }
+    this.CHART_DATA.longestSeries = longestSeries;
 
-      /* Will set initial zoom window */
-      if (this.CHART_OPTIONS.zoomWindow) {
-        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
-          this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex;
-        }
-        if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex > this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1) {
-          this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex;
-        } else {
-          this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
-        }
+    /* Will set initial zoom window */
+    if (this.CHART_OPTIONS.zoomWindow) {
+      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
+        this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex;
+      }
+      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex > this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1) {
+        this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex;
       } else {
         this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
       }
-
-      this.prepareChart();
-      this.tooltip.createTooltip(this);
-    } catch (ex) {
-      ex.errorIn = `Error in AreaChart with runId:${this.getRunId()}`;
-      throw ex;
+    } else {
+      this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
     }
 
+    this.prepareChart();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   initDataSet() {
@@ -295,14 +295,18 @@ class AreaChart extends CoordinateChart {
   } /*End prepareChart()*/
 
   prepareFullSeriesDataset() {
-    let scaleX = this.CHART_DATA.fsScaleX = (this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length);
-    let scaleYfull = (this.CHART_DATA.hScrollBoxHeight / this.CHART_DATA.maxima);
+    let margin = (this.CHART_DATA.hScrollBoxHeight*0.1);
+    this.CHART_DATA.fsScaleX = (this.CHART_DATA.gridBoxWidth / this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length);
+    this.CHART_DATA.maxRange = this.CHART_DATA.maxima;
+    this.CHART_DATA.minRange = this.CHART_DATA.minima > 0 ? 0 : this.CHART_DATA.minima;
+    this.CHART_DATA.fsScaleY = ((this.CHART_DATA.hScrollBoxHeight-margin) / (this.CHART_DATA.maxRange - this.CHART_DATA.minRange));
+    this.CHART_DATA.fsBaseLine = (this.CHART_DATA.maxRange*this.CHART_DATA.fsScaleY) + (margin/2);
 
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       let arrPointsSet = [];
       let dataSet = this.CHART_OPTIONS.dataSet.series[index].data;
       for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (scaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight) - (dataSet[dataCount].value * scaleYfull));
+        let p = new Point(this.CHART_DATA.marginLeft + (dataCount * this.CHART_DATA.fsScaleX) + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine ) - (dataSet[dataCount].value * this.CHART_DATA.fsScaleY));
         arrPointsSet.push(p);
       }
       this.CHART_DATA.fullSeries.push(arrPointsSet);
@@ -330,7 +334,7 @@ class AreaChart extends CoordinateChart {
     }
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxHeight + this.CHART_DATA.hLabelHeight), "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine), "L", this.CHART_DATA.marginLeft + (this.CHART_DATA.fsScaleX / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight + this.CHART_DATA.fsBaseLine), "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='fLine_" + index + "' stroke='#000' fill='none' d='" + line.join(" ") + "' stroke-width='1' opacity='0.6'></path>";
@@ -366,7 +370,6 @@ class AreaChart extends CoordinateChart {
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
     this.CHART_DATA.minima = Math.min.apply(null, minSet);
-    this.CHART_DATA.maxima = this.round(this.CHART_DATA.maxima);
 
     //fire Event afterParseData
     let afterParseDataEvent = new this.event.Event("afterParseData", {
@@ -390,15 +393,19 @@ class AreaChart extends CoordinateChart {
       return void 0;
     }
 
+    let minLabelVal = this.vLabel.interval * Math.floor((this.vLabel.minVal > 0 ? 0 : this.vLabel.minVal) / this.vLabel.interval);
+    let maxLabelVal = minLabelVal + ((this.CHART_CONST.hGridCount-1) * this.vLabel.interval);
+    
     let interval = scaleX || (this.CHART_DATA.gridBoxWidth / (dataSet.length));
-    let scaleY = (this.CHART_DATA.gridBoxHeight / this.CHART_DATA.maxima);
+    let scaleY = (this.CHART_DATA.gridBoxHeight / (maxLabelVal-minLabelVal));
+    let baseLine = maxLabelVal * scaleY ;
     let arrPointsSet = [];
     let strSeries = "";
 
     /* ploting actual points */
     strSeries = "<g id='series_actual_" + index + "' class='series' pointer-events='none' >";
     for (let dataCount = 0; dataCount < dataSet.length; dataCount++) {
-      let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) - (dataSet[dataCount].value * scaleY));
+      let p = new Point(this.CHART_DATA.marginLeft + (dataCount * scaleX) + (interval / 2), (this.CHART_DATA.marginTop + baseLine) - (dataSet[dataCount].value * scaleY));
       d.push(!dataCount ? "M" : "L");
       d.push(p.x);
       d.push(p.y);
@@ -441,7 +448,7 @@ class AreaChart extends CoordinateChart {
     line.push.apply(line, ["L", arrPointsSet[arrPointsSet.length - 1].x, arrPointsSet[arrPointsSet.length - 1].y]);
 
     area.push.apply(area, line);
-    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight, "L", this.CHART_DATA.marginLeft + (interval / 2), this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight, "Z"];
+    d = ["L", arrPointsSet[arrPointsSet.length - 1].x, this.CHART_DATA.marginTop + baseLine, "L", this.CHART_DATA.marginLeft + (interval / 2), this.CHART_DATA.marginTop + baseLine, "Z"];
     area.push.apply(area, d);
 
     strSeries += "<path id='area_" + index + "' stroke='none' fill='" + fill + "' d='" + area.join(" ") + "' stroke-width='1' opacity='" + areaOpacity + "'></path>";
@@ -732,7 +739,7 @@ class AreaChart extends CoordinateChart {
       this.CHART_DATA.marginLeft,
       this.CHART_DATA.marginTop,
       this.CHART_DATA.maxima,
-      0,
+      this.CHART_DATA.minima,
       this.CHART_DATA.vLabelWidth,
       this.CHART_DATA.gridHeight,
       this.CHART_CONST.hGridCount,

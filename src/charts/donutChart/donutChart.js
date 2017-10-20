@@ -53,80 +53,85 @@ let Point = require("./../../core/point");
 
 class DonutChart extends SlicedChart {
   constructor(opts) {
-    super("donutChart", opts);
-    let self = this;
-    this.CHART_DATA = this.util.extends({
-      scaleX: 0,
-      scaleY: 0,
-      svgCenter: 0,
-      donutCenter: 0,
-      uniqueDataSet: [],
-      totalValue: 0,
-      donutWidth: 160,
-      donutHeight: 160,
-      innerWidth: 80,
-      innerHeight: 80,
-      donutSet: [],
-      dragStartAngle: 0,
-      dragEndPoint: null,
-      mouseDown: 0,
-      mouseDrag: 0,
-      donutWithTextSpan: 0,
-      maxTextLen: 0
-    }, this.CHART_DATA);
+    super(opts);
+    try {
+      let self = this;
+      this.CHART_DATA = this.util.extends({
+        scaleX: 0,
+        scaleY: 0,
+        svgCenter: 0,
+        donutCenter: 0,
+        uniqueDataSet: [],
+        totalValue: 0,
+        donutWidth: 160,
+        donutHeight: 160,
+        innerWidth: 80,
+        innerHeight: 80,
+        offsetWidth: 20, // distance of text label from left and right side 
+        offsetHeight: 80, // distance of text label from top and bottom side 
+        donutSet: [],
+        dragStartAngle: 0,
+        dragEndPoint: null,
+        mouseDown: 0,
+        mouseDrag: 0,
+        donutWithTextSpan: 0,
+        maxTextLen: 0
+      }, this.CHART_DATA);
 
-    this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
 
-    this.CHART_CONST = this.util.extends({
-      FIX_WIDTH: 800,
-      FIX_HEIGHT: 600,
-      MIN_WIDTH: 300,
-      MIN_HEIGHT: 400
-    }, this.CHART_CONST);
+      this.CHART_CONST = this.util.extends({
+        FIX_WIDTH: 800,
+        FIX_HEIGHT: 600,
+        MIN_WIDTH: 300,
+        MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
+      }, this.CHART_CONST);
 
-    this.EVENT_BINDS = {
-      onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      onDonutClickBind: self.onDonutClick.bind(self),
-      onLegendHoverBind: self.onLegendHover.bind(self),
-      onLegendLeaveBind: self.onLegendLeave.bind(self),
-      onLegendClickBind: self.onLegendClick.bind(self)
-    };
+      this.EVENT_BINDS = {
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+        onDonutClickBind: self.onDonutClick.bind(self),
+        onLegendHoverBind: self.onLegendHover.bind(self),
+        onLegendLeaveBind: self.onLegendLeave.bind(self),
+        onLegendClickBind: self.onLegendClick.bind(self)
+      };
 
-    this.init();
-    if (this.CHART_OPTIONS.animated !== false) {
-      this.showAnimatedView();
+      this.init();
+      if (this.CHART_OPTIONS.animated !== false) {
+        this.showAnimatedView();
+      }
+    } catch (ex) {
+      ex.errorIn = `Error in DonutChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex;
     }
   }
 
   init() {
-    try {
-      super.initBase();
-      this.initDataSet();
-      if (this.CHART_OPTIONS.showLegend) {
-        if (this.CHART_OPTIONS.width <= 480) {
-          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
-        } else {
-          this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 40 / 100;
-          this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min((this.CHART_OPTIONS.width * 7 / 10) / 2, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-        }
-      } else {
-        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, this.CHART_OPTIONS.height) * 20 / 100;
-        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, this.CHART_OPTIONS.height) * 10 / 100;
-      }
+    super.initBase();
+    this.initDataSet();
 
-      if (this.CHART_OPTIONS.showLegend) {
-        this.CHART_DATA.donutCenter = new Point((this.CHART_DATA.svgWidth * 7 / 10) / 2, this.CHART_DATA.svgCenter.y + 50);
+    if (this.CHART_OPTIONS.showLegend) {
+      if (this.CHART_OPTIONS.width <= 480) {
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+      } else if (this.CHART_OPTIONS.width <= 680) {
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
       } else {
-        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+        this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+        this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 20 / 100;
+        this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
       }
-
-      this.prepareChart();
-      this.tooltip.createTooltip(this);
-    } catch (ex) {
-      ex.errorIn = `Error in DonutChart with runId:${this.getRunId()}`;
-      throw ex;
+    } else {
+      this.CHART_DATA.donutWidth = this.CHART_DATA.donutHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+      this.CHART_DATA.innerWidth = this.CHART_DATA.innerHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 10 / 100;
+      this.CHART_DATA.donutCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
+    this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.donutWidth - 10, this.CHART_DATA.offsetHeight);
+    this.prepareChart();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   initDataSet() {
@@ -181,11 +186,13 @@ class DonutChart extends SlicedChart {
         });
       });
       this.legendBox.createLegends(this, "legendContainer", {
-        left: self.CHART_DATA.donutCenter.x + self.CHART_DATA.donutWithTextSpan,
-        top: self.CHART_DATA.donutCenter.y - self.CHART_DATA.donutHeight - 50,
+        left: 10,
+        top: self.CHART_DATA.donutCenter.y + (self.CHART_DATA.donutHeight) + self.CHART_DATA.offsetHeight + 20,
+        width: self.CHART_DATA.width - this.left,
         legendSet: lSet,
-        type: "vertical",
-        border: true
+        type: "horizontal",
+        border: false,
+        background: "#eee"
       });
     }
     this.bindEvents();
@@ -199,7 +206,7 @@ class DonutChart extends SlicedChart {
     let strSVG = "";
     strSVG += "  <rect class='donut" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
     strSVG += "  <text class='donut" + index + "' id='txtDonutGrpDonut" + index + "' fill='#717171' font-family='Lato' >";
-    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>"; 
+    strSVG += "  <tspan class='donut" + index + "' id='txtDonut" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
     strSVG += "  <path class='donut" + index + "' id='donutHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
     strSVG += "  <path class='donut" + index + "'  id='upperArcDonut" + index + "'  fill='" + color + "' stroke='#eee' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
     strSVG += "  <path class='donut" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
@@ -367,7 +374,7 @@ class DonutChart extends SlicedChart {
             }
             let donutHover = this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex);
             let donutHoverPath;
-            let hoverWidth = Math.round(this.CHART_DATA.innerWidth * 30 / 100);
+            let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
             hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
             hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
             if (donutData.slicedOut) {
@@ -378,14 +385,14 @@ class DonutChart extends SlicedChart {
               donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
             }
             donutHover.setAttribute("d", donutHoverPath.d);
-            donutHover.style["fill-opacity"] = 0.4; 
+            donutHover.style["fill-opacity"] = 0.4;
           }
         }, false);
 
         upperArcDonut.addEventListener("mouseleave", (e) => {
           let elemId = e.target.getAttribute("class");
           let donutIndex = elemId.substring("donut".length);
-          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
+          this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0;
           this.tooltip.hide();
         }, false);
 
@@ -440,17 +447,21 @@ class DonutChart extends SlicedChart {
       if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
         shiftedCentre = this.CHART_DATA.donutCenter;
       }
+      let sPoint = this.geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, donutData.midAngle), donutData.midAngle);
+      let ePoint = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.offsetWidth, this.CHART_DATA.donutHeight + this.CHART_DATA.offsetHeight, donutData.midAngle), donutData.midAngle);
+      ePoint.x += (donutData.midAngle > 180 ? -shiftIndex : shiftIndex);
+      let lPath = ["M", sPoint.x, sPoint.y, "L", ePoint.x, ePoint.y];
+      lPath.push("l", (donutData.midAngle > 180 ? -5 : 5), 0);
+      this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + index).setAttribute("d", lPath.join(" "));
 
       let upperArcDonut = this.CHART_DATA.chartSVG.querySelector("#upperArcDonut" + index);
       upperArcDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
-      let txtDonut = this.CHART_DATA.chartSVG.querySelector("#txtDonutGrpDonut" + index);
-      txtDonut.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
 
-      let pathToLegend = this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + index);
-      pathToLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+      let txtDonut = this.CHART_DATA.chartSVG.querySelector("#txtDonutGrpDonut" + index);
+      txtDonut.setAttribute("transform", "translate(" + (donutData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
 
       let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + index);
-      colorLegend.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.donutCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.donutCenter.y) + ")");
+      colorLegend.setAttribute("transform", "translate(" + (donutData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
 
       shiftIndex = sliceOut ? shiftIndex - 1 : shiftIndex + 1;
       if ((!sliceOut && shiftIndex === 15) || (sliceOut && shiftIndex === -1)) {
@@ -463,7 +474,7 @@ class DonutChart extends SlicedChart {
     let donutIndex = e.legendIndex;
     let donutData = this.CHART_DATA.donutSet[donutIndex];
     let donutHover = this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex);
-    let hoverWidth = Math.round(this.CHART_DATA.innerWidth * 30 / 100);
+    let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
     hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
     hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
     let donutHoverPath;
@@ -475,12 +486,12 @@ class DonutChart extends SlicedChart {
       donutHoverPath = this.describeDonutArc(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.CHART_DATA.donutWidth + hoverWidth, this.CHART_DATA.donutHeight + hoverWidth, this.CHART_DATA.innerWidth + hoverWidth, this.CHART_DATA.innerHeight + hoverWidth, donutData.upperArcPath.startAngle, donutData.upperArcPath.endAngle, 0);
     }
     donutHover.setAttribute("d", donutHoverPath.d);
-    donutHover.style["fill-opacity"] = 0.4; 
+    donutHover.style["fill-opacity"] = 0.4;
   }
 
   onLegendLeave(e) {
     let donutIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0; 
+    this.CHART_DATA.chartSVG.querySelector("#donutHover" + donutIndex).style["fill-opacity"] = 0;
   }
 
   onLegendClick(e) {
@@ -555,70 +566,49 @@ class DonutChart extends SlicedChart {
     txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 100);
 
     let maxOverFlow = this.calcMaxOverflow(0);
-    for (let donutIndex = 0; donutIndex < this.CHART_DATA.donutSet.length; donutIndex++) {
+    let reduceFontSizeBy = 0;
+    switch (true) {
+      case maxOverFlow >= 10 && maxOverFlow < 15:
+        reduceFontSizeBy = 3;
+        break;
+      case maxOverFlow >= 15 && maxOverFlow < 20:
+        reduceFontSizeBy = 4;
+        break;
+      case maxOverFlow >= 20 && maxOverFlow < 25:
+        reduceFontSizeBy = 5;
+        break;
+      case maxOverFlow >= 25:
+        reduceFontSizeBy = 6;
+        break;
+    }
+
+    for (let donutIndex in this.CHART_DATA.uniqueDataSet) {
       let donutData = this.CHART_DATA.donutSet[donutIndex];
-      let textPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), donutData.midAngle), donutData.midAngle);
-      let txtBoundingRect = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getBoundingClientRect();
-      let txtLen = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getComputedTextLength();
-      let newTextPos = new Point(textPos.x, textPos.y);
-      if (donutData.midAngle > 180) {
-        newTextPos.x -= txtLen;
-      }
-
-      let otrTextPos;
-      if ((donutData.midAngle > 90 && donutData.midAngle <= 180) || (donutData.midAngle > 270 && donutData.midAngle <= 360)) {
-        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle), this.CHART_DATA.donutSet[Math.abs(donutIndex - 1)].midAngle);
-      } else if ((donutData.midAngle > 0 && donutData.midAngle <= 90) || (donutData.midAngle > 180 && donutData.midAngle <= 270)) {
-        otrTextPos = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutHeight + this.CHART_DATA.innerWidth - (maxOverFlow / 2), this.CHART_DATA.donutSet[(donutIndex + 1) % this.CHART_DATA.donutSet.length].midAngle), this.CHART_DATA.donutSet[(donutIndex + 1) % this.CHART_DATA.donutSet.length].midAngle);
-      }
-
-      if (Math.abs(otrTextPos.y - newTextPos.y) < 50) {
-        if (donutData.midAngle > 90 && donutData.midAngle < 270) {
-          newTextPos.y = (otrTextPos.y + 50);
-        } else {
-          newTextPos.y = (otrTextPos.y - 50);
-        }
-      }
-
+      let sPoint = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, donutData.midAngle), donutData.midAngle);
+      let ePoint = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth + this.CHART_DATA.offsetWidth, this.CHART_DATA.donutHeight + this.CHART_DATA.offsetHeight, donutData.midAngle), donutData.midAngle);
       let txtDonut = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex);
-      txtDonut.setAttribute("x", newTextPos.x);
-      txtDonut.setAttribute("y", newTextPos.y);
-      if (maxOverFlow > 0) {
-        txtDonut.setAttribute("font-size", 12);
-        let newTxtLen = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getComputedTextLength();
-        txtBoundingRect = this.CHART_DATA.chartSVG.querySelector("#txtDonut" + donutIndex).getBoundingClientRect();
-        if (donutData.midAngle > 180) {
-          textPos.x -= (txtLen - newTxtLen);
-        }
-        txtLen = newTxtLen;
-      }
+      txtDonut.setAttribute("font-size", Number(txtDonut.getAttribute("font-size")) - reduceFontSizeBy);
 
-      let indent = Math.round(this.CHART_DATA.innerWidth * 20 / 100);
-      indent = (indent > 15) ? 15 : indent;
-      indent = (indent < 5) ? 5 : indent;
+      let txtBoundingRect = txtDonut.getBoundingClientRect();
+      let txtLen = txtDonut.getComputedTextLength();
+
+      let lPath = ["M", sPoint.x, sPoint.y, "L", ePoint.x, ePoint.y];
+      lPath.push("l", (donutData.midAngle > 180 ? -5 : 5), 0);
+
+      let textStartPos = new Point(ePoint.x + (donutData.midAngle > 180 ? -(10 + txtLen) : 10), ePoint.y + 5);
+
+      txtDonut.setAttribute("x", textStartPos.x);
+      txtDonut.setAttribute("y", textStartPos.y);
 
       let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + donutIndex);
-      colorLegend.setAttribute("x", newTextPos.x);
-      colorLegend.setAttribute("y", newTextPos.y + (txtBoundingRect.height / 2));
+      colorLegend.setAttribute("x", textStartPos.x);
+      colorLegend.setAttribute("y", textStartPos.y + (txtBoundingRect.height / 6));
       colorLegend.setAttribute("width", txtLen);
-      colorLegend.setAttribute("height", indent / 2);
+      colorLegend.setAttribute("height", 2);
       if (maxOverFlow > 0) {
         colorLegend.style.display = "none";
       }
-
-      let sPoint = this.geom.polarToCartesian(this.CHART_DATA.donutCenter.x, this.CHART_DATA.donutCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.donutWidth, this.CHART_DATA.donutHeight, donutData.midAngle), donutData.midAngle);
-      let lPath;
-      if (donutData.midAngle > 180) {
-        lPath = ["M", textPos.x + 5, newTextPos.y];
-        lPath.push("L", textPos.x + indent + 5, newTextPos.y);
-        lPath.push("L", sPoint.x, sPoint.y);
-      } else {
-        lPath = ["M", textPos.x - 5, newTextPos.y];
-        lPath.push("L", textPos.x - indent - 5, newTextPos.y);
-        lPath.push("L", sPoint.x, sPoint.y);
-      }
-      let pathToLegend = this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + donutIndex);
-      pathToLegend.setAttribute("d", lPath.join(" "));
+      this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + donutIndex).setAttribute("d", lPath.join(" "));
     }
   } /*End resetTextPos()*/
 

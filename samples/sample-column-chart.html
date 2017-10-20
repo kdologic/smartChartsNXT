@@ -6,7 +6,8 @@
   <script>
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var columnChart = new SmartChartsNXT.ColumnChart({
+        var columnChart = new SmartChartsNXT.Chart({
+          "type":"ColumnChart",
           "title": "Sales Report",
           "subTitle": "Report for the year, 2016",
           "targetElem": "chartContainer",

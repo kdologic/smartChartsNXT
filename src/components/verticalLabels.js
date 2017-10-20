@@ -13,30 +13,32 @@ class VerticalLabels {
     constructor() {}
 
     createVerticalLabel(objChart, targetElem, posX, posY, maxVal, minVal, maxWidth, gridHeight, labelCount, labelPrefix) {
-        this.objChart = objChart; 
-        this.targetElem = targetElem; 
+        this.objChart = objChart;
+        this.targetElem = targetElem;
         this.chartSVG = this.objChart.CHART_DATA.chartSVG;
         this.vLabelContainer = this.chartSVG.querySelector("#" + targetElem);
-        this.posX = posX; 
+        this.posX = posX;
         this.posY = posY;
-        this.maxVal = maxVal; 
-        this.minVal = minVal; 
-        this.maxWidth = maxWidth; 
-        this.gridHeight = gridHeight; 
-        this.labelCount = labelCount; 
-        this.labelPrefix = labelPrefix; 
-       
-        let interval = (maxVal) / (labelCount - 1);
+        this.maxVal = maxVal;
+        this.minVal = minVal;
+        this.maxWidth = maxWidth;
+        this.gridHeight = gridHeight;
+        this.labelCount = labelCount;
+        this.labelPrefix = labelPrefix;
+
+        this.interval = this.getInterval(this.maxVal, this.minVal, this.labelCount);
+        let minLabelVal = this.interval * Math.floor((this.minVal > 0 ? 0 : this.minVal) / this.interval);
+
         let strText = "<g id='vTextLabel'>";
-        for (let gridCount = labelCount - 1, i = 0; gridCount >= 0; gridCount--) {
-            let value = (i++ * interval);
+        for (let gridCount = this.labelCount - 1, i = 0; gridCount >= 0; gridCount--) {
+            let value = minLabelVal + (i++ * this.interval);
             value = this.formatTextValue(value);
-            strText += "<text font-family='Lato' fill='black'><tspan x='" + (posX - maxWidth) + "' y='" + (posY + (gridCount * gridHeight) + 5) + "' font-size='12' >" + (labelPrefix ? labelPrefix : "") + value + "<\/tspan></text>";
-            let d = ["M", posX, posY + (gridCount * gridHeight), "L", (posX - 5), posY + (gridCount * gridHeight)];
+            strText += "<text font-family='Lato' fill='black'><tspan x='" + (this.posX - maxWidth) + "' y='" + (this.posY + (gridCount * this.gridHeight) + 5) + "' font-size='12' >" + (this.labelPrefix ? this.labelPrefix : "") + value + "<\/tspan></text>";
+            let d = ["M", this.posX, this.posY + (gridCount * this.gridHeight), "L", (this.posX - 5), this.posY + (gridCount * this.gridHeight)];
             strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
         }
         strText += "</g>";
-        this.vLabelContainer.innerHTML = strText; 
+        this.vLabelContainer.innerHTML = strText;
         this.adjustFontSize();
     } /*End createVerticalLabel()*/
 
@@ -56,14 +58,24 @@ class VerticalLabels {
     }
 
     formatTextValue(value) {
-        if (Number(value) >= 100000) {
+        if (Math.abs(Number(value)) >= 100000) {
             return (Number(value) / 100000).toFixed(2) + " M";
-        } else if (value >= 1000) {
+        } else if (Math.abs(Number(value)) >= 1000) {
             return (Number(value) / 1000).toFixed(2) + " K";
         } else {
             return Number(value).toFixed(2);
         }
     }
+
+    getInterval(maxVal, minVal, intervalCount) {
+        minVal = minVal > 0 ? 0 : minVal;
+        maxVal = maxVal < 0 ? 0 :maxVal;
+        let tempInterval = (maxVal - minVal) / (intervalCount - 2);
+        let digitBase10 = Math.pow(10,Math.round(tempInterval).toString().length-1);
+        let nearestNum = Math.ceil(tempInterval/digitBase10)*digitBase10;
+        return nearestNum; 
+    }
+
 }
 
 module.exports = VerticalLabels;

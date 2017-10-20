@@ -25,11 +25,16 @@ gulp.task('build', buildTask);
 gulp.task('watch', watchTask);
 gulp.task('default', ['build', 'watch']);
 
-let header = `/*
-* smartChartsNXT v${pkg.version}
+let header = `/** 
+* SmartChartsNXT
+* http://www.smartcharts.cf
+* Version:${pkg.version}
+* 
+* Copyright 2017 Kausik Dey
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
-*/\n\n`;
+*/
+`;
 
 /*
  * Generate a build based on the source file
@@ -46,7 +51,6 @@ function buildTask() {
     .pipe(insert.prepend(header))
     .pipe(gulp.dest(buildDir));
 }
-
 
 function watchTask() {
   return gulp.watch('./src/**', ['build']);

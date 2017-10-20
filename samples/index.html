@@ -3,7 +3,6 @@
 <head>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <style>
-    
     h2 {
       font: 400 40px/1.5 Helvetica, Verdana, sans-serif;
       margin: 0;
@@ -46,23 +45,23 @@
     function loadCharts() {
 
       SmartChartsNXT.ready(function () {
-        var lineChart = new SmartChartsNXT.LineChart(dDef1);
-        var areaChart = new SmartChartsNXT.AreaChart(dDef2);
-        var columnChart = new SmartChartsNXT.ColumnChart(dDef3);
-        var stepChart = new SmartChartsNXT.StepChart(dDef4);
+        let lineChart = new SmartChartsNXT.Chart(dDef1);
+        let areaChart = new SmartChartsNXT.Chart(dDef2);
+        let columnChart = new SmartChartsNXT.Chart(dDef3);
+        let stepChart = new SmartChartsNXT.Chart(dDef4);
+        let pieChart = new SmartChartsNXT.Chart(dDef5);
+        let donutChart = new SmartChartsNXT.Chart(dDef6);
       });
     }
 
-    var reloadCount = 0;
-
     function refresh() {
-      for (var i = 0; i < dDef1.dataSet.series.length; i++) {
+      for (let i = 0; i < dDef1.dataSet.series.length; i++) {
         dDef1.dataSet.series[i].data = generateData(5, (i + 1) * 10, 500);
       }
-      for (var i = 0; i < dDef2.dataSet.series.length; i++) {
+      for (let i = 0; i < dDef2.dataSet.series.length; i++) {
         dDef2.dataSet.series[i].data = generateData(5, (i + 1) * 10, 500);
       }
-      for (var i = 0; i < dDef4.dataSet.series.length; i++) {
+      for (let i = 0; i < dDef4.dataSet.series.length; i++) {
         dDef4.dataSet.series[i].data = generateData(5, (i + 1) * 10, 500);
       }
       loadCharts();
@@ -79,21 +78,25 @@
   <div>
     <h2>Chart List</h2>
     <ul>
-      <li><a href="./areaChart/test_html_area_chart.html">Area Chart</a></li>
-      <li><a href="./areaChart/test_html_Multiarea_chart.html">Multi Area Chart</a></li>
-      <li><a href="./lineChart/test_html_line_chart.html">Line Chart</a></li>
-      <li><a href="./lineChart/test_html_multi_line_chart.html">Multi Line Chart</a></li>
-      <li><a href="./stepChart/test_html_step_chart.html">Step Chart</a></li>
-      <li><a href="./stepChart/test_html_multi_series_step_chart.html">Multi Line Step Chart</a></li>
+      <li><a href="./sample-area-chart.html">Area Chart</a></li>
+      <li><a href="./sample-multi-area-chart.html">Multi Area Chart</a></li>
+      <li><a href="./sample-line-chart.html">Line Chart</a></li>
+      <li><a href="./sample-multi-line-chart.html">Multi Line Chart</a></li>
+      <li><a href="./sample-step-chart.html">Step Chart</a></li>
+      <li><a href="./sample-multi-series-step-chart.html">Multi Line Step Chart</a></li>
+      <li><a href="./sample-pie-chart-2d.html">Pie Chart</a></li>
+      <li><a href="./sample-donut-chart-with-legend.html">Donut Chart</a></li>
     </ul>
   </div>
   <div>
-    <button id='btnRefresh' onclick='refresh();' name="refresh" value="Refresh" type="button">Refresh</button>
-    
+    <!-- <button id='btnRefresh' onclick='refresh();' name="refresh" value="Refresh" type="button">Refresh</button> -->
+
     <div id='areaChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
     <div id='lineChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
     <div id='columnChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
     <div id='stepChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
+    <div id='pieChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
+    <div id='donutChart' style="margin:20px;width:40%; height:50%;display:inline-block;"> </div>
   </div>
 
 </body>
@@ -102,11 +105,11 @@
 
 <script>
   function generateData(x, y, count) {
-    var dataSet = [];
-    for (var i = 0; i < count; i++) {
-      var newDate = new Date();
+    let dataSet = [];
+    for (let i = 0; i < count; i++) {
+      let newDate = new Date();
       newDate.setDate(newDate.getDate() + i);
-      var datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
+      let datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
       dataSet.push({
         label: newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
         value: datum
@@ -114,7 +117,8 @@
     }
     return dataSet;
   }
-  var dDef1 = {
+  let dDef1 = {
+    "type": "LineChart",
     "title": "Line Chart",
     "subTitle": "Demo series",
     "targetElem": "lineChart",
@@ -165,14 +169,15 @@
     }
   };
 
-  var dDef2 = {
+  let dDef2 = {
+    "type": "AreaChart",
     "title": "Area Chart",
     "subTitle": "Demo series",
     "targetElem": "areaChart",
     "canvasBorder": false,
     "bgColor": "none",
     "animated": false,
-    "showLegend":true,
+    "showLegend": true,
     "toolTip": {
       "content": '<table>' +
         '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
@@ -216,7 +221,8 @@
       "rightIndex": 300
     }
   };
-  var dDef3 = {
+  let dDef3 = {
+    "type": "ColumnChart",
     "title": "Column Chart",
     "subTitle": "Report for the year, 2016",
     "targetElem": "columnChart",
@@ -286,7 +292,8 @@
     }
   }
 
-  var dDef4 = {
+  let dDef4 = {
+    "type": "StepChart",
     "title": "Step Chart",
     "subTitle": "Report for the year, 2016",
     "targetElem": "stepChart",
@@ -321,5 +328,75 @@
       leftIndex: 10,
       rightIndex: 20
     }
+  };
+
+  let dDef5 = {
+    "type": "PieChart",
+    "title": "Pie Chart",
+    "outline": 2,
+    "canvasBorder": false,
+    "subTitle": "As of Q1, 2016",
+    "targetElem": "pieChart",
+    "bgColor": "white",
+    "showLegend": true,
+    "animated": true,
+    "dataSet": [{
+        "label": "Chrome",
+        "value": "72.6",
+        "color": "#F44336"
+      },
+      {
+        "label": "IE",
+        "value": "5.7"
+      },
+      {
+        "label": "Safari",
+        "value": "3.6"
+      },
+      {
+        "label": "Firefox",
+        "value": "16.91",
+        "color": "#FFC107",
+        "slicedOut": false
+      },
+      {
+        "label": "Opera",
+        "value": "1.2"
+      }
+    ]
+  };
+
+  let dDef6 = {
+    "type": "DonutChart",
+    "title": "Donut Chart",
+    "outline": 2,
+    "canvasBorder": false,
+    "subTitle": "As of Q1, 2016",
+    "targetElem": "donutChart",
+    "bgColor": "white",
+    "showLegend": true,
+    "dataSet": [{
+        "label": "Chrome",
+        "value": "72.6",
+        "color": "#F44336"
+      },
+      {
+        "label": "IE",
+        "value": "5.7"
+      },
+      {
+        "label": "Safari",
+        "value": "3.6"
+      },
+      {
+        "label": "Firefox",
+        "value": "16.9",
+        "color": "#FFC107"
+      },
+      {
+        "label": "Opera",
+        "value": "1.2"
+      }
+    ]
   };
 </script>

@@ -5,22 +5,34 @@
 
   <script>
     function generateData(x, y, count) {
-      var dataSet = [];
-      for (var i = 0; i < count; i++) {
-        var newDate = new Date();
+      let dataSet = [];
+      for (let i = 0; i < count; i++) {
+        let newDate = new Date();
         newDate.setDate(newDate.getDate() + i);
-        var datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
+        //let datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
+        let datum = sRand(x, y);
         dataSet.push({
           label: newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
-          value: datum
+          //value: (i % 2 === 0 ? 1 : -1) * datum
+          value: datum.toFixed(2)
+          //value : (i-30)
         });
       }
       return dataSet;
     }
-
+    //let seed = Math.round(Math.random()*10);
+    let seed = 6; 
+    function sRand(min, max) {
+			min = min === undefined ? 0 : min;
+			max = max === undefined ? 1 : max;
+			seed = (seed * 9301 + 49297) % 233280;
+			return min + (seed / 233280) * (max - min);
+    }
+    
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        var areaChart = new SmartChartsNXT.AreaChart({
+        let areaChart = new SmartChartsNXT.Chart({
+          "type": "AreaChart",
           "title": "Area Chart",
           "subTitle": "Single series",
           "targetElem": "chartContainer",
@@ -49,32 +61,32 @@
               "markerRadius": 3.5,
               "smoothedLine": false,
               "areaOpacity": "0.4",
-              "data": generateData(10, 50, 45)
+              "data": generateData(10, 200, 45)
             }]
           },
-          events: {
-            afterRender: function (e) {
-              console.log(e, "event after rendering complete");
-            },
-            onInit: function (e) {
-              console.log(e, "event onInit");
-            },
-            afterParseData: function (e) {
-              console.log(e, "event afterParseData");
-            },
-            beforeSave: function (e) {
-              console.log(e, "event beforeSave");
-            },
-            afterSave: function (e) {
-              console.log(e, "event afterSave");
-            },
-            beforePrint: function (e) {
-              console.log(e, "event beforePrint");
-            },
-            afterPrint: function (e) {
-              console.log(e, "event afterPrint");
-            }
-          },
+          // events: {
+          //   afterRender: function (e) {
+          //     console.log(e, "event after rendering complete");
+          //   },
+          //   onInit: function (e) {
+          //     console.log(e, "event onInit");
+          //   },
+          //   afterParseData: function (e) {
+          //     console.log(e, "event afterParseData");
+          //   },
+          //   beforeSave: function (e) {
+          //     console.log(e, "event beforeSave");
+          //   },
+          //   afterSave: function (e) {
+          //     console.log(e, "event afterSave");
+          //   },
+          //   beforePrint: function (e) {
+          //     console.log(e, "event beforePrint");
+          //   },
+          //   afterPrint: function (e) {
+          //     console.log(e, "event afterPrint");
+          //   }
+          // },
           zoomWindow: {
             "leftIndex": 10,
             "rightIndex": 20
