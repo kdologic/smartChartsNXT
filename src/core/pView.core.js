@@ -31,18 +31,31 @@ document.body.appendChild(
 
 */
 
+"use strict";
+
+/*
+ * pView.core.js
+ * @CreatedOn: 20-Sep-2017
+ * @Author: SmartChartsNXT
+ * @Version: 1.0.0
+ * @Description:This will create a View Engin Aka - pView, for render JSX virtual DOM to a real DOM. 
+ * "virtual DOM"? It's just JSON - each "VNode" is an object with 3 properties. nodeName, Attributes, children
+ * The whole process (JSX -> VDOM -> DOM) in one step
+ */
 
 /** Render Virtual DOM to the real DOM */
 function render(vnode) {
-  var svgNS = "http://www.w3.org/2000/svg";  
+  var svgNS = "http://www.w3.org/2000/svg";
   if (typeof vnode === 'string') {
     return document.createTextNode(vnode);
   }
-  //let n = document.createElement(vnode.nodeName);
-  let n = document.createElementNS(svgNS, vnode.nodeName);
-  Object.keys(vnode.attributes || {}).forEach(k => n.setAttribute(k, vnode.attributes[k]));
-  (vnode.children || []).forEach(c => n.appendChild(render(c)));
-  return n;
+  let node = document.createElementNS(svgNS, vnode.nodeName);
+  Object.keys(vnode.attributes || {}).forEach(key => {
+    let attrVal = key === 'style' ? parseStyleProps(vnode.attributes[key]) : vnode.attributes[key];
+    node.setAttribute(key, attrVal);
+  });
+  (vnode.children || []).forEach(c => node.appendChild(render(c)));
+  return node;
 }
 
 /** hyperscript generator, gets called by transpiled JSX */
@@ -55,4 +68,16 @@ function h(nodeName, attributes, ...args) {
   };
 }
 
-export {render, h}; 
+/** convert style JSON into string, gets called by transpiled JSX */
+function parseStyleProps(objStyle) {
+  if (typeof objStyle === "string") {
+    return objStyle;
+  }
+  let sArr = [];
+  Object.keys(objStyle).forEach(key => {
+    sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]}`);
+  });
+  return sArr.join(';');
+}
+
+export { render, h }; 
