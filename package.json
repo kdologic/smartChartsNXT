@@ -39,5 +39,7 @@
     "webpack": "^3.7.1",
     "webpack-stream": "^4.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "babel-runtime": "^6.26.0"
+  }
 }

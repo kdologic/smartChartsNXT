@@ -11,10 +11,10 @@ module.exports = {
       ],
       query: {
         plugins: [
+          ['transform-runtime'],
           ["transform-react-jsx", {
             "pragma": "h" // default pragma is React.createElement
-          }],
-          ['transform-runtime']
+          }]
         ],
         presets: ['es2015']
       }

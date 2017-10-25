@@ -19,6 +19,7 @@ import UtilCore from './../core/util.core';
 import { h, Component} from "./../viewEngin/pview";
 
 import Timer from "./../viewEngin/timer"; 
+import Mytitle from "./../viewEngin/mytitle"; 
 
 /** ------- Requireing all chart types ------- */
 const CHART_MODULES = {
@@ -157,6 +158,7 @@ class BaseChart extends Component {
           OUserSelect: 'none',
           UserSelect: 'none'
         }} >
+        <Mytitle />
         <Timer x='50' y='100' />
 
         { this.CHART_OPTIONS.canvasBorder ? 
@@ -167,7 +169,7 @@ class BaseChart extends Component {
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
             style={{ fill: '#fff', strokWidth: 1, stroke: '#717171' }}
-            events= {{click:this.onRectClick.bind(this)}} /><Timer x='50' y='200' />
+            events= {{click:this.onRectClick.bind(this)}} />
         </g> : null}
       </svg>
     );

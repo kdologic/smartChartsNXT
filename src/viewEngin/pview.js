@@ -33,7 +33,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
     component.self.componentDidMount.call(component.self);
   }
 
-  console.log(component); 
+  //console.log(component); 
 
   return component;
 }
@@ -123,7 +123,7 @@ function parseEventsProps(events, node) {
 
 /** This will return true if instace is es6 class type  */
 function isNativeClass(instance, Constructor) {
-  return instance instanceof Constructor;
+  return !!instance.toString().match(/_classCallCheck/);
 }
 
 /** This will return false if two node are exual other return true */
