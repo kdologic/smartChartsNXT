@@ -233,4 +233,4 @@ class UtilCore {
     }/*End assemble()*/
 }
 
-module.exports = UtilCore;
+export default new UtilCore();
