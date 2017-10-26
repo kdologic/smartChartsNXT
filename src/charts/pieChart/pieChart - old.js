@@ -43,26 +43,18 @@
     let pieChart = new SmartChartsNXT.PieChart(settings);
   });
  */
-
 "use strict";
 
-//let BaseChart = require("./baseChart");
-let Tooltip = require("./../../components/tooltip");
-let LegendBox = require("./../../components/legendBox");
-//let SlicedChart = require("./../../base/slicedChart");
+let SlicedChart = require("./../../base/slicedChart");
 let Point = require("./../../core/point");
 
-import { Component } from "./../../viewEngin/pview";
-import UtilCore from './../../core/util.core';
+class PieChart extends SlicedChart {
 
-class PieChart extends Component {
-  constructor(props) {
-    super(props);
+  constructor(opts) {
+    super(opts);
     try {
       let self = this;
-      this.tooltip = new Tooltip(); 
-      this.legendBox = new LegendBox(); 
-      this.CHART_DATA = UtilCore.extends({
+      this.CHART_DATA = this.util.extends({
         scaleX: 0,
         scaleY: 0,
         svgCenter: 0,
@@ -80,38 +72,38 @@ class PieChart extends Component {
         mouseDrag: 0,
         pieWithTextSpan: 0,
         maxTextLen: 0
-      }, this.props.chartdata);
+      }, this.CHART_DATA);
 
-      this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartoptions);
+      this.CHART_OPTIONS = this.util.extends({}, this.CHART_OPTIONS);
 
-      this.CHART_CONST = UtilCore.extends({
+      this.CHART_CONST = this.util.extends({
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600,
         MIN_WIDTH: 300,
-        MIN_HEIGHT: self.props.chartoptions.showLegend ? 500 : 400
-      }, this.props.chartconst);
+        MIN_HEIGHT: self.CHART_OPTIONS.showLegend ? 500 : 400
+      }, this.CHART_CONST);
 
-      // this.EVENT_BINDS = {
-      //   onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      //   onPieClickBind: self.onPieClick.bind(self),
-      //   onLegendHoverBind: self.onLegendHover.bind(self),
-      //   onLegendLeaveBind: self.onLegendLeave.bind(self),
-      //   onLegendClickBind: self.onLegendClick.bind(self)
-      // };
+      this.EVENT_BINDS = {
+        onWindowResizeBind: self.onWindowResize.bind(self, self.init),
+        onPieClickBind: self.onPieClick.bind(self),
+        onLegendHoverBind: self.onLegendHover.bind(self),
+        onLegendLeaveBind: self.onLegendLeave.bind(self),
+        onLegendClickBind: self.onLegendClick.bind(self)
+      };
 
       this.init();
       if (this.CHART_OPTIONS.animated !== false) {
         this.showAnimatedView();
       }
     } catch (ex) {
-      ex.errorIn = `Error in PieChart with runId:${this.props.runid}`;
-      //this.showErrorScreen(opts, ex, ex.errorIn);
+      ex.errorIn = `Error in PieChart with runId:${this.getRunId()}`;
+      this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex;
     }
   }
 
   init() {
-    //super.initBase();
+    super.initBase();
     this.initDataSet();
 
     if (this.CHART_OPTIONS.showLegend) {
@@ -130,8 +122,8 @@ class PieChart extends Component {
       this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
     this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
-    //this.prepareChart();
-    //this.tooltip.createTooltip(this);
+    this.prepareChart();
+    this.tooltip.createTooltip(this);
   } /*End init()*/
 
   initDataSet() {
@@ -139,41 +131,26 @@ class PieChart extends Component {
     this.CHART_DATA.uniqueDataSet = [];
     this.CHART_DATA.totalValue = 0;
   } /*End initDataSet()*/
-          //<tspan class='txt-title' x={(100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width)} y={(50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height)} font-size='25'>{ this.CHART_OPTIONS.title }</tspan>
-
-  render() {
-    return (
-    <g>
-      <g>
-        <text class='txt-title-grp' fill='#717171' font-family='Lato' >
-          <tspan text-anchor="middle" class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)} font-size='4vw'>{this.CHART_OPTIONS.title}</tspan>
-          <tspan text-anchor="middle" class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)} font-size='2vw'>{this.CHART_OPTIONS.subTitle}</tspan>
-        </text>
-      </g>
-      <g class='legend-container'>
-      </g>
-    </g> );
-  }
 
   prepareChart() {
     let self = this;
     this.prepareDataSet();
-    // let strSVG = "";
-    // strSVG += "<g>";
-    // strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
-    // strSVG += "    <tspan id='txtTitle' x='" + (100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width) + "' y='" + (50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height) + "' font-size='25'><\/tspan>";
-    // strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='15'><\/tspan>";
-    // strSVG += "  <\/text>";
-    // strSVG += "<\/g>";
+    let strSVG = "";
+    strSVG += "<g>";
+    strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
+    strSVG += "    <tspan id='txtTitle' x='" + (100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width) + "' y='" + (50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height) + "' font-size='25'><\/tspan>";
+    strSVG += "    <tspan id='txtSubtitle' x='125' y='80' font-size='15'><\/tspan>";
+    strSVG += "  <\/text>";
+    strSVG += "<\/g>";
 
-    // strSVG += "<g id='legendContainer'>";
-    // strSVG += "<\/g>";
+    strSVG += "<g id='legendContainer'>";
+    strSVG += "<\/g>";
 
-    // this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
+    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
 
     /*Set Title of chart*/
-    //this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
-    //this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
+    this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
+    this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
 
     let startAngle;
     let endAngle = 0;
@@ -356,7 +333,7 @@ class PieChart extends Component {
             }
             let row1 = this.CHART_DATA.uniqueDataSet[pieIndex].label + ", " + this.CHART_DATA.uniqueDataSet[pieIndex].value;
             let row2 = this.CHART_DATA.uniqueDataSet[pieIndex].percent.toFixed(2) + "%";
-            let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : UtilCore.getColor(pieIndex));
+            let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : this.util.getColor(pieIndex));
             this.tooltip.updateTip(mousePos, color, row1, row2);
           }
         }, false);
@@ -669,7 +646,7 @@ class PieChart extends Component {
         this.CHART_DATA.uniqueDataSet.push({
           "label": self.CHART_OPTIONS.dataSet[i].label,
           "value": self.CHART_OPTIONS.dataSet[i].value,
-          "color": this.CHART_OPTIONS.dataSet[i].color || UtilCore.getColor(i),
+          "color": this.CHART_OPTIONS.dataSet[i].color || this.util.getColor(i),
           "slicedOut": self.CHART_OPTIONS.dataSet[i].slicedOut || false
         });
       } else {

@@ -8,7 +8,7 @@
 
 "use strict";
 
-import { mountTo, h } from "./../viewEngin/pview";
+import { mountTo } from "./../viewEngin/pview";
 import BaseChart from './../base/baseChart';
 import UtilCore from './../core/util.core';
 

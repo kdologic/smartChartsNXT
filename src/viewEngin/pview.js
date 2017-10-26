@@ -11,6 +11,7 @@
  * The whole process (JSX -> VDOM -> DOM) in one step
  */
 
+ 
 /** RenderComponent will render virtual DOM Into Real DOM and add append element into the real DOM */
 function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
   if (!node || !targetNode) {
@@ -32,7 +33,6 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
   if (component.self && typeof component.self.componentDidMount === 'function') {
     component.self.componentDidMount.call(component.self);
   }
-
   //console.log(component); 
 
   return component;
@@ -92,13 +92,14 @@ function renderDOM(vnode) {
 }
 
 /** hyperscript generator, gets called by transpiled JSX */
-function h(nodeName, attributes, ...args) {
+window.__h__ = window.__h__ || 
+function(nodeName, attributes, ...args) {
   args = args.filter((v) => {
     return !!v;
   });
   let children = args.length ? [].concat(...args) : null;
   return { nodeName, attributes, children };
-}
+};
 
 /** convert style JSON into string, gets called by transpiled JSX */
 function parseStyleProps(objStyle) {
@@ -119,7 +120,6 @@ function parseEventsProps(events, node) {
   });
   return Object.keys(events).join();
 }
-
 
 /** This will return true if instace is es6 class type  */
 function isNativeClass(instance, Constructor) {
@@ -162,8 +162,6 @@ class Component {
       mountTo({ node: this.refs.node, children: this.refs.children, self: this }, parent, 'rnode', oldNode);
     }
   }
-
-
 }
 
-export { mountTo, h,  Component };
+export { mountTo, Component };

@@ -16,17 +16,16 @@ let Point = require("./../core/point");
 let transformer = require("./../core/transformer");
 
 import UtilCore from './../core/util.core';
-import { h, Component} from "./../viewEngin/pview";
+import { Component } from "./../viewEngin/pview";
 
-import Timer from "./../viewEngin/timer"; 
-import Mytitle from "./../viewEngin/mytitle"; 
-
+//import Timer from "./../viewEngin/timer"; 
+//import Mytitle from "./../viewEngin/mytitle"; 
 /** ------- Requireing all chart types ------- */
 const CHART_MODULES = {
     //AreaChart: require("./../charts/areaChart/areaChart")
     // LineChart: require("./../charts/lineChart/lineChart"),
     // StepChart: require("./../charts/stepChart/stepChart"),
-    // PieChart: require("./../charts/pieChart/pieChart"),
+    PieChart: require("./../charts/pieChart/pieChart")
     // DonutChart: require("./../charts/donutChart/donutChart"),
     // ColumnChart: require("./../charts/columnChart/columnChart")
 };
@@ -39,14 +38,13 @@ class BaseChart extends Component {
     try {
       super(props); 
       let opts = this.props.opts; 
-      // this.util = new UtilCore();
       // this.geom = new GeomCore();
       // this.event = new EventCore();
       // this.ui = new UiCore();
-      // this.transformer = transformer;
-      // this.plugins = {
-      //   animator: animator
-      // };
+      this.transformer = transformer;
+      this.plugins = {
+        animator: animator
+      };
       this.chartType = this.props.opts.type;
       this.CHART_OPTIONS = UtilCore.extends(opts, {});
       this.CHART_DATA = {};
@@ -58,22 +56,15 @@ class BaseChart extends Component {
       };
       this.runId = this.props.runid; 
       this.timeOut = null;
-      // this.state = {
-      //   timeNow: new Date().toTimeString().split(' ')[0]
-      // };
-      
       this.initBase(); 
     } catch (ex) {
-      ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
-      throw ex;
+        ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
+        throw ex;
     }
   }
 
   initBase() {
     let self = this;
-    //this.CHART_DATA.container = document.querySelector("#" + this.CHART_OPTIONS.targetElem);
-    //this.CHART_DATA.container.setAttribute("runId", this.runId);
-
     this.CHART_OPTIONS.width = this.CHART_CONST.FIX_WIDTH = this.props.width || this.CHART_CONST.FIX_WIDTH;
     this.CHART_OPTIONS.height = this.CHART_CONST.FIX_HEIGHT = this.props.height || this.CHART_CONST.FIX_HEIGHT;
 
@@ -84,12 +75,12 @@ class BaseChart extends Component {
       this.CHART_OPTIONS.height = this.CHART_CONST.FIX_HEIGHT = this.CHART_CONST.MIN_HEIGHT;
     }
 
-    if (this.CHART_OPTIONS.events && typeof this.CHART_OPTIONS.events === "object") {
-      for (let e in this.CHART_OPTIONS.events) {
-        this.event.off(e, this.CHART_OPTIONS.events[e]);
-        this.event.on(e, this.CHART_OPTIONS.events[e]);
-      }
-    }
+    // if (this.CHART_OPTIONS.events && typeof this.CHART_OPTIONS.events === "object") {
+    //   for (let e in this.CHART_OPTIONS.events) {
+    //     this.event.off(e, this.CHART_OPTIONS.events[e]);
+    //     this.event.on(e, this.CHART_OPTIONS.events[e]);
+    //   }
+    // }
 
     this.CHART_DATA.scaleX = this.CHART_CONST.FIX_WIDTH - this.CHART_OPTIONS.width;
     this.CHART_DATA.scaleY = this.CHART_CONST.FIX_HEIGHT - this.CHART_OPTIONS.height;
@@ -141,6 +132,7 @@ class BaseChart extends Component {
   // }
 
   render() {
+    let Chart = CHART_MODULES[this.chartType];
     return (
       <svg xmlns='http:\/\/www.w3.org\/2000\/svg'
         version={'1.1'}
@@ -158,9 +150,6 @@ class BaseChart extends Component {
           OUserSelect: 'none',
           UserSelect: 'none'
         }} >
-        <Mytitle />
-        <Timer x='50' y='100' />
-
         { this.CHART_OPTIONS.canvasBorder ? 
         <g>
           <rect x='0' y='0'
@@ -169,18 +158,25 @@ class BaseChart extends Component {
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
             style={{ fill: '#fff', strokWidth: 1, stroke: '#717171' }}
-            events= {{click:this.onRectClick.bind(this)}} />
+            //events= {{click:this.onRectClick.bind(this)}} 
+          />
         </g> : null}
+        <Chart opts={this.props.opts} 
+          runid={this.runId}
+          chartoptions={this.CHART_OPTIONS} 
+          chartdata={this.CHART_DATA} 
+          chartconst={this.CHART_CONST} 
+        /> 
       </svg>
     );
   }
 
-  onRectClick(e) {
-    console.log("inside on rect click");
-    this.setState({
-      timeNow: new Date().toTimeString().split(' ')[0]
-    });
-  }
+  // onRectClick(e) {
+  //   console.log("inside on rect click");
+  //   this.setState({
+  //     timeNow: new Date().toTimeString().split(' ')[0]
+  //   });
+  // }
 
   // render() {
   //   //fire event afterRender

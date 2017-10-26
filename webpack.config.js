@@ -1,8 +1,9 @@
+"use strict";
+
 const path = require("path");
-let webpack = require("webpack");
+const webpack = require("webpack");
 
 module.exports = {
-  //entry: [ 'babel-polyfill'],// './src/main'],
   module: {
     loaders: [{
       loader: "babel-loader",
@@ -13,7 +14,7 @@ module.exports = {
         plugins: [
           ['transform-runtime'],
           ["transform-react-jsx", {
-            "pragma": "h" // default pragma is React.createElement
+            "pragma": "__h__" // change default pragma React.createElement into __h__
           }]
         ],
         presets: ['es2015']
