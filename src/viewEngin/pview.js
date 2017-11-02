@@ -138,12 +138,12 @@ class Component {
     this.refs = {};
   }
 
-  setState(stateParam) {
-    if (typeof stateParam === 'function') {
-      stateParams = stateParam.call(this.state);
+  setState(stateParams) {
+    if (typeof stateParams === 'function') {
+      stateParams = stateParams.call(this, this.state);
     }
-    Object.keys(stateParam).forEach(key => {
-      this.state[key] = stateParam[key];
+    Object.keys(stateParams).forEach(key => {
+      this.state[key] = stateParams[key];
     });
     this.update();
   }

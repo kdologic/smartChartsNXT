@@ -15,14 +15,19 @@ import UtilCore from './../core/util.core';
 class Chart {
   constructor(opts){
     try {
-      let targetNode = document.querySelector("#" + opts.targetElem);
+      const targetNode = document.querySelector("#" + opts.targetElem);
       const runId = UtilCore.uuidv4();
       targetNode.setAttribute("runId", runId);
-      let chartNode = mountTo(<BaseChart opts={opts} runid={runId} width={targetNode.offsetWidth} height={targetNode.offsetHeight} />, targetNode);
+      this.renderChart(opts, runId, targetNode); 
+      window.addEventListener('resize', this.renderChart.bind(this, opts, runId, targetNode), false); 
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 
     }
+  }
+
+  renderChart(opts, runId, targetNode) {
+    this.chartNode = mountTo(<BaseChart opts={opts} runid={runId} width={targetNode.offsetWidth} height={targetNode.offsetHeight} />, targetNode);
   }
 
   showErrorScreen(opts, ex, mgs) {

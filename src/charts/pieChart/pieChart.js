@@ -5,6 +5,8 @@
  * @Author:SmartChartsNXT
  * @description:This will generate a 2d Pie chart. Using SVG 1.1 elements and HTML 5 standard. 
  * @JSFiddle:
+ * 
+ * 
  * @Sample caller code:
  * let settings = {
       "title":"Browser Statistics and Trends",
@@ -40,7 +42,7 @@
       ]
     }; 
   SmartChartsNXT.ready(function(){
-    let pieChart = new SmartChartsNXT.PieChart(settings);
+    let pieChart = new SmartChartsNXT.Chart(settings);
   });
  */
 
@@ -50,10 +52,11 @@
 let Tooltip = require("./../../components/tooltip");
 let LegendBox = require("./../../components/legendBox");
 //let SlicedChart = require("./../../base/slicedChart");
-let Point = require("./../../core/point");
 
+import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import UtilCore from './../../core/util.core';
+import PieSet from './pieSet'; 
 
 class PieChart extends Component {
   constructor(props) {
@@ -100,9 +103,9 @@ class PieChart extends Component {
       // };
 
       this.init();
-      if (this.CHART_OPTIONS.animated !== false) {
-        this.showAnimatedView();
-      }
+      // if (this.CHART_OPTIONS.animated !== false) {
+      //   this.showAnimatedView();
+      // }
     } catch (ex) {
       ex.errorIn = `Error in PieChart with runId:${this.props.runid}`;
       //this.showErrorScreen(opts, ex, ex.errorIn);
@@ -130,6 +133,7 @@ class PieChart extends Component {
       this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
     this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
+    this.prepareDataSet(); 
     //this.prepareChart();
     //this.tooltip.createTooltip(this);
   } /*End init()*/
@@ -139,25 +143,30 @@ class PieChart extends Component {
     this.CHART_DATA.uniqueDataSet = [];
     this.CHART_DATA.totalValue = 0;
   } /*End initDataSet()*/
-          //<tspan class='txt-title' x={(100 / this.CHART_CONST.FIX_WIDTH * this.CHART_OPTIONS.width)} y={(50 / this.CHART_CONST.FIX_HEIGHT * this.CHART_OPTIONS.height)} font-size='25'>{ this.CHART_OPTIONS.title }</tspan>
 
   render() {
     return (
-    <g>
       <g>
-        <text class='txt-title-grp' fill='#717171' font-family='Lato' >
-          <tspan text-anchor="middle" class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)} font-size='4vw'>{this.CHART_OPTIONS.title}</tspan>
-          <tspan text-anchor="middle" class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)} font-size='2vw'>{this.CHART_OPTIONS.subTitle}</tspan>
-        </text>
-      </g>
-      <g class='legend-container'>
-      </g>
-    </g> );
+        <g>
+          <text class='txt-title-grp' fill='#717171' font-family='Lato' >
+            <tspan text-anchor='middle' class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)} font-size='4vw'>{this.CHART_OPTIONS.title}</tspan>
+            <tspan text-anchor='middle' class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)} font-size='2vw'>{this.CHART_OPTIONS.subTitle}</tspan>
+          </text>
+        </g>
+        <g class='legend-container'></g>
+        <PieSet dataSet={this.CHART_DATA.uniqueDataSet} 
+        cx ={this.CHART_DATA.pieCenter.x} cy={this.CHART_DATA.pieCenter.y} 
+        width={this.CHART_DATA.pieWidth} height={this.CHART_DATA.pieHeight} 
+        offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
+        strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} />
+      </g> 
+    );
   }
 
+  
   prepareChart() {
     let self = this;
-    this.prepareDataSet();
+    //this.prepareDataSet();
     // let strSVG = "";
     // strSVG += "<g>";
     // strSVG += "  <text id='txtTitleGrp' fill='#717171' font-family='Lato' >";
@@ -175,15 +184,15 @@ class PieChart extends Component {
     //this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").textContent = this.CHART_OPTIONS.title;
     //this.CHART_DATA.chartSVG.querySelector("#txtSubtitle").textContent = this.CHART_OPTIONS.subTitle;
 
-    let startAngle;
-    let endAngle = 0;
-    let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
-    for (let i in this.CHART_DATA.uniqueDataSet) {
-      startAngle = endAngle;
-      endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 3.6);
-      let color = this.CHART_DATA.uniqueDataSet[i].color;
-      this.createPie(startAngle, endAngle, color, strokeColor, i);
-    }
+    // let startAngle;
+    // let endAngle = 0;
+    // let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
+    // for (let i in this.CHART_DATA.uniqueDataSet) {
+    //   startAngle = endAngle;
+    //   endAngle += (this.CHART_DATA.uniqueDataSet[i].percent * 3.6);
+    //   let color = this.CHART_DATA.uniqueDataSet[i].color;
+    //   this.createPie(startAngle, endAngle, color, strokeColor, i);
+    // }
 
     this.resetTextPos();
     if (this.CHART_OPTIONS.showLegend) {
@@ -212,33 +221,33 @@ class PieChart extends Component {
   } /*End prepareChart()*/
 
 
-  createPie(startAngle, endAngle, color, strokeColor, index) {
-    let percent = this.CHART_DATA.uniqueDataSet[index].percent.toFixed(2);
-    let strSVG = "";
-    strSVG += "  <rect class='pie" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
-    strSVG += "  <text class='pie" + index + "' id='txtPieGrpPie" + index + "' fill='#717171' font-family='Lato' >";
-    strSVG += "  <tspan class='pie" + index + "' id='txtPie" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
-    strSVG += "  <path class='pie" + index + "' id='pieHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
-    strSVG += "  <path class='pie" + index + "'  id='upperArcPie" + index + "'  fill='" + color + "' stroke='" + strokeColor + "' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
-    strSVG += "  <path class='pie" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
+  // createPie(startAngle, endAngle, color, strokeColor, index) {
+  //   let percent = this.CHART_DATA.uniqueDataSet[index].percent.toFixed(2);
+  //   let strSVG = "";
+  //   strSVG += "  <rect class='pie" + index + "' id='colorLegend" + index + "' width='300' height='100' fill='" + color + "' style='opacity:1;' />";
+  //   strSVG += "  <text class='pie" + index + "' id='txtPieGrpPie" + index + "' fill='#717171' font-family='Lato' >";
+  //   strSVG += "  <tspan class='pie" + index + "' id='txtPie" + index + "' x='100' y='50' font-size='16'><\/tspan></text>";
+  //   strSVG += "  <path class='pie" + index + "' id='pieHover" + index + "'  fill='" + color + "' stroke='none' stroke-width='0' style='transition: fill-opacity 0.3s linear; fill-opacity:0; cursor:pointer;' \/> ";
+  //   strSVG += "  <path class='pie" + index + "'  id='upperArcPie" + index + "'  fill='" + color + "' stroke='" + strokeColor + "' stroke-width='" + (this.CHART_OPTIONS.outline || 1) + "' style='cursor:pointer;' \/>";
+  //   strSVG += "  <path class='pie" + index + "' id='pathToLegend" + index + "'  fill='none' stroke='#555' stroke-width='1' \/>";
 
-    this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
-    let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, startAngle, endAngle, 0);
-    this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + index).setAttribute("d", upperArcPath.d);
-    let textLabel = this.CHART_DATA.uniqueDataSet[index]["label"];
-    this.CHART_DATA.chartSVG.querySelector("#txtPie" + index).textContent = (textLabel + " [" + percent + "%]");
+  //   this.CHART_DATA.chartSVG.insertAdjacentHTML("beforeend", strSVG);
+  //   let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, startAngle, endAngle, 0);
+  //   this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + index).setAttribute("d", upperArcPath.d);
+  //   let textLabel = this.CHART_DATA.uniqueDataSet[index]["label"];
+  //   this.CHART_DATA.chartSVG.querySelector("#txtPie" + index).textContent = (textLabel + " [" + percent + "%]");
 
-    let midAngle = (startAngle + endAngle) / 2;
-    let self = this;
-    let pie = {
-      "id": "pie" + index,
-      "upperArcPath": upperArcPath,
-      "midAngle": midAngle,
-      "slicedOut": self.CHART_DATA.uniqueDataSet[index].slicedOut,
-      "percent": percent
-    };
-    this.CHART_DATA.pieSet.push(pie);
-  } /*End createPie()*/
+  //   let midAngle = (startAngle + endAngle) / 2;
+  //   let self = this;
+  //   let pie = {
+  //     "id": "pie" + index,
+  //     "upperArcPath": upperArcPath,
+  //     "midAngle": midAngle,
+  //     "slicedOut": self.CHART_DATA.uniqueDataSet[index].slicedOut,
+  //     "percent": percent
+  //   };
+  //   this.CHART_DATA.pieSet.push(pie);
+  // } /*End createPie()*/
 
   describePieArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag) {
     let fullArc = false;
@@ -279,7 +288,7 @@ class PieChart extends Component {
       "endAngle": endAngle
     };
 
-  } /*End describePieArc()*/
+  } 
 
   bindEvents() {
     let mouseDownPos;
@@ -443,44 +452,44 @@ class PieChart extends Component {
       ex.errorIn = `Error in PieChart events with runId:${this.getRunId()}`;
       throw ex;
     }
-  } /*End bindEvents()*/
+  } 
 
-  onPieClick(e) {
-    if (this.CHART_DATA.uniqueDataSet.length <= 1) {
-      return void 0;
-    }
-    let index = e.pieIndex;
-    let pieData = this.CHART_DATA.pieSet[index];
-    let sliceOut = this.CHART_DATA.pieSet[index].slicedOut;
-    this.CHART_DATA.pieSet[index].slicedOut = !sliceOut;
-    let shiftIndex = sliceOut ? 15 : 1;
-    let shiftInterval = setInterval(() => {
-      let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
-      if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
-        shiftedCentre = this.CHART_DATA.pieCenter;
-      }
-      let sPoint = this.geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, pieData.midAngle), pieData.midAngle);
-      let ePoint = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth, this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight, pieData.midAngle), pieData.midAngle);
-      ePoint.x += (pieData.midAngle > 180 ? -shiftIndex : shiftIndex);
-      let lPath = ["M", sPoint.x, sPoint.y, "L", ePoint.x, ePoint.y];
-      lPath.push("l", (pieData.midAngle > 180 ? -5 : 5), 0);
-      this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + index).setAttribute("d", lPath.join(" "));
+  // onPieClick(e) {
+  //   if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+  //     return void 0;
+  //   }
+  //   let index = e.pieIndex;
+  //   let pieData = this.CHART_DATA.pieSet[index];
+  //   let sliceOut = this.CHART_DATA.pieSet[index].slicedOut;
+  //   this.CHART_DATA.pieSet[index].slicedOut = !sliceOut;
+  //   let shiftIndex = sliceOut ? 15 : 1;
+  //   let shiftInterval = setInterval(() => {
+  //     let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
+  //     if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
+  //       shiftedCentre = this.CHART_DATA.pieCenter;
+  //     }
+  //     let sPoint = this.geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, pieData.midAngle), pieData.midAngle);
+  //     let ePoint = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(this.CHART_DATA.pieWidth + this.CHART_DATA.offsetWidth, this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight, pieData.midAngle), pieData.midAngle);
+  //     ePoint.x += (pieData.midAngle > 180 ? -shiftIndex : shiftIndex);
+  //     let lPath = ["M", sPoint.x, sPoint.y, "L", ePoint.x, ePoint.y];
+  //     lPath.push("l", (pieData.midAngle > 180 ? -5 : 5), 0);
+  //     this.CHART_DATA.chartSVG.querySelector("#pathToLegend" + index).setAttribute("d", lPath.join(" "));
 
-      let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + index);
-      upperArcPie.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.pieCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.pieCenter.y) + ")");
+  //     let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + index);
+  //     upperArcPie.setAttribute("transform", "translate(" + (shiftedCentre.x - this.CHART_DATA.pieCenter.x) + "," + (shiftedCentre.y - this.CHART_DATA.pieCenter.y) + ")");
 
-      let txtPie = this.CHART_DATA.chartSVG.querySelector("#txtPieGrpPie" + index);
-      txtPie.setAttribute("transform", "translate(" + (pieData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
+  //     let txtPie = this.CHART_DATA.chartSVG.querySelector("#txtPieGrpPie" + index);
+  //     txtPie.setAttribute("transform", "translate(" + (pieData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
 
-      let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + index);
-      colorLegend.setAttribute("transform", "translate(" + (pieData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
+  //     let colorLegend = this.CHART_DATA.chartSVG.querySelector("#colorLegend" + index);
+  //     colorLegend.setAttribute("transform", "translate(" + (pieData.midAngle > 180 ? -shiftIndex : shiftIndex) + ", 0)");
 
-      shiftIndex = sliceOut ? shiftIndex - 1 : shiftIndex + 1;
-      if ((!sliceOut && shiftIndex === 15) || (sliceOut && shiftIndex === -1)) {
-        clearInterval(shiftInterval);
-      }
-    }, 10);
-  } /*End onPieClick()*/
+  //     shiftIndex = sliceOut ? shiftIndex - 1 : shiftIndex + 1;
+  //     if ((!sliceOut && shiftIndex === 15) || (sliceOut && shiftIndex === -1)) {
+  //       clearInterval(shiftInterval);
+  //     }
+  //   }, 10);
+  // } 
 
   onLegendHover(e) {
     let pieIndex = e.legendIndex;
@@ -554,23 +563,23 @@ class PieChart extends Component {
   } /*End rotateChart()*/
 
   resetTextPos() {
-    let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-    let txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    let txtTitleGrp = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp");
+    //let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    //let txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    //let txtTitleGrp = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp");
 
-    if (txtTitleLen > this.CHART_CONST.FIX_WIDTH) {
-      let fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
-      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
-      txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
-      fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
-      this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
-      txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
-    }
+    // if (txtTitleLen > this.CHART_CONST.FIX_WIDTH) {
+    //   let fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getAttribute("font-size");
+    //   this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").setAttribute("font-size", fontSize - 5);
+    //   txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
+    //   fontSize = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getAttribute("font-size");
+    //   this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").setAttribute("font-size", fontSize - 3);
+    //   txtSubTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtSubtitle").getComputedTextLength();
+    // }
 
-    txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
-    txtTitleGrp.querySelector("#txtTitle").setAttribute("y", 80);
-    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
-    txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 100);
+    // txtTitleGrp.querySelector("#txtTitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtTitleLen / 2)));
+    // txtTitleGrp.querySelector("#txtTitle").setAttribute("y", 80);
+    // txtTitleGrp.querySelector("#txtSubtitle").setAttribute("x", (this.CHART_DATA.svgCenter.x - (txtSubTitleLen / 2)));
+    // txtTitleGrp.querySelector("#txtSubtitle").setAttribute("y", 100);
 
     let maxOverFlow = this.calcMaxOverflow(0);
     let reduceFontSizeBy = 0;
@@ -682,11 +691,11 @@ class PieChart extends Component {
       this.CHART_DATA.uniqueDataSet[i]["percent"] = percent;
     }
 
-    //fire Event afterParseData
-    let afterParseDataEvent = new this.event.Event("afterParseData", {
-      srcElement: self
-    });
-    this.event.dispatchEvent(afterParseDataEvent);
+    // //fire Event afterParseData
+    // let afterParseDataEvent = new this.event.Event("afterParseData", {
+    //   srcElement: self
+    // });
+    // this.event.dispatchEvent(afterParseDataEvent);
   } /*End prepareDataSet()*/
 
   slicedOutOnSettings() {

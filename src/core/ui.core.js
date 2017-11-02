@@ -11,7 +11,8 @@
 
 "use strict";
 
-let Point = require("./point");
+import Point from './point';
+import Geom from './geom.core'; 
 
 class UiCore {
     constructor() {}
@@ -51,7 +52,7 @@ class UiCore {
         scaleY = scaleY || 1;
         let strSVG = "";
         strSVG += "<g id='smartCharts-menu2'>";
-        strSVG += "  <path id='smartCharts-menu-icon' d='" + chartObj.geom.describeRoundedRect(((svgCenter.x * 2) - 50 + (scaleX / 2)), (25 - (scaleY / 2)), 35, 30, 5).join(" ") + "' pointer-events='all' fill='none' stroke-width='0.5' opacity='0' stroke='#717171' style='cursor:pointer;' />";
+        strSVG += "  <path id='smartCharts-menu-icon' d='" + Geom.describeRoundedRect(((svgCenter.x * 2) - 50 + (scaleX / 2)), (25 - (scaleY / 2)), 35, 30, 5).join(" ") + "' pointer-events='all' fill='none' stroke-width='0.5' opacity='0' stroke='#717171' style='cursor:pointer;' />";
         strSVG += " <g class='vBarIcon'>";
         strSVG += "  <line  x1='" + ((svgCenter.x * 2) - 45 + (scaleX / 2)) + "' y1='" + (32 - (scaleY / 2)) + "' x2='" + ((svgCenter.x * 2) - 20 + (scaleX / 2)) + "' y2='" + (32 - (scaleY / 2)) + "' style='stroke:#333;stroke-width:1;cursor:pointer;' />";
         strSVG += "  <line  x1='" + ((svgCenter.x * 2) - 45 + (scaleX / 2)) + "' y1='" + (39 - (scaleY / 2)) + "' x2='" + ((svgCenter.x * 2) - 20 + (scaleX / 2)) + "' y2='" + (39 - (scaleY / 2)) + "' style='stroke:#333;stroke-width:1;cursor:pointer;' />";
@@ -80,7 +81,7 @@ class UiCore {
                     offSetX = 10,
                     offSetY = 20; //offSetX = ((svgCenter.x)-350+(scaleX/2)),offSetY = (25-(scaleY/2));
                 strSVG = "  <g id='smartCharts-menu-panel'>"; //(svgCenter.x*2)-50-offSetX
-                strSVG += "  <path id='smartCharts-menu-container'  stroke='#09cef3'  fill='white' d='" + chartObj.geom.describeRoundedRect(offSetX, offSetY, ((svgCenter.x * 2) - (2 * offSetX)), menuHeight, menuHeight / 2).join(" ") + "' stroke-width='1' fill-opacity='0.95'></path>";
+                strSVG += "  <path id='smartCharts-menu-container'  stroke='#09cef3'  fill='white' d='" + Geom.describeRoundedRect(offSetX, offSetY, ((svgCenter.x * 2) - (2 * offSetX)), menuHeight, menuHeight / 2).join(" ") + "' stroke-width='1' fill-opacity='0.95'></path>";
 
                 strSVG += " <rect class='main-menu-item save-as' x='" + (offSetX + 15) + "' y='" + offSetY + "' width='" + menuItemWidth + "' height='" + menuHeight + "' fill='#09cef3' stroke-width='1' stroke='none' fill-opacity='0.5' style='cursor:pointer;'/>";
                 strSVG += " <text class='main-menu-item save-as' fill='#555' x='" + (offSetX + 30) + "' y='" + (offSetY + 20) + "' font-family='Lato' style='cursor:pointer;'>Save As...</text>";
@@ -90,7 +91,7 @@ class UiCore {
 
 
                 strSVG += " <g class='main-menu-item crossIcon'> ";
-                let d = chartObj.geom.describeRoundedRect(((svgCenter.x * 2) - (2 * offSetX) - 28), offSetY + 1, 28, 28, 5);
+                let d = Geom.describeRoundedRect(((svgCenter.x * 2) - (2 * offSetX) - 28), offSetY + 1, 28, 28, 5);
                 strSVG += " <path  fill='red' d='" + d.join(" ") + "' stroke-width='1' stroke='none' fill-opacity='0.5' style='cursor:pointer;'/>";
                 strSVG += "  <line  x1='" + (((svgCenter.x * 2) - (2 * offSetX) - 25)) + "' y1='" + (offSetY + 28) + "' x2='" + ((svgCenter.x * 2) - (2 * offSetX) - 3) + "' y2='" + (offSetY + 3) + "' stroke-width='2' stroke='#be0d0d' style='cursor:pointer;' />";
                 strSVG += "  <line  x1='" + (((svgCenter.x * 2) - (2 * offSetX) - 25)) + "' y1='" + (offSetY + 3) + "' x2='" + ((svgCenter.x * 2) - (2 * offSetX) - 3) + "' y2='" + (offSetY + 28) + "' stroke-width='2' stroke='#be0d0d' style='cursor:pointer;' />";
@@ -218,7 +219,7 @@ class UiCore {
 
 
                     strSVG = "  <g id='smartCharts-saveas-submenu' class='sub-menu'>";
-                    strSVG += "  <path id='smartCharts-menu-container'  stroke='#09cef3'  fill='white' d='" + chartObj.geom.describeRoundedRect(offSetX + 15, (offSetY + menuHeight + subMenuOffsetY), (svgCenter.x <= 250 ? (menuItemWidth * 2) + 4 : (menuItemWidth * 4)), (svgCenter.x <= 250 ? (menuHeight * 3) : menuHeight), 2).join(" ") + "' stroke-width='1' fill-opacity='0.95'></path>";
+                    strSVG += "  <path id='smartCharts-menu-container'  stroke='#09cef3'  fill='white' d='" + Geom.describeRoundedRect(offSetX + 15, (offSetY + menuHeight + subMenuOffsetY), (svgCenter.x <= 250 ? (menuItemWidth * 2) + 4 : (menuItemWidth * 4)), (svgCenter.x <= 250 ? (menuHeight * 3) : menuHeight), 2).join(" ") + "' stroke-width='1' fill-opacity='0.95'></path>";
 
                     strSVG += "  <path stroke='#09cef3'  fill='#555' d='" + submenuOffsetPath.join(" ") + "' stroke-width='0' fill-opacity='0.4'></path>";
 

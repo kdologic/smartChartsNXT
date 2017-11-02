@@ -9,12 +9,12 @@
 "use strict";
 
 let UiCore = require("./../core/ui.core");
-let GeomCore = require("./../core/geom.core");
 let EventCore = require("./../core/event.core");
 let Event = require("./../core/event");
-let Point = require("./../core/point");
 let transformer = require("./../core/transformer");
 
+import Geom from './../core/geom.core'; 
+import Point from "./../core/point";
 import UtilCore from './../core/util.core';
 import { Component } from "./../viewEngin/pview";
 
@@ -108,7 +108,6 @@ class BaseChart extends Component {
     this.CHART_DATA.svgWidth = parseInt(this.CHART_OPTIONS.width);
     this.CHART_DATA.svgHeight = parseInt(this.CHART_OPTIONS.height);
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
-
     // if (this.CHART_OPTIONS.canvasBorder) {
     //   let strSVG = "<g>";
     //   strSVG += "   <rect x='0' y='0' width='" + (this.CHART_DATA.svgWidth - 1) + "' height='" + (this.CHART_DATA.svgHeight - 1) + "' shape-rendering='optimizeSpeed' style='fill:none;stroke-width:1;stroke:#717171;' \/>";
