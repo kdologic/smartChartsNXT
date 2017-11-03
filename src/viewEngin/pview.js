@@ -65,7 +65,7 @@ function renderDOM(vnode) {
     let objComp = new vnode.nodeName(vnode.attributes);
     ({ node: component.node, children: component.children } = renderDOM(objComp.getVirtualNode()));
     component.self = objComp;
-    ({ node: objComp.refs.node, children: objComp.refs.children } = component);
+    ({ node: objComp.ref.node, children: objComp.ref.children } = component);
 
   } else if (typeof vnode.nodeName === 'function') {
     ({ node: component.node, children: component.children } = renderDOM(vnode.nodeName(vnode.attributes)));
@@ -135,7 +135,7 @@ class Component {
   constructor(props) {
     this.props = props;
     this.state = {};
-    this.refs = {};
+    this.ref = {};
   }
 
   setState(stateParams) {
@@ -156,10 +156,10 @@ class Component {
     let vNodeNow = this.render();
     if (detectDiff(this.vNode, vNodeNow)) {
       this.vNode = vNodeNow;
-      let parent = this.refs.node.parentNode;
-      let oldNode = this.refs.node; 
-      ({ node: this.refs.node, children: this.refs.children } = renderDOM(this.vNode));
-      mountTo({ node: this.refs.node, children: this.refs.children, self: this }, parent, 'rnode', oldNode);
+      let parent = this.ref.node.parentNode;
+      let oldNode = this.ref.node; 
+      ({ node: this.ref.node, children: this.ref.children } = renderDOM(this.vNode));
+      mountTo({ node: this.ref.node, children: this.ref.children, self: this }, parent, 'rnode', oldNode);
     }
   }
 }

@@ -157,25 +157,16 @@ class BaseChart extends Component {
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
             style={{ fill: '#fff', strokWidth: 1, stroke: '#717171' }}
-            //events= {{click:this.onRectClick.bind(this)}} 
           />
         </g> : null}
-        <Chart opts={this.props.opts} 
-          runid={this.runId}
-          chartoptions={this.CHART_OPTIONS} 
-          chartdata={this.CHART_DATA} 
-          chartconst={this.CHART_CONST} 
+        <Chart runId={this.runId}
+          chartOptions={this.CHART_OPTIONS} 
+          chartData={this.CHART_DATA} 
+          chartConst={this.CHART_CONST} 
         /> 
       </svg>
     );
   }
-
-  // onRectClick(e) {
-  //   console.log("inside on rect click");
-  //   this.setState({
-  //     timeNow: new Date().toTimeString().split(' ')[0]
-  //   });
-  // }
 
   // render() {
   //   //fire event afterRender

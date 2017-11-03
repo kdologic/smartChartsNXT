@@ -305,4 +305,4 @@ class UiCore {
     } /*End appendWaterMark()*/
 }
 
-module.exports = UiCore;
+export default new UiCore();

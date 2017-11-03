@@ -8,13 +8,10 @@
 
 "use strict";
 
-let UiCore = require("./../core/ui.core");
-let Point = require("./../core/point");
+import Point from "./../core/point";
 
 class Tooltip {
-    constructor() {
-        this.ui = new UiCore();
-    }
+    constructor() {}
 
     createTooltip(objChart) {
         this.objChart = objChart;

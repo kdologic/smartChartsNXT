@@ -83,16 +83,16 @@ class PieChart extends Component {
         mouseDrag: 0,
         pieWithTextSpan: 0,
         maxTextLen: 0
-      }, this.props.chartdata);
+      }, this.props.chartData);
 
-      this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartoptions);
+      this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartOptions);
 
       this.CHART_CONST = UtilCore.extends({
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600,
         MIN_WIDTH: 300,
-        MIN_HEIGHT: self.props.chartoptions.showLegend ? 500 : 400
-      }, this.props.chartconst);
+        MIN_HEIGHT: self.props.chartOptions.showLegend ? 500 : 400
+      }, this.props.chartConst);
 
       // this.EVENT_BINDS = {
       //   onWindowResizeBind: self.onWindowResize.bind(self, self.init),
@@ -107,7 +107,7 @@ class PieChart extends Component {
       //   this.showAnimatedView();
       // }
     } catch (ex) {
-      ex.errorIn = `Error in PieChart with runId:${this.props.runid}`;
+      ex.errorIn = `Error in PieChart with runId:${this.props.runId}`;
       //this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex;
     }
@@ -154,11 +154,12 @@ class PieChart extends Component {
           </text>
         </g>
         <g class='legend-container'></g>
-        <PieSet dataSet={this.CHART_DATA.uniqueDataSet} 
-        cx ={this.CHART_DATA.pieCenter.x} cy={this.CHART_DATA.pieCenter.y} 
-        width={this.CHART_DATA.pieWidth} height={this.CHART_DATA.pieHeight} 
-        offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
-        strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} />
+        <PieSet dataSet={this.CHART_DATA.uniqueDataSet} rootNodeId={this.CHART_OPTIONS.targetElem}
+          cx ={this.CHART_DATA.pieCenter.x} cy={this.CHART_DATA.pieCenter.y} 
+          width={this.CHART_DATA.pieWidth} height={this.CHART_DATA.pieHeight} 
+          offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
+          strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
+        />
       </g> 
     );
   }
@@ -449,7 +450,7 @@ class PieChart extends Component {
       window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
 
     } catch (ex) {
-      ex.errorIn = `Error in PieChart events with runId:${this.getRunId()}`;
+      ex.errorIn = `Error in PieChart events with runId:${this.props.runId}`;
       throw ex;
     }
   } 
