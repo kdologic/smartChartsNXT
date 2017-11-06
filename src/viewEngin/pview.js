@@ -12,7 +12,14 @@
  */
 
  
-/** RenderComponent will render virtual DOM Into Real DOM and add append element into the real DOM */
+/** 
+ * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
+ * @param {object} node - It will be a real DOM node or Virtual node which can be mount.
+ * @param {object} targetNode - This will be the target DOM where actually mount will done.
+ * @param {string='vnode'} nodeType - This flag decide node variable having real node or virtual node ['vnode' | 'rnode'].
+ * @param {object=null} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node. 
+ * @return {object} will be the component object. 
+ * */
 function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
   if (!node || !targetNode) {
     throw new TypeError('Invalid vnode or target in render component');
@@ -33,7 +40,6 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
   if (component.self && typeof component.self.componentDidMount === 'function') {
     component.self.componentDidMount.call(component.self);
   }
-  //console.log(component); 
 
   return component;
 }

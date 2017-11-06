@@ -24,7 +24,7 @@ class PieSlice extends Component {
     this.state = {
       startAngle: this.props.startAngle, 
       endAngle: this.props.endAngle,
-      upperArcTransform: "",
+      arcTransform: "",
       legendPath: this.getLegendPath(),
       colorTransform: "",
       textTransform: ""
@@ -35,18 +35,23 @@ class PieSlice extends Component {
     let textStartPoint = this.getTextStartPoint(); 
     let colorStartPoint = this.getColorLegendStartPoint(); 
     return (
-      <g class={`pie-grp-${this.props.index}`} events={{rotatePie: this.rotatePie.bind(this)}} >
+      <g class={`pie-grp-${this.props.index}`} events={{onRotateSlice: this.rotateSlice.bind(this)}} >
         <rect class={`pie-${this.props.index} color-legend-${this.props.index}`} x={colorStartPoint.x} y={colorStartPoint.y} transform={this.state.colorTransform} width={this.colorLegendWidth} height={this.colorLegendHeight} fill={this.props.data.color} fill-opacity='1' />
         <text class={`pie-${this.props.index} txt-pie-grp-pie-${this.props.index}`} transform={this.state.textTransform} fill='#717171' font-family='Lato'>
           <tspan class={`pie-${this.props.index} txt-pie-${this.props.index}`} x={textStartPoint.x} y={textStartPoint.y} text-anchor={this.getTextAnchor()} font-size='16'>{`${this.props.data.label} [${this.props.data.percent.toFixed(2)} %]`}</tspan>
         </text>
-        <path class={`pie-${this.props.index} pie-hover-${this.props.index}`} fill={this.props.data.color} stroke='none' stroke-width='0' fill-opacity='0' style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} /> 
+        <path class={`pie-${this.props.index} pie-hover-${this.props.index}`} 
+          d={this.getArcPath(this.props.width + 10, this.props.height + 10)} transform={this.state.arcTransform} 
+          fill={this.props.data.color} stroke='none' stroke-width='0' fill-opacity='0'
+          style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} 
+        /> 
         <path class={`pie-${this.props.index} upper-arc-pie-${this.props.index}`} 
-          d={this.getUpperArcPath()} transform={this.state.upperArcTransform} fill={this.props.data.color} 
+          d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} 
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
-            mousedown:this.onMouseDown.bind(this), mouseup:this.onMouseUp.bind(this),
-            mousemove:this.onMouseMove.bind(this)
+            mousedown: this.onMouseDown.bind(this), mouseup: this.onMouseUp.bind(this),
+            mousemove: this.onMouseMove.bind(this), mouseenter: this.onMouseEnter.bind(this),
+            mouseleave: this.onMouseLeave.bind(this)
           }} 
         />
         <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} fill='none' stroke='#555' stroke-width='1' />
@@ -55,8 +60,8 @@ class PieSlice extends Component {
   }
 
 
-  getUpperArcPath() {
-    let path = Geom.describeEllipticalArc(this.props.cx, this.props.cy, this.props.width, this.props.height, this.state.startAngle || this.props.startAngle, this.state.endAngle || this.props.endAngle, 0);
+  getArcPath(width = this.props.width, height = this.props.height) {
+    let path = Geom.describeEllipticalArc(this.props.cx, this.props.cy, width, height, this.state.startAngle || this.props.startAngle, this.state.endAngle || this.props.endAngle, 0);
     return path.d;
   }
 
@@ -104,7 +109,7 @@ class PieSlice extends Component {
       ePoint.x += (this.midAngle > 180 ? -shiftIndex : shiftIndex);
 
       reState.legendPath = this.getLegendPath(sPoint, ePoint);
-      reState.upperArcTransform = `translate(${shiftedCentre.x - this.props.cx}, ${shiftedCentre.y - this.props.cy})`;
+      reState.arcTransform = `translate(${shiftedCentre.x - this.props.cx}, ${shiftedCentre.y - this.props.cy})`;
       reState.textTransform = `translate(${this.midAngle > 180 ? -shiftIndex : shiftIndex}, 0)`;
       reState.colorTransform = `translate(${this.midAngle > 180 ? -shiftIndex : shiftIndex}, 0)`;
 
@@ -120,14 +125,15 @@ class PieSlice extends Component {
     e.stopPropagation();
     this.mouseDownPos = { x: e.clientX, y: e.clientY };
     this.mouseDown = 1;
+    this.mouseDrag = 0; 
   }
 
   onMouseUp(e) {
     e.stopPropagation();
-    this.mouseDown = 0;
     if(this.mouseDrag === 0) {
       this.slideToggle(); 
     }
+    this.mouseDown = 0;
     this.mouseDrag = 0;
   }
 
@@ -165,13 +171,43 @@ class PieSlice extends Component {
     }
   }
 
-  rotatePie(e) {
-    this.midAngle = ((this.state.startAngle + this.state.endAngle) / 2) % 360;
-    this.setState({
-      startAngle: this.state.startAngle + e.detail.rotationIndex,
-      endAngle: this.state.endAngle += e.detail.rotationIndex,
-      legendPath: this.getLegendPath()
-    });
+  onMouseEnter(e) {
+    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0.4; 
+  }
+
+  onMouseLeave(e) {
+    this.mouseDown = 0; 
+    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0; 
+  }
+
+  rotateSlice(e) {
+    let mid = ((this.state.startAngle + this.state.endAngle) / 2) % 360;
+    this.midAngle = (mid < 0 ? 360 + mid : mid);
+    this.slicedOut = false; 
+    
+    this.state.startAngle = this.state.startAngle + e.detail.rotationIndex; 
+    this.state.endAngle = this.state.endAngle + e.detail.rotationIndex;
+    this.state.legendPath = this.getLegendPath(); 
+    this.state.arcTransform = this.state.colorTransform = this.state.textTransform = ''; 
+    let textStartPoint = this.getTextStartPoint(); 
+    let colorStartPoint = this.getColorLegendStartPoint(); 
+    let upperArc = this.ref.node.querySelector(`.upper-arc-pie-${this.props.index}`);
+    let colorLegend = this.ref.node.querySelector(`.color-legend-${this.props.index}`); 
+    let textPie = this.ref.node.querySelector(`.txt-pie-${this.props.index}`);
+    let pieHover = this.ref.node.querySelector(`.pie-hover-${this.props.index}`); 
+    
+    upperArc.setAttribute('d', this.getArcPath());
+    upperArc.setAttribute('transform', this.state.arcTransform); 
+    pieHover.setAttribute('d', this.getArcPath(this.props.width + 10, this.props.height + 10));
+    pieHover.setAttribute('transform', this.state.arcTransform); 
+    this.ref.node.querySelector(`.path-to-legend-${this.props.index}`).setAttribute('d', this.state.legendPath);
+    colorLegend.setAttribute('x', colorStartPoint.x);
+    colorLegend.setAttribute('y', colorStartPoint.y);
+    colorLegend.setAttribute('transform', this.state.colorTransform);
+    textPie.setAttribute('x', textStartPoint.x);
+    textPie.setAttribute('y', textStartPoint.y);
+    textPie.setAttribute('text-anchor', this.getTextAnchor());
+    textPie.parentNode.setAttribute('transform',this.state.textTransform); 
   }
 
   getAngle(point1, point2) {
