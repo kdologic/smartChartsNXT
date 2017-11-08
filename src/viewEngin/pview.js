@@ -37,8 +37,8 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
     targetNode.replaceChild(component.node, oldNode); 
   }
   
-  if (component.self && typeof component.self.componentDidMount === 'function') {
-    component.self.componentDidMount.call(component.self);
+  if(component.eventStack && component.eventStack instanceof Array){
+    component.eventStack.forEach(evt => evt());
   }
 
   return component;
@@ -52,7 +52,8 @@ function renderDOM(vnode) {
   }
   let component = {
     node: undefined,
-    children: []
+    children: [],
+    eventStack: []
   };
   if (typeof vnode.nodeName === 'string') {
     component.node = document.createElementNS(svgNS, vnode.nodeName);
@@ -69,16 +70,20 @@ function renderDOM(vnode) {
 
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) {
     let objComp = new vnode.nodeName(vnode.attributes);
-    ({ node: component.node, children: component.children } = renderDOM(objComp.getVirtualNode()));
+    let renderedComp = renderDOM(objComp.getVirtualNode());
+
+    ({ node: component.node, children: component.children } = renderedComp);
+    component.eventStack.push.apply(component.eventStack, renderedComp.eventStack);
     component.self = objComp;
-    ({ node: objComp.ref.node, children: objComp.ref.children } = component);
+    ({ node: objComp.ref.node, children: objComp.ref.children} = component);
 
   } else if (typeof vnode.nodeName === 'function') {
     ({ node: component.node, children: component.children } = renderDOM(vnode.nodeName(vnode.attributes)));
-
   } else {
     throw new TypeError('RenderDOM method accepts html node or function or class with render mothod');
   }
+
+  /* loop for childrens */
   (vnode.children || []).forEach((c) => {
     let childComp = renderDOM(c);
 
@@ -88,9 +93,11 @@ function renderDOM(vnode) {
 
     component.children.push(childComp);
     component.node.appendChild(childComp.node);
-
+    if(childComp.eventStack && childComp.eventStack instanceof Array) {
+      component.eventStack.push.apply(component.eventStack, childComp.eventStack);
+    }
     if (childComp.self && typeof childComp.self.componentDidMount === 'function') {
-      childComp.self.componentDidMount.call(childComp.self);
+      component.eventStack.push(childComp.self.componentDidMount.bind(childComp.self));
     }
   });
 
@@ -164,8 +171,9 @@ class Component {
       this.vNode = vNodeNow;
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
-      ({ node: this.ref.node, children: this.ref.children } = renderDOM(this.vNode));
-      mountTo({ node: this.ref.node, children: this.ref.children, self: this }, parent, 'rnode', oldNode);
+      let renderedComp = renderDOM(this.vNode); 
+      ({ node: this.ref.node, children: this.ref.children } = renderedComp);
+      mountTo({ node: this.ref.node, children: this.ref.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }
   }
 }

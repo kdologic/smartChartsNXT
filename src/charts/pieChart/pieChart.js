@@ -1,8 +1,9 @@
-/*
+/** 
+ * pieChart.js
  * SVG Pie Chart 2D
- * @Version:1.1.0
- * @CreatedOn:07-Jul-2016
- * @Author:SmartChartsNXT
+ * @version:1.1.0
+ * @createdOn:07-Jul-2016
+ * @author:SmartChartsNXT
  * @description:This will generate a 2d Pie chart. Using SVG 1.1 elements and HTML 5 standard. 
  * @JSFiddle:
  * 
@@ -50,12 +51,13 @@
 
 //let BaseChart = require("./baseChart");
 let Tooltip = require("./../../components/tooltip");
-let LegendBox = require("./../../components/legendBox");
+//let LegendBox = require("./../../components/legendBox");
 //let SlicedChart = require("./../../base/slicedChart");
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import UtilCore from './../../core/util.core';
+import LegendBox from './../../components/legendBox';
 import PieSet from './pieSet'; 
 
 class PieChart extends Component {
@@ -63,8 +65,7 @@ class PieChart extends Component {
     super(props);
     try {
       let self = this;
-      this.tooltip = new Tooltip(); 
-      this.legendBox = new LegendBox(); 
+      //this.tooltip = new Tooltip(); 
       this.CHART_DATA = UtilCore.extends({
         scaleX: 0,
         scaleY: 0,
@@ -93,14 +94,6 @@ class PieChart extends Component {
         MIN_WIDTH: 300,
         MIN_HEIGHT: self.props.chartOptions.showLegend ? 500 : 400
       }, this.props.chartConst);
-
-      // this.EVENT_BINDS = {
-      //   onWindowResizeBind: self.onWindowResize.bind(self, self.init),
-      //   onPieClickBind: self.onPieClick.bind(self),
-      //   onLegendHoverBind: self.onLegendHover.bind(self),
-      //   onLegendLeaveBind: self.onLegendLeave.bind(self),
-      //   onLegendClickBind: self.onLegendClick.bind(self)
-      // };
 
       this.init();
       // if (this.CHART_OPTIONS.animated !== false) {
@@ -153,7 +146,17 @@ class PieChart extends Component {
             <tspan text-anchor='middle' class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)} font-size='2vw'>{this.CHART_OPTIONS.subTitle}</tspan>
           </text>
         </g>
-        <g class='legend-container'></g>
+        <g class='legend-container'>
+          {
+            this.CHART_OPTIONS.showLegend ? 
+            <LegendBox legendSet={this.getLegendData()}
+              left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight}
+              maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee'
+              onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
+            /> 
+            : null 
+          }
+        </g>
         <PieSet dataSet={this.CHART_DATA.uniqueDataSet} rootNodeId={this.CHART_OPTIONS.targetElem}
           cx ={this.CHART_DATA.pieCenter.x} cy={this.CHART_DATA.pieCenter.y} 
           width={this.CHART_DATA.pieWidth} height={this.CHART_DATA.pieHeight} 
@@ -164,9 +167,65 @@ class PieChart extends Component {
     );
   }
 
-  
-  prepareChart() {
+  prepareDataSet() {
     let self = this;
+    for (let i in this.CHART_OPTIONS.dataSet) {
+      let found = -1;
+      for (let j in this.CHART_DATA.uniqueDataSet) {
+        if (this.CHART_OPTIONS.dataSet[i].label.toLowerCase() === this.CHART_DATA.uniqueDataSet[j].label.toLowerCase()) {
+          found = j;
+          break;
+        }
+      }
+      if (found === -1) {
+        this.CHART_DATA.uniqueDataSet.push({
+          "label": self.CHART_OPTIONS.dataSet[i].label,
+          "value": self.CHART_OPTIONS.dataSet[i].value,
+          "color": this.CHART_OPTIONS.dataSet[i].color || UtilCore.getColor(i),
+          "slicedOut": self.CHART_OPTIONS.dataSet[i].slicedOut || false
+        });
+      } else {
+        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(this.CHART_OPTIONS.dataSet[i].value) + parseFloat(this.CHART_DATA.uniqueDataSet[found].value);
+      }
+      this.CHART_DATA.totalValue += parseFloat(this.CHART_OPTIONS.dataSet[i].value);
+    }
+    for (let i in this.CHART_DATA.uniqueDataSet) {
+      let percent = 100 * parseFloat(this.CHART_DATA.uniqueDataSet[i].value) / this.CHART_DATA.totalValue;
+      this.CHART_DATA.uniqueDataSet[i]["percent"] = percent;
+    }
+
+    // //fire Event afterParseData
+    // let afterParseDataEvent = new this.event.Event("afterParseData", {
+    //   srcElement: self
+    // });
+    // this.event.dispatchEvent(afterParseDataEvent);
+  } /*End prepareDataSet()*/
+
+  getLegendData() {
+    return this.CHART_DATA.uniqueDataSet.map((data, index) => {
+      let lSet = {}; 
+      ({label:lSet.label, value:lSet.value, color:lSet.color} = data);
+      return lSet; 
+    });
+  }
+
+  onLegendHover(index) {
+    let e = new CustomEvent('sliceHover'); 
+    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+  }
+
+  onLegendLeave(index) {
+    let e = new CustomEvent('sliceLeave'); 
+    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+  }
+
+  onLegendClick(index) {
+    let e = new CustomEvent('toggleSlide'); 
+    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+  }
+  
+  //prepareChart() {
+    //let self = this;
     //this.prepareDataSet();
     // let strSVG = "";
     // strSVG += "<g>";
@@ -195,32 +254,31 @@ class PieChart extends Component {
     //   this.createPie(startAngle, endAngle, color, strokeColor, i);
     // }
 
-    this.resetTextPos();
-    if (this.CHART_OPTIONS.showLegend) {
-      let lSet = [];
-      this.CHART_DATA.uniqueDataSet.map((data, index) => {
-        lSet.push({
-          label: data.label,
-          value: data.value,
-          color: data.color
-        });
-      });
-      this.legendBox.createLegends(this, "legendContainer", {
-        left: 10,
-        top: self.CHART_DATA.pieCenter.y + (self.CHART_DATA.pieHeight) + self.CHART_DATA.offsetHeight + 20,
-        width: self.CHART_DATA.width - this.left,
-        legendSet: lSet,
-        type: "horizontal",
-        border: false,
-        background: "#eee"
-      });
-    }
-    this.bindEvents();
-    this.slicedOutOnSettings();
-    this.render();
+    //this.resetTextPos();
+    // if (this.CHART_OPTIONS.showLegend) {
+    //   let lSet = [];
+    //   this.CHART_DATA.uniqueDataSet.map((data, index) => {
+    //     lSet.push({
+    //       label: data.label,
+    //       value: data.value,
+    //       color: data.color
+    //     });
+    //   });
+    //   this.legendBox.createLegends(this, "legendContainer", {
+    //     left: 10,
+    //     top: self.CHART_DATA.pieCenter.y + (self.CHART_DATA.pieHeight) + self.CHART_DATA.offsetHeight + 20,
+    //     width: self.CHART_DATA.width - this.left,
+    //     legendSet: lSet,
+    //     type: "horizontal",
+    //     border: false,
+    //     background: "#eee"
+    //   });
+    // }
+    //this.bindEvents();
+    //this.slicedOutOnSettings();
+    //this.render();
 
-  } /*End prepareChart()*/
-
+  //} /*End prepareChart()*/
 
   // createPie(startAngle, endAngle, color, strokeColor, index) {
   //   let percent = this.CHART_DATA.uniqueDataSet[index].percent.toFixed(2);
@@ -250,210 +308,210 @@ class PieChart extends Component {
   //   this.CHART_DATA.pieSet.push(pie);
   // } /*End createPie()*/
 
-  describePieArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag) {
-    let fullArc = false;
-    if (startAngle % 360 === endAngle % 360) {
-      endAngle--;
-      fullArc = true;
-    }
+  // describePieArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag) {
+  //   let fullArc = false;
+  //   if (startAngle % 360 === endAngle % 360) {
+  //     endAngle--;
+  //     fullArc = true;
+  //   }
 
-    let outerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, endAngle), endAngle);
-    let outerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, startAngle), startAngle);
-    let innerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, endAngle), endAngle);
-    let innerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, startAngle), startAngle);
-    let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
+  //   let outerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, endAngle), endAngle);
+  //   let outerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMaxX, rMaxY, startAngle), startAngle);
+  //   let innerArcStart = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, endAngle), endAngle);
+  //   let innerArcEnd = this.geom.polarToCartesian(cx, cy, this.geom.getEllipticalRadious(rMinX, rMinY, startAngle), startAngle);
+  //   let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
 
-    let d = [
-      "M", outerArcStart.x, outerArcStart.y,
-      "A", rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y,
-      "L", innerArcEnd.x, innerArcEnd.y,
-      "A", rMinX, rMinY, 0, largeArcFlag, Math.abs(sweepFlag - 1), innerArcStart.x, innerArcStart.y,
-      "Z"
-    ];
+  //   let d = [
+  //     "M", outerArcStart.x, outerArcStart.y,
+  //     "A", rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y,
+  //     "L", innerArcEnd.x, innerArcEnd.y,
+  //     "A", rMinX, rMinY, 0, largeArcFlag, Math.abs(sweepFlag - 1), innerArcStart.x, innerArcStart.y,
+  //     "Z"
+  //   ];
 
-    if (fullArc) {
-      d.push("L", outerArcStart.x, outerArcStart.y);
-    }
-    return {
-      "d": d.join(" "),
-      "outerArc": [rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y].join(" "),
-      "outerArcStart": outerArcStart,
-      "outerArcEnd": outerArcEnd,
-      "innerArc": [rMinX, rMinY, 0, largeArcFlag, sweepFlag, innerArcStart.x, innerArcStart.y].join(" "),
-      "innerArcStart": innerArcStart,
-      "innerArcEnd": innerArcEnd,
-      "center": new Point(cx, cy),
-      "rMaxX": rMaxX,
-      "rMaxY": rMaxY,
-      "startAngle": startAngle,
-      "endAngle": endAngle
-    };
+  //   if (fullArc) {
+  //     d.push("L", outerArcStart.x, outerArcStart.y);
+  //   }
+  //   return {
+  //     "d": d.join(" "),
+  //     "outerArc": [rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y].join(" "),
+  //     "outerArcStart": outerArcStart,
+  //     "outerArcEnd": outerArcEnd,
+  //     "innerArc": [rMinX, rMinY, 0, largeArcFlag, sweepFlag, innerArcStart.x, innerArcStart.y].join(" "),
+  //     "innerArcStart": innerArcStart,
+  //     "innerArcEnd": innerArcEnd,
+  //     "center": new Point(cx, cy),
+  //     "rMaxX": rMaxX,
+  //     "rMaxY": rMaxY,
+  //     "startAngle": startAngle,
+  //     "endAngle": endAngle
+  //   };
 
-  } 
+  // } 
 
-  bindEvents() {
-    let mouseDownPos;
-    let self = this;
-    try {
-      for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
-        let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex);
-        upperArcPie.addEventListener("mousedown", (e) => {
-          e.stopPropagation();
-          mouseDownPos = {
-            x: e.clientX,
-            y: e.clientY
-          };
-          let elemId = e.target.getAttribute("class");
-          let pieIndex = elemId.substring("pie".length);
-          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
-          this.CHART_DATA.mouseDown = 1;
+  // bindEvents() {
+  //   let mouseDownPos;
+  //   let self = this;
+  //   try {
+  //     for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
+  //       let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex);
+  //       upperArcPie.addEventListener("mousedown", (e) => {
+  //         e.stopPropagation();
+  //         mouseDownPos = {
+  //           x: e.clientX,
+  //           y: e.clientY
+  //         };
+  //         let elemId = e.target.getAttribute("class");
+  //         let pieIndex = elemId.substring("pie".length);
+  //         this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+  //         this.CHART_DATA.mouseDown = 1;
 
-        }, false);
+  //       }, false);
 
-        upperArcPie.addEventListener("touchstart", (e) => {
-          e.stopPropagation();
-          this.CHART_DATA.mouseDown = 1;
-        }, false);
+  //       upperArcPie.addEventListener("touchstart", (e) => {
+  //         e.stopPropagation();
+  //         this.CHART_DATA.mouseDown = 1;
+  //       }, false);
 
-        upperArcPie.addEventListener("mouseup", (e) => {
-          e.stopPropagation();
-          this.CHART_DATA.mouseDown = 0;
-          if (this.CHART_DATA.mouseDrag === 0) {
-            let elemClass = e.target.getAttribute("class");
-            let pieIndex = elemClass.substring("pie".length);
-            //fire Event onLegendClick
-            let onPieClick = new this.event.Event("onPieClick", {
-              srcElement: self,
-              originEvent: e,
-              pieIndex: pieIndex
-            });
-            this.event.dispatchEvent(onPieClick);
-          }
-          this.CHART_DATA.mouseDrag = 0;
-        }, false);
+  //       upperArcPie.addEventListener("mouseup", (e) => {
+  //         e.stopPropagation();
+  //         this.CHART_DATA.mouseDown = 0;
+  //         if (this.CHART_DATA.mouseDrag === 0) {
+  //           let elemClass = e.target.getAttribute("class");
+  //           let pieIndex = elemClass.substring("pie".length);
+  //           //fire Event onLegendClick
+  //           let onPieClick = new this.event.Event("onPieClick", {
+  //             srcElement: self,
+  //             originEvent: e,
+  //             pieIndex: pieIndex
+  //           });
+  //           this.event.dispatchEvent(onPieClick);
+  //         }
+  //         this.CHART_DATA.mouseDrag = 0;
+  //       }, false);
 
-        upperArcPie.addEventListener("touchend", (e) => {
-          e.stopPropagation();
-          this.CHART_DATA.mouseDown = 0;
-          this.CHART_DATA.mouseDrag = 0;
-        }, false);
+  //       upperArcPie.addEventListener("touchend", (e) => {
+  //         e.stopPropagation();
+  //         this.CHART_DATA.mouseDown = 0;
+  //         this.CHART_DATA.mouseDrag = 0;
+  //       }, false);
 
-        upperArcPie.addEventListener("mousemove", (e) => {
-          if (this.CHART_DATA.uniqueDataSet.length <= 1) {
-            return;
-          }
-          if (this.CHART_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
-            let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
-            let dragAngle = this.getAngle(this.CHART_DATA.pieCenter, dragStartPoint);
+  //       upperArcPie.addEventListener("mousemove", (e) => {
+  //         if (this.CHART_DATA.uniqueDataSet.length <= 1) {
+  //           return;
+  //         }
+  //         if (this.CHART_DATA.mouseDown === 1 && (mouseDownPos.x !== e.clientX && mouseDownPos.y !== e.clientY)) {
+  //           let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+  //           let dragAngle = this.getAngle(this.CHART_DATA.pieCenter, dragStartPoint);
 
-            if (dragAngle > this.CHART_DATA.dragStartAngle) {
-              this.rotateChart(2, false);
-            } else {
-              this.rotateChart(-2, false);
-            }
-            this.CHART_DATA.dragStartAngle = dragAngle;
-            this.CHART_DATA.mouseDrag = 1;
-            this.tooltip.hide();
-          } else {
-            let mousePos = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
-            let pieData, elemId = e.target.getAttribute("class");
-            let pieIndex = elemId.substring("pie".length);
+  //           if (dragAngle > this.CHART_DATA.dragStartAngle) {
+  //             this.rotateChart(2, false);
+  //           } else {
+  //             this.rotateChart(-2, false);
+  //           }
+  //           this.CHART_DATA.dragStartAngle = dragAngle;
+  //           this.CHART_DATA.mouseDrag = 1;
+  //           this.tooltip.hide();
+  //         } else {
+  //           let mousePos = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+  //           let pieData, elemId = e.target.getAttribute("class");
+  //           let pieIndex = elemId.substring("pie".length);
 
-            for (let i in this.CHART_DATA.pieSet) {
-              if (this.CHART_DATA.pieSet[i].id === elemId) {
-                pieData = this.CHART_DATA.pieSet[i];
-              }
-            }
-            let row1 = this.CHART_DATA.uniqueDataSet[pieIndex].label + ", " + this.CHART_DATA.uniqueDataSet[pieIndex].value;
-            let row2 = this.CHART_DATA.uniqueDataSet[pieIndex].percent.toFixed(2) + "%";
-            let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : UtilCore.getColor(pieIndex));
-            this.tooltip.updateTip(mousePos, color, row1, row2);
-          }
-        }, false);
+  //           for (let i in this.CHART_DATA.pieSet) {
+  //             if (this.CHART_DATA.pieSet[i].id === elemId) {
+  //               pieData = this.CHART_DATA.pieSet[i];
+  //             }
+  //           }
+  //           let row1 = this.CHART_DATA.uniqueDataSet[pieIndex].label + ", " + this.CHART_DATA.uniqueDataSet[pieIndex].value;
+  //           let row2 = this.CHART_DATA.uniqueDataSet[pieIndex].percent.toFixed(2) + "%";
+  //           let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : UtilCore.getColor(pieIndex));
+  //           this.tooltip.updateTip(mousePos, color, row1, row2);
+  //         }
+  //       }, false);
 
-        upperArcPie.addEventListener("touchmove", (e) => {
-          e.preventDefault();
-          let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.changedTouches[0]);
-          let dragAngle = this.getAngle(this.CHART_DATA.pieCenter, dragStartPoint);
+  //       upperArcPie.addEventListener("touchmove", (e) => {
+  //         e.preventDefault();
+  //         let dragStartPoint = this.ui.cursorPoint(this.CHART_OPTIONS.targetElem, e.changedTouches[0]);
+  //         let dragAngle = this.getAngle(this.CHART_DATA.pieCenter, dragStartPoint);
 
-          if (dragAngle > this.CHART_DATA.dragStartAngle) {
-            this.rotateChart(2, false);
-          } else {
-            this.rotateChart(-2, false);
-          }
-          this.CHART_DATA.dragStartAngle = dragAngle;
-          this.CHART_DATA.mouseDrag = 1;
-        }, false);
+  //         if (dragAngle > this.CHART_DATA.dragStartAngle) {
+  //           this.rotateChart(2, false);
+  //         } else {
+  //           this.rotateChart(-2, false);
+  //         }
+  //         this.CHART_DATA.dragStartAngle = dragAngle;
+  //         this.CHART_DATA.mouseDrag = 1;
+  //       }, false);
 
-        upperArcPie.addEventListener("mouseenter", (e) => {
-          if (this.CHART_DATA.mouseDown === 0) {
-            let pieData, elemId = e.target.getAttribute("class");
-            let pieIndex = elemId.substring("pie".length);
+  //       upperArcPie.addEventListener("mouseenter", (e) => {
+  //         if (this.CHART_DATA.mouseDown === 0) {
+  //           let pieData, elemId = e.target.getAttribute("class");
+  //           let pieIndex = elemId.substring("pie".length);
 
-            for (let i = 0; i < this.CHART_DATA.pieSet.length; i++) {
-              if (this.CHART_DATA.pieSet[i].id === elemId) {
-                pieData = this.CHART_DATA.pieSet[i];
-              }
-            }
-            let pieHover = this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex);
-            let pieHoverPath;
-            let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
-            hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
-            hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
-            if (pieData.slicedOut) {
-              let shiftIndex = 15;
-              let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
-              pieHoverPath = this.describePieArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-            } else {
-              pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-            }
-            pieHover.setAttribute("d", pieHoverPath.d);
-            pieHover.style["fill-opacity"] = 0.4;
-          }
-        }, false);
+  //           for (let i = 0; i < this.CHART_DATA.pieSet.length; i++) {
+  //             if (this.CHART_DATA.pieSet[i].id === elemId) {
+  //               pieData = this.CHART_DATA.pieSet[i];
+  //             }
+  //           }
+  //           let pieHover = this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex);
+  //           let pieHoverPath;
+  //           let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
+  //           hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
+  //           hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
+  //           if (pieData.slicedOut) {
+  //             let shiftIndex = 15;
+  //             let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
+  //             pieHoverPath = this.describePieArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
+  //           } else {
+  //             pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
+  //           }
+  //           pieHover.setAttribute("d", pieHoverPath.d);
+  //           pieHover.style["fill-opacity"] = 0.4;
+  //         }
+  //       }, false);
 
-        upperArcPie.addEventListener("mouseleave", (e) => {
-          let elemId = e.target.getAttribute("class");
-          let pieIndex = elemId.substring("pie".length);
-          this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0;
-          this.tooltip.hide();
-        }, false);
+  //       upperArcPie.addEventListener("mouseleave", (e) => {
+  //         let elemId = e.target.getAttribute("class");
+  //         let pieIndex = elemId.substring("pie".length);
+  //         this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0;
+  //         this.tooltip.hide();
+  //       }, false);
 
-      } /*End of for loop*/
+  //     } /*End of for loop*/
 
-      this.CHART_DATA.chartSVG.addEventListener("mouseup", (e) => {
-        e.stopPropagation();
-        this.CHART_DATA.mouseDown = 0;
-        this.CHART_DATA.mouseDrag = 0;
-      }, false);
+  //     this.CHART_DATA.chartSVG.addEventListener("mouseup", (e) => {
+  //       e.stopPropagation();
+  //       this.CHART_DATA.mouseDown = 0;
+  //       this.CHART_DATA.mouseDrag = 0;
+  //     }, false);
 
-      this.CHART_DATA.chartSVG.addEventListener("touchend", (e) => {
-        e.stopPropagation();
-        this.CHART_DATA.mouseDown = 0;
-        this.CHART_DATA.mouseDrag = 0;
-      }, false);
+  //     this.CHART_DATA.chartSVG.addEventListener("touchend", (e) => {
+  //       e.stopPropagation();
+  //       this.CHART_DATA.mouseDown = 0;
+  //       this.CHART_DATA.mouseDrag = 0;
+  //     }, false);
 
-      /*Bind event for pie click */
-      this.event.off("onPieClick", this.EVENT_BINDS.onPieClickBind);
-      this.event.on("onPieClick", this.EVENT_BINDS.onPieClickBind);
+  //     /*Bind event for pie click */
+  //     this.event.off("onPieClick", this.EVENT_BINDS.onPieClickBind);
+  //     this.event.on("onPieClick", this.EVENT_BINDS.onPieClickBind);
 
-      /*Add event for legends */
-      this.event.off("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
-      this.event.on("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
-      this.event.off("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
-      this.event.on("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
-      this.event.off("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
-      this.event.on("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+  //     /*Add event for legends */
+  //     this.event.off("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+  //     this.event.on("onLegendHover", this.EVENT_BINDS.onLegendHoverBind);
+  //     this.event.off("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+  //     this.event.on("onLegendLeave", this.EVENT_BINDS.onLegendLeaveBind);
+  //     this.event.off("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
+  //     this.event.on("onLegendClick", this.EVENT_BINDS.onLegendClickBind);
 
-      /*Add events for resize chart window */
-      window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
-      window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
+  //     /*Add events for resize chart window */
+  //     window.removeEventListener('resize', this.EVENT_BINDS.onWindowResizeBind);
+  //     window.addEventListener('resize', this.EVENT_BINDS.onWindowResizeBind, true);
 
-    } catch (ex) {
-      ex.errorIn = `Error in PieChart events with runId:${this.props.runId}`;
-      throw ex;
-    }
-  } 
+  //   } catch (ex) {
+  //     ex.errorIn = `Error in PieChart events with runId:${this.props.runId}`;
+  //     throw ex;
+  //   }
+  // } 
 
   // onPieClick(e) {
   //   if (this.CHART_DATA.uniqueDataSet.length <= 1) {
@@ -492,76 +550,42 @@ class PieChart extends Component {
   //   }, 10);
   // } 
 
-  onLegendHover(e) {
-    let pieIndex = e.legendIndex;
-    let pieData = this.CHART_DATA.pieSet[pieIndex];
-    let pieHover = this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex);
-    let hoverWidth = Math.round(this.CHART_DATA.offsetWidth * 30 / 100);
-    hoverWidth = (hoverWidth > 20) ? 20 : hoverWidth;
-    hoverWidth = (hoverWidth < 8) ? 8 : hoverWidth;
-    let pieHoverPath;
-    if (pieData.slicedOut) {
-      let shiftIndex = 15;
-      let shiftedCentre = this.geom.polarToCartesian(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, pieData.midAngle), pieData.midAngle);
-      pieHoverPath = this.describePieArc(shiftedCentre.x, shiftedCentre.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-    } else {
-      pieHoverPath = this.describePieArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth + hoverWidth, this.CHART_DATA.pieHeight + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, this.CHART_DATA.offsetWidth + hoverWidth, pieData.upperArcPath.startAngle, pieData.upperArcPath.endAngle, 0);
-    }
-    pieHover.setAttribute("d", pieHoverPath.d);
-    pieHover.style["fill-opacity"] = 0.4;
-  }
+  
 
-  onLegendLeave(e) {
-    let pieIndex = e.legendIndex;
-    this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).style["fill-opacity"] = 0;
-  }
+  // getAngle(point1, point2) {
+  //   let deltaX = point2.x - point1.x;
+  //   let deltaY = point2.y - point1.y;
+  //   let rad = Math.atan2(deltaY, deltaX);
+  //   let deg = rad * 180.0 / Math.PI;
+  //   deg = (deg < 0) ? deg + 450 : deg + 90;
+  //   return deg % 360;
+  // }
 
-  onLegendClick(e) {
-    let self = this;
-    this.CHART_DATA.chartSVG.querySelector("#pieHover" + e.legendIndex).setAttribute("d", "");
-    //fire Event onLegendClick
-    let onPieClick = new this.event.Event("onPieClick", {
-      srcElement: self,
-      originEvent: e.originEvent,
-      pieIndex: e.legendIndex
-    });
-    this.event.dispatchEvent(onPieClick);
-  }
+  // rotateChart(rotationIndex, ignorOrdering) {
+  //   for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
+  //     let pieData;
+  //     let elemId = "pie" + pieIndex;
+  //     pieData = this.CHART_DATA.pieSet[pieIndex];
+  //     this.CHART_DATA.pieSet[pieIndex].slicedOut = false;
 
-  getAngle(point1, point2) {
-    let deltaX = point2.x - point1.x;
-    let deltaY = point2.y - point1.y;
-    let rad = Math.atan2(deltaY, deltaX);
-    let deg = rad * 180.0 / Math.PI;
-    deg = (deg < 0) ? deg + 450 : deg + 90;
-    return deg % 360;
-  }
+  //     let pieGroup = this.CHART_DATA.chartSVG.querySelectorAll(".pie" + pieIndex);
+  //     for (let i = 0; i < pieGroup.length; i++) {
+  //       pieGroup[i].setAttribute("transform", "");
+  //     }
+  //     this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
 
-  rotateChart(rotationIndex, ignorOrdering) {
-    for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
-      let pieData;
-      let elemId = "pie" + pieIndex;
-      pieData = this.CHART_DATA.pieSet[pieIndex];
-      this.CHART_DATA.pieSet[pieIndex].slicedOut = false;
+  //     let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, (pieData["upperArcPath"].startAngle + rotationIndex), (pieData["upperArcPath"].endAngle + rotationIndex), 0);
+  //     let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex).setAttribute("d", upperArcPath.d);
+  //     let midAngle = (((pieData["upperArcPath"].startAngle + rotationIndex) + (pieData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
 
-      let pieGroup = this.CHART_DATA.chartSVG.querySelectorAll(".pie" + pieIndex);
-      for (let i = 0; i < pieGroup.length; i++) {
-        pieGroup[i].setAttribute("transform", "");
-      }
-      this.CHART_DATA.chartSVG.querySelector("#pieHover" + pieIndex).setAttribute("d", "");
+  //     this.CHART_DATA.pieSet[pieIndex]["upperArcPath"] = upperArcPath;
+  //     this.CHART_DATA.pieSet[pieIndex]["midAngle"] = (midAngle < 0 ? 360 + midAngle : midAngle);
+  //     if (!ignorOrdering) {
+  //       this.resetTextPos();
+  //     }
+  //   }
 
-      let upperArcPath = this.geom.describeEllipticalArc(this.CHART_DATA.pieCenter.x, this.CHART_DATA.pieCenter.y, this.CHART_DATA.pieWidth, this.CHART_DATA.pieHeight, (pieData["upperArcPath"].startAngle + rotationIndex), (pieData["upperArcPath"].endAngle + rotationIndex), 0);
-      let upperArcPie = this.CHART_DATA.chartSVG.querySelector("#upperArcPie" + pieIndex).setAttribute("d", upperArcPath.d);
-      let midAngle = (((pieData["upperArcPath"].startAngle + rotationIndex) + (pieData["upperArcPath"].endAngle + rotationIndex)) / 2) % 360.00;
-
-      this.CHART_DATA.pieSet[pieIndex]["upperArcPath"] = upperArcPath;
-      this.CHART_DATA.pieSet[pieIndex]["midAngle"] = (midAngle < 0 ? 360 + midAngle : midAngle);
-      if (!ignorOrdering) {
-        this.resetTextPos();
-      }
-    }
-
-  } /*End rotateChart()*/
+  // } /*End rotateChart()*/
 
   resetTextPos() {
     //let txtTitleLen = this.CHART_DATA.chartSVG.querySelector("#txtTitleGrp #txtTitle").getComputedTextLength();
@@ -664,41 +688,6 @@ class PieChart extends Component {
     return maxOverFlow;
   } /*End calcMaxOverflow()*/
 
-
-  prepareDataSet() {
-    let self = this;
-    for (let i in this.CHART_OPTIONS.dataSet) {
-      let found = -1;
-      for (let j in this.CHART_DATA.uniqueDataSet) {
-        if (this.CHART_OPTIONS.dataSet[i].label.toLowerCase() === this.CHART_DATA.uniqueDataSet[j].label.toLowerCase()) {
-          found = j;
-          break;
-        }
-      }
-      if (found === -1) {
-        this.CHART_DATA.uniqueDataSet.push({
-          "label": self.CHART_OPTIONS.dataSet[i].label,
-          "value": self.CHART_OPTIONS.dataSet[i].value,
-          "color": this.CHART_OPTIONS.dataSet[i].color || UtilCore.getColor(i),
-          "slicedOut": self.CHART_OPTIONS.dataSet[i].slicedOut || false
-        });
-      } else {
-        this.CHART_DATA.uniqueDataSet[found].value = parseFloat(this.CHART_OPTIONS.dataSet[i].value) + parseFloat(this.CHART_DATA.uniqueDataSet[found].value);
-      }
-      this.CHART_DATA.totalValue += parseFloat(this.CHART_OPTIONS.dataSet[i].value);
-    }
-    for (let i in this.CHART_DATA.uniqueDataSet) {
-      let percent = 100 * parseFloat(this.CHART_DATA.uniqueDataSet[i].value) / this.CHART_DATA.totalValue;
-      this.CHART_DATA.uniqueDataSet[i]["percent"] = percent;
-    }
-
-    // //fire Event afterParseData
-    // let afterParseDataEvent = new this.event.Event("afterParseData", {
-    //   srcElement: self
-    // });
-    // this.event.dispatchEvent(afterParseDataEvent);
-  } /*End prepareDataSet()*/
-
   slicedOutOnSettings() {
     for (let i = 0; i < this.CHART_DATA.pieSet.length; i++) {
       if (this.CHART_DATA.pieSet[i].slicedOut) {
@@ -711,23 +700,23 @@ class PieChart extends Component {
     }
   } /*End slicedOutOnSettings()*/
 
-  colorLuminance(hex, lum) {
-    /* validate hex string*/
-    hex = String(hex).replace(/[^0-9a-f]/gi, '');
-    if (hex.length < 6) {
-      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-    }
-    lum = lum || 0;
-    /* convert to decimal and change luminosity*/
-    let rgb = "#",
-      c, i;
-    for (i = 0; i < 3; i++) {
-      c = parseInt(hex.substr(i * 2, 2), 16);
-      c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-      rgb += ("00" + c).substr(c.length);
-    }
-    return rgb;
-  } /*End colorLuminance()*/
+  // colorLuminance(hex, lum) {
+  //   /* validate hex string*/
+  //   hex = String(hex).replace(/[^0-9a-f]/gi, '');
+  //   if (hex.length < 6) {
+  //     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+  //   }
+  //   lum = lum || 0;
+  //   /* convert to decimal and change luminosity*/
+  //   let rgb = "#",
+  //     c, i;
+  //   for (i = 0; i < 3; i++) {
+  //     c = parseInt(hex.substr(i * 2, 2), 16);
+  //     c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
+  //     rgb += ("00" + c).substr(c.length);
+  //   }
+  //   return rgb;
+  // } /*End colorLuminance()*/
 
   showAnimatedView() {
     let sAngle = 0;

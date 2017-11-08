@@ -133,8 +133,8 @@ class BaseChart extends Component {
   render() {
     let Chart = CHART_MODULES[this.chartType];
     return (
-      <svg xmlns='http:\/\/www.w3.org\/2000\/svg'
-        version={'1.1'}
+      <svg xmlns='http://www.w3.org/2000/svg'
+        version={1.1}
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
         id={`${this.chartType}_${this.runId}`}

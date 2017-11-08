@@ -41,7 +41,7 @@ class PieSet extends Component {
           offsetWidth={this.props.offsetWidth} offsetHeight={this.props.offsetHeight}
           data={data} startAngle={this.state.startAngle} endAngle={this.state.endAngle} 
           strokeColor={this.props.strokeColor} strokeWidth={this.props.strokeWidth} 
-          rotateChart={this.rotateChart.bind(this)}
+          rotateChart={this.rotateChart.bind(this)} slicedOut={data.slicedOut}
         />
       );
     });
