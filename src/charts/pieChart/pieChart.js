@@ -151,7 +151,7 @@ class PieChart extends Component {
             this.CHART_OPTIONS.showLegend ? 
             <LegendBox legendSet={this.getLegendData()}
               left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
-              maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee'
+              maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee' toggleType
               onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
             /> 
             : null 

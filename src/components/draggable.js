@@ -30,7 +30,6 @@ class Draggable extends Component{
   }
 
   render() {
-    console.log("children inside render-->",this.props.children); 
     return (
       <g class='dragger drag-handler-container' style={{cursor: 'move'}}
         events={{

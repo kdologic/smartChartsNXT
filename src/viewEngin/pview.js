@@ -21,6 +21,8 @@
  * @return {object} will be the component object. 
  * */
 function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
+
+  console.log("node", node, "targetNode", targetNode);
   if (!node || !targetNode) {
     throw new TypeError('Invalid vnode or target in render component');
   }
@@ -46,9 +48,9 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
 
 /** Render Virtual DOM to the real DOM */
 function renderDOM(vnode) {
-  var svgNS = "http://www.w3.org/2000/svg";
+  let svgNS = "http://www.w3.org/2000/svg";
   if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return { node: document.createTextNode(vnode) };
+    return { node: document.createTextNode(vnode), children: [], eventStack: []};
   }
   let component = {
     node: undefined,
@@ -69,7 +71,7 @@ function renderDOM(vnode) {
     });
 
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) {
-    vnode.attributes.children = JSON.parse(JSON.stringify(vnode.children));
+    vnode.attributes.children = vnode.children;
     let objComp = new vnode.nodeName(vnode.attributes);
     let renderedComp = renderDOM(objComp.getVirtualNode());
 
@@ -172,17 +174,24 @@ class Component {
   }
 
   update() {
+    debugger; 
     let vnodeNow = this.render();
     vnodeNow.children = vnodeNow.children || [];
     vnodeNow.children.push(...(this.props.children || []));
-
+    console.log(vnodeNow, this.vnode); 
+    console.log("ref---->", this.ref); 
     if (detectDiff(this.vnode, vnodeNow)) {
       this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
       let renderedComp = renderDOM(this.vnode); 
-      ({ node: this.ref.node, children: this.ref.children } = renderedComp);
-      mountTo({ node: this.ref.node, children: this.ref.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
+      //({ node: this.ref.node, children: this.ref.children } = renderedComp);
+      console.log("parent-->", parent, "cloned-->", this.ref.node.parentNode.cloneNode(true));
+      let component = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
+      this.ref.node = component.node; 
+      this.ref.children = component.children; 
+      
+      console.log("comp in update-->", component);
     }
   }
 
