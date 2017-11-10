@@ -76,7 +76,7 @@ class PieChart extends Component {
         pieWidth: 160,
         pieHeight: 160,
         offsetWidth: 20, // distance of text label from left and right side 
-        offsetHeight: 80, // distance of text label from top and bottom side 
+        offsetHeight: 70, // distance of text label from top and bottom side 
         pieSet: [],
         dragStartAngle: 0,
         dragEndPoint: null,
@@ -150,7 +150,7 @@ class PieChart extends Component {
           {
             this.CHART_OPTIONS.showLegend ? 
             <LegendBox legendSet={this.getLegendData()}
-              left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight}
+              left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
               maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee'
               onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
             /> 

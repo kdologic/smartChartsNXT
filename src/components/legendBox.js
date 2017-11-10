@@ -8,11 +8,9 @@
  * @description:This is a component class will create legned area. 
  */
 
-import Point from "./../core/point";
 import Geom from './../core/geom.core';
-import Ui from './../core/ui.core';
-import UtilCore from './../core/util.core';
 import { Component } from "./../viewEngin/pview";
+import Draggable from './../components/draggable'; 
 
 class LegendBox extends Component {
   constructor(props) {
@@ -21,7 +19,7 @@ class LegendBox extends Component {
     this.state = {
       legendSet: this.props.legendSet.map(lSet => {
         lSet.length = lSet.labelLength = lSet.valueLength = 0;
-        lSet.isToggeled = false; 
+        lSet.isToggeled = false;
         return lSet;
       }),
       left: this.props.left,
@@ -54,10 +52,12 @@ class LegendBox extends Component {
 
   render() {
     return (
-      <g>
-        <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
-        {this.getLegendSet()}
-      </g>
+      <Draggable>
+        <g>
+          <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
+          {this.getLegendSet()}
+        </g>
+      </Draggable>
     );
   }
 
@@ -96,7 +96,7 @@ class LegendBox extends Component {
   }
 
   getMaxLegendInLine(eachLength) {
-    return this.props.type === 'horizontal' ? Math.floor(this.props.maxWidth / eachLength) : 1;
+    return this.props.type === 'horizontal' ? Math.floor((this.props.maxWidth - this.state.padding) / eachLength) : 1;
   }
 
   calcElementSpacing() {
@@ -128,29 +128,28 @@ class LegendBox extends Component {
 
   onClick(e) {
     let index = e.target.classList[0].substring("legend-".length);
-    if(this.isToggleType) {
+    if (this.isToggleType) {
       this.state.legendSet[index].isToggeled = !this.state.legendSet[index].isToggeled;
-      this.update(); 
+      this.update();
     }
-    if(typeof this.props.onLegendClick === 'function'){
+    if (typeof this.props.onLegendClick === 'function') {
       this.props.onLegendClick(index);
     }
   }
 
   onHover(e) {
     let index = e.target.classList[0].substring("legend-".length);
-    if(typeof this.props.onLegendHover === 'function'){
+    if (typeof this.props.onLegendHover === 'function') {
       this.props.onLegendHover(index);
     }
   }
 
   onLeave(e) {
     let index = e.target.classList[0].substring("legend-".length);
-    if(typeof this.props.onLegendLeave === 'function'){
+    if (typeof this.props.onLegendLeave === 'function') {
       this.props.onLegendLeave(index);
     }
   }
-
 }
 
 export default LegendBox; 

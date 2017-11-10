@@ -69,6 +69,7 @@ function renderDOM(vnode) {
     });
 
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) {
+    vnode.attributes.children = JSON.parse(JSON.stringify(vnode.children));
     let objComp = new vnode.nodeName(vnode.attributes);
     let renderedComp = renderDOM(objComp.getVirtualNode());
 
@@ -80,7 +81,7 @@ function renderDOM(vnode) {
   } else if (typeof vnode.nodeName === 'function') {
     ({ node: component.node, children: component.children } = renderDOM(vnode.nodeName(vnode.attributes)));
   } else {
-    throw new TypeError('RenderDOM method accepts html node or function or class with render mothod');
+    throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
   }
 
   /* loop for childrens */
@@ -111,7 +112,7 @@ function(nodeName, attributes, ...args) {
     return !!v;
   });
   let children = args.length ? [].concat(...args) : null;
-  return { nodeName, attributes, children };
+  return { nodeName, attributes: attributes|| {}, children };
 };
 
 /** convert style JSON into string, gets called by transpiled JSX */
@@ -140,9 +141,14 @@ function isNativeClass(instance, Constructor) {
 }
 
 /** This will return false if two node are exual other return true */
-function detectDiff(vNode1, vNode2) {
-  return !(JSON.stringify(vNode1) === JSON.stringify(vNode2));
+function detectDiff(vnode1, vnode2) {
+  return !(JSON.stringify(vnode1) === JSON.stringify(vnode2));
 }
+
+/**
+ * Component Class is the base class of all PView reusable component class. 
+ * All components must extends this Component class. And they should have render method. 
+ */
 
 class Component {
   constructor(props) {
@@ -162,19 +168,26 @@ class Component {
   }
 
   getVirtualNode() {
-    return this.vNode = this.render();
+    return this.vnode = this.render();
   }
 
   update() {
-    let vNodeNow = this.render();
-    if (detectDiff(this.vNode, vNodeNow)) {
-      this.vNode = vNodeNow;
+    let vnodeNow = this.render();
+    vnodeNow.children = vnodeNow.children || [];
+    vnodeNow.children.push(...(this.props.children || []));
+
+    if (detectDiff(this.vnode, vnodeNow)) {
+      this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
-      let renderedComp = renderDOM(this.vNode); 
+      let renderedComp = renderDOM(this.vnode); 
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       mountTo({ node: this.ref.node, children: this.ref.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }
+  }
+
+  render() {
+    return (<g> child must override this render method </g>);
   }
 }
 

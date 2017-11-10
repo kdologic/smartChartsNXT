@@ -10,28 +10,80 @@
 
 "use strict";
 
-let transformer = require("./../core/transformer");
+import transformer from "./../core/transformer";
+import { Component } from "./../viewEngin/pview";
 
-class Draggable {
-  constructor() {}
+class Draggable extends Component{
+  constructor(props) {
+    super(props);
 
-  doDraggable(targetElemObj) {
-    this.targetElemObj = targetElemObj;
-    this.targetElemId = targetElemObj.getAttribute("id") || Math.round(Math.random() * 1000);
-    this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
-    if (this.objDragHandle) {
-      this.objDragHandle.parentNode.removeChild(this.objDragHandle);
-    }
-    let bbox = this.targetElemObj.getBBox();
-    let strSVG = "";
-    strSVG += "<g id='drag_handler_container_" + this.targetElemId + "' class='dragger' style='cursor: move;'>";
-    strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height + 10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";
-    strSVG += "</g>";
-    this.targetElemObj.insertAdjacentHTML("beforeend", strSVG);
-    this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
-    this.bindDragEvents();
-    this.hideHandler();
+    this.state = {
+      showHandler: false,
+      hBBox: {
+        x: 0, 
+        y: 0, 
+        width: 0, 
+        height: 0
+      }
+    };
+    this.padding = 5; 
   }
+
+  render() {
+    console.log("children inside render-->",this.props.children); 
+    return (
+      <g class='dragger drag-handler-container' style={{cursor: 'move'}}
+        events={{
+          dblclick: this.onDoubleClick.bind(this)
+        }} >
+      {
+        this.state.showHandler ? 
+        <rect class='dragger drag-handler-outerbox' 
+          x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height} 
+          stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'>
+        </rect>
+        : null
+      }
+      </g>
+    );
+  }
+
+     // {this.props.children}  
+  
+  // doDraggable(targetElemObj) {
+  //   this.targetElemObj = targetElemObj;
+  //   this.targetElemId = targetElemObj.getAttribute("id") || Math.round(Math.random() * 1000);
+  //   this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
+  //   if (this.objDragHandle) {
+  //     this.objDragHandle.parentNode.removeChild(this.objDragHandle);
+  //   }
+  //   let bbox = this.targetElemObj.getBBox();
+  //   let strSVG = "";
+  //   strSVG += "<g id='drag_handler_container_" + this.targetElemId + "' class='dragger' style='cursor: move;'>";
+  //   strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height + 10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";
+  //   strSVG += "</g>";
+  //   this.targetElemObj.insertAdjacentHTML("beforeend", strSVG);
+  //   this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
+  //   this.bindDragEvents();
+  //   this.hideHandler();
+  // }
+
+  onDoubleClick(e) {
+    e.stopPropagation(); 
+    e.preventDefault(); 
+    let contBBox = this.ref.node.getBBox(); 
+
+    let hBBox = {
+      x: contBBox.x - this.padding, 
+      y: contBBox.y - this.padding, 
+      width: contBBox.width + (2 * this.padding),
+      height: contBBox.height + (2 * this.padding)
+    };
+    this.setState({showHandler: !this.state.showHandler, hBBox:hBBox});
+    console.log(e); 
+  }
+
+  
 
   bindDragEvents() {
     let mouseDownPos;
@@ -109,4 +161,4 @@ class Draggable {
   }
 }
 
-module.exports = Draggable;
+export default Draggable;

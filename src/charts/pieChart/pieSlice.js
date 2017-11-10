@@ -61,9 +61,10 @@ class PieSlice extends Component {
           d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} 
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
-            mousedown: this.onMouseDown.bind(this), mouseup: this.onMouseUp.bind(this),
-            mousemove: this.onMouseMove.bind(this), mouseenter: this.onMouseEnter.bind(this),
-            mouseleave: this.onMouseLeave.bind(this)
+            mousedown: this.onMouseDown.bind(this), touchstart: this.onMouseDown.bind(this),
+            mouseup: this.onMouseUp.bind(this), touchend: this.onMouseUp.bind(this), 
+            mousemove: this.onMouseMove.bind(this), touchmove: this.onMouseMove.bind(this),
+            mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)
           }} 
         />
         <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} fill='none' stroke='#555' stroke-width='1' />
@@ -135,13 +136,15 @@ class PieSlice extends Component {
 
   onMouseDown(e) {
     e.stopPropagation();
-    this.mouseDownPos = { x: e.clientX, y: e.clientY };
+    e.preventDefault(); 
+    this.mouseDownPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
     this.mouseDown = 1;
     this.mouseDrag = 0; 
   }
 
   onMouseUp(e) {
     e.stopPropagation();
+    e.preventDefault(); 
     if(this.mouseDrag === 0) {
       this.toggleSlide(); 
     }
@@ -153,8 +156,9 @@ class PieSlice extends Component {
     if (!this.props.toggleEnabled) {
       return;
     }
-    if (this.mouseDown === 1 && (this.mouseDownPos.x !== e.clientX && this.mouseDownPos.y !== e.clientY)) {
-      let dragStartPoint = Ui.cursorPoint(this.props.rootNodeId, e);
+    let pos = {clientX : e.clientX || e.touches[0].clientX, clientY : e.clientY || e.touches[0].clientY };
+    if (this.mouseDown === 1 && (this.mouseDownPos.x !== pos.clientX && this.mouseDownPos.y !== pos.clientY)) {
+      let dragStartPoint = Ui.cursorPoint(this.props.rootNodeId, pos);
       let dragAngle = this.getAngle(new Point(this.props.cx, this.props.cy), dragStartPoint);
 
       if (dragAngle > this.dragStartAngle) {
@@ -193,12 +197,12 @@ class PieSlice extends Component {
   }
 
   rotateSlice(e) {
-    let mid = ((this.state.startAngle + this.state.endAngle) / 2) % 360;
-    this.midAngle = (mid < 0 ? 360 + mid : mid);
     this.slicedOut = false; 
-    
     this.state.startAngle = this.state.startAngle + e.detail.rotationIndex; 
     this.state.endAngle = this.state.endAngle + e.detail.rotationIndex;
+    let mid = ((this.state.startAngle + this.state.endAngle) / 2) % 360;
+    this.midAngle = (mid < 0 ? 360 + mid : mid);
+    
     this.state.legendPath = this.getLegendPath(); 
     this.state.arcTransform = this.state.colorTransform = this.state.textTransform = ''; 
     let textStartPoint = this.getTextStartPoint(); 
