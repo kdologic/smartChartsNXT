@@ -52,12 +52,14 @@ class LegendBox extends Component {
 
   render() {
     return (
-      <Draggable>
-        <g>
-          <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
-          {this.getLegendSet()}
-        </g>
-      </Draggable>
+      <g>
+        <Draggable>
+          <g>
+            <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
+            {this.getLegendSet()}
+          </g>
+        </Draggable>
+      </g>
     );
   }
 

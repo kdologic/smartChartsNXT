@@ -174,24 +174,16 @@ class Component {
   }
 
   update() {
-    debugger; 
     let vnodeNow = this.render();
     vnodeNow.children = vnodeNow.children || [];
     vnodeNow.children.push(...(this.props.children || []));
-    console.log(vnodeNow, this.vnode); 
-    console.log("ref---->", this.ref); 
     if (detectDiff(this.vnode, vnodeNow)) {
       this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
       let renderedComp = renderDOM(this.vnode); 
-      //({ node: this.ref.node, children: this.ref.children } = renderedComp);
-      console.log("parent-->", parent, "cloned-->", this.ref.node.parentNode.cloneNode(true));
+      ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       let component = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
-      this.ref.node = component.node; 
-      this.ref.children = component.children; 
-      
-      console.log("comp in update-->", component);
     }
   }
 
