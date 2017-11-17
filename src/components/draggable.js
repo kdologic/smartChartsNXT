@@ -31,8 +31,7 @@ class Draggable extends Component{
     this.timer = 0; 
     this.prevent = false; 
     this.presentTrnsMatrix = null; 
-
-    console.log("inside initialize");
+    this.touchDelay = 500;
   }
 
   render() {
@@ -51,6 +50,18 @@ class Draggable extends Component{
     );
   }
 
+  onTouchStart(e) {
+    e.preventDefault();
+    this.onMouseDown(e);
+    this.timer = setTimeout(this.onDoubleClick.bind(this, e), this.touchDelay);
+  }
+
+  onTouchEnd(e) {
+    if (this.timer) {
+      clearTimeout(this.timer);
+    }
+  }
+
   onClick(e) {
     let delay = 200; 
     this.timer = setTimeout(function () {
@@ -64,7 +75,9 @@ class Draggable extends Component{
   onDoubleClick(e) {
     e.stopPropagation(); 
     e.preventDefault(); 
-    clearTimeout(this.timer);
+    if(this.timer){
+      clearTimeout(this.timer);
+    }
     this.prevent = true;
     let contBBox = this.ref.node.getBBox(); 
 
@@ -81,18 +94,21 @@ class Draggable extends Component{
     e.stopPropagation();
     this.handleMouseDown = true;
     this.mouseDownPos = {
-      x: e.clientX,
-      y: e.clientY
+      x: e.clientX || e.touches[0].clientX,
+      y: e.clientY || e.touches[0].clientY
     };
     this.presentTrnsMatrix = transformer.convertTransformMatrix(this.state.tranMatrix);
   }
 
   onMouseMove(e) {
     e.stopPropagation();
+    if(this.timer) {
+      clearTimeout(this.timer); 
+    }
     if (this.handleMouseDown) {
       this.mousePosNow = {
-        x: e.clientX,
-        y: e.clientY
+        x: e.clientX || e.touches[0].clientX,
+        y: e.clientY || e.touches[0].clientY
       };
       let tranMatrix = transformer.getTransformMatrix([
         `translate(${this.mousePosNow.x - this.mouseDownPos.x}, ${this.mousePosNow.y - this.mouseDownPos.y})`
@@ -106,13 +122,18 @@ class Draggable extends Component{
   }
 
   getHandlerEventMap() {
-    let evtList = {dblclick: this.onDoubleClick.bind(this)}; 
+    let evtList = {
+      dblclick: this.onDoubleClick.bind(this),
+      touchstart: this.onTouchStart.bind(this), 
+      touchend: this.onTouchEnd.bind(this)
+    }; 
     return this.state.showHandler ? Object.assign(evtList, {
       click: this.onClick.bind(this),
       mousedown: this.onMouseDown.bind(this), 
       mousemove: this.onMouseMove.bind(this), 
       mouseup: this.onMouseUp.bind(this),
-      mouseleave: this.onMouseUp.bind(this)
+      mouseleave: this.onMouseUp.bind(this),
+      touchmove: this.onMouseMove.bind(this)
     }) : evtList;
   }
 }
