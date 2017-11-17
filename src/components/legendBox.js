@@ -10,7 +10,6 @@
 
 import Geom from './../core/geom.core';
 import { Component } from "./../viewEngin/pview";
-import Draggable from './../components/draggable'; 
 
 class LegendBox extends Component {
   constructor(props) {
@@ -53,12 +52,8 @@ class LegendBox extends Component {
   render() {
     return (
       <g>
-        <Draggable>
-          <g>
-            <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
-            {this.getLegendSet()}
-          </g>
-        </Draggable>
+        <path class='legend-container-border' d={this.getContainerBorderPath()}  fill={(this.props.background || "none")} stroke-width='1' stroke='#717171' stroke-opacity={(this.props.border ? 1 : 0)} />
+        {this.getLegendSet()}
       </g>
     );
   }

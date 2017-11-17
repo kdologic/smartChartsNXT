@@ -57,6 +57,7 @@ let Tooltip = require("./../../components/tooltip");
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import UtilCore from './../../core/util.core';
+import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import PieSet from './pieSet'; 
 
@@ -149,11 +150,13 @@ class PieChart extends Component {
         <g class='legend-container'>
           {
             this.CHART_OPTIONS.showLegend ? 
-            <LegendBox legendSet={this.getLegendData()}
-              left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
-              maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee' toggleType
-              onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
-            /> 
+            <Draggable>
+              <LegendBox legendSet={this.getLegendData()}
+                left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
+                maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee' toggleType
+                onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
+              /> 
+            </Draggable>
             : null 
           }
         </g>

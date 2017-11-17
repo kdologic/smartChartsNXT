@@ -22,7 +22,6 @@
  * */
 function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
 
-  console.log("node", node, "targetNode", targetNode);
   if (!node || !targetNode) {
     throw new TypeError('Invalid vnode or target in render component');
   }
