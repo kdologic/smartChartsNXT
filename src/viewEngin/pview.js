@@ -57,7 +57,8 @@ function renderDOM(vnode) {
     eventStack: []
   };
   if (typeof vnode.nodeName === 'string') {
-    component.node = document.createElementNS(svgNS, vnode.nodeName);
+    let isHtml = vnode.nodeName.match('html-'); 
+    component.node = isHtml ? document.createElement(vnode.nodeName.substring('html-'.length)) : document.createElementNS(svgNS, vnode.nodeName);
     Object.keys(vnode.attributes || {}).forEach(key => {
       let attrVal = ((k) => {
         switch (k) {
@@ -181,6 +182,8 @@ class Component {
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
       let renderedComp = renderDOM(this.vnode); 
+
+      typeof this.componentDidMount === 'function' && renderedComp.eventStack.push(this.componentDidMount.bind(this)); 
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       let component = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }

@@ -1,9 +1,9 @@
-/*
- * sc.util.core.js
+/**
+ * util.core.js
  * @CreatedOn: 07-Apr-2016
  * @Author: SmartChartsNXT
  * @Version: 1.1.0
- * @Description:SmartChartsNXT Core Library components. That contains util functionality.
+ * @Description:SmartChartsNXT Core Library components. That contains utillity functions.
  */
 
 
@@ -32,7 +32,7 @@ class UtilCore {
      * Properties from the Souce1 object will be copied to source Object.
      * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
      * */
-    let mergedJSON = JSON.parse(JSON.stringify(source)); // Copying source to a new Object
+    let mergedJSON = source; 
     for (let attrname in source1) {
       if (mergedJSON.hasOwnProperty(attrname)) {
         if (source1[attrname] != null && source1[attrname].constructor == Object) {

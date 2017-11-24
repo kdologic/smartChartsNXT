@@ -18,6 +18,14 @@
       "bgColor":"gray",
       "showLegend":true,
       "animated":false,
+      "tooltip": {
+        "content": function() {
+          return '<table>' +
+          '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+          '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+          '</table>';
+        }
+      },
       "dataSet":[
         {
           "label":"Chrome",
@@ -50,7 +58,7 @@
 "use strict";
 
 //let BaseChart = require("./baseChart");
-let Tooltip = require("./../../components/tooltip");
+//let Tooltip = require("./../../components/tooltip");
 //let LegendBox = require("./../../components/legendBox");
 //let SlicedChart = require("./../../base/slicedChart");
 
@@ -59,6 +67,7 @@ import { Component } from "./../../viewEngin/pview";
 import UtilCore from './../../core/util.core';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
+import Tooltip from './../../components/tooltip';
 import PieSet from './pieSet'; 
 
 class PieChart extends Component {
@@ -66,7 +75,6 @@ class PieChart extends Component {
     super(props);
     try {
       let self = this;
-      //this.tooltip = new Tooltip(); 
       this.CHART_DATA = UtilCore.extends({
         scaleX: 0,
         scaleY: 0,
@@ -95,6 +103,8 @@ class PieChart extends Component {
         MIN_WIDTH: 300,
         MIN_HEIGHT: self.props.chartOptions.showLegend ? 500 : 400
       }, this.props.chartConst);
+
+      this.childObj={}; 
 
       this.init();
       // if (this.CHART_OPTIONS.animated !== false) {
@@ -127,6 +137,7 @@ class PieChart extends Component {
       this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
     }
     this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
+
     this.prepareDataSet(); 
     //this.prepareChart();
     //this.tooltip.createTooltip(this);
@@ -153,7 +164,7 @@ class PieChart extends Component {
             <Draggable>
               <LegendBox legendSet={this.getLegendData()}
                 left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
-                maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee' toggleType
+                maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee'
                 onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
               /> 
             </Draggable>
@@ -165,6 +176,10 @@ class PieChart extends Component {
           width={this.CHART_DATA.pieWidth} height={this.CHART_DATA.pieHeight} 
           offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
           strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
+          updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)}
+        />
+        <Tooltip onRef={ref => this.childObj.tooltip = ref} rootNodeId={this.CHART_OPTIONS.targetElem}
+          offsetWidth={this.CHART_OPTIONS.width} offsetHeight={this.CHART_OPTIONS.height} 
         />
       </g> 
     );
@@ -202,7 +217,26 @@ class PieChart extends Component {
     //   srcElement: self
     // });
     // this.event.dispatchEvent(afterParseDataEvent);
-  } /*End prepareDataSet()*/
+  } 
+
+  updateTooltip(originPoint, index, pointData) {
+    let row1 = pointData.label + ", " + pointData.value;
+    let row2 = pointData.percent.toFixed(2) + "%";
+    let strokeColor = pointData.color || UtilCore.getColor(index);
+    if (this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'function') {
+      row1 = this.CHART_OPTIONS.tooltip.content.call(pointData); 
+      row2 = 'html'; 
+    }else if(this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'string'){
+      let tooltipContent = this.CHART_OPTIONS.tooltip.content.replace(/{{/g, "${").replace(/}}/g, "}");
+      row1 = this.util.assemble(tooltipContent, "point")(pointData);
+      row2 = 'html'; 
+    }
+    this.childObj.tooltip.updateTip(originPoint, strokeColor, row1, row2);
+  }
+
+  hideTip() {
+    this.childObj.tooltip.hide(); 
+  }
 
   getLegendData() {
     return this.CHART_DATA.uniqueDataSet.map((data, index) => {

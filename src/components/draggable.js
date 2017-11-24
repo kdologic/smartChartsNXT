@@ -36,7 +36,7 @@ class Draggable extends Component{
 
   render() {
     return (
-      <g class='dragger drag-handler-container' transform={this.state.tranMatrix} style={{cursor: 'move'}}
+      <g class='dragger drag-handler-container' transform={this.state.tranMatrix} style={{cursor: this.state.showHandler ?'move':'default'}}
         events={this.getHandlerEventMap()} >
       {
         this.state.showHandler ? 
@@ -51,7 +51,6 @@ class Draggable extends Component{
   }
 
   onTouchStart(e) {
-    e.preventDefault();
     this.onMouseDown(e);
     this.timer = setTimeout(this.onDoubleClick.bind(this, e), this.touchDelay);
   }

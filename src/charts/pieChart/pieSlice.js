@@ -10,7 +10,7 @@
 
 import Point from "./../../core/point";
 import Geom from './../../core/geom.core'; 
-import Ui from './../../core/ui.core'; 
+import UiCore from './../../core/ui.core'; 
 import UtilCore from './../../core/util.core';
 import {Component} from "./../../viewEngin/pview";
 
@@ -158,7 +158,7 @@ class PieSlice extends Component {
     }
     let pos = {clientX : e.clientX || e.touches[0].clientX, clientY : e.clientY || e.touches[0].clientY };
     if (this.mouseDown === 1 && (this.mouseDownPos.x !== pos.clientX && this.mouseDownPos.y !== pos.clientY)) {
-      let dragStartPoint = Ui.cursorPoint(this.props.rootNodeId, pos);
+      let dragStartPoint = UiCore.cursorPoint(this.props.rootNodeId, pos);
       let dragAngle = this.getAngle(new Point(this.props.cx, this.props.cy), dragStartPoint);
 
       if (dragAngle > this.dragStartAngle) {
@@ -168,22 +168,11 @@ class PieSlice extends Component {
       }
       this.dragStartAngle = dragAngle;
       this.mouseDrag = 1;
-      //this.tooltip.hide();
+      this.props.hideTip();
     } else {
       /** for tooltip only  */
-      // let mousePos = Ui.cursorPoint(this.props.rootNodeId, e);
-      // let pieData, elemId = e.target.getAttribute("class");
-      // let pieIndex = elemId.substring("pie".length);
-
-      // for (let i in this.CHART_DATA.pieSet) {
-      //   if (this.CHART_DATA.pieSet[i].id === elemId) {
-      //     pieData = this.CHART_DATA.pieSet[i];
-      //   }
-      // }
-      // let row1 = this.CHART_DATA.uniqueDataSet[pieIndex].label + ", " + this.CHART_DATA.uniqueDataSet[pieIndex].value;
-      // let row2 = this.CHART_DATA.uniqueDataSet[pieIndex].percent.toFixed(2) + "%";
-      // let color = (this.CHART_OPTIONS.dataSet[pieIndex].color ? this.CHART_OPTIONS.dataSet[pieIndex].color : UtilCore.getColor(pieIndex));
-      // this.tooltip.updateTip(mousePos, color, row1, row2);
+      let mousePos = UiCore.cursorPoint(this.props.rootNodeId, e);
+      this.props.updateTip(mousePos, this.props.index, this.props.data);
     }
   }
 
@@ -193,7 +182,8 @@ class PieSlice extends Component {
 
   onMouseLeave(e) {
     this.mouseDown = 0; 
-    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0; 
+    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0;
+    this.props.hideTip(); 
   }
 
   rotateSlice(e) {

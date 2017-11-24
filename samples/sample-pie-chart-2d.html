@@ -8,36 +8,62 @@
       SmartChartsNXT.ready(function () {
         let PieChart2D = new SmartChartsNXT.Chart({
           "type": "PieChart",
-          "title": "Browser Statistics and Trends",
+          "title": "Browser Market Share Worldwide ",
           "outline": 2,
           "canvasBorder": true,
-          "subTitle": "As of Q1, 2016",
+          "subTitle": "As of Q3, 2017",
           "targetElem": "chartContainer",
           "bgColor": "white",
           "showLegend": true,
           "animated": true,
+          "tooltip": {
+            "content": function() {
+              return '<table>' +
+              '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+              '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+              '</table>';
+            },
+            "enabled": true, 
+            "color": "white",
+            "bgColor": "black",
+            "fontSize": "12", 
+            "fontFamily": "", 
+            "xPadding": "",
+            "yPadding": "",
+            "cornerRadius": "", 
+            "borderColor": "",
+            "borderWidth": ""
+          },
           "dataSet": [{
               "label": "Chrome",
-              "value": "72.6",
+              "value": "54.53",
               "color": "#F44336"
             },
             {
               "label": "IE",
-              "value": "5.7"
+              "value": "3.7"
             },
             {
               "label": "Safari",
-              "value": "3.6"
+              "value": "14.61"
             },
             {
               "label": "Firefox",
-              "value": "16.91",
+              "value": "6.07",
               "color": "#FFC107",
               "slicedOut": false
             },
             {
               "label": "Opera",
-              "value": "1.2"
+              "value": "3.9"
+            },
+            {
+              "label": "UC Browser",
+              "value": "7.88"
+            },
+            {
+              "label": "Others",
+              "value": "9.29"
             }
           ] //,
           // events: {
