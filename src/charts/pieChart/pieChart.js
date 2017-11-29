@@ -178,9 +178,10 @@ class PieChart extends Component {
           strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
           updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)}
         />
-        <Tooltip onRef={ref => this.childObj.tooltip = ref} rootNodeId={this.CHART_OPTIONS.targetElem}
-          offsetWidth={this.CHART_OPTIONS.width} offsetHeight={this.CHART_OPTIONS.height} 
-        />
+        {(this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.enable === false) ? null :
+          <Tooltip onRef={ref => this.childObj.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} 
+          rootNodeId={this.CHART_OPTIONS.targetElem} offsetWidth={this.CHART_OPTIONS.width} offsetHeight={this.CHART_OPTIONS.height} 
+        />}
       </g> 
     );
   }
@@ -220,22 +221,21 @@ class PieChart extends Component {
   } 
 
   updateTooltip(originPoint, index, pointData) {
-    let row1 = pointData.label + ", " + pointData.value;
-    let row2 = pointData.percent.toFixed(2) + "%";
-    let strokeColor = pointData.color || UtilCore.getColor(index);
-    if (this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'function') {
-      row1 = this.CHART_OPTIONS.tooltip.content.call(pointData); 
-      row2 = 'html'; 
-    }else if(this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'string'){
-      let tooltipContent = this.CHART_OPTIONS.tooltip.content.replace(/{{/g, "${").replace(/}}/g, "}");
-      row1 = this.util.assemble(tooltipContent, "point")(pointData);
-      row2 = 'html'; 
+    if(!this.childObj.tooltip) {
+      return; 
     }
-    this.childObj.tooltip.updateTip(originPoint, strokeColor, row1, row2);
+    if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content)
+    {
+      this.childObj.tooltip.updateTip(originPoint, index, pointData);
+    } else {
+      let row1 = pointData.label + ", " + pointData.value;
+      let row2 = pointData.percent.toFixed(2) + "%";
+      this.childObj.tooltip.updateTip(originPoint, index, pointData, row1, row2);
+    }
   }
 
   hideTip() {
-    this.childObj.tooltip.hide(); 
+    this.childObj.tooltip && this.childObj.tooltip.hide(); 
   }
 
   getLegendData() {

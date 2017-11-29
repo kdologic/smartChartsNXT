@@ -4,27 +4,60 @@
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will tooltip area for the chart. 
+ * 
+ * sample config --
+ * "tooltip": {
+      "content": function() {
+        return '<table>' +
+        '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+        '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+        '</table>';
+      },
+      "enabled": true, 
+      "color": "white",
+      "bgColor": "black",
+      "fontSize": "14", 
+      "fontFamily": "Lato", 
+      "xPadding": 10,
+      "yPadding": 10,
+      "borderColor": "pink",
+      "borderWidth": 1,
+      "opacity": 0.9
+    }
  */
 
 "use strict";
 
+import defaultConfig from "./../settings/config";
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
 import UiCore from "./../core/ui.core";
+import UtilCore from "./../core/util.core";
 
 class Tooltip extends Component {
     constructor(props) {
       super(props);
-      this.padding = 10;
+      let padding = 10;
+      this.config = {
+        enabled: true, 
+        color: this.props.opts.color || defaultConfig.theme.fontColor,
+        bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColor,
+        fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
+        fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
+        xPadding: Number(this.props.opts.xPadding) || padding,
+        yPadding: Number(this.props.opts.yPadding) || padding,
+        strokeWidth: this.props.opts.borderWidth || "1",
+        opacity:this.props.opts.opacity || "0.9"
+      };
       this.state = {
         tooltipContent: '', 
-        contentX: this.padding, 
-        contentY: this.padding, 
+        contentX: this.config.xPadding, 
+        contentY: this.config.yPadding, 
         contentWidth: 0,
         contentHeight: 0,
         strokeColor: 'rgb(124, 181, 236)', 
         tooltipPath: '',
-        display:'block'
+        opacity:'0'
       };
     }
 
@@ -39,12 +72,12 @@ class Tooltip extends Component {
       return (
         <g class='tooltip-container' pointer-events='none' 
           transform={`translate(${this.props.offsetWidth/2},${this.props.offsetHeight/2})`} 
-          style={{display: this.state.display, 'transition': 'all 0.2s linear'}} >
+          style={{opacity: this.state.opacity, 'transition': 'transform 0.3s ease-out, opacity 0.2s ease-out'}} >
           <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
-            fill='white' stroke={this.state.strokeColor} d={this.state.tooltipPath} 
-            stroke-width='1' opacity='0.9'>
+            fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
+            stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
           </path>
-          <g class='text-tooltip-grp' fill='#717171' font-family='Lato' >
+          <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
             <foreignObject class='tooltip-content' x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
             </foreignObject>
           </g>
@@ -54,7 +87,7 @@ class Tooltip extends Component {
     }
 
     createTooltipContent(line1, line2) {
-      let strContents = "<table>";
+      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+";font-family:"+this.config.fontFamily+";'>";
       strContents += "<tr><td>" + line1 + "</td></tr>";
       if (line2) {
         strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
@@ -63,11 +96,30 @@ class Tooltip extends Component {
       return strContents; 
     }
 
-    updateTip(originPoint, strokeColor, line1, line2) {
-      let padding = 10;
+    updateTip(originPoint, index, pointData, line1, line2) {
+      let xPadding = this.config.xPadding; 
+      let yPadding = this.config.yPadding; 
       let strContents = "";
       let cPoint;
+      let delta = 10; 
       let newState = {};
+
+      if(!pointData && !line1 && !line2) {
+        return; 
+      }
+
+      let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.state.strokeColor;
+
+      if(pointData && this.props.opts && this.props.opts.content) {
+        if (typeof this.props.opts.content === 'function') {
+          line1 = this.props.opts.content.call(pointData); 
+          line2 = 'html'; 
+        }else if(typeof this.props.opts.content === 'string'){
+          let tooltipContent = tthis.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
+          line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
+          line2 = 'html'; 
+        }
+      }
 
       /*Prevent call-by-sharing*/
       if (originPoint) {
@@ -89,63 +141,63 @@ class Tooltip extends Component {
       let txtWidth = containBox.width;
       let lineHeight = containBox.height;
 
-      cPoint.y -= 20;
-      let topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - lineHeight - 10 - padding);
-      let width = txtWidth + (2 * padding);
-      let height = lineHeight + (2 * padding);
+      cPoint.y -= (2*delta);
+      let topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
+      let width = txtWidth + (2 * xPadding);
+      let height = lineHeight + (2 * yPadding);
       let d = [
         "M", 0, 0, //TOP-LEFT CORNER
-        "L", (width), 0, //LINE TO TOP-RIGHT CORNER
-        "L", (width), (height), //LINE TO BOTTOM-RIGHT CORNER
-        "L", (width/2) + 10, height,
-        "L", (width/2), height + 10,
-        "L", (width/2) - 10, height,
-        "L", (0), (height), //LINE TO BOTTOM-LEFT CORNER
+        "L", width, 0, //LINE TO TOP-RIGHT CORNER
+        "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+        "L", (width/2) + delta, height,
+        "L", (width/2), height + delta,
+        "L", (width/2) - delta, height,
+        "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
         "Z"
       ];
       if (topLeft.x + width > this.props.offsetWidth) {
-        cPoint.x -= 20;
-        cPoint.y += 20;
-        topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - (lineHeight) - 10 - (padding));
+        cPoint.x -= (2*delta);
+        cPoint.y += (2*delta);
+        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
         topLeft.x -= (width / 2);
         topLeft.y += (height / 2);
         d = [
           "M", 0, 0, //TOP-LEFT CORNER
-          "L", (width), 0, //LINE TO TOP-RIGHT CORNER
-          "L", (width), (height/2) - 10,
-          "L", (width + 10), (height/2),
-          "L", (width), (height/2) + 10,
-          "L", (width), (height), //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, (height), //LINE TO BOTTOM-LEFT CORNER
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, (height/2) - delta,
+          "L", (width + delta), (height/2),
+          "L", width, (height/2) + delta,
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
           "Z"
         ];
       } else if (topLeft.x <= 0) {
-        cPoint.x += 10;
-        cPoint.y += 20;
-        topLeft = new Point(cPoint.x + (txtWidth / 2) + padding + 10, cPoint.y - (lineHeight) - 10 - (padding));
+        cPoint.x += delta;
+        cPoint.y += (2 * delta);
+        topLeft = new Point(cPoint.x + (txtWidth / 2) + xPadding + delta, cPoint.y - lineHeight - delta - yPadding);
         topLeft.x -= (width / 2);
         topLeft.y += (height / 2);
         d = [
           "M", 0, 0, //TOP-LEFT CORNER
-          "L", (width), 0, //LINE TO TOP-RIGHT CORNER
-          "L", (width), (height), //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, (height), // LINE TO BOTTOM-LEFT CORNER
-          "L", 0, (height/2) + 10, // LINE TO BEFORE C-POINT BEND
-          "L", -10, (height/2), // LINE TO C-POINT
-          "L", 0, (height/2) - 10, //LINE TO AFTER C-POINT BEND
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, // LINE TO BOTTOM-LEFT CORNER
+          "L", 0, (height/2) + delta, // LINE TO BEFORE C-POINT BEND
+          "L", (-delta), (height/2), // LINE TO C-POINT
+          "L", 0, (height/2) - delta, //LINE TO AFTER C-POINT BEND
           "Z"
         ];
       } else if (topLeft.y < 0) {
-        cPoint.y += 40;
-        topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y);
+        cPoint.y += (4*delta);
+        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y);
         d = [
           "M", 0, 0, //TOP-LEFT CORNER
-          "L", (width/2) - 10, 0,
-          "L", (width/2), -10,
-          "L", (width/2) + 10, 0,
-          "L", (width), 0, //LINE TO TOP-RIGHT CORNER
-          "L", (width), (height), //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, (height), //LINE TO BOTTOM-LEFT CORNER
+          "L", (width/2) - delta, 0,
+          "L", (width/2), (-delta),
+          "L", (width/2) + delta, 0,
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
           "Z"
         ];
       }
@@ -155,11 +207,11 @@ class Tooltip extends Component {
         tooltipContent: strContents, 
         contentX: textPos.x, 
         contentY: textPos.y, 
-        contentWidth: containBox.width + padding,
-        contentHeight: containBox.height + padding,
-        strokeColor: strokeColor || this.state.strokeColor,
+        contentWidth: (containBox.width + xPadding),
+        contentHeight: (containBox.height + yPadding),
+        strokeColor: strokeColor,
         tooltipPath: d.join(' '),
-        display:'block'
+        opacity:1
       };
 
       
@@ -176,11 +228,11 @@ class Tooltip extends Component {
     }
 
     show() {
-      this.ref.node.style.display = 'block';
+      this.ref.node.style.opacity = 1;
     }
 
     hide() {
-      this.ref.node.style.display = 'none';
+      this.ref.node.style.opacity = 0;
     }
 }
 

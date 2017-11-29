@@ -16,17 +16,38 @@ import Geom from './geom.core';
 class UiCore {
   constructor() {}
 
+  /*  ** depricated ** */
+  // dropShadow(shadowId) {
+  //   return (
+  //     <defs>
+  //       <filter id={shadowId} height='130%'>
+  //         <feGaussianBlur in='SourceGraphic' stdDeviation='1'/>
+  //           <feOffset dx='2' dy='2' result='offsetblur'/>
+  //             <feMerge><feMergeNode/>
+  //           <feMergeNode in='SourceGraphic'/>
+  //         </feMerge>
+  //       </filter>
+  //     </defs>
+  //   );
+  // } 
+
   dropShadow(shadowId) {
     return (
-      <filter id={shadowId} height='130%'>
-        <feGaussianBlur in='SourceGraphic' stdDeviation='1'/>
-          <feOffset dx='2' dy='2' result='offsetblur'/>
-            <feMerge><feMergeNode/>
-          <feMergeNode in='SourceGraphic'/>
-        </feMerge>
-      </filter>
+      <defs>
+        <filter xmlns="http://www.w3.org/2000/svg" id={shadowId} height="130%">
+          <feGaussianBlur in="SourceAlpha" stdDeviation="0"/> 
+          <feOffset dx="4" dy="4" result="offsetblur"/>
+          <feComponentTransfer>
+            <feFuncA type="linear" slope="0.2"/>
+          </feComponentTransfer>
+          <feMerge> 
+            <feMergeNode/>
+            <feMergeNode in="SourceGraphic"/> 
+          </feMerge>
+        </filter>
+      </defs>
     );
-  } 
+  }
 
   /* Get point in global SVG space*/
   cursorPoint(targetElem, evt) {
