@@ -160,7 +160,7 @@ class PieChart extends Component {
         </g>
         <g class='legend-container'>
           {
-            this.CHART_OPTIONS.showLegend ? 
+            this.CHART_OPTIONS.showLegend &&
             <Draggable>
               <LegendBox legendSet={this.getLegendData()}
                 left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
@@ -168,7 +168,6 @@ class PieChart extends Component {
                 onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
               /> 
             </Draggable>
-            : null 
           }
         </g>
         <PieSet dataSet={this.CHART_DATA.uniqueDataSet} rootNodeId={this.CHART_OPTIONS.targetElem}

@@ -1,10 +1,10 @@
 "use strict";
 
-/*
+/** 
  * pieSlice.js
- * @CreatedOn: 01-Nov-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
+ * @createdOn: 01-Nov-2017
+ * @author: SmartChartsNXT
+ * @version: 1.1.0
  * @description:This is a component class which create each pie slice and bind related events. 
  */
 
@@ -67,11 +67,16 @@ class PieSlice extends Component {
             mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)
           }} 
         />
+        {this.createGradient(`grad-pie${this.props.index}`)}
+        <path class={`pie-${this.props.index} gradient-arc-pie-${this.props.index}`} 
+          d={this.getArcPath()} transform={this.state.arcTransform} 
+          stroke-width="0.5" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" 
+          fill={`url(#grad-pie${this.props.index})`} style={{'pointer-events':'none'}}
+        />
         <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} fill='none' stroke='#555' stroke-width='1' />
       </g>
     );
   }
-
 
   getArcPath(width = this.props.width, height = this.props.height) {
     let path = Geom.describeEllipticalArc(this.props.cx, this.props.cy, width, height, this.state.startAngle || this.props.startAngle, this.state.endAngle || this.props.endAngle, 0);
@@ -198,12 +203,15 @@ class PieSlice extends Component {
     let textStartPoint = this.getTextStartPoint(); 
     let colorStartPoint = this.getColorLegendStartPoint(); 
     let upperArc = this.ref.node.querySelector(`.upper-arc-pie-${this.props.index}`);
+    let upperArcGrad = this.ref.node.querySelector(`.gradient-arc-pie-${this.props.index}`);
     let colorLegend = this.ref.node.querySelector(`.color-legend-${this.props.index}`); 
     let textPie = this.ref.node.querySelector(`.txt-pie-${this.props.index}`);
     let pieHover = this.ref.node.querySelector(`.pie-hover-${this.props.index}`); 
     
     upperArc.setAttribute('d', this.getArcPath());
     upperArc.setAttribute('transform', this.state.arcTransform); 
+    upperArcGrad.setAttribute('d', this.getArcPath());
+    upperArcGrad.setAttribute('transform', this.state.arcTransform); 
     pieHover.setAttribute('d', this.getArcPath(this.props.width + 10, this.props.height + 10));
     pieHover.setAttribute('transform', this.state.arcTransform); 
 
@@ -226,6 +234,18 @@ class PieSlice extends Component {
     let deg = rad * 180.0 / Math.PI;
     deg = (deg < 0) ? deg + 450 : deg + 90;
     return deg % 360;
+  }
+
+  createGradient(gradId) {
+    return (
+      <defs>
+        <radialGradient id={gradId} cx={this.props.cx} cy={this.props.cy} fx={this.props.cx} fy={this.props.cy} r={this.props.width} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" style="stop-color:#fff;stop-opacity:0.06"></stop>
+          <stop offset="83%" style="stop-color:#fff;stop-opacity:0.2"></stop>
+          <stop offset="95%" style="stop-color:#fff;stop-opacity:0"></stop>
+        </radialGradient>
+      </defs>
+    );
   }
 }
 
