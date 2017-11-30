@@ -31,10 +31,15 @@ class PieSlice extends Component {
     };
   }
 
+  componentWillMount() {
+    typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+  }
+
   componentDidMount() {
     if(this.props.slicedOut === true) {
       this.toggleSlide(); 
     }
+    typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 
   render() {
@@ -43,7 +48,6 @@ class PieSlice extends Component {
     return (
       <g class={`pie-grp-${this.props.index}`} 
         events={{
-          onRotateSlice: this.rotateSlice.bind(this), 
           toggleSlide: this.toggleSlide.bind(this),
           sliceHover: this.onMouseEnter.bind(this), 
           sliceLeave: this.onMouseLeave.bind(this)
@@ -142,19 +146,19 @@ class PieSlice extends Component {
   onMouseDown(e) {
     e.stopPropagation();
     e.preventDefault(); 
-    this.mouseDownPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
-    this.mouseDown = 1;
-    this.mouseDrag = 0; 
+    this.props.parentCtx.mouseDownPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
+    this.props.parentCtx.mouseDown = 1;
+    this.props.parentCtx.mouseDrag = 0; 
   }
 
   onMouseUp(e) {
     e.stopPropagation();
     e.preventDefault(); 
-    if(this.mouseDrag === 0) {
+    if(this.props.parentCtx.mouseDrag === 0) {
       this.toggleSlide(); 
     }
-    this.mouseDown = 0;
-    this.mouseDrag = 0;
+    this.props.parentCtx.mouseDown = 0;
+    this.props.parentCtx.mouseDrag = 0;
   }
 
   onMouseMove(e) {
@@ -162,17 +166,17 @@ class PieSlice extends Component {
       return;
     }
     let pos = {clientX : e.clientX || e.touches[0].clientX, clientY : e.clientY || e.touches[0].clientY };
-    if (this.mouseDown === 1 && (this.mouseDownPos.x !== pos.clientX && this.mouseDownPos.y !== pos.clientY)) {
+    if (this.props.parentCtx.mouseDown === 1 && (this.props.parentCtx.mouseDownPos.x !== pos.clientX && this.props.parentCtx.mouseDownPos.y !== pos.clientY)) {
       let dragStartPoint = UiCore.cursorPoint(this.props.rootNodeId, pos);
       let dragAngle = this.getAngle(new Point(this.props.cx, this.props.cy), dragStartPoint);
 
       if (dragAngle > this.dragStartAngle) {
-        this.props.rotateChart(2, false);
+        this.props.rotateChart(2);
       } else {
-        this.props.rotateChart(-2, false);
+        this.props.rotateChart(-2);
       }
       this.dragStartAngle = dragAngle;
-      this.mouseDrag = 1;
+      this.props.parentCtx.mouseDrag = 1;
       this.props.hideTip();
     } else {
       /** for tooltip only  */
@@ -186,15 +190,14 @@ class PieSlice extends Component {
   }
 
   onMouseLeave(e) {
-    this.mouseDown = 0; 
     this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0;
     this.props.hideTip(); 
   }
 
-  rotateSlice(e) {
+  rotateSlice(rotationIndex) {
     this.slicedOut = false; 
-    this.state.startAngle = this.state.startAngle + e.detail.rotationIndex; 
-    this.state.endAngle = this.state.endAngle + e.detail.rotationIndex;
+    this.state.startAngle = this.state.startAngle + rotationIndex; 
+    this.state.endAngle = this.state.endAngle + rotationIndex;
     let mid = ((this.state.startAngle + this.state.endAngle) / 2) % 360;
     this.midAngle = (mid < 0 ? 360 + mid : mid);
     

@@ -55,8 +55,8 @@ class UiCore {
       targetElem = document.querySelector("#" + targetElem + " svg");
     }
     let pt = targetElem.createSVGPoint();
-    pt.x = evt.clientX;
-    pt.y = evt.clientY;
+    pt.x = evt.clientX || evt.touches[0].clientX;
+    pt.y = evt.clientY || evt.touches[0].clientY;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
   } /*End cursorPoint()*/
 

@@ -1,10 +1,10 @@
 "use strict";
 
-/*
+/**
  * pieSet.js
- * @CreatedOn: 01-Nov-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
+ * @createdOn: 01-Nov-2017
+ * @author: SmartChartsNXT
+ * @version: 1.1.0
  * @description:This is a parent class of pie slice class which create all the pie slices. 
  */
 
@@ -18,6 +18,12 @@ class PieSet extends Component {
     this.state = {
       startAngle:0,
       endAngle:0
+    };
+    this.slices = {};
+    this.global = {
+      mouseDownPos: {},
+      mouseDown: 0,
+      mouseDrag: 0
     };
   }
 
@@ -43,16 +49,16 @@ class PieSet extends Component {
           strokeColor={this.props.strokeColor} strokeWidth={this.props.strokeWidth} 
           rotateChart={this.rotateChart.bind(this)} slicedOut={data.slicedOut}
           updateTip={this.props.updateTip} hideTip={this.props.hideTip}
+          onRef={ref => this.slices["s"+i] = ref} parentCtx={this.global}
         />
       );
     });
   }
 
-  rotateChart(rotationIndex, ignorOrdering) {
-    this.ref.children.map((child, index) => {
-      let e = new CustomEvent('onRotateSlice', {'detail':{rotationIndex}}); 
-      child.node.dispatchEvent(e); 
-    }); 
+  rotateChart(rotationIndex) {
+    Object.keys(this.slices).forEach((key) => {
+      this.slices[key].rotateSlice(rotationIndex); 
+    });
   } 
   
 }
