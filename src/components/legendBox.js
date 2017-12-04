@@ -29,6 +29,9 @@
       "borderOpacity": 1,
       "opacity": 0.9,
       "toggleType": false,
+      "hideIcon": false, 
+      "hideLabel": false, 
+      "hideValue": false,
       "onLegendClick": function() {console.log("onClick-",this)},
       "onLegendHover": function() {console.log("onHover-",this)},
       "onLegendLeave": function() {console.log("onLeave-",this)}
@@ -86,8 +89,9 @@ class LegendBox extends Component {
     this.padding = 10; 
     this.containerWidth = 0; 
     this.containerHeight = 0; 
-    this.colorContWidth = 15;
+    this.colorContWidth = this.props.opts.hideIcon ? 0 : 15;
     this.textResized = false;
+    this.hoverHeight = 15; 
     this.lineHeight = 30;
     this.toggleColor = '#bbb';
   }
@@ -118,25 +122,30 @@ class LegendBox extends Component {
   getLegendSet() {
     return this.state.legendSet.map((data, index) =>{
       return (
-        <g class={`legend-${index} series-legend`} transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
+        <g class={`legend-${index} series-legend`} tabindex='0' transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
           events={{
             click:this.onClick.bind(this),
+            keyup:this.onClick.bind(this),
             mouseenter:this.onHover.bind(this),
-            mouseleave: this.onLeave.bind(this)
+            mouseleave: this.onLeave.bind(this),
+            focusin: this.onHover.bind(this),
+            focusout: this.onLeave.bind(this)
           }} >
           <rect class={`legend-${index} legend-border-${index}`} x={this.state.left + (this.padding/2)} y={this.state.top + (this.padding/2)} rx='7'
-           width={this.state.lengthSet.max.width + (2 * this.padding)} height={this.colorContWidth + this.padding} fill={this.config.hoverColor}  
-           stroke='none' fill-opacity='0' style={{'transition': 'fill-opacity 0.3s linear'}}>
+           width={this.state.lengthSet.max.width + this.padding} height={this.hoverHeight + this.padding} fill={this.config.hoverColor}  
+           stroke='none' style={{'transition': 'fill-opacity 0.3s linear',"fillOpacity":"0"}}>
           </rect>
-          <rect class={`legend-${index} legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding} 
-            width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggeled ? this.toggleColor : data.color} 
-            shape-rendering='optimizeSpeed' stroke='none' opacity='1'>
-          </rect>
+          {!this.props.opts.hideIcon &&
+            <rect class={`legend-${index} legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding} 
+              width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggeled ? this.toggleColor : data.color} 
+              shape-rendering='optimizeSpeed' stroke='none' opacity='1'>
+            </rect>
+          }
           <text class={`legend-${index} legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14} fill={this.config.color} font-family={this.config.fontFamily} pointer-events='none' >
-            <tspan class={`legend-${index} legend-txt-label-${index}`}>{data.label}</tspan>
+            <tspan class={`legend-${index} legend-txt-label-${index}`}>{!this.props.opts.hideLabel && data.label}</tspan>
             <tspan class={`legend-${index} legend-txt-value-${index}`} 
               dx={this.state.lengthSet.max.labelLength-this.state.legendSet[index].labelLength + this.padding}>
-              {data.value}
+              {!this.props.opts.hideValue && data.value}
             </tspan>
           </text>
         </g>
@@ -217,6 +226,9 @@ class LegendBox extends Component {
   }
 
   onClick(e) {
+    if(e.type === "keyup" && (e.which || e.keyCode) !== 32) {
+      return; 
+    }
     let index = e.target.classList[0].substring("legend-".length);
     if (this.config.toggleType) {
       this.state.legendSet[index].isToggeled = !this.state.legendSet[index].isToggeled;
