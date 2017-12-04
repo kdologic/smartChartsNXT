@@ -49,6 +49,18 @@ class UiCore {
     );
   }
 
+  radialShadow(gradId, cx, cy, fx, fy, r) {
+    return (
+      <defs>
+        <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits="userSpaceOnUse">
+          <stop offset="0%" style="stop-color:#fff;stop-opacity:0.06"></stop>
+          <stop offset="83%" style="stop-color:#fff;stop-opacity:0.2"></stop>
+          <stop offset="95%" style="stop-color:#fff;stop-opacity:0"></stop>
+        </radialGradient>
+      </defs>
+    );
+  }
+
   /* Get point in global SVG space*/
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {

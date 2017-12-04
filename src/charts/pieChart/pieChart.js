@@ -10,46 +10,48 @@
  * 
  * @Sample caller code:
  * let settings = {
-      "title":"Browser Statistics and Trends",
-      "outline":2,
-      "canvasBorder":true,
-      "subTitle":"As of Q1, 2016",
-      "targetElem":"chartContainer",
-      "bgColor":"gray",
-      "showLegend":true,
-      "animated":false,
-      "tooltip": {
-        "content": function() {
-          return '<table>' +
-          '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
-          '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
-          '</table>';
-        }
+    "title":"Browser Statistics and Trends",
+    "outline":2,
+    "canvasBorder":true,
+    "subTitle":"As of Q1, 2016",
+    "targetElem":"chartContainer",
+    "bgColor":"gray",
+    "legends": {
+      "enable" : true
+    },
+    "animated":false,
+    "tooltip": {
+      "content": function() {
+        return '<table>' +
+        '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+        '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+        '</table>';
+      }
+    },
+    "dataSet":[
+      {
+        "label":"Chrome",
+        "value":"72.6"
       },
-      "dataSet":[
-        {
-          "label":"Chrome",
-          "value":"72.6"
-        },
-        {
-          "label":"IE",
-          "value":"5.7"
-        },
-        {
-          "label":"Safari",
-          "value":"3.6",
-          "slicedOut":true
-        },
-        {
-          "label":"Firefox",
-          "value":"16.9"
-        },
-        {
-          "label":"Opera",
-          "value":"1.2"
-        }
-      ]
-    }; 
+      {
+        "label":"IE",
+        "value":"5.7"
+      },
+      {
+        "label":"Safari",
+        "value":"3.6",
+        "slicedOut":true
+      },
+      {
+        "label":"Firefox",
+        "value":"16.9"
+      },
+      {
+        "label":"Opera",
+        "value":"1.2"
+      }
+    ]
+  };
   SmartChartsNXT.ready(function(){
     let pieChart = new SmartChartsNXT.Chart(settings);
   });
@@ -101,7 +103,7 @@ class PieChart extends Component {
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600,
         MIN_WIDTH: 300,
-        MIN_HEIGHT: self.props.chartOptions.showLegend ? 500 : 400
+        MIN_HEIGHT: !self.props.chartOptions.legends || self.props.chartOptions.legends.enable !== false ? 500 : 400
       }, this.props.chartConst);
 
       this.childObj={}; 
@@ -121,21 +123,24 @@ class PieChart extends Component {
     //super.initBase();
     this.initDataSet();
 
-    if (this.CHART_OPTIONS.showLegend) {
-      if (this.CHART_OPTIONS.width <= 480) {
-        this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
-      } else if (this.CHART_OPTIONS.width <= 680) {
-        this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
-      } else {
-        this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
-        this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
-      }
-    } else {
-      this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
-      this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
-    }
+    // if (this.CHART_OPTIONS.showLegend) {
+    //   if (this.CHART_OPTIONS.width <= 480) {
+    //     this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+    //     this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+    //   } else if (this.CHART_OPTIONS.width <= 680) {
+    //     this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+    //     this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 20);
+    //   } else {
+    //     this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 300)) * 40 / 100;
+    //     this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 40);
+    //   }
+    // } else {
+    //   this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = Math.min(this.CHART_OPTIONS.width, (this.CHART_OPTIONS.height - 200)) * 20 / 100;
+    //   this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 70);
+    // }
+    this.CHART_DATA.pieWidth = this.CHART_DATA.pieHeight = 130;
+    this.CHART_DATA.pieCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y);
+
     this.CHART_DATA.offsetHeight = Math.min(this.CHART_DATA.pieWidth - 10, this.CHART_DATA.offsetHeight);
 
     this.prepareDataSet(); 
@@ -160,11 +165,10 @@ class PieChart extends Component {
         </g>
         <g class='legend-container'>
           {
-            this.CHART_OPTIONS.showLegend &&
+            (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable === false) ? null :
             <Draggable>
-              <LegendBox legendSet={this.getLegendData()}
-                left={10} top={this.CHART_DATA.pieCenter.y + this.CHART_DATA.pieHeight + this.CHART_DATA.offsetHeight + 20}
-                maxWidth={this.CHART_OPTIONS.width - 10} type='horizontal' background='#eee'
+              <LegendBox legendSet={this.getLegendData()} float='bottom' left={10} top={10} opts={this.CHART_OPTIONS.legends || {}} 
+                canvasWidth={this.CHART_OPTIONS.width} canvasHeight={this.CHART_OPTIONS.height} type='horizontal' background='#eee'
                 onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
               /> 
             </Draggable>
@@ -177,10 +181,13 @@ class PieChart extends Component {
           strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
           updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)}
         />
-        {(this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.enable === false) ? null :
+        {
+          (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.enable === false) ? null :
           <Tooltip onRef={ref => this.childObj.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} 
-          rootNodeId={this.CHART_OPTIONS.targetElem} offsetWidth={this.CHART_OPTIONS.width} offsetHeight={this.CHART_OPTIONS.height} 
-        />}
+            rootNodeId={this.CHART_OPTIONS.targetElem} offsetWidth={this.CHART_OPTIONS.width} 
+            offsetHeight={this.CHART_OPTIONS.height} 
+          />
+        }
       </g> 
     );
   }

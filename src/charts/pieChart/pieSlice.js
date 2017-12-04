@@ -71,7 +71,7 @@ class PieSlice extends Component {
             mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)
           }} 
         />
-        {this.createGradient(`grad-pie${this.props.index}`)}
+        {UiCore.radialShadow(`grad-pie${this.props.index}`, this.props.cx, this.props.cy, this.props.cx, this.props.cy, this.props.width)}
         <path class={`pie-${this.props.index} gradient-arc-pie-${this.props.index}`} 
           d={this.getArcPath()} transform={this.state.arcTransform} 
           stroke-width="0.5" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" 
@@ -237,18 +237,6 @@ class PieSlice extends Component {
     let deg = rad * 180.0 / Math.PI;
     deg = (deg < 0) ? deg + 450 : deg + 90;
     return deg % 360;
-  }
-
-  createGradient(gradId) {
-    return (
-      <defs>
-        <radialGradient id={gradId} cx={this.props.cx} cy={this.props.cy} fx={this.props.cx} fy={this.props.cy} r={this.props.width} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" style="stop-color:#fff;stop-opacity:0.06"></stop>
-          <stop offset="83%" style="stop-color:#fff;stop-opacity:0.2"></stop>
-          <stop offset="95%" style="stop-color:#fff;stop-opacity:0"></stop>
-        </radialGradient>
-      </defs>
-    );
   }
 }
 

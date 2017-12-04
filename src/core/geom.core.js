@@ -1,8 +1,8 @@
-/*
- * sc.geom.core.js
- * @CreatedOn: 07-Apr-2016
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
+/**
+ * geom.core.js
+ * @createdOn: 07-Apr-2016
+ * @author: SmartChartsNXT
+ * @version: 1.1.0
  * @description:SmartChartsNXT Core Library components. That contains geometric functionality.
  */
 

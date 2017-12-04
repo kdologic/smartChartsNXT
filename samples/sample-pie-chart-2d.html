@@ -14,7 +14,26 @@
           "subTitle": "As of Q3, 2017",
           "targetElem": "chartContainer",
           "bgColor": "white",
-          "showLegend": true,
+          "legends":{
+            "enable" : true,
+            "top": 10,
+            "left": 10, 
+            "alignment": "horizontal",
+            "float": "bottom",
+            "color": "#000",
+            "bgColor": "#eee",
+            "hoverColor":"#999",
+            "fontSize": 14, 
+            "fontFamily": "Lato", 
+            "borderColor": "none",
+            "borderWidth": 3,
+            "borderOpacity": 1,
+            "opacity": 0.9,
+            "toggleType": false,
+            // "onLegendClick": function() {console.log("onClick-",this)},
+            // "onLegendHover": function() {console.log("onHover-",this)},
+            // "onLegendLeave": function() {console.log("onLeave-",this)}
+          },
           "animated": true,
           "tooltip": {
             "content": function() {

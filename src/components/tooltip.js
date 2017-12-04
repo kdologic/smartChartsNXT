@@ -5,7 +5,7 @@
  * @author:SmartChartsNXT
  * @description: This components will tooltip area for the chart. 
  * 
- * sample config --
+ * Accepted config --
  * "tooltip": {
       "content": function() {
         return '<table>' +
@@ -39,7 +39,6 @@ class Tooltip extends Component {
       super(props);
       let padding = 10;
       this.config = {
-        enabled: true, 
         color: this.props.opts.color || defaultConfig.theme.fontColor,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColor,
         fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
