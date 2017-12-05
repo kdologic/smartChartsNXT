@@ -11,10 +11,15 @@
 export default {
   theme: {
     fontFamily: "Lato",
-    fontColor: "#000",
+    fontColorLight: "#fff",
+    fontColorMedium: "#D1D0CE",
+    fontColorDark: "#000",
+    fontColorHighlight: "#03a9f4",
     fontSizeSmall: "9",
     fontSizeMedium: "14",
     fontSizeLarge: "18",
-    bgColor: "#fff"
+    bgColorLight: "#fff",
+    bgColorMedium: "#8B8A88",
+    bgColorDark: "#000"
   }
 };

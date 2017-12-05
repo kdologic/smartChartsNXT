@@ -54,7 +54,7 @@ class LegendBox extends Component {
       left: this.props.opts.left || this.props.left,
       type: this.props.opts.allignment || this.props.type || "horizontal",
       float: this.props.opts.float || this.props.float || "bottom",
-      color: this.props.opts.color || defaultConfig.theme.fontColor,
+      color: this.props.opts.color || defaultConfig.theme.fontColorDark,
       bgColor: this.props.opts.bgColor || this.props.background || "none",
       hoverColor: this.props.opts.hoverColor || this.props.hoverColor || "#999",
       fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,

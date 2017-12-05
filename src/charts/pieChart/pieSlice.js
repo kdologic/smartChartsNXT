@@ -62,7 +62,7 @@ class PieSlice extends Component {
           style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} 
         /> 
         <path class={`pie-${this.props.index} upper-arc-pie-${this.props.index}`} 
-          d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} 
+          d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} stroke-linecap='round'
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
             mousedown: this.onMouseDown.bind(this), touchstart: this.onMouseDown.bind(this),

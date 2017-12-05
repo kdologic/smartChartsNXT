@@ -39,8 +39,8 @@ class Tooltip extends Component {
       super(props);
       let padding = 10;
       this.config = {
-        color: this.props.opts.color || defaultConfig.theme.fontColor,
-        bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColor,
+        color: this.props.opts.color || defaultConfig.theme.fontColorLight,
+        bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
         fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
         xPadding: Number(this.props.opts.xPadding) || padding,

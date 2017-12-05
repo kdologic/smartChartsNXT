@@ -61,6 +61,11 @@ class UiCore {
     );
   }
 
+  getScaledFontSize(totalWidth, scale, maxSize) {
+    let fSize = totalWidth / scale;
+    return fSize < maxSize ? fSize : maxSize;
+  }
+
   /* Get point in global SVG space*/
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {

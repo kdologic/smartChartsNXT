@@ -13,7 +13,7 @@
     "title":"Browser Statistics and Trends",
     "outline":2,
     "canvasBorder":true,
-    "subTitle":"As of Q1, 2016",
+    "subtitle":"As of Q1, 2016",
     "targetElem":"chartContainer",
     "bgColor":"gray",
     "legends": {
@@ -66,7 +66,9 @@
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
+import defaultConfig from "./../../settings/config";
 import UtilCore from './../../core/util.core';
+import UiCore from './../../core/ui.core';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Tooltip from './../../components/tooltip';
@@ -154,14 +156,36 @@ class PieChart extends Component {
     this.CHART_DATA.totalValue = 0;
   } /*End initDataSet()*/
 
+  getStyle() {
+    return (`
+      .txt-title-grp .txt-title {
+        font-family: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily};
+        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)};
+        fill: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark};
+        stroke: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'};
+      }
+      .txt-title-grp .txt-subtitle {
+        font-family: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily};
+        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)};
+        fill: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark};
+        stroke: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'};
+      }
+    `);
+  }
+
   render() {
     return (
       <g>
+        <style>
+          {this.getStyle()}
+        </style> 
         <g>
-          <text class='txt-title-grp' fill='#717171' font-family='Lato' >
-            <tspan text-anchor='middle' class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)} font-size='4vw'>{this.CHART_OPTIONS.title}</tspan>
-            <tspan text-anchor='middle' class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)} font-size='2vw'>{this.CHART_OPTIONS.subTitle}</tspan>
-          </text>
+          <Draggable>
+            <text class='txt-title-grp' text-rendering='geometricPrecision'>
+              <tspan text-anchor='middle' class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)}>{this.CHART_OPTIONS.title}</tspan>
+              <tspan text-anchor='middle' class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)}>{this.CHART_OPTIONS.subtitle}</tspan>
+            </text>
+          </Draggable>
         </g>
         <g class='legend-container'>
           {
