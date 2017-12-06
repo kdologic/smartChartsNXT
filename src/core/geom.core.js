@@ -97,11 +97,11 @@ class GeomCore {
     return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
   } /*End getMidPoint()*/
 
-  getEllipticalRadious(rx, ry, angleInDegrees) {
+  getEllipticalRadius(rx, ry, angleInDegrees) {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
-  } /*End getEllipticalRadious()*/
+  } /*End getEllipticalRadius()*/
 
   describeEllipticalArc(cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
     let fullArc = false;
@@ -109,8 +109,8 @@ class GeomCore {
       endAngle--;
       fullArc = true;
     }
-    let start = this.polarToCartesian(cx, cy, this.getEllipticalRadious(rx, ry, endAngle), endAngle);
-    let end = this.polarToCartesian(cx, cy, this.getEllipticalRadious(rx, ry, startAngle), startAngle);
+    let start = this.polarToCartesian(cx, cy, this.getEllipticalRadius(rx, ry, endAngle), endAngle);
+    let end = this.polarToCartesian(cx, cy, this.getEllipticalRadius(rx, ry, startAngle), startAngle);
     let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
 
     let d = [

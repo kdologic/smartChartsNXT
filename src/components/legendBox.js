@@ -96,7 +96,12 @@ class LegendBox extends Component {
     this.toggleColor = '#bbb';
   }
 
+  componentWillMount() {
+    typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+  }
+
   componentDidMount() {
+    typeof this.props.onRef === 'function' && this.props.onRef(this);
     if (!this.textResized) {
       this.textResized = true;
       this.state.lengthSet = this.calcElementSpacing(); 
@@ -223,6 +228,15 @@ class LegendBox extends Component {
 
   getContainerBorderPath() {
     return Geom.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(" ");
+  }
+
+  getBBox() {
+    return {
+      width: this.containerWidth, 
+      height: this.containerHeight, 
+      x: this.state.trnsX,
+      y: this.state.trnsY
+    };
   }
 
   onClick(e) {

@@ -151,7 +151,7 @@ class BaseChart extends Component {
         }} >
         { this.CHART_OPTIONS.canvasBorder ? 
         <g>
-          <rect x='0' y='0'
+          <rect x='0' y='0' vector-effect='non-scaling-stroke'
             width={this.CHART_OPTIONS.width - 1}
             height={this.CHART_OPTIONS.height - 1}
             shape-rendering='optimizeSpeed'

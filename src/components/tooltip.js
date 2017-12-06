@@ -70,7 +70,7 @@ class Tooltip extends Component {
     render() {
       return (
         <g class='tooltip-container' pointer-events='none' 
-          transform={`translate(${this.props.offsetWidth/2},${this.props.offsetHeight/2})`} 
+          transform={`translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`} 
           style={{opacity: this.state.opacity, 'transition': 'transform 0.3s ease-out, opacity 0.2s ease-out'}} >
           <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
             fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
@@ -154,7 +154,7 @@ class Tooltip extends Component {
         "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
         "Z"
       ];
-      if (topLeft.x + width > this.props.offsetWidth) {
+      if (topLeft.x + width > this.props.svgWidth) {
         cPoint.x -= (2*delta);
         cPoint.y += (2*delta);
         topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);

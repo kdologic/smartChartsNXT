@@ -12,7 +12,7 @@ export default {
   theme: {
     fontFamily: "Lato",
     fontColorLight: "#fff",
-    fontColorMedium: "#D1D0CE",
+    fontColorMedium: "#848484",
     fontColorDark: "#000",
     fontColorHighlight: "#03a9f4",
     fontSizeSmall: "9",

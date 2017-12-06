@@ -8,6 +8,7 @@
  * @description:This is a component class which create each pie slice and bind related events. 
  */
 
+import defaultConfig from "./../../settings/config";
 import Point from "./../../core/point";
 import Geom from './../../core/geom.core'; 
 import UiCore from './../../core/ui.core'; 
@@ -29,6 +30,7 @@ class PieSlice extends Component {
       colorTransform: "",
       textTransform: ""
     };
+    this.maxMarkerTextLen = 15;
   }
 
   componentWillMount() {
@@ -52,17 +54,25 @@ class PieSlice extends Component {
           sliceHover: this.onMouseEnter.bind(this), 
           sliceLeave: this.onMouseLeave.bind(this)
         }} >
-        <rect class={`pie-${this.props.index} color-legend-${this.props.index}`} x={colorStartPoint.x} y={colorStartPoint.y} transform={this.state.colorTransform} width={this.colorLegendWidth} height={this.colorLegendHeight} fill={this.props.data.color} fill-opacity='1' />
-        <text class={`pie-${this.props.index} txt-pie-grp-pie-${this.props.index}`} transform={this.state.textTransform} fill='#717171' font-family='Lato'>
-          <tspan class={`pie-${this.props.index} txt-pie-${this.props.index}`} x={textStartPoint.x} y={textStartPoint.y} text-anchor={this.getTextAnchor()} font-size='16'>{`${this.props.data.label} [${this.props.data.percent.toFixed(2)} %]`}</tspan>
-        </text>
+
+        {this.props.showSliceMarker &&
+          <g class={`slice-marker-${this.props.index}`}>
+            <rect class={`pie-${this.props.index} color-legend-${this.props.index}`} x={colorStartPoint.x} y={colorStartPoint.y} transform={this.state.colorTransform} width={this.colorLegendWidth} height={this.colorLegendHeight} fill={this.props.data.color} fill-opacity='1' />
+            <text class={`pie-${this.props.index} txt-pie-grp-pie-${this.props.index}`} transform={this.state.textTransform} fill={defaultConfig.theme.fontColorMedium} font-family={defaultConfig.theme.fontFamily}>
+              <tspan class={`pie-${this.props.index} txt-pie-${this.props.index}`} x={textStartPoint.x} y={textStartPoint.y} text-anchor={this.getTextAnchor()} font-size={this.props.fontSize}>
+                {this.getMarkerText(this.props.data)}
+              </tspan>
+            </text>
+            <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} stroke-linejoin='round' vector-effect="non-scaling-stroke" fill='none' stroke={defaultConfig.theme.fontColorDark} stroke-width='1' />
+          </g>
+        }
         <path class={`pie-${this.props.index} pie-hover-${this.props.index}`} 
           d={this.getArcPath(this.props.width + 10, this.props.height + 10)} transform={this.state.arcTransform} 
           fill={this.props.data.color} stroke='none' stroke-width='0' fill-opacity='0'
           style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} 
         /> 
         <path class={`pie-${this.props.index} upper-arc-pie-${this.props.index}`} 
-          d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} stroke-linecap='round'
+          d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} stroke-linecap='butt' stroke-linejoin='bevel'
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
             mousedown: this.onMouseDown.bind(this), touchstart: this.onMouseDown.bind(this),
@@ -77,9 +87,18 @@ class PieSlice extends Component {
           stroke-width="0.5" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" 
           fill={`url(#grad-pie${this.props.index})`} style={{'pointer-events':'none'}}
         />
-        <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} fill='none' stroke='#555' stroke-width='1' />
       </g>
     );
+  }
+
+  getMarkerText(data) {
+    let text = "";
+    if (data.label) {
+      text = this.props.hideMarkerText ? "" : data.label.substring(0, this.maxMarkerTextLen);
+      text += (!this.props.hideMarkerText && data.label.length > this.maxMarkerTextLen) ? '..' : "";
+      text += `[${data.percent.toFixed(2)} %]`;
+    }
+    return text;
   }
 
   getArcPath(width = this.props.width, height = this.props.height) {
@@ -88,11 +107,11 @@ class PieSlice extends Component {
   }
 
   getLowerOrbitalPoint() {
-    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadious(this.props.width, this.props.height, this.midAngle), this.midAngle);
+    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
   }
 
   getUpperOrbitalPoint() {
-    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadious(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
+    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
   }
 
   getTextAnchor() {
@@ -122,12 +141,12 @@ class PieSlice extends Component {
     let shiftIndex = sliceOut ? 15 : 1;
     this.slicedOut = !this.slicedOut; 
     let shiftInterval = setInterval(() => {
-      let shiftedCentre = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadious(shiftIndex * 2, shiftIndex * 2, this.midAngle), this.midAngle);
+      let shiftedCentre = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(shiftIndex * 2, shiftIndex * 2, this.midAngle), this.midAngle);
       if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
         shiftedCentre = new Point(this.props.cx, this.props.cy);
       }
-      let sPoint = Geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, Geom.getEllipticalRadious(this.props.width, this.props.height, this.midAngle), this.midAngle);
-      let ePoint = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadious(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
+      let sPoint = Geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, Geom.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
+      let ePoint = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
       ePoint.x += (this.midAngle > 180 ? -shiftIndex : shiftIndex);
 
       reState.legendPath = this.getLegendPath(sPoint, ePoint);
@@ -210,7 +229,8 @@ class PieSlice extends Component {
     let colorLegend = this.ref.node.querySelector(`.color-legend-${this.props.index}`); 
     let textPie = this.ref.node.querySelector(`.txt-pie-${this.props.index}`);
     let pieHover = this.ref.node.querySelector(`.pie-hover-${this.props.index}`); 
-    
+    let legendPath = this.ref.node.querySelector(`.path-to-legend-${this.props.index}`);
+
     upperArc.setAttribute('d', this.getArcPath());
     upperArc.setAttribute('transform', this.state.arcTransform); 
     upperArcGrad.setAttribute('d', this.getArcPath());
@@ -218,16 +238,22 @@ class PieSlice extends Component {
     pieHover.setAttribute('d', this.getArcPath(this.props.width + 10, this.props.height + 10));
     pieHover.setAttribute('transform', this.state.arcTransform); 
 
-    this.ref.node.querySelector(`.path-to-legend-${this.props.index}`).setAttribute('d', this.state.legendPath);
+    if(legendPath) {
+      legendPath.setAttribute('d', this.state.legendPath);
+    }
     
-    colorLegend.setAttribute('x', colorStartPoint.x);
-    colorLegend.setAttribute('y', colorStartPoint.y);
-    colorLegend.setAttribute('transform', this.state.colorTransform);
+    if(colorLegend){
+      colorLegend.setAttribute('x', colorStartPoint.x);
+      colorLegend.setAttribute('y', colorStartPoint.y);
+      colorLegend.setAttribute('transform', this.state.colorTransform);
+    }
     
-    textPie.setAttribute('x', textStartPoint.x);
-    textPie.setAttribute('y', textStartPoint.y);
-    textPie.setAttribute('text-anchor', this.getTextAnchor());
-    textPie.parentNode.setAttribute('transform',this.state.textTransform); 
+    if(textPie) {
+      textPie.setAttribute('x', textStartPoint.x);
+      textPie.setAttribute('y', textStartPoint.y);
+      textPie.setAttribute('text-anchor', this.getTextAnchor());
+      textPie.parentNode.setAttribute('transform',this.state.textTransform);
+    }
   }
 
   getAngle(point1, point2) {
