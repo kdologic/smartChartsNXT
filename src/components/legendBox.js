@@ -52,7 +52,7 @@ class LegendBox extends Component {
     this.config = {
       top: this.props.opts.top || this.props.top,
       left: this.props.opts.left || this.props.left,
-      type: this.props.opts.allignment || this.props.type || "horizontal",
+      type: this.props.opts.alignment || this.props.type || "horizontal",
       float: this.props.opts.float || this.props.float || "bottom",
       color: this.props.opts.color || defaultConfig.theme.fontColorDark,
       bgColor: this.props.opts.bgColor || this.props.background || "none",
@@ -159,7 +159,7 @@ class LegendBox extends Component {
   }
 
   calcTransformation() {
-    switch (this.props.float) {
+    switch (this.config.float) {
       case 'top':
         this.state.trnsX = this.config.left || this.padding;
         this.state.trnsY = this.padding;

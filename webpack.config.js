@@ -2,8 +2,15 @@
 
 const path = require("path");
 const webpack = require("webpack");
+//let Visualizer = require('webpack-visualizer-plugin');
+let BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+
 
 module.exports = {
+  plugins: [
+    //new Visualizer({filename: './public/statistics.html'}),
+    new BundleAnalyzerPlugin()
+  ],
   module: {
     loaders: [{
       loader: "babel-loader",
@@ -13,9 +20,9 @@ module.exports = {
       query: {
         plugins: [
           ['transform-runtime'],
-          ["transform-react-jsx", {
-            "pragma": "__h__" // change default pragma React.createElement into __h__
-          }]
+          ["transform-class-properties"],
+          ['transform-object-rest-spread'],
+          ["transform-react-jsx", {"pragma": "__h__"}] // change default pragma React.createElement into __h__
         ],
         presets: ['es2015']
       }

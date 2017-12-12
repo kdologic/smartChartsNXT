@@ -1,9 +1,9 @@
 /**
  * util.core.js
- * @CreatedOn: 07-Apr-2016
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
- * @Description:SmartChartsNXT Core Library components. That contains utillity functions.
+ * @createdOn: 07-Apr-2016
+ * @author: SmartChartsNXT
+ * @version: 1.1.0
+ * @description:SmartChartsNXT Core Library components. That contains utillity functions.
  */
 
 
@@ -32,7 +32,7 @@ class UtilCore {
      * Properties from the Souce1 object will be copied to source Object.
      * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
      * */
-    let mergedJSON = source; 
+    let mergedJSON = source;
     for (let attrname in source1) {
       if (mergedJSON.hasOwnProperty(attrname)) {
         if (source1[attrname] != null && source1[attrname].constructor == Object) {
@@ -51,6 +51,20 @@ class UtilCore {
     return mergedJSON;
   } /*End mergeRecursive()*/
 
+  /**
+   * Returns a number whose value is limited to the given range.
+   *
+   * Example: limit the output of this computation to between 0 and 255
+   * (x * 255).clamp(0, 255)
+   *
+   * @param {Number} min The lower boundary of the output range
+   * @param {Number} max The upper boundary of the output range
+   * @returns A number in the range [min, max]
+   * @type Number
+   */
+  clamp(min, max, val) {
+    return Math.min(Math.max(val, min), max);
+  }
 
 
   getColor(index, ranbowFlag) {

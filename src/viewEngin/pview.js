@@ -38,6 +38,10 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
     targetNode.replaceChild(component.node, oldNode); 
   }
   
+  if (component.self && typeof component.self.componentDidMount === 'function') {
+    component.self.componentDidMount.call(component.self);
+  }
+
   if(component.eventStack && component.eventStack instanceof Array){
     component.eventStack.forEach(evt => evt());
   }

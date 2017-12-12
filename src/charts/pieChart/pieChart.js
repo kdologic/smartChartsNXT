@@ -77,6 +77,8 @@ class PieChart extends Component {
       this.CHART_DATA = UtilCore.extends({
         scaleX: 0,
         scaleY: 0,
+        svgWidth:0,
+        svgHeight:0,
         svgCenter: 0,
         pieCenter: 0,
         uniqueDataSet: [],
@@ -93,18 +95,23 @@ class PieChart extends Component {
         maxTextLen: 0
       }, this.props.chartData);
 
-      this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartOptions);
+      this.CHART_OPTIONS = UtilCore.extends({
+        minRadius: 30, 
+        maxRadius: 200
+      }, this.props.chartOptions);
 
-      this.CHART_CONST = UtilCore.extends({
-        FIX_WIDTH: 800,
-        FIX_HEIGHT: 600,
-        MIN_WIDTH: 300,
-        MIN_HEIGHT: !self.props.chartOptions.legends || self.props.chartOptions.legends.enable !== false ? 500 : 400
-      }, this.props.chartConst);
+      this.CHART_CONST = UtilCore.extends({} , this.props.chartConst);
       
+      this.padding = 5; 
       this.firstRender = true; 
       this.childObj={}; 
-
+      this.legendBoxType = this.props.chartOptions.legends ? this.props.chartOptions.legends.alignment : 'horizontal';
+      this.legendBoxFloat = this.props.chartOptions.legends ? this.props.chartOptions.legends.float : 'bottom';
+      
+      let legend = this.props.chartOptions.legends;
+      this.minWidth = (!legend || legend.enable !== false) && (legend.type === 'left' || legend.type === 'right') ? 500 : 400;
+      this.minHeight = (!legend || legend.enable !== false) && (legend.type === 'top' || legend.type === 'bottom') ? 500 : 400;
+      
       this.init();
       // if (this.CHART_OPTIONS.animated !== false) {
       //   this.showAnimatedView();
@@ -127,9 +134,14 @@ class PieChart extends Component {
     this.CHART_DATA.totalValue = 0;
   } 
 
+  // componentWillMount() {
+  //   this.props.setMinCanvasSize(this.minWidth, this.minHeight); 
+  // }
+
   componentDidMount() {
     if(this.firstRender){
       this.firstRender = false; 
+      //this.props.setMinCanvasSize(this.minWidth, this.minHeight); 
       this.calcPieDimensions(); 
       this.update(); 
     }
@@ -153,8 +165,8 @@ class PieChart extends Component {
           {
             (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable === false) ? null :
             <Draggable>
-              <LegendBox legendSet={this.getLegendData()} float='bottom' left={10} top={10} opts={this.CHART_OPTIONS.legends || {}} 
-                canvasWidth={this.CHART_OPTIONS.width} canvasHeight={this.CHART_OPTIONS.height} type='horizontal' background='#eee'
+              <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={10} top={10} opts={this.CHART_OPTIONS.legends || {}} 
+                canvasWidth={this.CHART_OPTIONS.width} canvasHeight={this.CHART_OPTIONS.height} type={this.legendBoxType} background='#eee'
                 onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
                 onRef={ref => this.childObj.legendBox = ref}
               /> 
@@ -183,12 +195,36 @@ class PieChart extends Component {
 
   calcPieDimensions() {
     let extraMargin = 100;
-    let legendBBox = this.childObj.legendBox.getBBox();
+    let legendBBox = this.childObj.legendBox ? this.childObj.legendBox.getBBox() : {width: 0, height: 0, x: 0, y: 0};
     let headerBBox = this.ref.node.querySelector('.txt-title-grp').getBoundingClientRect();
-    this.pieAreaWidth = this.CHART_DATA.svgWidth;
-    this.pieAreaHeight = legendBBox.y - headerBBox.bottom - extraMargin;
-    this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + (this.pieAreaHeight / 2) + (extraMargin / 2));
-    this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+    switch(this.legendBoxFloat) {
+      case 'top': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+      case 'bottom': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
+        this.pieAreaHeight = (legendBBox.y || this.CHART_DATA.svgHeight) - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = (Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) - extraMargin) / 2;
+        break; 
+      case 'left': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - legendBBox.x - legendBBox.width - extraMargin; 
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(legendBBox.x + legendBBox.width + ((this.pieAreaWidth + extraMargin) / 2), headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+      case 'right': 
+        this.pieAreaWidth = legendBBox.x - extraMargin; 
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+    }
+    this.CHART_DATA.pieRadius = ((v) => v < this.CHART_OPTIONS.minRadius ? this.CHART_OPTIONS.minRadius : v)(this.CHART_DATA.pieRadius);
+    
   }
 
   getStyle() {
@@ -283,52 +319,52 @@ class PieChart extends Component {
     this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
   }
   
-  showAnimatedView() {
-    let sAngle = 0;
-    let eAngle = 1;
-    let angleCalc = {};
-    let self = this;
-    for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
-      angleCalc["pie" + pieIndex] = {
-        "startAngle": sAngle++,
-        "endAngle": eAngle++
-      };
-    }
-    let intervalId = setInterval(() => {
-      this.CHART_DATA.pieSet = [];
-      this.CHART_DATA.totalValue = 0;
-      for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
-        let startAngle = angleCalc["pie" + pieIndex].startAngle;
-        let endAngle = angleCalc["pie" + pieIndex].endAngle;
-        let angleDiff = endAngle - startAngle;
-        if (pieIndex > 0) {
-          startAngle = angleCalc["pie" + (pieIndex - 1)].endAngle;
-          endAngle = startAngle + angleDiff;
-        }
-        let actualEndAngle = (this.CHART_DATA.uniqueDataSet[pieIndex].percent * 36 / 10);
-        endAngle = (endAngle + 15) > (startAngle + actualEndAngle) ? (startAngle + actualEndAngle) : (endAngle + 15);
-        let pieSet = this.CHART_DATA.chartSVG.querySelectorAll(".pie" + pieIndex);
-        for (let i = 0; i < pieSet.length; i++) {
-          pieSet[i].parentNode.removeChild(pieSet[i]);
-        }
+  // showAnimatedView() {
+  //   let sAngle = 0;
+  //   let eAngle = 1;
+  //   let angleCalc = {};
+  //   let self = this;
+  //   for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
+  //     angleCalc["pie" + pieIndex] = {
+  //       "startAngle": sAngle++,
+  //       "endAngle": eAngle++
+  //     };
+  //   }
+  //   let intervalId = setInterval(() => {
+  //     this.CHART_DATA.pieSet = [];
+  //     this.CHART_DATA.totalValue = 0;
+  //     for (let pieIndex in this.CHART_DATA.uniqueDataSet) {
+  //       let startAngle = angleCalc["pie" + pieIndex].startAngle;
+  //       let endAngle = angleCalc["pie" + pieIndex].endAngle;
+  //       let angleDiff = endAngle - startAngle;
+  //       if (pieIndex > 0) {
+  //         startAngle = angleCalc["pie" + (pieIndex - 1)].endAngle;
+  //         endAngle = startAngle + angleDiff;
+  //       }
+  //       let actualEndAngle = (this.CHART_DATA.uniqueDataSet[pieIndex].percent * 36 / 10);
+  //       endAngle = (endAngle + 15) > (startAngle + actualEndAngle) ? (startAngle + actualEndAngle) : (endAngle + 15);
+  //       let pieSet = this.CHART_DATA.chartSVG.querySelectorAll(".pie" + pieIndex);
+  //       for (let i = 0; i < pieSet.length; i++) {
+  //         pieSet[i].parentNode.removeChild(pieSet[i]);
+  //       }
 
-        let color = this.CHART_DATA.uniqueDataSet[pieIndex].color;
-        let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
-        self.createPie(startAngle, endAngle, color, strokeColor, pieIndex);
-        angleCalc["pie" + pieIndex] = {
-          "startAngle": startAngle,
-          "endAngle": endAngle
-        };
-        this.CHART_DATA.chartSVG.querySelector("#colorLegend" + pieIndex).style.display = "none";
-        this.CHART_DATA.chartSVG.querySelector("#txtPieGrpPie" + pieIndex).style.display = "none";
-        if (endAngle >= 358) {
-          clearInterval(intervalId);
-          this.init();
-        }
-      }
-    }, 50);
-  } 
+  //       let color = this.CHART_DATA.uniqueDataSet[pieIndex].color;
+  //       let strokeColor = this.CHART_DATA.uniqueDataSet.length > 1 ? "#eee" : "none";
+  //       self.createPie(startAngle, endAngle, color, strokeColor, pieIndex);
+  //       angleCalc["pie" + pieIndex] = {
+  //         "startAngle": startAngle,
+  //         "endAngle": endAngle
+  //       };
+  //       this.CHART_DATA.chartSVG.querySelector("#colorLegend" + pieIndex).style.display = "none";
+  //       this.CHART_DATA.chartSVG.querySelector("#txtPieGrpPie" + pieIndex).style.display = "none";
+  //       if (endAngle >= 358) {
+  //         clearInterval(intervalId);
+  //         this.init();
+  //       }
+  //     }
+  //   }, 50);
+  // } 
 
 } 
 
-module.exports = PieChart;
+export default PieChart;
