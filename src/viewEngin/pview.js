@@ -1,12 +1,12 @@
 
 "use strict";
 
-/*
+/** 
  * pview.js
  * @CreatedOn: 20-Sep-2017
- * @Author: SmartChartsNXT
- * @Version: 1.0.0
- * @Description:This will create a View Engin Aka - pView, for render JSX virtual DOM to a real DOM. 
+ * @author: Kausik Dey
+ * @version: 1.0.0
+ * @description:This will create a View Engin Aka - pView, for render JSX virtual DOM to a real DOM. 
  * "virtual DOM"? It's just JSON - each "VNode" is an object with 3 properties. nodeName, Attributes, children
  * The whole process (JSX -> VDOM -> DOM) in one step
  */
@@ -38,12 +38,12 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
     targetNode.replaceChild(component.node, oldNode); 
   }
   
-  if (component.self && typeof component.self.componentDidMount === 'function') {
-    component.self.componentDidMount.call(component.self);
-  }
-
   if(component.eventStack && component.eventStack instanceof Array){
     component.eventStack.forEach(evt => evt());
+  }
+
+  if (component.self && typeof component.self.componentDidMount === 'function') {
+    component.self.componentDidMount.call(component.self);
   }
 
   return component;
@@ -187,7 +187,6 @@ class Component {
       let oldNode = this.ref.node; 
       let renderedComp = renderDOM(this.vnode); 
 
-      typeof this.componentDidMount === 'function' && renderedComp.eventStack.push(this.componentDidMount.bind(this)); 
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       let component = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }

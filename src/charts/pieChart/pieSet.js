@@ -48,7 +48,6 @@ class PieSet extends Component {
         case 3: this.setState({showSliceMarker: false}); break; 
       }
     }
-      
   }
 
   render() {
