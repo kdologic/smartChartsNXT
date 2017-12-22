@@ -1,9 +1,9 @@
-/*
+/**
  * chart.js
- * @CreatedOn: 22-Oct-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
- * @Description:This class will be entry point of all charts.
+ * @createdOn: 22-Oct-2017
+ * @author: SmartChartsNXT
+ * @version: 1.0.0
+ * @description:This class will be entry point of all charts.
  */
 
 "use strict";
@@ -15,11 +15,12 @@ import UtilCore from './../core/util.core';
 class Chart {
   constructor(opts){
     try {
-      const targetNode = document.querySelector("#" + opts.targetElem);
       const runId = UtilCore.uuidv4();
-      targetNode.setAttribute("runId", runId);
-      this.renderChart(opts, runId, targetNode); 
-      window.addEventListener('resize', this.renderChart.bind(this, opts, runId, targetNode), false); 
+      this.targetNode = document.querySelector("#" + opts.targetElem);
+      this.targetNode.setAttribute("runId", runId);
+      this.renderChartBind = this.renderChart.bind(this, opts, runId, this.targetNode);
+      this.renderChartBind(); 
+      window.addEventListener('resize', this.renderChartBind, false); 
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 
@@ -27,8 +28,36 @@ class Chart {
   }
 
   renderChart(opts, runId, targetNode) {
+    if(this.chartNode) {
+      opts.animated = false; 
+    }
     this.chartNode = mountTo(<BaseChart opts={opts} runid={runId} width={targetNode.offsetWidth} height={targetNode.offsetHeight} />, targetNode);
   }
+
+  // onWindowResize(callBackInit) {
+  //   let self = this;
+  //   let containerDiv = this.targetNode; 
+  //   if (this.timeOut != null) {
+  //     clearTimeout(this.timeOut);
+  //   }
+  //   callChart();
+
+  //   function callChart() {
+  //     if (containerDiv) {
+  //       if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
+  //         self.timeOut = setTimeout(() => {
+  //           callChart();
+  //         }, 100);
+  //       } else {
+  //         self.timeOut = setTimeout(() => {
+  //           if (typeof callBackInit === "function") {
+  //             callBackInit.call(self);
+  //           }
+  //         }, 500);
+  //       }
+  //     }
+  //   }
+  // } 
 
   showErrorScreen(opts, ex, mgs) {
     return; 
@@ -98,40 +127,6 @@ class Chart {
       }
     })();
   }
-
-  onWindowResize(callBackInit) {
-    let self = this;
-    let containerDiv = this.CHART_DATA.container;
-    if (this.getRunId() != containerDiv.getAttribute("runId")) {
-      window.removeEventListener('resize', this.onWindowResize);
-      if (this.timeOut != null) {
-        clearTimeout(this.timeOut);
-      }
-      return;
-    }
-    if (containerDiv.offsetWidth !== this.CHART_CONST.FIX_WIDTH || containerDiv.offsetHeight !== this.CHART_CONST.FIX_HEIGHT) {
-      if (this.timeOut != null) {
-        clearTimeout(this.timeOut);
-      }
-      callChart();
-
-      function callChart() {
-        if (containerDiv) {
-          if (containerDiv.offsetWidth === 0 && containerDiv.offsetHeight === 0) {
-            self.timeOut = setTimeout(() => {
-              callChart();
-            }, 100);
-          } else {
-            self.timeOut = setTimeout(() => {
-              if (typeof callBackInit === "function") {
-                callBackInit.call(self);
-              }
-            }, 500);
-          }
-        }
-      }
-    }
-  } /*End onWindowResize()*/
 }
 
 export default Chart; 

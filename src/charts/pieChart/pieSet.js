@@ -21,7 +21,8 @@ class PieSet extends Component {
       endAngle:0,
       pieTextFontSize: defaultConfig.theme.fontSizeMedium,
       showSliceMarker: true,
-      hideMarkerText: false
+      hideMarkerText: false, 
+      animPercent: null
     };
     this.slices = {};
     this.global = {
@@ -47,7 +48,14 @@ class PieSet extends Component {
         case 2: this.setState({hideMarkerText: true}); break;
         case 3: this.setState({showSliceMarker: false}); break; 
       }
-    }
+    } else if(this.props.animated) {
+      if(this.state.animPercent === null) {
+        this.state.animPercent = 0; 
+      }
+      if(this.state.animPercent <= 100){
+        this.doAnimation(); 
+      }
+    } 
   }
 
   render() {
@@ -60,8 +68,10 @@ class PieSet extends Component {
 
   createPieSlices() {
     return this.props.dataSet.map((data, i) =>{
+      let percent = Math.min(this.state.animPercent || data.percent, data.percent);
       this.state.startAngle = this.state.endAngle; 
-      this.state.endAngle += (data.percent * 3.6);
+      this.state.endAngle += (percent * 3.6);
+      console.log(this.state.endAngle);
       return (
         <PieSlice index={i} rootNodeId={this.props.rootNodeId}
           toggleEnabled={this.props.dataSet.length > 0 ? true : false} cx ={this.props.cx} cy={this.props.cy} 
@@ -80,6 +90,12 @@ class PieSet extends Component {
       this.slices[key].rotateSlice(rotationIndex); 
     });
   } 
+
+  doAnimation() {
+    setTimeout(() => {
+      this.setState({animPercent:this.state.animPercent + 4});
+    }, 50);
+  }
   
 }
 

@@ -145,7 +145,7 @@ class BaseChart extends Component {
   //   this.event.dispatchEvent(aftrRenderEvent);
   // }
 
-  getRunId(chartType) {
+  getRunId() {
     return this.runId;
   }
 

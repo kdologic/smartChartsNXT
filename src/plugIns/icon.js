@@ -1,4 +1,4 @@
-/*
+/**
  * icon.js
  * @CreatedOn: 07-Nov-2017
  * @author: SmartChartsNXT

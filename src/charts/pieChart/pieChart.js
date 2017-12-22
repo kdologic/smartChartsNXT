@@ -134,14 +134,9 @@ class PieChart extends Component {
     this.CHART_DATA.totalValue = 0;
   } 
 
-  // componentWillMount() {
-  //   this.props.setMinCanvasSize(this.minWidth, this.minHeight); 
-  // }
-
   componentDidMount() {
     if(this.firstRender){
       this.firstRender = false; 
-      //this.props.setMinCanvasSize(this.minWidth, this.minHeight); 
       this.calcPieDimensions(); 
       this.update(); 
     }
@@ -180,7 +175,8 @@ class PieChart extends Component {
           offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
           pieAreaWidth={this.pieAreaWidth} pieAreaHeight={this.pieAreaHeight}
           strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
-          updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)}
+          updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)} 
+          animated={this.CHART_OPTIONS.animated === 'undefined' ? true : this.CHART_OPTIONS.animated}
         /> 
         }
         {!this.firstRender && 
@@ -192,43 +188,12 @@ class PieChart extends Component {
       </g> 
     );
   }
-
-  calcPieDimensions() {
-    let extraMargin = 100;
-    let legendBBox = this.childObj.legendBox ? this.childObj.legendBox.getBBox() : {width: 0, height: 0, x: 0, y: 0};
-    let headerBBox = this.ref.node.querySelector('.txt-title-grp').getBoundingClientRect();
-    switch(this.legendBoxFloat) {
-      case 'top': 
-        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
-        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
-        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
-        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
-        break; 
-      case 'bottom': 
-        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
-        this.pieAreaHeight = (legendBBox.y || this.CHART_DATA.svgHeight) - headerBBox.bottom - extraMargin;
-        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
-        this.CHART_DATA.pieRadius = (Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) - extraMargin) / 2;
-        break; 
-      case 'left': 
-        this.pieAreaWidth = this.CHART_DATA.svgWidth - legendBBox.x - legendBBox.width - extraMargin; 
-        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
-        this.CHART_DATA.pieCenter = new Point(legendBBox.x + legendBBox.width + ((this.pieAreaWidth + extraMargin) / 2), headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
-        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
-        break; 
-      case 'right': 
-        this.pieAreaWidth = legendBBox.x - extraMargin; 
-        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
-        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
-        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
-        break; 
-    }
-    this.CHART_DATA.pieRadius = ((v) => v < this.CHART_OPTIONS.minRadius ? this.CHART_OPTIONS.minRadius : v)(this.CHART_DATA.pieRadius);
-    
-  }
-
+  
   getStyle() {
     return (`
+      *{
+        outline:none;
+      }
       .txt-title-grp .txt-title {
         font-family: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily};
         font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)};
@@ -317,6 +282,40 @@ class PieChart extends Component {
   onLegendClick(index) {
     let e = new CustomEvent('toggleSlide'); 
     this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+  }
+
+  calcPieDimensions() {
+    let extraMargin = 100;
+    let legendBBox = this.childObj.legendBox ? this.childObj.legendBox.getBBox() : {width: 0, height: 0, x: 0, y: 0};
+    let headerBBox = this.ref.node.querySelector('.txt-title-grp').getBoundingClientRect();
+    switch(this.legendBoxFloat) {
+      case 'top': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+      case 'bottom': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - this.padding;
+        this.pieAreaHeight = (legendBBox.y || this.CHART_DATA.svgHeight) - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = (Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth, this.pieAreaHeight - this.CHART_DATA.offsetHeight) - extraMargin) / 2;
+        break; 
+      case 'left': 
+        this.pieAreaWidth = this.CHART_DATA.svgWidth - legendBBox.x - legendBBox.width - extraMargin; 
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(legendBBox.x + legendBBox.width + ((this.pieAreaWidth + extraMargin) / 2), headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+      case 'right': 
+        this.pieAreaWidth = legendBBox.x - extraMargin; 
+        this.pieAreaHeight = this.CHART_DATA.svgHeight - headerBBox.bottom - extraMargin;
+        this.CHART_DATA.pieCenter = new Point(this.pieAreaWidth / 2, headerBBox.bottom + ((this.pieAreaHeight + extraMargin) / 2));
+        this.CHART_DATA.pieRadius = Math.min(this.pieAreaWidth - this.CHART_DATA.offsetWidth - (2*extraMargin), this.pieAreaHeight - this.CHART_DATA.offsetHeight) / 2;
+        break; 
+    }
+    this.CHART_DATA.pieRadius = ((v) => v < this.CHART_OPTIONS.minRadius ? this.CHART_OPTIONS.minRadius : v)(this.CHART_DATA.pieRadius);
+    
   }
   
   // showAnimatedView() {

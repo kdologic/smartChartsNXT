@@ -25,13 +25,14 @@ class UtilCore {
         obj1[p] = obj2[p];
       }
     }
-  } /*End mergeRecursive()*/
+  }
 
+
+  /**
+   * Properties from the Souce1 object will be copied to source Object.
+   * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
+   */
   extends(source, source1) {
-    /*
-     * Properties from the Souce1 object will be copied to source Object.
-     * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
-     * */
     let mergedJSON = source;
     for (let attrname in source1) {
       if (mergedJSON.hasOwnProperty(attrname)) {
@@ -49,7 +50,7 @@ class UtilCore {
       }
     }
     return mergedJSON;
-  } /*End mergeRecursive()*/
+  }
 
   /**
    * Returns a number whose value is limited to the given range.
@@ -123,7 +124,7 @@ class UtilCore {
     }
 
     return result;
-  } /*End getColor()*/
+  }
 
   colorLuminance(hex, lum) {
     /* validate hex string*/
@@ -141,7 +142,7 @@ class UtilCore {
       rgb += ("00" + c).substr(c.length);
     }
     return rgb;
-  } /*End colorLuminance()*/
+  }
 
   saveAsImage(opts) {
     /*opts = {width:800, height:500, srcElem:"", type:"jpeg || png || svg", saveSuccess:null};*/
@@ -224,25 +225,27 @@ class UtilCore {
       }
     };
 
-  } /*End saveAsImage()*/
+  }
 
+  /**
+   * opts = {width:800, height:500, srcElem:"", saveSuccess:null}
+   */
   printChart(opts) {
-    /*opts = {width:800, height:500, srcElem:"", saveSuccess:null};*/
     opts.printFlag = true;
     opts.type = "pdf";
     this.saveAsImage(opts);
-  } /*End printChart()*/
+  }
 
   assemble(literal, params) {
     return new Function(params, "return `" + literal + "`;"); // TODO: Proper escaping
-  } /*End assemble()*/
+  }
 
   /* will generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant*/
   uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
-  } /*End assemble()*/
+  }
 }
 
 export default new UtilCore();

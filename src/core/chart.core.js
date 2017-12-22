@@ -1,9 +1,10 @@
-/*
+/**
  * chart.core.js
- * @CreatedOn:10-Jul-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
- * @Description:SmartChartsNXT Core Library components. That contains common functionality.
+ * @createdOn:10-Jul-2017
+ * @author: SmartChartsNXT
+ * @version: 1.1.0
+ * @description:SmartChartsNXT Core Library components. It's bootstrap the code, 
+ * by loading appropriate dependencies. Loading ployfills and shims, fonts etc. 
  */
 
 "use strict";
