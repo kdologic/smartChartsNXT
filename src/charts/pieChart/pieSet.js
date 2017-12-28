@@ -71,7 +71,6 @@ class PieSet extends Component {
       let percent = Math.min(this.state.animPercent || data.percent, data.percent);
       this.state.startAngle = this.state.endAngle; 
       this.state.endAngle += (percent * 3.6);
-      console.log(this.state.endAngle);
       return (
         <PieSlice index={i} rootNodeId={this.props.rootNodeId}
           toggleEnabled={this.props.dataSet.length > 0 ? true : false} cx ={this.props.cx} cy={this.props.cy} 

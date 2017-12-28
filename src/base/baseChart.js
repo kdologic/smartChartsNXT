@@ -16,8 +16,6 @@ import Point from "./../core/point";
 import UtilCore from './../core/util.core';
 import { Component } from "./../viewEngin/pview";
 
-//import Timer from "./../viewEngin/timer"; 
-//import Mytitle from "./../viewEngin/mytitle"; 
 /** ------- Requireing all chart types ------- */
 const CHART_MODULES = {
     //AreaChart: require("./../charts/areaChart/areaChart")
@@ -133,7 +131,7 @@ class BaseChart extends Component {
           chartConst={this.CHART_CONST} 
         /> 
       </svg>
-    );
+     );
   }
 
 

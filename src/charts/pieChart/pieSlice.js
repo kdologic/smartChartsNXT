@@ -63,7 +63,7 @@ class PieSlice extends Component {
                 {this.getMarkerText(this.props.data)}
               </tspan>
             </text>
-            <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} stroke-linejoin='round' vector-effect="non-scaling-stroke" fill='none' stroke={defaultConfig.theme.fontColorDark} stroke-width='1' />
+            <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} stroke-linejoin='round' vector-effect="non-scaling-stroke" fill='none' stroke={defaultConfig.theme.fontColorMedium} stroke-width='1' />
           </g>
         }
         <path class={`pie-${this.props.index} pie-hover-${this.props.index}`} 
