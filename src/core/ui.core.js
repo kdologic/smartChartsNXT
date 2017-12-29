@@ -49,13 +49,49 @@ class UiCore {
     );
   }
 
-  radialShadow(gradId, cx, cy, fx, fy, r) {
+  // radialShadow(gradId, cx, cy, fx, fy, r) {
+  //   return (
+  //     <defs>
+  //       <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits="userSpaceOnUse">
+  //         <stop offset="0%" style="stop-color:#fff;stop-opacity:0.06"></stop>
+  //         <stop offset="83%" style="stop-color:#fff;stop-opacity:0.2"></stop>
+  //         <stop offset="95%" style="stop-color:#fff;stop-opacity:0"></stop>
+  //       </radialGradient>
+  //     </defs>
+  //   );
+  // }
+  /** Create radial gradient
+   * @param {string} gradId - identifire of this gradient
+   * @param {number} cx - center x 
+   * @param {number} cy - center y
+   * @param {number} fx - offset x
+   * @param {number} fy - offset y
+   * @param {number} r -  radius
+   * @param {Array} gradArr - Array of number or object. 
+   * Example --
+   * gradArr = [0.1, -0.06, 0.9] or 
+   * gradArr = [{offset:0, opacity:0.06},{offset:83, opacity:0.2},{offset:95, opacity:0}]
+   * (-) negative indicates darker shades
+   * 
+  */
+  radialShadow(gradId, cx, cy, fx, fy, r, gradArr) {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits="userSpaceOnUse">
-          <stop offset="0%" style="stop-color:#fff;stop-opacity:0.06"></stop>
-          <stop offset="83%" style="stop-color:#fff;stop-opacity:0.2"></stop>
-          <stop offset="95%" style="stop-color:#fff;stop-opacity:0"></stop>
+          {gradArr.map((grad, i) =>{
+            let offset = i/gradArr.length*100;
+            let opacity = grad; 
+            let color = '#fff'; 
+            if(typeof grad === 'object'){
+              offset = grad.offset !== 'undefined' ? grad.offset : offset; 
+              opacity = grad.opacity  !== 'undefined' ? grad.opacity : opacity; 
+              if(opacity < 0) {
+                color = '#000'; 
+                opacity = Math.abs(opacity); 
+              }
+            }
+            return <stop offset={`${offset}%`} stop-color={color} stop-opacity={opacity}></stop>;
+          })}
         </radialGradient>
       </defs>
     );

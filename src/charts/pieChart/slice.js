@@ -1,11 +1,11 @@
 "use strict";
 
 /** 
- * pieSlice.js
+ * slice.js
  * @createdOn: 01-Nov-2017
  * @author: SmartChartsNXT
  * @version: 1.1.0
- * @description:This is a component class which create each pie slice and bind related events. 
+ * @description:This is a component class which create each slice and bind related events. 
  */
 
 import defaultConfig from "./../../settings/config";
@@ -15,7 +15,7 @@ import UiCore from './../../core/ui.core';
 import UtilCore from './../../core/util.core';
 import {Component} from "./../../viewEngin/pview";
 
-class PieSlice extends Component {
+class Slice extends Component {
   constructor(props) {
     super(props);
     this.colorLegendWidth = 40; 
@@ -48,7 +48,7 @@ class PieSlice extends Component {
     let textStartPoint = this.getTextStartPoint(); 
     let colorStartPoint = this.getColorLegendStartPoint(); 
     return (
-      <g class={`pie-grp-${this.props.index}`} 
+      <g class={`slice-grp-${this.props.index}`} 
         events={{
           toggleSlide: this.toggleSlide.bind(this),
           sliceHover: this.onMouseEnter.bind(this), 
@@ -57,21 +57,21 @@ class PieSlice extends Component {
 
         {this.props.showSliceMarker &&
           <g class={`slice-marker-${this.props.index}`}>
-            <rect class={`pie-${this.props.index} color-legend-${this.props.index}`} x={colorStartPoint.x} y={colorStartPoint.y} transform={this.state.colorTransform} width={this.colorLegendWidth} height={this.colorLegendHeight} fill={this.props.data.color} fill-opacity='1' />
-            <text class={`pie-${this.props.index} txt-pie-grp-pie-${this.props.index}`} transform={this.state.textTransform} fill={defaultConfig.theme.fontColorMedium} font-family={defaultConfig.theme.fontFamily}>
-              <tspan class={`pie-${this.props.index} txt-pie-${this.props.index}`} x={textStartPoint.x} y={textStartPoint.y} text-anchor={this.getTextAnchor()} font-size={this.props.fontSize}>
+            <rect class={`slice-${this.props.index} color-legend-${this.props.index}`} x={colorStartPoint.x} y={colorStartPoint.y} transform={this.state.colorTransform} width={this.colorLegendWidth} height={this.colorLegendHeight} fill={this.props.data.color} fill-opacity='1' />
+            <text class={`slice-${this.props.index} txt-slice-grp-slice-${this.props.index}`} transform={this.state.textTransform} fill={defaultConfig.theme.fontColorMedium} font-family={defaultConfig.theme.fontFamily}>
+              <tspan class={`slice-${this.props.index} txt-slice-${this.props.index}`} x={textStartPoint.x} y={textStartPoint.y} text-anchor={this.getTextAnchor()} font-size={this.props.fontSize}>
                 {this.getMarkerText(this.props.data)}
               </tspan>
             </text>
-            <path class={`pie-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} stroke-linejoin='round' vector-effect="non-scaling-stroke" fill='none' stroke={defaultConfig.theme.fontColorMedium} stroke-width='1' />
+            <path class={`slice-${this.props.index} path-to-legend-${this.props.index}`} d={this.state.legendPath} stroke-linejoin='round' vector-effect="non-scaling-stroke" fill='none' stroke={defaultConfig.theme.fontColorMedium} stroke-width='1' />
           </g>
         }
-        <path class={`pie-${this.props.index} pie-hover-${this.props.index}`} 
+        <path class={`slice-${this.props.index} slice-hover-${this.props.index}`} 
           d={this.getArcPath(this.props.width + 10, this.props.height + 10)} transform={this.state.arcTransform} 
           fill={this.props.data.color} stroke='none' stroke-width='0' fill-opacity='0'
           style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} 
         /> 
-        <path class={`pie-${this.props.index} upper-arc-pie-${this.props.index}`} 
+        <path class={`slice-${this.props.index} upper-arc-slice-${this.props.index}`} 
           d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} stroke-linecap='butt' stroke-linejoin='bevel'
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
@@ -81,11 +81,13 @@ class PieSlice extends Component {
             mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)
           }} 
         />
-        {UiCore.radialShadow(`grad-pie${this.props.index}`, this.props.cx, this.props.cy, this.props.cx, this.props.cy, this.props.width)}
-        <path class={`pie-${this.props.index} gradient-arc-pie-${this.props.index}`} 
+        {
+          UiCore.radialShadow(`grad-slice${this.props.index}`, this.props.cx, this.props.cy, this.props.cx, this.props.cy, this.props.width, this.props.gradient)
+        }
+        <path class={`slice-${this.props.index} gradient-arc-slice-${this.props.index}`} 
           d={this.getArcPath()} transform={this.state.arcTransform} 
           stroke-width="0.5" stroke-linecap="square" stroke-linejoin="round" fill-opacity="1" stroke-opacity="1" 
-          fill={`url(#grad-pie${this.props.index})`} style={{'pointer-events':'none'}}
+          fill={`url(#grad-slice${this.props.index})`} style={{'pointer-events':'none'}}
         />
       </g>
     );
@@ -101,8 +103,8 @@ class PieSlice extends Component {
     return text;
   }
 
-  getArcPath(width = this.props.width, height = this.props.height) {
-    let path = Geom.describeEllipticalArc(this.props.cx, this.props.cy, width, height, this.state.startAngle || this.props.startAngle, this.state.endAngle || this.props.endAngle, 0);
+  getArcPath(width = this.props.width, height = this.props.height, innerWidth = this.props.innerWidth, innerHeight = this.props.innerHeight) {
+    let path = this.describeArc(this.props.cx, this.props.cy, width, height, innerWidth, innerHeight, this.state.startAngle || this.props.startAngle, this.state.endAngle || this.props.endAngle);
     return path.d;
   }
 
@@ -162,6 +164,46 @@ class PieSlice extends Component {
     }, 10);
   }
 
+  describeArc(cx, cy, rMaxX, rMaxY, rMinX, rMinY, startAngle, endAngle, sweepFlag = 0) {
+    let fullArc = false;
+    if (startAngle % 360 === endAngle % 360) {
+      endAngle--;
+      fullArc = true;
+    }
+    let outerArcStart = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMaxX, rMaxY, endAngle), endAngle);
+    let outerArcEnd = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMaxX, rMaxY, startAngle), startAngle);
+    let innerArcStart = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMinX, rMinY, endAngle), endAngle);
+    let innerArcEnd = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMinX, rMinY, startAngle), startAngle);
+    let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
+
+    let d = [
+      "M", outerArcStart.x, outerArcStart.y,
+      "A", rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y,
+      "L", innerArcEnd.x, innerArcEnd.y,
+      "A", rMinX, rMinY, 0, largeArcFlag, Math.abs(sweepFlag - 1), innerArcStart.x, innerArcStart.y,
+      "Z"
+    ];
+
+    if (fullArc) {
+      d.push("L", outerArcStart.x, outerArcStart.y);
+    }
+    let path = {
+      "d": d.join(" "),
+      "outerArc": [rMaxX, rMaxY, 0, largeArcFlag, sweepFlag, outerArcEnd.x, outerArcEnd.y].join(" "),
+      "outerArcStart": outerArcStart,
+      "outerArcEnd": outerArcEnd,
+      "innerArc": [rMinX, rMinY, 0, largeArcFlag, sweepFlag, innerArcStart.x, innerArcStart.y].join(" "),
+      "innerArcStart": innerArcStart,
+      "innerArcEnd": innerArcEnd,
+      "center": new Point(cx, cy),
+      "rMaxX": rMaxX,
+      "rMaxY": rMaxY,
+      "startAngle": startAngle,
+      "endAngle": endAngle
+    };
+    return path;
+  }
+
   onMouseDown(e) {
     e.stopPropagation();
     e.preventDefault(); 
@@ -205,11 +247,11 @@ class PieSlice extends Component {
   }
 
   onMouseEnter(e) {
-    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0.4; 
+    this.ref.node.querySelector(`.slice-hover-${this.props.index}`).style['fill-opacity'] = 0.4; 
   }
 
   onMouseLeave(e) {
-    this.ref.node.querySelector(`.pie-hover-${this.props.index}`).style['fill-opacity'] = 0;
+    this.ref.node.querySelector(`.slice-hover-${this.props.index}`).style['fill-opacity'] = 0;
     this.props.hideTip(); 
   }
 
@@ -224,19 +266,19 @@ class PieSlice extends Component {
     this.state.arcTransform = this.state.colorTransform = this.state.textTransform = ''; 
     let textStartPoint = this.getTextStartPoint(); 
     let colorStartPoint = this.getColorLegendStartPoint(); 
-    let upperArc = this.ref.node.querySelector(`.upper-arc-pie-${this.props.index}`);
-    let upperArcGrad = this.ref.node.querySelector(`.gradient-arc-pie-${this.props.index}`);
+    let upperArc = this.ref.node.querySelector(`.upper-arc-slice-${this.props.index}`);
+    let upperArcGrad = this.ref.node.querySelector(`.gradient-arc-slice-${this.props.index}`);
     let colorLegend = this.ref.node.querySelector(`.color-legend-${this.props.index}`); 
-    let textPie = this.ref.node.querySelector(`.txt-pie-${this.props.index}`);
-    let pieHover = this.ref.node.querySelector(`.pie-hover-${this.props.index}`); 
+    let textSlice = this.ref.node.querySelector(`.txt-slice-${this.props.index}`);
+    let sliceHover = this.ref.node.querySelector(`.slice-hover-${this.props.index}`); 
     let legendPath = this.ref.node.querySelector(`.path-to-legend-${this.props.index}`);
 
     upperArc.setAttribute('d', this.getArcPath());
     upperArc.setAttribute('transform', this.state.arcTransform); 
     upperArcGrad.setAttribute('d', this.getArcPath());
     upperArcGrad.setAttribute('transform', this.state.arcTransform); 
-    pieHover.setAttribute('d', this.getArcPath(this.props.width + 10, this.props.height + 10));
-    pieHover.setAttribute('transform', this.state.arcTransform); 
+    sliceHover.setAttribute('d', this.getArcPath(this.props.width + 10, this.props.height + 10));
+    sliceHover.setAttribute('transform', this.state.arcTransform); 
 
     if(legendPath) {
       legendPath.setAttribute('d', this.state.legendPath);
@@ -248,11 +290,11 @@ class PieSlice extends Component {
       colorLegend.setAttribute('transform', this.state.colorTransform);
     }
     
-    if(textPie) {
-      textPie.setAttribute('x', textStartPoint.x);
-      textPie.setAttribute('y', textStartPoint.y);
-      textPie.setAttribute('text-anchor', this.getTextAnchor());
-      textPie.parentNode.setAttribute('transform',this.state.textTransform);
+    if(textSlice) {
+      textSlice.setAttribute('x', textStartPoint.x);
+      textSlice.setAttribute('y', textStartPoint.y);
+      textSlice.setAttribute('text-anchor', this.getTextAnchor());
+      textSlice.parentNode.setAttribute('transform',this.state.textTransform);
     }
   }
 
@@ -266,4 +308,4 @@ class PieSlice extends Component {
   }
 }
 
-export default PieSlice; 
+export default Slice; 

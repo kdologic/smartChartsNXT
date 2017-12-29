@@ -1,59 +1,84 @@
 /** 
  * pieChart.js
  * SVG Pie Chart 2D
- * @version:1.1.0
  * @createdOn:07-Jul-2016
+ * @version:2.0.0
  * @author:SmartChartsNXT
  * @description:This will generate a 2d Pie chart. Using SVG 1.1 elements and HTML 5 standard. 
  * @JSFiddle:
  * 
- * 
  * @Sample caller code:
- * let settings = {
-    "title":"Browser Statistics and Trends",
-    "outline":2,
-    "canvasBorder":true,
-    "subtitle":"As of Q1, 2016",
-    "targetElem":"chartContainer",
-    "bgColor":"gray",
-    "legends": {
-      "enable" : true
-    },
-    "animated":false,
-    "tooltip": {
-      "content": function() {
-        return '<table>' +
-        '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
-        '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
-        '</table>';
-      }
-    },
-    "dataSet":[
-      {
-        "label":"Chrome",
-        "value":"72.6"
+  SmartChartsNXT.ready(function () {
+    let PieChart2D = new SmartChartsNXT.Chart({
+      "type": "PieChart",
+      "title": "Browser Market Share Worldwide ",
+      "subtitle": "As of Q3, 2017",
+      "minRadius": 30,
+      "maxRadius": 100,
+      "titleStyle": {
+        "fillColor":"#717171",
+        "borderColor":"none",
+        "fontFamily": "Lato",
+        "maxFontSize": "25"
       },
-      {
-        "label":"IE",
-        "value":"5.7"
+      "subtitleStyle": {
+        "fillColor":"#717171",
+        "borderColor":"none",
+        "fontFamily": "Lato",
+        "maxFontSize": "18"
       },
-      {
-        "label":"Safari",
-        "value":"3.6",
-        "slicedOut":true
+      "outline": 2,
+      "canvasBorder": true,
+      "targetElem": "chartContainer",
+      "bgColor": "white",
+      "legends":{
+        "enable" : true,
+        "top": 200,
+        "left": 10, 
+        "alignment": "horizontal",
+        "float": "bottom",
+        "color": "#000",
+        "bgColor": "#eee",
+        "hoverColor":"#999",
+        "fontSize": 14, 
+        "fontFamily": "Lato", 
+        "borderColor": "none",
+        "borderWidth": 3,
+        "borderOpacity": 1,
+        "opacity": 0.9,
+        "toggleType": false,
       },
-      {
-        "label":"Firefox",
-        "value":"16.9"
+      "animated": false,
+      "tooltip": {
+        "content": function() {
+          return '<table>' +
+          '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+          '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+          '</table>';
+        }
       },
-      {
-        "label":"Opera",
-        "value":"1.2"
-      }
-    ]
-  };
-  SmartChartsNXT.ready(function(){
-    let pieChart = new SmartChartsNXT.Chart(settings);
+      "dataSet": [
+        {
+          "label": "Chrome",
+          "value": "54.53",
+          "color": "#F44336"
+        },
+        {
+          "label": "IE",
+          "value": "3.7",
+          "color": "#4682b4"
+        },
+        {
+          "label": "Safari",
+          "value": "14.61"
+        },
+        {
+          "label": "Firefox",
+          "value": "6.07",
+          "color": "#FFC107",
+          "slicedOut": false
+        }] 
+    });
   });
  */
 
@@ -67,7 +92,7 @@ import UiCore from './../../core/ui.core';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Tooltip from './../../components/tooltip';
-import PieSet from './pieSet'; 
+import PieSet from './sliceSet'; 
 
 class PieChart extends Component {
   constructor(props) {
@@ -84,6 +109,7 @@ class PieChart extends Component {
         uniqueDataSet: [],
         totalValue: 0,
         pieRadius: 0,
+        innerRadius: 0,
         offsetWidth: 20, // distance of text label from left and right side 
         offsetHeight: 70, // distance of text label from top and bottom side 
         pieSet: [],
@@ -111,14 +137,9 @@ class PieChart extends Component {
       let legend = this.props.chartOptions.legends;
       this.minWidth = (!legend || legend.enable !== false) && (legend.type === 'left' || legend.type === 'right') ? 500 : 400;
       this.minHeight = (!legend || legend.enable !== false) && (legend.type === 'top' || legend.type === 'bottom') ? 500 : 400;
-      
       this.init();
-      // if (this.CHART_OPTIONS.animated !== false) {
-      //   this.showAnimatedView();
-      // }
     } catch (ex) {
       ex.errorIn = `Error in PieChart with runId:${this.props.runId}`;
-      //this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex;
     }
   }
@@ -172,9 +193,11 @@ class PieChart extends Component {
         <PieSet dataSet={this.CHART_DATA.uniqueDataSet} rootNodeId={this.CHART_OPTIONS.targetElem}
           cx ={this.CHART_DATA.pieCenter.x} cy={this.CHART_DATA.pieCenter.y} 
           width={this.CHART_DATA.pieRadius} height={this.CHART_DATA.pieRadius} 
+          innerWidth={this.CHART_DATA.innerRadius} innerHeight={this.CHART_DATA.innerRadius} 
           offsetWidth={this.CHART_DATA.offsetWidth} offsetHeight={this.CHART_DATA.offsetHeight}
-          pieAreaWidth={this.pieAreaWidth} pieAreaHeight={this.pieAreaHeight}
+          areaWidth={this.pieAreaWidth} areaHeight={this.pieAreaHeight}
           strokeColor={this.CHART_DATA.uniqueDataSet.length > 1 ? '#eee' : "none"} strokeWidth={this.CHART_OPTIONS.outline || 1} 
+          gradient={this.CHART_OPTIONS.radialGradient || [{offset:0, opacity:0.06},{offset:83, opacity:0.2},{offset:95, opacity:0}]}
           updateTip={this.updateTooltip.bind(this)} hideTip={this.hideTip.bind(this)} 
           animated={this.CHART_OPTIONS.animated === 'undefined' ? true : this.CHART_OPTIONS.animated}
         /> 
@@ -271,17 +294,17 @@ class PieChart extends Component {
 
   onLegendHover(index) {
     let e = new CustomEvent('sliceHover'); 
-    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+    this.ref.node.querySelector(`.slice-grp-${index}`).dispatchEvent(e); 
   }
 
   onLegendLeave(index) {
     let e = new CustomEvent('sliceLeave'); 
-    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+    this.ref.node.querySelector(`.slice-grp-${index}`).dispatchEvent(e); 
   }
 
   onLegendClick(index) {
     let e = new CustomEvent('toggleSlide'); 
-    this.ref.node.querySelector(`.pie-grp-${index}`).dispatchEvent(e); 
+    this.ref.node.querySelector(`.slice-grp-${index}`).dispatchEvent(e); 
   }
 
   calcPieDimensions() {

@@ -24,8 +24,11 @@ const CHART_MODULES = {
     PieChart: {
       config: require("./../charts/pieChart/config").default,
       chart: require("./../charts/pieChart/pieChart").default
+    },
+    DonutChart: {
+      config: require("./../charts/donutChart/config").default,
+      chart: require("./../charts/donutChart/donutChart").default
     }
-    // DonutChart: require("./../charts/donutChart/donutChart"),
     // ColumnChart: require("./../charts/columnChart/columnChart")
 };
 

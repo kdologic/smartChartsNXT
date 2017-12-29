@@ -98,6 +98,9 @@ class GeomCore {
   } /*End getMidPoint()*/
 
   getEllipticalRadius(rx, ry, angleInDegrees) {
+    if(!rx || !ry) {
+      return 0; 
+    }
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
