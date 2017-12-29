@@ -72,8 +72,8 @@ class Core {
   } /*End ready()*/
 
   handleError(ex, msg) {
-    console.error("SmartChartsNXT:" + ex.errorIn);
-    console.log(ex.stack);
+    console.error("SmartChartsNXT:" + (ex.errorIn || ""));
+    ex.stack && console.log(ex.stack);
   } /*End handleError()*/
 
 }

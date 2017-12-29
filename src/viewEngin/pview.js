@@ -170,7 +170,7 @@ class Component {
     Object.keys(stateParams).forEach(key => {
       this.state[key] = stateParams[key];
     });
-    this.update();
+    return this.update();
   }
 
   getVirtualNode() {
@@ -188,7 +188,7 @@ class Component {
       let renderedComp = renderDOM(this.vnode); 
 
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
-      let component = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
+      return mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }
   }
 
@@ -197,4 +197,4 @@ class Component {
   }
 }
 
-export { mountTo, Component };
+export { mountTo, renderDOM, Component };

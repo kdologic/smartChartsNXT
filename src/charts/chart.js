@@ -24,6 +24,7 @@ class Chart {
       window.addEventListener('resize', this.renderChartBind, false); 
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex; 
     }
   }
 
@@ -34,7 +35,7 @@ class Chart {
       }
       this.chartNode = mountTo(<BaseChart opts={opts} runid={runId} width={targetNode.offsetWidth} height={targetNode.offsetHeight} />, targetNode);
     }catch(ex) {
-      this.showErrorScreen(opts, ex, ex.errorIn);
+      throw ex; 
     }
   }
 
