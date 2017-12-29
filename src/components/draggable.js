@@ -10,106 +10,131 @@
 
 "use strict";
 
-let Geom = require("./../core/geom.core");
-let transformer = require("./../core/transformer");
+import transformer from "./../core/transformer";
+import { Component } from "./../viewEngin/pview";
 
-class Draggable {
-    constructor() {
-        this.geom = new Geom();
+class Draggable extends Component{
+  constructor(props) {
+    super(props);
+    this.state = {
+      showHandler: false,
+      hBBox: {
+        x: 0, 
+        y: 0, 
+        width: 0, 
+        height: 0
+      }, 
+      tranMatrix: transformer.getTransformMatrix()
+    };
+    this.padding = 5; 
+    this.handleMouseDown = false; 
+    this.timer = 0; 
+    this.prevent = false; 
+    this.presentTrnsMatrix = null; 
+    this.touchDelay = 500;
+  }
+
+  render() {
+    return (
+      <g class='dragger drag-handler-container' transform={this.state.tranMatrix} style={{cursor: this.state.showHandler ?'move':'default'}}
+        events={this.getHandlerEventMap()} >
+      {
+        this.state.showHandler ? 
+        <rect class='dragger drag-handler-outerbox' 
+          x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height} 
+          stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'>
+        </rect>
+        : null
+      }
+      </g>
+    );
+  }
+
+  onTouchStart(e) {
+    this.onMouseDown(e);
+    this.timer = setTimeout(this.onDoubleClick.bind(this, e), this.touchDelay);
+  }
+
+  onTouchEnd(e) {
+    if (this.timer) {
+      clearTimeout(this.timer);
     }
+  }
 
-    doDraggable(targetElemObj) {
-        this.targetElemObj = targetElemObj;
-        this.targetElemId = targetElemObj.getAttribute("id") || Math.round(Math.random() * 1000);
-        this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
-        if (this.objDragHandle) {
-            this.objDragHandle.parentNode.removeChild(this.objDragHandle);
-        }
-        let bbox = this.targetElemObj.getBBox();
-        let strSVG = "";
-        strSVG += "<g id='drag_handler_container_" + this.targetElemId + "' class='dragger' style='cursor: move;'>";
-        strSVG += "<rect id='drag_handler_outerbox_" + this.targetElemId + "' class='dragger' x='" + (bbox.x - 5) + "' y='" + (bbox.y - 5) + "' width='" + (bbox.width + 10) + "' height='" + (bbox.height + 10) + "' stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'></rect>";
-        strSVG += "</g>";
-        this.targetElemObj.insertAdjacentHTML("beforeend", strSVG);
-        this.objDragHandle = this.targetElemObj.querySelector("#drag_handler_container_" + this.targetElemId);
-        this.bindDragEvents();
-        this.hideHandler();
+  onClick(e) {
+    let delay = 200; 
+    this.timer = setTimeout(function () {
+      if (!this.prevent) {
+        //do nothing; 
+      }
+      this.prevent = false;
+    }, delay);
+  }
+
+  onDoubleClick(e) {
+    e.stopPropagation(); 
+    e.preventDefault(); 
+    if(this.timer){
+      clearTimeout(this.timer);
     }
+    this.prevent = true;
+    let contBBox = this.ref.node.getBBox(); 
 
-    bindDragEvents() {
-        let mouseDownPos;
-        let mousePosNow;
-        let presentTrnsMatrix;
-        this.handleMouseDown = false;
-        var timer = 0;
-        var delay = 200;
-        var prevent = false;
+    let hBBox = {
+      x: contBBox.x - this.padding, 
+      y: contBBox.y - this.padding, 
+      width: contBBox.width + (2 * this.padding),
+      height: contBBox.height + (2 * this.padding)
+    };
+    this.setState({showHandler: !this.state.showHandler, hBBox:hBBox});
+  }
 
-        this.targetElemObj.setAttribute("pointer-events", 'all');
-        this.targetElemObj.addEventListener("click", (e) => {
-            timer = setTimeout(function () {
-                if (!prevent) {
-                    //do nothing; 
-                }
-                prevent = false;
-            }, delay);
-        });
+  onMouseDown(e) {
+    e.stopPropagation();
+    this.handleMouseDown = true;
+    this.mouseDownPos = {
+      x: e.clientX || e.touches[0].clientX,
+      y: e.clientY || e.touches[0].clientY
+    };
+    this.presentTrnsMatrix = transformer.convertTransformMatrix(this.state.tranMatrix);
+  }
 
-        this.targetElemObj.addEventListener("dblclick", (e) => {
-            clearTimeout(timer);
-            prevent = true;
-            this.showHandler();
-        });
-
-        this.objDragHandle.addEventListener("dblclick", (e) => {
-            e.stopPropagation();
-            this.hideHandler();
-        });
-
-        this.objDragHandle.addEventListener("mousedown", (e) => {
-            e.stopPropagation();
-            this.handleMouseDown = true;
-            mouseDownPos = {
-                x: e.clientX,
-                y: e.clientY
-            };
-            presentTrnsMatrix = transformer.getElementTransformation(this.targetElemObj);
-        }, false);
-
-        this.objDragHandle.addEventListener("mousemove", (e) => {
-            e.stopPropagation();
-            if (this.handleMouseDown) {
-                mousePosNow = {
-                    x: e.clientX,
-                    y: e.clientY
-                };
-                let tranMatrix = transformer.getTransformMatrix(
-                    [
-                        `translate(${mousePosNow.x - mouseDownPos.x},
-                        ${mousePosNow.y - mouseDownPos.y})`
-                    ], presentTrnsMatrix);
-                this.targetElemObj.setAttribute("transform", tranMatrix);
-            }
-        }, false);
-
-        this.objDragHandle.addEventListener("mouseup", (e) => {
-            e.stopPropagation();
-            this.handleMouseDown = false;
-        }, false);
-
-        this.objDragHandle.addEventListener("mouseleave", (e) => {
-            e.stopPropagation();
-            this.handleMouseDown = false;
-        }, false);
+  onMouseMove(e) {
+    e.stopPropagation();
+    if(this.timer) {
+      clearTimeout(this.timer); 
     }
-
-    showHandler() {
-        this.objDragHandle.style.display = "block";
+    if (this.handleMouseDown) {
+      this.mousePosNow = {
+        x: e.clientX || e.touches[0].clientX,
+        y: e.clientY || e.touches[0].clientY
+      };
+      let tranMatrix = transformer.getTransformMatrix([
+        `translate(${this.mousePosNow.x - this.mouseDownPos.x}, ${this.mousePosNow.y - this.mouseDownPos.y})`
+      ], this.presentTrnsMatrix);
+      this.setState({tranMatrix});
     }
+  }
 
-    hideHandler() {
-        this.objDragHandle.style.display = "none";
-    }
+  onMouseUp(e) {
+    this.handleMouseDown = false;
+  }
+
+  getHandlerEventMap() {
+    let evtList = {
+      dblclick: this.onDoubleClick.bind(this),
+      touchstart: this.onTouchStart.bind(this), 
+      touchend: this.onTouchEnd.bind(this)
+    }; 
+    return this.state.showHandler ? Object.assign(evtList, {
+      click: this.onClick.bind(this),
+      mousedown: this.onMouseDown.bind(this), 
+      mousemove: this.onMouseMove.bind(this), 
+      mouseup: this.onMouseUp.bind(this),
+      mouseleave: this.onMouseUp.bind(this),
+      touchmove: this.onMouseMove.bind(this)
+    }) : evtList;
+  }
 }
 
-module.exports = Draggable;
+export default Draggable;

@@ -1,176 +1,238 @@
-/*
+/**
  * tooltip.js
- * @Version:1.0.0
- * @CreatedOn:17-Jul-2017
- * @Author:SmartChartsNXT
- * @Description: This components will tooltip area for the chart. 
+ * @version:1.1.0
+ * @createdOn:17-Jul-2017
+ * @author:SmartChartsNXT
+ * @description: This components will tooltip area for the chart. 
+ * 
+ * Accepted config --
+ * "tooltip": {
+      "content": function() {
+        return '<table>' +
+        '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+        '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+        '</table>';
+      },
+      "enabled": true, 
+      "color": "white",
+      "bgColor": "black",
+      "fontSize": "14", 
+      "fontFamily": "Lato", 
+      "xPadding": 10,
+      "yPadding": 10,
+      "borderColor": "pink",
+      "borderWidth": 1,
+      "opacity": 0.9
+    }
  */
 
 "use strict";
 
-let UiCore = require("./../core/ui.core");
-let Point = require("./../core/point");
+import defaultConfig from "./../settings/config";
+import Point from "./../core/point";
+import { Component } from "./../viewEngin/pview";
+import UiCore from "./../core/ui.core";
+import UtilCore from "./../core/util.core";
 
-class Tooltip {
-    constructor() {
-        this.ui = new UiCore();
+class Tooltip extends Component {
+    constructor(props) {
+      super(props);
+      let padding = 10;
+      this.config = {
+        color: this.props.opts.color || defaultConfig.theme.fontColorLight,
+        bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
+        fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
+        fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
+        xPadding: Number(this.props.opts.xPadding) || padding,
+        yPadding: Number(this.props.opts.yPadding) || padding,
+        strokeWidth: this.props.opts.borderWidth || "1",
+        opacity:this.props.opts.opacity || "0.9"
+      };
+      this.state = {
+        tooltipContent: '', 
+        contentX: this.config.xPadding, 
+        contentY: this.config.yPadding, 
+        contentWidth: 0,
+        contentHeight: 0,
+        strokeColor: 'rgb(124, 181, 236)', 
+        tooltipPath: '',
+        opacity:'0'
+      };
     }
 
-    createTooltip(objChart) {
-        this.objChart = objChart;
-        this.chartSVG = this.objChart.CHART_DATA.chartSVG;
-        this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
-        if (this.tooltipContainer) {
-            this.tooltipContainer.parentNode.removeChild(this.tooltipContainer);
-        }
-
-        let strSVG = "<g id='toolTipContainer' pointer-events='none'>";
-        strSVG += "  <path id='toolTip'  filter='' fill='white' stroke='rgb(124, 181, 236)' fill='none' d='' stroke-width='1' opacity='0.9'></path>";
-        strSVG += "  <g id='txtToolTipGrp' fill='#717171' font-family='Lato' >";
-
-        strSVG += "<foreignobject id='toolTipHTML'>";
-        strSVG += "<body xmlns='http://www.w3.org/1999/xhtml'>";
-        strSVG += "</body>";
-        strSVG += "</foreignobject>";
-
-        strSVG += " </g>";
-        strSVG += "</g>";
-        this.chartSVG.insertAdjacentHTML("beforeend", strSVG);
-        this.tooltipContainer = this.chartSVG.querySelector("#toolTipContainer");
-        this.tooltipContainer.querySelector("#toolTip").setAttribute("filter", this.ui.dropShadow("toolTipContainer"));
-        this.toolTipHtml = this.tooltipContainer.querySelector("#toolTipHTML");
-        this.toolTip = this.tooltipContainer.querySelector("#toolTip");
+    componentWillMount() {
+      typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+    }
+    componentDidMount() {
+      typeof this.props.onRef === 'function' && this.props.onRef(this); 
     }
 
-    updateTip(originPoint, color, line1, line2) {
-        if (!this.objChart || !this.chartSVG) {
-            return;
-        }
-        this.createTooltip(this.objChart, this.chartSVG);
-        let lineHeight = 20;
-        let padding = 10;
-        let strContents = "";
-        let chartWidth = this.chartSVG.parentNode.offsetWidth;
-        let chartHeight = this.chartSVG.parentNode.offsetHeight;
-        let cPoint;
+    render() {
+      return (
+        <g class='tooltip-container' pointer-events='none' 
+          transform={`translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`} 
+          style={{opacity: this.state.opacity, 'transition': 'transform 0.3s ease-out, opacity 0.2s ease-out'}} >
+          <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
+            fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
+            stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
+          </path>
+          <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
+            <foreignObject class='tooltip-content' x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
+            </foreignObject>
+          </g>
+          {UiCore.dropShadow('tooltip-border-smartcharts-shadow')}
+        </g>
+      );
+    }
 
-        /*Prevent call-by-sharing*/
-        if (originPoint) {
-            cPoint = new Point(originPoint.x, originPoint.y);
-        }
-        if (line2 === "html") {
-            strContents += line1;
-        } else {
-            strContents += "<table>";
-            strContents += "<tr><td>" + line1 + "</td></tr>";
-            if (line2) {
-                strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
-            }
-            strContents += "</table>";
-        }
-        this.toolTipHtml.innerHTML = strContents;
+    createTooltipContent(line1, line2) {
+      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+";font-family:"+this.config.fontFamily+";'>";
+      strContents += "<tr><td>" + line1 + "</td></tr>";
+      if (line2) {
+        strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
+      }
+      strContents += "</table>";
+      return strContents; 
+    }
 
-        let temp = document.createElement("div");
-        temp.innerHTML = strContents;
-        temp.style.display = "inline-block";
-        temp.style.visibility = 'hidden';
-        document.getElementsByTagName("body")[0].appendChild(temp);
-        let containBox = {
-            width: temp.offsetWidth + 8,
-            height: temp.offsetHeight + 5
-        };
-        if (temp) {
-            temp.parentNode.removeChild(temp);
-        }
-        let txtWidth = containBox.width;
-        lineHeight = containBox.height;
+    updateTip(originPoint, index, pointData, line1, line2) {
+      let xPadding = this.config.xPadding; 
+      let yPadding = this.config.yPadding; 
+      let strContents = "";
+      let cPoint;
+      let delta = 10; 
+      let newState = {};
 
-        cPoint.y -= 20;
-        let topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - lineHeight - 10 - padding);
-        let width = txtWidth + (2 * padding);
-        let height = lineHeight + (2 * padding);
-        let d = [
-            "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-            "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-            "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-            "L", cPoint.x + 10, cPoint.y,
-            "L", cPoint.x, cPoint.y + 10,
-            "L", cPoint.x - 10, cPoint.y,
-            "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-            "Z"
+      if(!pointData && !line1 && !line2) {
+        return; 
+      }
+
+      let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.state.strokeColor;
+
+      if(pointData && this.props.opts && this.props.opts.content) {
+        if (typeof this.props.opts.content === 'function') {
+          line1 = this.props.opts.content.call(pointData); 
+          line2 = 'html'; 
+        }else if(typeof this.props.opts.content === 'string'){
+          let tooltipContent = tthis.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
+          line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
+          line2 = 'html'; 
+        }
+      }
+
+      /*Prevent call-by-sharing*/
+      if (originPoint) {
+        cPoint = new Point(originPoint.x, originPoint.y);
+      }
+     
+      strContents = line2 === 'html' ? line1 : this.createTooltipContent(line1, line2);
+      let temp = document.createElement("div");
+      temp.innerHTML = strContents;
+      temp.style.display = "inline-block";
+      temp.style.visibility = 'hidden';
+      document.getElementsByTagName("body")[0].appendChild(temp);
+      let containBox = {
+        width: temp.offsetWidth + 8,
+        height: temp.offsetHeight + 5
+      };
+      temp && temp.parentNode.removeChild(temp);
+     
+      let txtWidth = containBox.width;
+      let lineHeight = containBox.height;
+
+      cPoint.y -= (2*delta);
+      let topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
+      let width = txtWidth + (2 * xPadding);
+      let height = lineHeight + (2 * yPadding);
+      let d = [
+        "M", 0, 0, //TOP-LEFT CORNER
+        "L", width, 0, //LINE TO TOP-RIGHT CORNER
+        "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+        "L", (width/2) + delta, height,
+        "L", (width/2), height + delta,
+        "L", (width/2) - delta, height,
+        "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
+        "Z"
+      ];
+      if (topLeft.x + width > this.props.svgWidth) {
+        cPoint.x -= (2*delta);
+        cPoint.y += (2*delta);
+        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
+        topLeft.x -= (width / 2);
+        topLeft.y += (height / 2);
+        d = [
+          "M", 0, 0, //TOP-LEFT CORNER
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, (height/2) - delta,
+          "L", (width + delta), (height/2),
+          "L", width, (height/2) + delta,
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
+          "Z"
         ];
-        if (topLeft.x + width > chartWidth) {
-            cPoint.x -= 20;
-            cPoint.y += 20;
-            topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y - (lineHeight) - 10 - (padding));
-            topLeft.x -= (width / 2);
-            topLeft.y += (height / 2);
-            d = [
-                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-                "L", cPoint.x, cPoint.y - 10,
-                "L", cPoint.x + 10, cPoint.y,
-                "L", cPoint.x, cPoint.y + 10,
-                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-                "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-                "Z"
-            ];
-        } else if(topLeft.x <= 0) {
-            cPoint.x += 10;
-            cPoint.y += 20;
-            topLeft = new Point(cPoint.x + (txtWidth / 2) + padding + 10, cPoint.y - (lineHeight) - 10 - (padding));
-            topLeft.x -= (width / 2);
-            topLeft.y += (height / 2);
-            d = [
-                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-                "L", topLeft.x, (topLeft.y + height), // LINE TO BOTTOM-LEFT CORNER
-                "L", topLeft.x  , cPoint.y + 10, // LINE TO BEFORE C-POINT BEND
-                "L", cPoint.x, cPoint.y, // LINE TO C-POINT
-                "L", topLeft.x, cPoint.y-10, //LINE TO AFTER C-POINT BEND
-                "Z"
-            ];
-        } else if (topLeft.y < 0) {
-            cPoint.y += 40;
-            topLeft = new Point(cPoint.x - (txtWidth / 2) - padding, cPoint.y);
-            d = [
-                "M", topLeft.x, topLeft.y, //TOP-LEFT CORNER
-                "L", cPoint.x - 10, cPoint.y,
-                "L", cPoint.x, cPoint.y - 10,
-                "L", cPoint.x + 10, cPoint.y,
-                "L", (topLeft.x + width), topLeft.y, //LINE TO TOP-RIGHT CORNER
-                "L", (topLeft.x + width), (topLeft.y + height), //LINE TO BOTTOM-RIGHT CORNER
-                "L", (topLeft.x), (topLeft.y + height), //LINE TO BOTTOM-LEFT CORNER
-                "Z"
-            ];
-        } 
+      } else if (topLeft.x <= 0) {
+        cPoint.x += delta;
+        cPoint.y += (2 * delta);
+        topLeft = new Point(cPoint.x + (txtWidth / 2) + xPadding + delta, cPoint.y - lineHeight - delta - yPadding);
+        topLeft.x -= (width / 2);
+        topLeft.y += (height / 2);
+        d = [
+          "M", 0, 0, //TOP-LEFT CORNER
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, // LINE TO BOTTOM-LEFT CORNER
+          "L", 0, (height/2) + delta, // LINE TO BEFORE C-POINT BEND
+          "L", (-delta), (height/2), // LINE TO C-POINT
+          "L", 0, (height/2) - delta, //LINE TO AFTER C-POINT BEND
+          "Z"
+        ];
+      } else if (topLeft.y < 0) {
+        cPoint.y += (4*delta);
+        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y);
+        d = [
+          "M", 0, 0, //TOP-LEFT CORNER
+          "L", (width/2) - delta, 0,
+          "L", (width/2), (-delta),
+          "L", (width/2) + delta, 0,
+          "L", width, 0, //LINE TO TOP-RIGHT CORNER
+          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
+          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
+          "Z"
+        ];
+      }
 
-        let textPos = new Point(topLeft.x + 5, topLeft.y + 5);
-        if (this.toolTipHtml) {
-            this.toolTipHtml.setAttribute("x", textPos.x);
-            this.toolTipHtml.setAttribute("y", textPos.y);
-            this.toolTipHtml.setAttribute("width", containBox.width + padding);
-            this.toolTipHtml.setAttribute("height", containBox.height + padding);
-        }
-        this.toolTip.setAttribute("d", d.join(" "));
-        if (color) {
-            this.toolTip.setAttribute("stroke", color);
-        }
-        this.show();
+      let textPos = new Point(topLeft.x + 5, topLeft.y + 5);
+      newState = {
+        tooltipContent: strContents, 
+        contentX: textPos.x, 
+        contentY: textPos.y, 
+        contentWidth: (containBox.width + xPadding),
+        contentHeight: (containBox.height + yPadding),
+        strokeColor: strokeColor,
+        tooltipPath: d.join(' '),
+        opacity:1
+      };
+
+      
+      let tipContent = this.ref.node.querySelector('.tooltip-content');
+      tipContent.innerHTML = newState.tooltipContent;
+      tipContent.setAttribute('width', newState.contentWidth); 
+      tipContent.setAttribute('height', newState.contentHeight); 
+
+      let tipBorder = this.ref.node.querySelector('.tooltip-border');
+      tipBorder.setAttribute('stroke', newState.strokeColor); 
+      tipBorder.setAttribute('d', newState.tooltipPath); 
+      this.ref.node.setAttribute('transform',`translate(${topLeft.x},${topLeft.y})`);
+      this.show(); 
     }
 
     show() {
-        if (this.tooltipContainer) {
-            this.tooltipContainer.style.display = "block";
-        }
+      this.ref.node.style.opacity = 1;
     }
 
     hide() {
-        if (this.tooltipContainer) {
-            this.tooltipContainer.style.display = "none";
-        }
+      this.ref.node.style.opacity = 0;
     }
 }
 
-module.exports = Tooltip;
+export default Tooltip;
