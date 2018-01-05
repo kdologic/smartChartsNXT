@@ -102,6 +102,13 @@ class UiCore {
     return fSize < maxSize ? fSize : maxSize;
   }
 
+  /** Returns true if it is a touch device 
+   * @return {boolean}
+  */
+  isTouchDevice() {
+    return "ontouchstart" in document.documentElement;
+  }
+
   /* Get point in global SVG space*/
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {

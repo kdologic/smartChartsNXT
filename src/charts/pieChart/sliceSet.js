@@ -11,11 +11,13 @@
 import defaultConfig from "./../../settings/config";
 import Point from "./../../core/point";
 import {Component} from "./../../viewEngin/pview";
+import UiCore from './../../core/ui.core'; 
 import Slice from "./slice"; 
 
 class SliceSet extends Component {
   constructor(props) {
     super(props);
+    let self = this; 
     this.state = {
       startAngle:0,
       endAngle:0,
@@ -27,8 +29,20 @@ class SliceSet extends Component {
     this.slices = {};
     this.global = {
       mouseDownPos: {},
-      mouseDown: 0,
-      mouseDrag: 0
+      set mouseDown(v) {
+        this._mouseDown = v; 
+      },
+      get mouseDown() {
+        return this._mouseDown; 
+      },
+      set mouseDrag(v) {
+        this._mouseDrag = v; 
+        let slicePlane = self.ref.node.getElementsByClassName('slice-rotation-plane')[0]; 
+        slicePlane.style.display = (v ? 'block':'none');
+      },
+      get mouseDrag() {
+        return this._mouseDrag; 
+      }
     };
     this.renderCounter = 0; 
   }
@@ -62,6 +76,14 @@ class SliceSet extends Component {
     return (
       <g class='slice-set'>
         {this.createSlices()}
+         <rect class='slice-rotation-plane' x={this.props.cx-(this.props.areaWidth/2)} y={this.props.cy-(this.props.areaHeight/2)} 
+          width={this.props.areaWidth} height={this.props.areaHeight} strokeColor='black' strokeWidth='1' fill='none' opacity='0.1' style={{display : 'none', 'pointer-events':'all'}}
+          events={{
+            touchstart: this.onMouseDown.bind(this),
+            mouseup: this.onMouseUp.bind(this), mousemove: this.onMouseMove.bind(this),
+            touchend: this.onMouseUp.bind(this), touchmove: this.onMouseMove.bind(this)
+          }}>
+        </rect> 
       </g>
     );
   }
@@ -85,6 +107,36 @@ class SliceSet extends Component {
     });
   }
 
+  onMouseDown(e) {
+    this.global.mouseDown = true; 
+  }
+
+  onMouseUp(e) {
+    e.stopPropagation();
+    e.preventDefault(); 
+    this.global.mouseDown = false; 
+    this.global.mouseDrag = false; 
+  }
+
+  onMouseMove(e) {
+    if (this.props.dataSet.length === 0) {
+      return;
+    }
+    let pos = {clientX : e.clientX || e.touches[0].clientX, clientY : e.clientY || e.touches[0].clientY };
+    if (this.global.mouseDown === true && (this.global.mouseDownPos.x !== pos.clientX && this.global.mouseDownPos.y !== pos.clientY)) {
+      let dragStartPoint = UiCore.cursorPoint(this.props.rootNodeId, pos);
+      let dragAngle = this.getAngle(new Point(this.props.cx, this.props.cy), dragStartPoint);
+
+      if (dragAngle > this.dragStartAngle) {
+        this.rotateChart(2);
+      } else {
+        this.rotateChart(-2);
+      }
+      this.dragStartAngle = dragAngle;
+      this.props.hideTip();
+    } 
+  }
+
   rotateChart(rotationIndex) {
     Object.keys(this.slices).forEach((key) => {
       this.slices[key].rotateSlice(rotationIndex); 
@@ -95,6 +147,15 @@ class SliceSet extends Component {
     setTimeout(() => {
       this.setState({animPercent:this.state.animPercent + 4});
     }, 50);
+  }
+
+  getAngle(point1, point2) {
+    let deltaX = point2.x - point1.x;
+    let deltaY = point2.y - point1.y;
+    let rad = Math.atan2(deltaY, deltaX);
+    let deg = rad * 180.0 / Math.PI;
+    deg = (deg < 0) ? deg + 450 : deg + 90;
+    return deg % 360;
   }
   
 }

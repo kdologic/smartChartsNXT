@@ -1,7 +1,7 @@
 /** 
  * config.js
  * @version:1.0.0
- * @createdOn:12-Dec-2017
+ * @createdOn:29-Dec-2017
  * @author:SmartChartsNXT
  * @description:This will be the default Donut chart config for load in BaseChart.
  */

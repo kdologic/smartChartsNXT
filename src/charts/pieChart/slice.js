@@ -208,37 +208,30 @@ class Slice extends Component {
     e.stopPropagation();
     e.preventDefault(); 
     this.props.parentCtx.mouseDownPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
-    this.props.parentCtx.mouseDown = 1;
-    this.props.parentCtx.mouseDrag = 0; 
+    this.props.parentCtx.mouseDown = true;
+    this.props.parentCtx.mouseDrag = false; 
   }
 
   onMouseUp(e) {
     e.stopPropagation();
     e.preventDefault(); 
-    if(this.props.parentCtx.mouseDrag === 0) {
+    if(!this.props.parentCtx.mouseDrag) {
       this.toggleSlide(); 
     }
-    this.props.parentCtx.mouseDown = 0;
-    this.props.parentCtx.mouseDrag = 0;
+    this.props.parentCtx.mouseDown = false;
+    this.props.parentCtx.mouseDrag = false;
   }
 
   onMouseMove(e) {
-    if (!this.props.toggleEnabled) {
-      return;
-    }
-    let pos = {clientX : e.clientX || e.touches[0].clientX, clientY : e.clientY || e.touches[0].clientY };
-    if (this.props.parentCtx.mouseDown === 1 && (this.props.parentCtx.mouseDownPos.x !== pos.clientX && this.props.parentCtx.mouseDownPos.y !== pos.clientY)) {
-      let dragStartPoint = UiCore.cursorPoint(this.props.rootNodeId, pos);
-      let dragAngle = this.getAngle(new Point(this.props.cx, this.props.cy), dragStartPoint);
-
-      if (dragAngle > this.dragStartAngle) {
-        this.props.rotateChart(2);
-      } else {
-        this.props.rotateChart(-2);
+    e.preventDefault();
+    e.stopPropagation();
+    if(this.props.parentCtx.mouseDown) {
+      this.props.parentCtx.mouseDrag = true;
+      if(UiCore.isTouchDevice()){
+        let changedTouch = e.changedTouches[0];
+        let elem = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
+        elem.dispatchEvent(new TouchEvent('mousemove', e)); 
       }
-      this.dragStartAngle = dragAngle;
-      this.props.parentCtx.mouseDrag = 1;
-      this.props.hideTip();
     } else {
       /** for tooltip only  */
       let mousePos = UiCore.cursorPoint(this.props.rootNodeId, e);
@@ -296,15 +289,6 @@ class Slice extends Component {
       textSlice.setAttribute('text-anchor', this.getTextAnchor());
       textSlice.parentNode.setAttribute('transform',this.state.textTransform);
     }
-  }
-
-  getAngle(point1, point2) {
-    let deltaX = point2.x - point1.x;
-    let deltaY = point2.y - point1.y;
-    let rad = Math.atan2(deltaY, deltaX);
-    let deg = rad * 180.0 / Math.PI;
-    deg = (deg < 0) ? deg + 450 : deg + 90;
-    return deg % 360;
   }
 }
 
