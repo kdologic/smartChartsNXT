@@ -370,13 +370,6 @@ class UiCore {
     } /*End onMenuClick()*/
 
   } /*End appendMenu2()*/
-
-  appendWaterMark(targetElem, scaleX, scaleY) {
-    let strSVG = "<g id='smartCharts-watermark'>";
-    strSVG += "  <text fill='#717171' x='" + (10 - (scaleX / 4)) + "' y='" + (25 - (scaleY / 2)) + "' font-size='10' font-family='Lato' style='cursor: pointer;' onclick=\"window.open('http://www.smartcharts.cf')\">Powered by SmartChartsNXT</text>";
-    strSVG += "  </g>";
-    document.querySelector("#" + targetElem + " svg").insertAdjacentHTML("beforeend", strSVG);
-  } /*End appendWaterMark()*/
 }
 
 export default new UiCore();
