@@ -42,8 +42,5 @@
     "webpack-bundle-analyzer": "^2.9.1",
     "webpack-stream": "^4.0.0",
     "webpack-visualizer-plugin": "^0.1.11"
-  },
-  "dependencies": {
-    "babel-runtime": "^6.26.0"
   }
 }

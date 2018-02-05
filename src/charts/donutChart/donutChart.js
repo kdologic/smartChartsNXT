@@ -93,7 +93,6 @@ import Draggable from './../../components/draggable';
 import LegendBox from './../../components/legendBox';
 import Tooltip from './../../components/tooltip';
 import DonutSet from './../pieChart/sliceSet'; 
-import Watermark from './../../components/watermark';
 
 class DonutChart extends Component {
   constructor(props) {
@@ -169,7 +168,6 @@ class DonutChart extends Component {
         <style>
           {this.getStyle()}
         </style> 
-        {this.CHART_OPTIONS.watermark !== false && <Watermark svgWidth={this.CHART_DATA.svgWidth}></Watermark>}
         <g>
           <Draggable>
             <text class='txt-title-grp' text-rendering='geometricPrecision'>
