@@ -30,7 +30,7 @@ let header = `/**
 * http://www.smartcharts.cf
 * Version:${pkg.version}
 * 
-* Copyright 2017 Kausik Dey
+* Copyright 2018 Kausik Dey
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
 */

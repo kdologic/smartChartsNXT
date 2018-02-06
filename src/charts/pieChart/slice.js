@@ -71,14 +71,16 @@ class Slice extends Component {
           fill={this.props.data.color} stroke='none' stroke-width='0' fill-opacity='0'
           style={{'transition': 'fill-opacity 0.3s linear', 'cursor':'pointer'}} 
         /> 
-        <path class={`slice-${this.props.index} upper-arc-slice-${this.props.index}`} 
+        <path class={`slice-${this.props.index} upper-arc-slice-${this.props.index}`} tabindex='0'
           d={this.getArcPath()} transform={this.state.arcTransform} fill={this.props.data.color} stroke-linecap='butt' stroke-linejoin='bevel'
           stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth} style={{'cursor':'pointer'}}
           events={{
             mousedown: this.onMouseDown.bind(this), touchstart: this.onMouseDown.bind(this),
             mouseup: this.onMouseUp.bind(this), touchend: this.onMouseUp.bind(this), 
             mousemove: this.onMouseMove.bind(this), touchmove: this.onMouseMove.bind(this),
-            mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)
+            mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this),
+            focusin: this.onMouseEnter.bind(this), focusout: this.onMouseLeave.bind(this), 
+            keyup: this.onKeyUp.bind(this)
           }} 
         />
         {
@@ -207,7 +209,7 @@ class Slice extends Component {
   onMouseDown(e) {
     e.stopPropagation();
     e.preventDefault(); 
-    this.props.parentCtx.mouseDownPos = { x: e.clientX || e.touches[0].clientX, y: e.clientY || e.touches[0].clientY };
+    this.props.parentCtx.mouseDownPos = { x: e.clientX || (e.touches ? e.touches[0] : {}).clientX, y: e.clientY || (e.touches ? e.touches[0] : {}).clientY };
     this.props.parentCtx.mouseDown = true;
     this.props.parentCtx.mouseDrag = false; 
   }
@@ -246,6 +248,13 @@ class Slice extends Component {
   onMouseLeave(e) {
     this.ref.node.querySelector(`.slice-hover-${this.props.index}`).style['fill-opacity'] = 0;
     this.props.hideTip(); 
+  }
+
+  onKeyUp(e) {
+    if(e.keyCode == 32 || e.keyCode == 13) {
+      this.onMouseDown(e); 
+      this.onMouseUp(e);
+    }
   }
 
   rotateSlice(rotationIndex) {
