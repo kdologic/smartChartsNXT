@@ -133,10 +133,9 @@ class PieChart extends Component {
       this.childObj={}; 
       this.legendBoxType = this.props.chartOptions.legends ? this.props.chartOptions.legends.alignment : 'horizontal';
       this.legendBoxFloat = this.props.chartOptions.legends ? this.props.chartOptions.legends.float : 'bottom';
+      this.minWidth = this.CHART_DATA.minWidth; 
+      this.minHeight = this.CHART_DATA.minHeight; 
       
-      let legend = this.props.chartOptions.legends;
-      this.minWidth = (!legend || legend.enable !== false) && (legend.type === 'left' || legend.type === 'right') ? 500 : 400;
-      this.minHeight = (!legend || legend.enable !== false) && (legend.type === 'top' || legend.type === 'bottom') ? 500 : 400;
       this.init();
     } catch (ex) {
       ex.errorIn = `Error in PieChart with runId:${this.props.runId}`;

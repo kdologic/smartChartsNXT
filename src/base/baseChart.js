@@ -21,7 +21,10 @@ import Menu from './../components/menu';
 
 /** ------- Requireing all chart types ------- */
 const CHART_MODULES = {
-    //AreaChart: require("./../charts/areaChart/areaChart")
+    AreaChart: {
+      config: require("./../charts/areaChart/config").default,
+      chart: require("./../charts/areaChart/areaChart").default
+    },
     // LineChart: require("./../charts/lineChart/lineChart"),
     // StepChart: require("./../charts/stepChart/stepChart"),
     PieChart: {
@@ -67,7 +70,7 @@ class BaseChart extends Component {
   loadConfig(config) {
     for (let key in config) {
       try {
-        this.CHART_DATA[key] = eval(config[key]);
+        this.CHART_DATA[key] = config[key];
       } catch (ex) { throw ex; }
     }
   }
