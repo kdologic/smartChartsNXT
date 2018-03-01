@@ -1,5 +1,5 @@
 /**
- * SVG Area Chart 
+ * SVG Area Chart :: areaChart.js
  * @version:2.0.0
  * @createdOn:31-05-2016
  * @author:SmartChartsNXT
@@ -18,6 +18,9 @@ import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
+import Grid from './../../components/grid';
+import AreaFill from './areaFill'; 
+import VerticalLabels from './../../components/verticalLabels';
 import Tooltip from './../../components/tooltip';
 
 
@@ -26,7 +29,7 @@ class AreaChart extends Component {
     super(props);
     try {
       let self = this;
-      this.CHART_DATA = this.util.extends({
+      this.CHART_DATA = UtilCore.extends({
         chartCenter: 0,
         maxima: 0,
         minima: 0,
@@ -36,7 +39,10 @@ class AreaChart extends Component {
         marginBottom: 0,
         gridBoxWidth: 0,
         gridBoxHeight: 0,
-        hScrollBoxHeight: opts.hideHorizontalScroller ? 0 : 60,
+        offsetWidth: 20, // distance of text label from left and right side 
+        offsetHeight: 70, // distance of text label from top and bottom side
+        hScrollBoxMarginTop: 70, 
+        hScrollBoxHeight: this.props.hideHorizontalScroller ? 0 : 60,
         fullSeries: [],
         fsScaleX: 0,
         vLabelWidth: 70,
@@ -50,17 +56,17 @@ class AreaChart extends Component {
         newCatgList: [],
         zoomOutBoxWidth: 40,
         zoomOutBoxHeight: 40
-      }, this.CHART_DATA);
+      }, this.props.chartData);
 
       this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartOptions);
-      this.CHART_CONST = this.util.extends({
-        FIX_WIDTH: 800,
-        FIX_HEIGHT: 600,
-        MIN_WIDTH: 250,
-        MIN_HEIGHT: 400,
+      this.CHART_CONST = UtilCore.extends({
         hGridCount: 10
-      }, this.CHART_CONST);
-
+      }, this.props.chartConst);
+      
+      this.childrens = {
+        area: []
+      };
+      console.log(this.CHART_OPTIONS);
 
       this.init();
     } catch (ex) {
@@ -71,6 +77,42 @@ class AreaChart extends Component {
 
   init() {
     this.initDataSet();
+    this.minWidth = this.CHART_DATA.minWidth; 
+    this.minHeight = this.CHART_DATA.minHeight;
+    this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
+    this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
+    this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
+    this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
+    this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 90;
+    this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
+    this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
+    this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1)); 
+
+    let longestSeries = 0;
+    let longSeriesLen = 0;
+    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
+
+      if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
+        longestSeries = index;
+        longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
+      }
+    }
+    this.CHART_DATA.longestSeries = longestSeries;
+
+    /* Will set initial zoom window */
+    if (this.CHART_OPTIONS.zoomWindow) {
+      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
+        this.CHART_DATA.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex;
+      }
+      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex > this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1) {
+        this.CHART_DATA.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex;
+      } else {
+        this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
+      }
+    } else {
+      this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
+    }
+    
     this.prepareDataSet(); 
   } 
 
@@ -102,7 +144,7 @@ class AreaChart extends Component {
       let minVal = Math.min.apply(null, arrData);
       maxSet.push(maxVal);
       minSet.push(minVal);
-      dataSet[i].color = dataSet[i].color || this.util.getColor(i);
+      dataSet[i].color = dataSet[i].color || UtilCore.getColor(i);
     }
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
@@ -129,8 +171,42 @@ class AreaChart extends Component {
             </text>
           </Draggable>
         </g>
+        <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold">
+          <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
+        </text>
+        <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold">
+          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2))}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
+        </text>
+        
+        <Grid posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} 
+          gridCount={this.CHART_CONST.hGridCount} gridHeight={this.CHART_DATA.gridHeight}>
+        </Grid> 
+
+        <VerticalLabels onRef={ref => this.childrens.vlabel = ref} opts={this.CHART_OPTIONS.verticalLabels || {}} 
+          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} 
+          labelCount={this.CHART_CONST.hGridCount} intervalLen={this.CHART_DATA.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} opts={this.CHART_OPTIONS.dataSet.yAxis || {}}> 
+        </VerticalLabels>
+
+        { 
+          this.drawSeries() 
+        }
+        
       </g>
     );
+  }
+
+  drawSeries() {
+    let maxLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
+    
+    return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
+      return (
+        <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={series.data.length} fill={'#f37200'} opacity={0.2}
+          maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} onRef={ref => this.childrens.area.push(ref)} >
+        </AreaFill>
+      );
+    });
   }
 
   getStyle() {
@@ -149,6 +225,10 @@ class AreaChart extends Component {
         font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)};
         fill: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark};
         stroke: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'};
+      }
+      .vertical-axis-title, .horizontal-axis-title {
+        font-family: ${defaultConfig.theme.fontFamily};
+        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)};
       }
     `);
   }

@@ -1,43 +1,40 @@
-/*
+/**
  * grid.js
- * @Version:1.0.0
- * @CreatedOn:14-Jul-2017
- * @Author:SmartChartsNXT
- * @Description: This components will create a grid for the chart. 
+ * @version:2.0.0
+ * @createdOn:14-Jul-2017
+ * @author:SmartChartsNXT
+ * @description: This components will create a grid for the chart. 
  */
 
 "use strict";
 
-class Grid {
+import defaultConfig from "./../settings/config";
+import { Component } from "./../viewEngin/pview";
 
-    constructor(targetElem, chartType) {
-        this.targetElem = targetElem;
-        this.chartType = chartType;
+class Grid extends Component{
+  constructor(props) {
+      super(props);
+  }
+  
+  render() {
+    return (
+      <g class='chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
+        {this.drawGridLines()}
+        <rect class='grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke={defaultConfig.theme.bgColorMedium}  shape-rendering='optimizeSpeed' pointer-events='all' fill='none' stroke-width='0' />
+        <line class='grid-box-left-border' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
+        <line class='grid-box-bottom-border' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
+      </g>
+    );
+  }
+
+  drawGridLines(){
+    let grids = []; 
+    for (let gridCount = 0; gridCount < this.props.gridCount - 1; gridCount++) {
+      grids.push(<line class={`grid-line-${gridCount}`} x1={0} y1={gridCount * this.props.gridHeight} x2={this.props.width} y2={gridCount * this.props.gridHeight} fill='none' stroke='#ddd' stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
     }
+    return grids;
+  }
 
-    createGrid(objChart, chartSVG, posX, posY, gridBoxWidth, gridBoxHeight, gridHeight, TgridCount) {
-        this.objChart = objChart; 
-        this.chartSVG = chartSVG; 
-        let d;
-        let hGrid = this.chartSVG.querySelector("#hGrid");
-        if (hGrid) {
-            hGrid.parentNode.removeChild(hGrid);
-        }
-
-        let strGrid = "";
-        strGrid += "<g id='hGrid' >";
-        for (let gridCount = 0; gridCount < TgridCount - 1; gridCount++) {
-            d = ["M", posX, posY + (gridCount * gridHeight), "L", posX + gridBoxWidth, posY + (gridCount * gridHeight)];
-            strGrid += "<path fill='none' d='" + d.join(" ") + "' stroke='#D8D8D8' shape-rendering='optimizeSpeed' stroke-width='1' stroke-opacity='1'></path>";
-        }
-        d = ["M", posX, posY, "L", posX, posY + gridBoxHeight + 10];
-        strGrid += "<rect id='gridRect' x='" + posX + "' y='" + posY + "' width='" + gridBoxWidth + "' height='" + gridBoxHeight + "' shape-rendering='optimizeSpeed' pointer-events='all' style='fill:none;stroke-width:0;stroke:#717171;' \/>";
-        strGrid += "<path id='gridBoxLeftBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'></path>";
-        d = ["M", posX, posY + gridBoxHeight, "L", posX + gridBoxWidth, posY + gridBoxHeight];
-        strGrid += "<path id='gridBoxBottomBorder' d='" + d.join(" ") + "' fill='none' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
-        strGrid += "</g>";
-        this.chartSVG.insertAdjacentHTML("beforeend", strGrid);
-    } /*End createGrid()*/
 }
 
-module.exports = Grid;
+export default Grid;

@@ -33,10 +33,22 @@
       SmartChartsNXT.ready(function () {
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
-          "title": "Area Chart",
-          "subTitle": "Single series",
           "targetElem": "chartContainer",
-          "canvasBorder": false,
+          "title": "Area Chart",
+          "subtitle": "Single series",
+          "titleStyle": {
+            "fillColor":"#717171",
+            "borderColor":"none",
+            "fontFamily": "Lato",
+            "maxFontSize": "25"
+          },
+          "subtitleStyle": {
+            "fillColor":"#717171",
+            "borderColor":"none",
+            "fontFamily": "Lato",
+            "maxFontSize": "18"
+          },
+          "canvasBorder": 2,
           "bgColor": "none",
           "toolTip": {
             "content": '<table>' +
@@ -61,7 +73,11 @@
               "markerRadius": 3.5,
               "smoothedLine": false,
               "areaOpacity": "0.4",
-              "data": generateData(10, 200, 45)
+              "data": [  //generateData(10, 500, 45)
+                {label:"Jan",value:"10"},{label:"Feb",value:"20"},{label:"Mar",value:"20"},{label:"Apr",value:"40"},
+                {label:"May",value:"40"},{label:"Jun",value:"60"},{label:"Jul",value:"40"},{label:"Aug",value:"70"},
+                {label:"Sep",value:"30"},{label:"Oct",value:"80"},{label:"Nov",value:"20"},{label:"Dec",value:"90"}
+              ]
             }]
           },
           // events: {
@@ -97,7 +113,7 @@
   </script>
 </head>
 
-<body>
+<body style="overflow: hidden;">
   <div>
     <div id='chartContainer' style="width:100%; height:100%;">
     </div>

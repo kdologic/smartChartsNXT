@@ -37,7 +37,7 @@ class Watermark extends Component {
         font-family: ${defaultConfig.theme.fontFamily};
         font-size: ${UiCore.getScaledFontSize(this.props.svgWidth, 20, 10)};
         fill: ${defaultConfig.theme.fontColorMedium};
-        stroke: 1;
+        stroke: none;
         stroke-width: 0;
       }
     `);

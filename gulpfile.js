@@ -4,7 +4,6 @@ let gulp = require('gulp');
 let insert = require('gulp-insert');
 let connect = require('gulp-connect');
 
-
 let uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
 let composer = require('gulp-uglify/composer');
 let minify = composer(uglifyEs, console);
@@ -19,11 +18,6 @@ let pkg = require('./package.json');
 let srcDir = './src/';
 let buildDir = './public/';
 let testDir = './test/';
-
-
-gulp.task('build', buildTask);
-gulp.task('watch', watchTask);
-gulp.task('default', ['build', 'watch']);
 
 let header = `/** 
 * SmartChartsNXT
@@ -45,7 +39,11 @@ function buildTask() {
     .pipe(webpack(webpackConfig))
     .pipe(rename('smartChartsNXT.bundle.js'))
     .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir))
+    .pipe(gulp.dest(buildDir));
+}
+
+function minifyTask() {
+  return gulp.src(buildDir + 'smartChartsNXT.bundle.js')
     .pipe(minify({}))
     .pipe(rename('smartChartsNXT.bundle.min.js'))
     .pipe(insert.prepend(header))
@@ -55,3 +53,9 @@ function buildTask() {
 function watchTask() {
   return gulp.watch('./src/**', ['build']);
 }
+
+gulp.task('build', buildTask);
+gulp.task('minify', ['build'], minifyTask );
+gulp.task('watch', watchTask);
+gulp.task('default', ['build', 'watch']);
+gulp.task('release', ['build', 'minify']);

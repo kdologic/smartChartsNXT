@@ -1,65 +1,80 @@
-/*
+/**
  * verticalLabels.js
- * @Version:1.0.0
- * @CreatedOn:14-Jul-2017
- * @Author:SmartChartsNXT
- * @Description: This components will create a Vertical Labels for the chart. 
+ * @version:2.0.0
+ * @createdOn:14-Jul-2017
+ * @author:SmartChartsNXT
+ * @description: This components will create a Vertical Labels for the chart. 
  */
 
 "use strict";
 
-class VerticalLabels {
+import defaultConfig from "./../settings/config";
+import Ticks from "./ticks";
+import { Component } from "./../viewEngin/pview";
 
-    constructor() {}
+class VerticalLabels extends Component{
 
-    createVerticalLabel(objChart, targetElem, posX, posY, maxVal, minVal, maxWidth, gridHeight, labelCount, labelPrefix) {
-        this.objChart = objChart;
-        this.targetElem = targetElem;
-        this.chartSVG = this.objChart.CHART_DATA.chartSVG;
-        this.vLabelContainer = this.chartSVG.querySelector("#" + targetElem);
-        this.posX = posX;
-        this.posY = posY;
-        this.maxVal = maxVal;
-        this.minVal = minVal;
-        this.maxWidth = maxWidth;
-        this.gridHeight = gridHeight;
-        this.labelCount = labelCount;
-        this.labelPrefix = labelPrefix;
+    constructor(props) {
+      super(props);
+      this.config = {
+        color: this.props.opts.fillColor || defaultConfig.theme.fontColorDark,
+        fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeSmall,
+        fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
+        opacity:this.props.opts.opacity || "1"
+      };
+      this.state = {
+        fontSize: this.config.fontSize
+      };
+      this.minLabelVal = 0 ; 
+      this.maxLabelVal = 0; 
+      this.valueInterval = this.getValueInterval(this.props.maxVal, this.props.minVal, this.props.labelCount);
+    }
 
-        this.interval = this.getInterval(this.maxVal, this.minVal, this.labelCount);
-        let minLabelVal = this.interval * Math.floor((this.minVal > 0 ? 0 : this.minVal) / this.interval);
+    componentWillMount() {
+      typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+    }
 
-        let strText = "<g id='vTextLabel'>";
-        for (let gridCount = this.labelCount - 1, i = 0; gridCount >= 0; gridCount--) {
-            let value = minLabelVal + (i++ * this.interval);
-            value = this.formatTextValue(value);
-            strText += "<text font-family='Lato' fill='black'><tspan x='" + (this.posX - maxWidth) + "' y='" + (this.posY + (gridCount * this.gridHeight) + 5) + "' font-size='12' >" + (this.labelPrefix ? this.labelPrefix : "") + value + "<\/tspan></text>";
-            let d = ["M", this.posX, this.posY + (gridCount * this.gridHeight), "L", (this.posX - 5), this.posY + (gridCount * this.gridHeight)];
-            strText += "<path fill='none' d='" + d.join(" ") + "' stroke='#333' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>";
-        }
-        strText += "</g>";
-        this.vLabelContainer.innerHTML = strText;
-        this.adjustFontSize();
-    } /*End createVerticalLabel()*/
+    componentDidMount() {
+      if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
+        this.setState({fontSize: this.state.fontSize-1});
+      }
+      typeof this.props.onRef === 'function' && this.props.onRef(this); 
+    }
 
-    adjustFontSize() {
-        /*Adjust vertical text label size*/
-        let arrVTextLabels = this.vLabelContainer.querySelectorAll("#vTextLabel text");
-        for (let i = 0; i < arrVTextLabels.length; i++) {
-            let txtWidth = arrVTextLabels[i].getComputedTextLength();
-            if (txtWidth > this.maxWidth - 10) {
-                let fontSize = arrVTextLabels[i].querySelector("tspan").getAttribute("font-size");
-                arrVTextLabels.forEach(elem => {
-                    elem.querySelector("tspan").setAttribute("font-size", (fontSize - 1));
-                });
-                i = 0;
-            }
-        }
+    render() {
+      return (
+        <g class='vertical-text-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
+          {
+            this.getLabels()
+          }
+          <Ticks posX={5} posY={0} span='5' tickInterval={this.props.intervalLen} tickCount={this.props.labelCount} type='vertical'></Ticks>
+        </g>
+      );
+    }
+
+    getLabels() {
+      let labels = []; 
+      this.minLabelVal = this.valueInterval * Math.floor((this.props.minVal > 0 ? 0 : this.props.minVal) / this.props.intervalLen);
+      for (let lCount = this.props.labelCount - 1, i = 0; lCount >= 0; lCount--) {
+        this.maxLabelVal = this.formatTextValue(this.minLabelVal + (i++ * this.valueInterval));
+        labels.push(this.getEachLabel(this.maxLabelVal, lCount)); 
+      }
+      return labels;
+    }
+
+    getEachLabel(val, index) {
+      return (
+        <g>
+          <text font-family={this.config.fontFamily} fill={this.config.color} stroke='none' font-size={this.state.fontSize} opacity={this.config.opacity} text-rendering='geometricPrecision'>
+            <tspan text-anchor='end' x={0} y={index * this.props.intervalLen} dy='5'> {(this.props.labelPrefix ? this.props.labelPrefix : "") + val} </tspan>
+          </text>
+        </g>
+      );
     }
 
     formatTextValue(value) {
-        if (Math.abs(Number(value)) >= 100000) {
-            return (Number(value) / 100000).toFixed(2) + " M";
+        if (Math.abs(Number(value)) >= 1000000) {
+            return (Number(value) / 1000000).toFixed(2) + " M";
         } else if (Math.abs(Number(value)) >= 1000) {
             return (Number(value) / 1000).toFixed(2) + " K";
         } else {
@@ -67,7 +82,7 @@ class VerticalLabels {
         }
     }
 
-    getInterval(maxVal, minVal, intervalCount) {
+    getValueInterval(maxVal, minVal, intervalCount) {
         minVal = minVal > 0 ? 0 : minVal;
         maxVal = maxVal < 0 ? 0 :maxVal;
         let tempInterval = (maxVal - minVal) / (intervalCount - 2);
@@ -78,4 +93,4 @@ class VerticalLabels {
 
 }
 
-module.exports = VerticalLabels;
+export default VerticalLabels;
