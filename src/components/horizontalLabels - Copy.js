@@ -1,32 +1,18 @@
-/**
+/*
  * horizontalLabels.js
- * @version:2.0.0
- * @createdOn:14-Jul-2017
- * @author:SmartChartsNXT
- * @description: This components will create a Horizontal Labels for the chart. 
+ * @Version:1.0.0
+ * @CreatedOn:14-Jul-2017
+ * @Author:SmartChartsNXT
+ * @Description: This components will create a Horizontal Labels for the chart. 
  */
 
 "use strict";
 
-import defaultConfig from "./../settings/config";
-import Ticks from "./ticks";
-import { Component } from "./../viewEngin/pview";
+let Event = require("./../core/event");
 
-class HorizontalLabels extends Component{
+class HorizontalLabels {
 
-    constructor(props) {
-      super(props);
-      this.config = {
-        color: this.props.opts.fillColor || defaultConfig.theme.fontColorDark,
-        fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeSmall,
-        fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
-        opacity:this.props.opts.opacity || "1"
-      };
-      this.state = {
-        fontSize: this.config.fontSize
-      };
-    }
-
+    constructor() {}
 
     createHorizontalLabel(objChart, targetElem, posX, posY, componentWidth, componentHeight, categories, scaleX) {
         let self = this;
@@ -143,4 +129,4 @@ class HorizontalLabels extends Component{
     }
 }
 
-export default HorizontalLabels;
+module.exports = HorizontalLabels;

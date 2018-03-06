@@ -29,7 +29,7 @@ class Grid extends Component{
 
   drawGridLines(){
     let grids = []; 
-    for (let gridCount = 0; gridCount < this.props.gridCount - 1; gridCount++) {
+    for (let gridCount = 0; gridCount < this.props.gridCount; gridCount++) {
       grids.push(<line class={`grid-line-${gridCount}`} x1={0} y1={gridCount * this.props.gridHeight} x2={this.props.width} y2={gridCount * this.props.gridHeight} fill='none' stroke='#ddd' stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
     }
     return grids;

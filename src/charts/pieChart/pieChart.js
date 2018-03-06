@@ -265,17 +265,17 @@ class PieChart extends Component {
     // this.event.dispatchEvent(afterParseDataEvent);
   } 
 
-  updateTooltip(originPoint, index, pointData) {
+  updateTooltip(originPoint, pointData) {
     if(!this.childObj.tooltip) {
       return; 
     }
     if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content)
     {
-      this.childObj.tooltip.updateTip(originPoint, index, pointData);
+      this.childObj.tooltip.updateTip(originPoint, pointData);
     } else {
       let row1 = pointData.label + ", " + pointData.value;
       let row2 = pointData.percent.toFixed(2) + "%";
-      this.childObj.tooltip.updateTip(originPoint, index, pointData, row1, row2);
+      this.childObj.tooltip.updateTip(originPoint, pointData, row1, row2);
     }
   }
 

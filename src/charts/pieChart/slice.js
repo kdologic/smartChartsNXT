@@ -237,7 +237,7 @@ class Slice extends Component {
     } else {
       /** for tooltip only  */
       let mousePos = UiCore.cursorPoint(this.props.rootNodeId, e);
-      this.props.updateTip(mousePos, this.props.index, this.props.data);
+      this.props.updateTip(mousePos, this.props.data);
     }
   }
 

@@ -47,6 +47,8 @@ class AreaChart extends Component {
         fsScaleX: 0,
         vLabelWidth: 70,
         hLabelHeight: 80,
+        hGridCount: 6,
+        valueInterval:0,
         windowLeftIndex: 0,
         windowRightIndex: -1,
         longestSeries: 0,
@@ -59,9 +61,7 @@ class AreaChart extends Component {
       }, this.props.chartData);
 
       this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartOptions);
-      this.CHART_CONST = UtilCore.extends({
-        hGridCount: 10
-      }, this.props.chartConst);
+      this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.childrens = {
         area: []
@@ -86,7 +86,6 @@ class AreaChart extends Component {
     this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_DATA.hScrollBoxHeight + 90;
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
-    this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_CONST.hGridCount - 1)); 
 
     let longestSeries = 0;
     let longSeriesLen = 0;
@@ -149,7 +148,10 @@ class AreaChart extends Component {
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
     this.CHART_DATA.minima = Math.min.apply(null, minSet);
-
+    this.CHART_DATA.objInterval = UiCore.calcInterval(this.CHART_DATA.minima, this.CHART_DATA.maxima);
+    ({iVal: this.CHART_DATA.valueInterval, iCount: this.CHART_DATA.hGridCount} = this.CHART_DATA.objInterval);
+    this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_DATA.hGridCount)); 
+    
     //fire Event afterParseData
     // let afterParseDataEvent = new this.event.Event("afterParseData", {
     //   srcElement: self
@@ -180,33 +182,58 @@ class AreaChart extends Component {
         
         <Grid posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} 
-          gridCount={this.CHART_CONST.hGridCount} gridHeight={this.CHART_DATA.gridHeight}>
+          gridCount={this.CHART_DATA.hGridCount} gridHeight={this.CHART_DATA.gridHeight}>
         </Grid> 
 
-        <VerticalLabels onRef={ref => this.childrens.vlabel = ref} opts={this.CHART_OPTIONS.verticalLabels || {}} 
-          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} 
-          labelCount={this.CHART_CONST.hGridCount} intervalLen={this.CHART_DATA.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} opts={this.CHART_OPTIONS.dataSet.yAxis || {}}> 
-        </VerticalLabels>
-
+        <VerticalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.yAxis || {}}
+          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} valueInterval={this.CHART_DATA.valueInterval}
+          labelCount={this.CHART_DATA.hGridCount} intervalLen={this.CHART_DATA.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
+          updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
+        </VerticalLabels> 
         { 
           this.drawSeries() 
         }
-        
+        <Tooltip onRef={ref => this.childrens.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} rootNodeId={this.CHART_OPTIONS.targetElem} 
+          svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
+        </Tooltip>
       </g>
     );
   }
 
   drawSeries() {
-    let maxLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
+    let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.slice(this.CHART_DATA.windowLeftIndex, this.CHART_DATA.windowRightIndex + 1).length;
     
     return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
       return (
         <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={series.data.length} fill={'#f37200'} opacity={0.2}
-          maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} onRef={ref => this.childrens.area.push(ref)} >
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={'#f37200'} opacity={0.2}
+          maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.childrens.area.push(ref)} >
         </AreaFill>
       );
     });
+  }
+
+  updateLabelTip(e, labelData) {
+    let mousePos = UiCore.cursorPoint(this.CHART_OPTIONS.targetElem, e);
+    this.childrens.tooltip.updateTip(mousePos, null, labelData);
+  }
+
+  // updateTooltip(originPoint, index, pointData) {
+  //   if(!this.childrens.tooltip) {
+  //     return; 
+  //   }
+  //   if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content)
+  //   {
+  //     this.childrens.tooltip.updateTip(originPoint, index, pointData);
+  //   } else {
+  //     let row1 = pointData.label + ", " + pointData.value;
+  //     let row2 = pointData.percent.toFixed(2) + "%";
+  //     this.childrens.tooltip.updateTip(originPoint, index, pointData, row1, row2);
+  //   }
+  // }
+
+  hideTip() {
+    this.childrens.tooltip && this.childrens.tooltip.hide(); 
   }
 
   getStyle() {

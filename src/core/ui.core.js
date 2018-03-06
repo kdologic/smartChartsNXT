@@ -1,8 +1,8 @@
 /**
  * ui.core.js
- * @CreatedOn: 07-Apr-2016
+ * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @version: 1.1.0
+ * @version: 2.0.0
  * @description:SmartChartsNXT Core Library components. That contains ui functionality.
  */
 
@@ -92,7 +92,39 @@ class UiCore {
     pt.x = evt.clientX || evt.touches[0].clientX;
     pt.y = evt.clientY || evt.touches[0].clientY;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
-  } /*End cursorPoint()*/
+  } 
+
+
+  /**
+   * Calculate interval value and also interval count for a given range. 
+   * @param {Number} minVal 
+   * @param {Number} maxVal 
+   * @return {Object} 
+   */
+  calcInterval(minVal, maxVal) {
+    let arrWeight = [1, 2, 5];
+    let minIntvCount = 6;
+    let maxIntvCount = 13;
+    let mid = (maxVal - minVal) / 2;
+    minVal = minVal > 0 ? 0 : minVal;
+    maxVal = maxVal < 0 ? 0 : maxVal;
+    let digitBase10 = Math.round(mid).toString().length;
+    for (let weight of arrWeight) {
+      let tInt = Math.pow(10, digitBase10 - 1) * weight;
+      for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
+        let hitIntv = tInt * intv;
+        let tMinVal = minVal < 0 ? Math.floor(minVal / tInt) * tInt : minVal;
+        if ((tMinVal + hitIntv) > maxVal) {
+          return {
+            iVal: tInt,
+            iCount: intv, 
+            iMax: tMinVal + hitIntv, 
+            iMin: tMinVal
+          };
+        }
+      }
+    }
+  }
 
 }
 

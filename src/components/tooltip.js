@@ -39,7 +39,7 @@ class Tooltip extends Component {
       super(props);
       let padding = 10;
       this.config = {
-        color: this.props.opts.color || defaultConfig.theme.fontColorLight,
+        color: this.props.opts.color || defaultConfig.theme.fontColorDark,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
         fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
@@ -95,7 +95,7 @@ class Tooltip extends Component {
       return strContents; 
     }
 
-    updateTip(originPoint, index, pointData, line1, line2) {
+    updateTip(originPoint, pointData, line1, line2) {
       let xPadding = this.config.xPadding; 
       let yPadding = this.config.yPadding; 
       let strContents = "";

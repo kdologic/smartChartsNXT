@@ -14,8 +14,6 @@ import { Component } from "./../../viewEngin/pview";
 class AreaFill extends Component{
   constructor(props) {
       super(props);
-      //this.maxVal = 0; 
-      //this.minVal = 0;
       this.baseLine = 0; 
       this.scaleX = 0; 
       this.scaleY = 0; 
@@ -44,7 +42,7 @@ class AreaFill extends Component{
 
   getAreaPath() {
     let path = this.getLinePath(); 
-    path.push('L', this.pointSet[this.pointSet.length - 1].x, this.props.height, 'L', this.pointSet[0].x, this.props.height, 'Z');
+    path.push('L', this.pointSet[this.pointSet.length - 1].x, this.baseLine, 'L', this.pointSet[0].x, this.baseLine, 'Z');
     return path;
   }
 
@@ -60,8 +58,6 @@ class AreaFill extends Component{
   
   prepareData() {
     this.valueSet = this.props.dataSet.data.map((data) => {
-      //this.maxVal = Math.max(this.maxVal, data.value); 
-      //this.minVal = Math.min(this.minVal, data.value); 
       return data.value;
     });
     this.scaleX = this.props.width / this.props.maxSeriesLen;
