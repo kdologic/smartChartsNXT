@@ -85,7 +85,7 @@ class VerticalLabels extends Component{
   onMouseEnter(e) {
     if(typeof this.props.updateTip === 'function') {
       let lblIndex = e.target.classList[0].replace('vlabel-',''); 
-      this.props.updateTip(e, this.valueSet[lblIndex]);
+      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.valueSet[lblIndex]);
     }
   }
 

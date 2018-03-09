@@ -106,20 +106,21 @@ class UiCore {
     let minIntvCount = 6;
     let maxIntvCount = 13;
     let mid = (maxVal - minVal) / 2;
-    minVal = minVal > 0 ? 0 : minVal;
+    let tMinVal = minVal > 0 ? 0 : minVal;
     maxVal = maxVal < 0 ? 0 : maxVal;
     let digitBase10 = Math.round(mid).toString().length;
     for (let weight of arrWeight) {
       let tInt = Math.pow(10, digitBase10 - 1) * weight;
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
         let hitIntv = tInt * intv;
-        let tMinVal = minVal < 0 ? Math.floor(minVal / tInt) * tInt : minVal;
-        if ((tMinVal + hitIntv) > maxVal) {
+        tMinVal = minVal <= 0 && tMinVal >= minVal ? (Math.floor(tMinVal / tInt) * tInt) : tMinVal;
+        if ((tMinVal + hitIntv) >= maxVal) {
+          tMinVal = minVal === 0 ? tMinVal - tInt : tMinVal;
           return {
             iVal: tInt,
             iCount: intv, 
             iMax: tMinVal + hitIntv, 
-            iMin: tMinVal
+            iMin: tMinVal 
           };
         }
       }

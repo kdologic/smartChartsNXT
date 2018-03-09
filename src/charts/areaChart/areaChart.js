@@ -21,6 +21,7 @@ import LegendBox from './../../components/legendBox';
 import Grid from './../../components/grid';
 import AreaFill from './areaFill'; 
 import VerticalLabels from './../../components/verticalLabels';
+import HorizonalLabels from './../../components/horizontalLabels';
 import Tooltip from './../../components/tooltip';
 
 
@@ -60,7 +61,12 @@ class AreaChart extends Component {
         zoomOutBoxHeight: 40
       }, this.props.chartData);
 
-      this.CHART_OPTIONS = UtilCore.extends({}, this.props.chartOptions);
+      this.CHART_OPTIONS = UtilCore.extends({
+        dataSet: {
+          xAxis: {label: 'x-axis'},
+          yAxis: {label: 'y-axis'}
+        }
+      }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.childrens = {
@@ -97,7 +103,7 @@ class AreaChart extends Component {
       }
     }
     this.CHART_DATA.longestSeries = longestSeries;
-
+    
     /* Will set initial zoom window */
     if (this.CHART_OPTIONS.zoomWindow) {
       if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
@@ -108,10 +114,12 @@ class AreaChart extends Component {
       } else {
         this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
       }
-    } else {
+    } 
+    if(this.CHART_DATA.windowRightIndex === -1){
       this.CHART_DATA.windowRightIndex = (longSeriesLen) - 1;
     }
     
+   
     this.prepareDataSet(); 
   } 
 
@@ -145,6 +153,7 @@ class AreaChart extends Component {
       minSet.push(minVal);
       dataSet[i].color = dataSet[i].color || UtilCore.getColor(i);
     }
+    
     this.CHART_OPTIONS.dataSet.xAxis.categories = categories;
     this.CHART_DATA.maxima = Math.max.apply(null, maxSet);
     this.CHART_DATA.minima = Math.min.apply(null, minSet);
@@ -186,13 +195,21 @@ class AreaChart extends Component {
         </Grid> 
 
         <VerticalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.maxima} minVal={this.CHART_DATA.minima} valueInterval={this.CHART_DATA.valueInterval}
+          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} valueInterval={this.CHART_DATA.valueInterval}
           labelCount={this.CHART_DATA.hGridCount} intervalLen={this.CHART_DATA.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
+
+        {/* <HorizonalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
+          posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth - 10} 
+          categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories}
+          updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
+        </HorizonalLabels>   */}
+        
         { 
           this.drawSeries() 
         }
+
         <Tooltip onRef={ref => this.childrens.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} rootNodeId={this.CHART_OPTIONS.targetElem} 
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
@@ -206,7 +223,8 @@ class AreaChart extends Component {
     return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
       return (
         <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={'#f37200'} opacity={0.2}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
+          opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.childrens.area.push(ref)} >
         </AreaFill>
       );
