@@ -50,6 +50,7 @@ class AreaChart extends Component {
         hLabelHeight: 80,
         hGridCount: 6,
         valueInterval:0,
+        paddingX: 10,
         windowLeftIndex: 0,
         windowRightIndex: -1,
         longestSeries: 0,
@@ -200,11 +201,11 @@ class AreaChart extends Component {
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
 
-        {/* <HorizonalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth - 10} 
-          categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories}
+        <HorizonalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
+          posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
+          categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
-        </HorizonalLabels>   */}
+        </HorizonalLabels>   
         
         { 
           this.drawSeries() 
@@ -222,7 +223,7 @@ class AreaChart extends Component {
     
     return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
       return (
-        <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+        <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.childrens.area.push(ref)} >

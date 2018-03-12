@@ -115,11 +115,17 @@ class UiCore {
         let hitIntv = tInt * intv;
         tMinVal = minVal <= 0 && tMinVal >= minVal ? (Math.floor(tMinVal / tInt) * tInt) : tMinVal;
         if ((tMinVal + hitIntv) >= maxVal) {
-          tMinVal = minVal === 0 ? tMinVal - tInt : tMinVal;
+        //debugger;
+          let iMax = tMinVal + hitIntv;
+          if(minVal === 0) {
+            tMinVal -= tInt;
+            intv++; 
+            iMax = hitIntv; 
+          }
           return {
             iVal: tInt,
             iCount: intv, 
-            iMax: tMinVal + hitIntv, 
+            iMax: iMax, 
             iMin: tMinVal 
           };
         }

@@ -19,7 +19,7 @@ class HorizontalLabels extends Component{
     super(props);
     this.config = {
       color: this.props.opts.fillColor || defaultConfig.theme.fontColorDark,
-      fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeSmall,
+      fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeMedium,
       fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
       opacity:this.props.opts.opacity || "1"
     };
@@ -40,6 +40,7 @@ class HorizontalLabels extends Component{
   }
 
   render() {
+    this.setIntervalLength();
     return (
       <g class='horizontal-text-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <text font-family={this.config.fontFamily} fill={this.config.color} stroke='none' font-size={this.state.fontSize} opacity={this.config.opacity} text-rendering='geometricPrecision' >
@@ -47,13 +48,12 @@ class HorizontalLabels extends Component{
           this.getLabels()
         }
         </text>
-        <Ticks posX={5} posY={0} span='5' tickInterval={this.props.intervalLen} tickCount={this.props.labelCount} type='vertical'></Ticks>
+        <Ticks posX={0} posY={0} span='6' tickInterval={this.state.intervalLen} tickCount={this.props.categorySet.length-1} type='horizontal'></Ticks>
       </g>
     );
   }
 
   getLabels() {
-    debugger;
     let labels = []; 
     for (let i = 0; i < this.props.categorySet.length; i++) {
       labels.push(this.getEachLabel(this.props.categorySet[i], i));
@@ -63,14 +63,27 @@ class HorizontalLabels extends Component{
 
   getEachLabel(val, index) {
     return (
-      <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor='middle' x={index * this.state.intervalLen} y={0} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+      <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor='middle' x={index * this.state.intervalLen} y={12} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
         {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
       </tspan>
     );
   }
 
   setIntervalLength() {
-    this.state.intervalLen = this.props.maxWidth / this.props.categorySet.length;
+    this.state.intervalLen = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1);
+  }
+
+  onMouseEnter(e) {
+    if(typeof this.props.updateTip === 'function') {
+      let lblIndex = e.target.classList[0].replace('hlabel-',''); 
+      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.props.categorySet[lblIndex]);
+    }
+  }
+
+  onMouseLeave(e) {
+    if(typeof this.props.hideTip === 'function') {
+      this.props.hideTip(e);
+    }
   }
 
     // createHorizontalLabel(objChart, targetElem, posX, posY, componentWidth, componentHeight, categories, scaleX) {

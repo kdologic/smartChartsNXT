@@ -22,7 +22,6 @@ class AreaFill extends Component{
     this.pointSet = []; 
     this.valueSet = []; 
     this.childrens = {}; 
-    this.paddingX = 10; 
     this.clipPathId = 'sc-clip-' + Math.round(Math.random()*100001);
     this.prepareData(); 
   }
@@ -72,7 +71,7 @@ class AreaFill extends Component{
   getLinePath() {
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
-      let point = new Point((i * this.scaleX)+ (this.scaleX / 2), (this.baseLine) - (data * this.scaleY));
+      let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
       if(i > 0) {
         path.push('L', point.x, point.y);
       }
@@ -85,10 +84,9 @@ class AreaFill extends Component{
   getCurvedLinePath() {
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
-      let point = new Point((i * this.scaleX) + this.paddingX, (this.baseLine) - (data * this.scaleY));
+      let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
       return point; 
     });
-    console.log(this.pointSet);
     path = Geom.getBezierSplines(this.pointSet);
     path.unshift('M', this.pointSet[0].x, this.pointSet[0].y);
     return path; 
@@ -98,7 +96,7 @@ class AreaFill extends Component{
     this.valueSet = this.props.dataSet.data.map((data) => {
       return data.value;
     });
-    this.scaleX = (this.props.width - (2 * this.paddingX)) / (this.props.maxSeriesLen-1);
+    this.scaleX = (this.props.width - (2 * this.props.paddingX)) / (this.props.maxSeriesLen-1);
     this.scaleY = this.props.height / (this.props.maxVal-this.props.minVal); 
     this.baseLine = this.props.maxVal * this.scaleY; 
   }
