@@ -23,6 +23,7 @@ import AreaFill from './areaFill';
 import VerticalLabels from './../../components/verticalLabels';
 import HorizonalLabels from './../../components/horizontalLabels';
 import Tooltip from './../../components/tooltip';
+import InteractivePlane from './interactivePlane'; 
 
 
 class AreaChart extends Component {
@@ -183,12 +184,6 @@ class AreaChart extends Component {
             </text>
           </Draggable>
         </g>
-        <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold">
-          <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
-        </text>
-        <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold">
-          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2))}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
-        </text>
         
         <Grid posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} 
@@ -206,6 +201,14 @@ class AreaChart extends Component {
           categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </HorizonalLabels>   
+
+        <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
+          <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
+        </text>
+
+        <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="25" stroke-linejoin="round" paint-order="stroke">
+          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
+        </text>
         
         { 
           this.drawSeries() 
@@ -214,6 +217,10 @@ class AreaChart extends Component {
         <Tooltip onRef={ref => this.childrens.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} rootNodeId={this.CHART_OPTIONS.targetElem} 
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
+        
+        <InteractivePlane onRef={ref => this.childrens.interactivePlane = ref} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} rootNodeId={this.CHART_OPTIONS.targetElem} >
+        </InteractivePlane>
       </g>
     );
   }

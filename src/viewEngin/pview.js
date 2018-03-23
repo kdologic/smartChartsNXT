@@ -25,7 +25,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
   if (!node || !targetNode) {
     throw new TypeError('Invalid vnode or target in render component');
   }
-  let component = (nodeType === 'rnode' ? node : renderDOM(node));
+  let component = (nodeType === 'rnode' ? node : renderDOM.call({context: {}} , node));
 
   if (component.self && typeof component.self.componentWillMount === 'function') {
     component.self.componentWillMount.call(component.self);
@@ -76,12 +76,14 @@ function renderDOM(vnode) {
 
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) {
     vnode.attributes.children = vnode.children;
+    vnode.nodeName.prototype.context = this.context || {}; 
     let objComp = new vnode.nodeName(vnode.attributes);
-    let renderedComp = renderDOM(objComp.getVirtualNode());
-
+    let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
+    let renderedComp = renderDOM.call({context: objChildContext}, objComp.getVirtualNode());
+    component.self = objComp;
     ({ node: component.node, children: component.children } = renderedComp);
     component.eventStack.push.apply(component.eventStack, renderedComp.eventStack);
-    component.self = objComp;
+    
     ({ node: objComp.ref.node, children: objComp.ref.children} = component);
 
   } else if (typeof vnode.nodeName === 'function') {
@@ -92,7 +94,7 @@ function renderDOM(vnode) {
 
   /* loop for childrens */
   (vnode.children || []).forEach((c) => {
-    let childComp = renderDOM(c);
+    let childComp = renderDOM.call(({context: this.context} || {}), c);
 
     if (childComp.self && typeof childComp.self.componentWillMount === 'function') {
       childComp.self.componentWillMount.call(childComp.self);
@@ -185,7 +187,8 @@ class Component {
       this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
-      let renderedComp = renderDOM(this.vnode); 
+      let objChildContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
+      let renderedComp = renderDOM.call({context : objChildContext || {}}, this.vnode); 
 
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       return mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);

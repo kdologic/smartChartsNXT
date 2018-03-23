@@ -59,12 +59,21 @@ class BaseChart extends Component {
       };
       this.runId = this.props.runid; 
       this.timeOut = null;
+      this.state = {
+        width: this.props.width || this.CHART_CONST.FIX_WIDTH, 
+        height: this.props.height || this.CHART_CONST.FIX_HEIGHT
+      }; 
       this.loadConfig(CHART_MODULES[this.chartType].config.call(this)); 
-      this.initCanvasSize(this.props.width || this.CHART_CONST.FIX_WIDTH, this.props.height || this.CHART_CONST.FIX_HEIGHT); 
     } catch (ex) {
       ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
       throw ex;
     }
+  }
+
+  passContext() {
+    return {
+      runId: this.props.runid
+    };
   }
 
   loadConfig(config) {
@@ -100,6 +109,7 @@ class BaseChart extends Component {
   
   
   render() {
+    this.initCanvasSize(this.state.width, this.state.height); 
     let Chart = CHART_MODULES[this.chartType].chart;
     return (
       <svg xmlns='http://www.w3.org/2000/svg'
@@ -126,7 +136,7 @@ class BaseChart extends Component {
             height={this.CHART_OPTIONS.height - 1}
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
-            style={{ fill: defaultConfig.theme.bgColorLight, strokWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}
+            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}
           />
         </g> : null}
 

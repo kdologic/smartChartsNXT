@@ -24,8 +24,11 @@ class HorizontalLabels extends Component{
       opacity:this.props.opts.opacity || "1"
     };
     this.state = {
-      fontSize: this.config.fontSize
+      fontSize: this.config.fontSize, 
+      labelTransform:false,
+      renderCounter:0
     };
+    this.intervalThreshold = 30;
   }
 
   componentWillMount() {
@@ -33,9 +36,10 @@ class HorizontalLabels extends Component{
   }
 
   componentDidMount() {
-    // if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
-    //   this.setState({fontSize: this.state.fontSize-1});
-    // }
+    this.state.renderCounter++; 
+    //if(this.state.renderCounter < 3 ){
+      this.checkLabelsWidth();
+    //}
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 
@@ -43,11 +47,9 @@ class HorizontalLabels extends Component{
     this.setIntervalLength();
     return (
       <g class='horizontal-text-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <text font-family={this.config.fontFamily} fill={this.config.color} stroke='none' font-size={this.state.fontSize} opacity={this.config.opacity} text-rendering='geometricPrecision' >
         {
           this.getLabels()
         }
-        </text>
         <Ticks posX={0} posY={0} span='6' tickInterval={this.state.intervalLen} tickCount={this.props.categorySet.length-1} type='horizontal'></Ticks>
       </g>
     );
@@ -55,28 +57,65 @@ class HorizontalLabels extends Component{
 
   getLabels() {
     let labels = []; 
-    for (let i = 0; i < this.props.categorySet.length; i++) {
-      labels.push(this.getEachLabel(this.props.categorySet[i], i));
+    for (let i = 0; i < this.state.categories.length; i++) {
+      labels.push(this.getEachLabel(this.state.categories[i], i));
     }
     return labels;
   }
 
   getEachLabel(val, index) {
+    let x = index * this.state.intervalLen; 
+    let y = 12; 
+    let transform = this.state.labelTransform ? "rotate(-45," + x + "," + y + ")" : ""; 
     return (
-      <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor='middle' x={index * this.state.intervalLen} y={12} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
-        {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
-      </tspan>
+      <text font-family={this.config.fontFamily} fill={this.config.color} x={x} y={y} 
+        transform={transform} font-size={this.state.fontSize} opacity={this.config.opacity} stroke='none' text-rendering='geometricPrecision' >
+
+        <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor={this.state.labelTransform ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+          {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
+        </tspan>
+
+      </text>
     );
   }
 
   setIntervalLength() {
-    this.state.intervalLen = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1);
+    let interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1);
+    this.state.categories = this.props.categorySet;
+    if (interval < this.intervalThreshold) {
+      let newCategories = [];
+      let skipLen = Math.ceil(this.intervalThreshold / interval);
+      for (let i = 0; i < this.props.categorySet.length; i += skipLen) {
+          newCategories.push(this.props.categorySet[i]);
+      }
+      
+      interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (newCategories.length - 1);
+      if((newCategories.length-1) * interval > this.props.maxWidth) {
+        newCategories.splice(-1,1);
+      }
+      this.state.categories = newCategories;
+    }
+    this.state.intervalLen = interval; 
+  }
+
+  checkLabelsWidth() {  
+    for(let i=0; i < this.state.categories.length; i++) {
+      let textLen = this.ref.node.querySelector('.hlabel-'+ i).getComputedTextLength(); 
+      if(textLen > this.intervalThreshold) {
+        if(this.state.fontSize > defaultConfig.theme.fontSizeSmall) {
+          this.setState({fontSize: this.state.fontSize-1});  
+        } else if(!this.state.labelTransform){
+          this.setState({labelTransform: true});
+        }
+        return; 
+      }
+    }
   }
 
   onMouseEnter(e) {
     if(typeof this.props.updateTip === 'function') {
       let lblIndex = e.target.classList[0].replace('hlabel-',''); 
-      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.props.categorySet[lblIndex]);
+      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex]);
     }
   }
 

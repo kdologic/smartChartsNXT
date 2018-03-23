@@ -46,7 +46,7 @@ class DataPoints extends Component{
       case 'circle': 
       default:
       return (<g class={`sc-data-point-${index}`}>
-        <circle cx={point.x} cy={point.y} r={this.props.r + 5} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='0' style={{'transition': 'fill-opacity 0.2s linear'}} > </circle>
+        <circle cx={point.x} cy={point.y} r={this.props.r + 5} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' style={{'transition': 'fill-opacity 0.2s linear'}} > </circle>
         <circle cx={point.x} cy={point.y} r={this.props.r + 2} class='outer-offset' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
         <circle cx={point.x} cy={point.y} r={this.props.r} class='inner-dot' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
       </g>);
@@ -54,16 +54,18 @@ class DataPoints extends Component{
   }
 
   doHighlight(index) {
-    let fillOpacity = 0.5; 
+    let fillOpacity = 1; 
     if(index === false) {
-      index = this.state.highlitedIndex; 
+      index = this.state.highlitedIndex || 0; 
       fillOpacity = 0; 
       this.state.highlitedIndex = null; 
     } else {
       this.state.highlitedIndex = index;
     }
     let highlighterElem = this.ref.node.querySelector(`.sc-data-point-${index} .outer-highliter`);
+    let innerDot = this.ref.node.querySelector(`.sc-data-point-${index} .inner-dot`);
     highlighterElem.setAttribute('fill-opacity', fillOpacity);  
+    innerDot.setAttribute('fill-opacity', +!fillOpacity);  
   }
 }
 

@@ -78,11 +78,37 @@ class GeomCore {
     svg.appendChild(newElement);
   } /*End createRect()*/
 
+  findClosestPoint(pSet, pt, realIndex) {
+    let halfLen = Math.ceil(pSet.length/2); 
+    let lSet = pSet.slice(0, halfLen); 
+    let rSet = pSet.slice(halfLen);
+    let nearPoint = undefined;
+    if(halfLen < 3) {
+      let min = Number.MAX_SAFE_INTEGER; 
+      for(let p of pSet) {
+        let d = this.getDistanceBetween(p,pt);
+        if( d < min) {
+          min = d; 
+          nearPoint = p; 
+        }
+      }
+      return nearPoint; 
+    }else {
+      if(this.xDist(lSet[halfLen-1], pt) <=  this.xDist(rSet[0], pt)) {
+        nearPoint= this.findClosestPoint(lSet, pt);
+      } else {
+        nearPoint = this.findClosestPoint(rSet, pt);
+      }
+      return nearPoint;
+    }
+  }
 
+  xDist(p1, p2) {
+    return Math.abs(p1.x - p2.x);
+  }
 
-  getDistanceBetween(point1, point2) {
-    let dist = Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y - point2.y) * (point1.y - point2.y)) || 0;
-    return dist;
+  getDistanceBetween(p1, p2) {
+    return Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2) || 0;
   } /*End getDistanceBetween()*/
 
   polarToCartesian(centerX, centerY, radius, angleInDegrees) {
@@ -98,8 +124,8 @@ class GeomCore {
   } /*End getMidPoint()*/
 
   getEllipticalRadius(rx, ry, angleInDegrees) {
-    if(!rx || !ry) {
-      return 0; 
+    if (!rx || !ry) {
+      return 0;
     }
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
@@ -178,12 +204,11 @@ class GeomCore {
     return result;
   } /*End checkLineIntersection()*/
 
-  /**
-   * 
+  /* 
    * @param {Point} pointSet 
    * @return {object []} Bézier curve path
    */
-  getBezierSplines(pointSet) {	
+  getBezierSplines(pointSet) {
     /*grab (x,y) coordinates of the control points*/
     let x = [];
     let y = [];
@@ -194,16 +219,15 @@ class GeomCore {
       x[i] = parseInt(pointSet[i].x);
       y[i] = parseInt(pointSet[i].y);
     }
-    
-    let cp = this.getCurveControlPoints(pointSet); 
+
+    let cp = this.getCurveControlPoints(pointSet);
     /*updates path settings, the browser will draw the new spline*/
     for (let i = 0; i < pointSet.length - 1; i++) {
       curvedPath.push(path(x[i], y[i], cp.p1[i].x, cp.p1[i].y, cp.p2[i].x, cp.p2[i].y, x[i + 1], y[i + 1]));
     }
 
-    function path(x1,y1,px1,py1,px2,py2,x2,y2)
-    {
-      return "C "+px1+" "+py1+" "+px2+" "+py2+" "+x2+" "+y2;
+    function path(x1, y1, px1, py1, px2, py2, x2, y2) {
+      return "C " + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
     }
 
     return curvedPath;
@@ -227,7 +251,10 @@ class GeomCore {
       secondControlPoints = [new Point()]; // :: P2 = 2P1 – P0 ::
       secondControlPoints[0].x = 2 * firstControlPoints[0].x - knots[0].x;
       secondControlPoints[0].y = 2 * firstControlPoints[0].y - knots[0].y;
-      return {p1: firstControlPoints, p2:secondControlPoints};
+      return {
+        p1: firstControlPoints,
+        p2: secondControlPoints
+      };
     }
 
     // Calculate first Bezier control points
@@ -261,12 +288,14 @@ class GeomCore {
       firstControlPoints[i] = new Point(x[i], y[i]);
       if (i < n - 1) {
         secondControlPoints[i] = new Point(2 * knots[i + 1].x - x[i + 1], 2 * knots[i + 1].y - y[i + 1]);
-      }
-      else {
+      } else {
         secondControlPoints[i] = new Point((knots[n].x + x[n - 1]) / 2, (knots[n].y + y[n - 1]) / 2);
       }
     }
-    return {p1: firstControlPoints, p2:secondControlPoints};
+    return {
+      p1: firstControlPoints,
+      p2: secondControlPoints
+    };
   }
 
   /**
@@ -288,7 +317,7 @@ class GeomCore {
     for (let i = 1; i < n; i++) {
       x[n - i - 1] -= tmp[n - i] * x[n - i]; // Backsubstitution.
     }
-      return x;
+    return x;
   }
 
 }

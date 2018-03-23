@@ -2,7 +2,7 @@
  * chart.js
  * @createdOn: 22-Oct-2017
  * @author: SmartChartsNXT
- * @version: 1.0.0
+ * @version: 2.0.0
  * @description:This class will be entry point of all charts.
  */
 
@@ -11,32 +11,26 @@
 import { mountTo } from "./../viewEngin/pview";
 import BaseChart from './../base/baseChart';
 import UtilCore from './../core/util.core';
+import eventEmitter from './../core/eventEmitter';
 import Error from "./../components/errorView"; 
 
 class Chart {
   constructor(opts){
     try {
       this.runId = UtilCore.uuidv4();
+      eventEmitter.createInstance(this.runId);
       this.targetNode = document.querySelector("#" + opts.targetElem);
       this.targetNode.setAttribute("runId", this.runId);
-      this.renderChartBind = this.renderChart.bind(this, opts, this.runId, this.targetNode);
-      this.renderChartBind(); 
-      window.addEventListener('resize', this.renderChartBind, false); 
+      this.chartNode = mountTo(<BaseChart opts={opts} runid={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
+      window.addEventListener('resize', this.onResize.bind(this), false); 
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 
     }
   }
 
-  renderChart(opts, runId, targetNode) {
-    try {
-      if(this.chartNode) {
-        opts.animated = false; 
-      }
-      this.chartNode = mountTo(<BaseChart opts={opts} runid={runId} width={targetNode.offsetWidth} height={targetNode.offsetHeight} />, targetNode);
-    }catch(ex) {
-      throw ex; 
-    }
+  onResize() {
+    this.chartNode.self.setState({width: this.targetNode.offsetWidth, height: this.targetNode.offsetHeight});
   }
 
   showErrorScreen(opts, ex, errorIn) {
