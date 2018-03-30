@@ -33,7 +33,6 @@ class DataPoints extends Component{
       <g>
         {
           this.props.pointSet.map((point, i) => {
-            //this.state.point[i].highlight = false;
             return this.getEachPoint(point, i);
           })
         }

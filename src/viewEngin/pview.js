@@ -156,7 +156,7 @@ function replaceClassWithObject(subNodes, refs){
           subNode.nodeName = refChld.self; 
           if (refChld.self && typeof refChld.self.propsWillReceive === 'function') {
             refChld.self.propsWillReceive.call(refChld.self, subNode.attributes);
-            setTimeout(() => { refChld.self.props = Object.assign({}, refChld.self.props, subNode.attributes); }, 0);
+            refChld.self.props = Object.assign({}, refChld.self.props, subNode.attributes);
           }
           break; 
         }
@@ -276,8 +276,11 @@ class Component {
     return (<g> child must override this render method </g>);
   }
 
-  /**Lifecycle event - fires just before passing props into a pre-exist Component */
-  propsWillReceive() {}
+  /**
+   * Lifecycle event - fires just before passing props into a pre-exist Component
+   * @param {Object} nextProps New set of props
+   */
+  propsWillReceive(nextProps) {}
 
   /** Lifecycle event - fires before the mounting component on parent DOM */
   componentWillMount() {}

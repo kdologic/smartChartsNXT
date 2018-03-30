@@ -23,9 +23,9 @@ class Watermark extends Component {
         <style>
           {this.getStyle()}
         </style> 
-        <text fill='#717171' text-rendering='geometricPrecision' font-size='10' font-family='Lato' style='cursor: pointer;' 
+        <text fill='#717171' text-rendering='geometricPrecision' style='cursor: pointer;' 
         events={{click : () => {window.open('http://www.smartcharts.cf');}}}>
-          <tspan text-anchor='start' class='watermark-text' x='10' y='12' >Powered by SmartChartsNXT</tspan>
+          <tspan text-anchor='start' class='watermark-text' x={this.props.posX} y={this.props.posY} >{this.props.text}</tspan>
         </text>
       </g>
     );

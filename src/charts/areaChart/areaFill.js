@@ -24,7 +24,6 @@ class AreaFill extends Component{
     this.scaleY = 0; 
     this.pointSet = []; 
     this.valueSet = []; 
-    this.childrens = {}; 
     this.clipPathId = 'sc-clip-' + Math.round(Math.random()*100001);
     this.prepareData(); 
     this.bindEvents(); 
@@ -39,6 +38,8 @@ class AreaFill extends Component{
   }
 
   render() {
+    this.subComp = {}; 
+    this.prepareData();
     let path = this.props.spline ? this.getCurvedLinePath() : this.getLinePath(); 
     return (
       <g class='sc-area-fill'>
@@ -52,7 +53,7 @@ class AreaFill extends Component{
             d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
           </path> 
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width='1' opacity='1'></path> 
-          <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.childrens.dataPoints = ref} /> 
+          <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
         </g>
       </g>
     );
@@ -100,19 +101,18 @@ class AreaFill extends Component{
 
   bindEvents() {
     this.emitter.on('interactiveMouseMove', this.interactiveMouseMove.bind(this));
-
     this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave.bind(this));
   }
 
   interactiveMouseMove(mousePos) {
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
     let nearPoint = Geom.findClosestPoint(this.pointSet, pt); 
-    this.childrens.dataPoints.doHighlight(false);
-    this.childrens.dataPoints.doHighlight(nearPoint.index); 
+    this.subComp.dataPoints.doHighlight(false);
+    this.subComp.dataPoints.doHighlight(nearPoint.index); 
   }
 
   interactiveMouseLeave(e) {
-    this.childrens.dataPoints.doHighlight(false);
+    this.subComp.dataPoints.doHighlight(false);
   }
 
 }

@@ -2,8 +2,8 @@
  * baseChart.js
  * @createdOn: 10-May-2017
  * @author: SmartChartsNXT
- * @version: 1.1.0
- * @description:This class will be the parent class of all charts.
+ * @version: 2.0.0
+ * @description:This is base chart with defaulf config and this will initiate loading of a specific chart type. 
  */
 
 "use strict";
@@ -45,25 +45,23 @@ class BaseChart extends Component {
   constructor(props) {
     try {
       super(props); 
-      let opts = this.props.opts; 
-      // this.event = new EventCore();
       // this.plugins = {
       //   animator: animator
       // };
       this.chartType = this.props.opts.type;
-      this.CHART_OPTIONS = UtilCore.extends(opts, { width: 1, height: 1});
+      this.CHART_OPTIONS = UtilCore.extends(this.props.opts, { width: 1, height: 1});
       this.CHART_DATA = {scaleX: 0, scaleY: 0};
       this.CHART_CONST = {
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600
       };
-      this.runId = this.props.runid; 
-      this.timeOut = null;
+       
       this.state = {
         width: this.props.width || this.CHART_CONST.FIX_WIDTH, 
         height: this.props.height || this.CHART_CONST.FIX_HEIGHT
       }; 
       this.loadConfig(CHART_MODULES[this.chartType].config.call(this)); 
+      this.initCanvasSize(this.state.width, this.state.height); 
     } catch (ex) {
       ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
       throw ex;
@@ -72,7 +70,13 @@ class BaseChart extends Component {
 
   passContext() {
     return {
-      runId: this.props.runid
+      runId: this.props.runId,
+      chartType: this.chartType, 
+      rootSvgId: this.getChartId(),
+      rootContainerId: this.CHART_OPTIONS.targetElem, 
+      svgWidth: this.CHART_DATA.svgWidth,
+      svgHeight: this.CHART_DATA.svgHeight,
+      svgCenter: this.CHART_DATA.svgCenter
     };
   }
 
@@ -83,30 +87,6 @@ class BaseChart extends Component {
       } catch (ex) { throw ex; }
     }
   }
-
-  initBase() {
-
-    // if (this.CHART_OPTIONS.events && typeof this.CHART_OPTIONS.events === "object") {
-    //   for (let e in this.CHART_OPTIONS.events) {
-    //     this.event.off(e, this.CHART_OPTIONS.events[e]);
-    //     this.event.on(e, this.CHART_OPTIONS.events[e]);
-    //   }
-    // }
-
-    //fire Event onInit
-    // let onInitEvent = new Event("onInit", {
-    //   srcElement: this
-    // });
-    // this.event.dispatchEvent(onInitEvent);
-
-    
-    // setTimeout(function () {
-    //   self.ui.appendMenu2(self.CHART_OPTIONS.targetElem, self.CHART_DATA.svgCenter, null, null, self);
-    //   self.ui.appendWaterMark(self.CHART_OPTIONS.targetElem, self.CHART_DATA.scaleX, self.CHART_DATA.scaleY);
-    // }, 100);
-
-  } /* End of Init() */
-  
   
   render() {
     this.initCanvasSize(this.state.width, this.state.height); 
@@ -129,7 +109,7 @@ class BaseChart extends Component {
           UserSelect: 'none'
         }} >
 
-        { this.CHART_OPTIONS.canvasBorder ? 
+        {this.CHART_OPTIONS.canvasBorder &&
         <g>
           <rect x='0' y='0' vector-effect='non-scaling-stroke'
             width={this.CHART_OPTIONS.width - 1}
@@ -138,15 +118,16 @@ class BaseChart extends Component {
             fill-opacity='0.001'
             style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}
           />
-        </g> : null}
+        </g>}
 
-        {this.CHART_OPTIONS.watermark !== false && <Watermark svgWidth={this.CHART_DATA.svgWidth}></Watermark>}
+        {this.CHART_OPTIONS.watermark !== false && 
+          <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} text="Powered by SmartChartsNXT"/>
+        }
         
         <g id={`${this.getChartId()}_cont`} >
-          <Chart runId={this.runId} chartOptions={this.CHART_OPTIONS} 
-            chartData={this.CHART_DATA} chartConst={this.CHART_CONST} 
-          /> 
+          <Chart chartOptions={this.CHART_OPTIONS} chartData={this.CHART_DATA} chartConst={this.CHART_CONST} /> 
         </g>
+
         {this.CHART_OPTIONS.showMenu !== false &&
           <Menu x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
         }
@@ -154,17 +135,8 @@ class BaseChart extends Component {
      );
   }
 
-
-  // render() {
-  //   //fire event afterRender
-  //   let aftrRenderEvent = new Event("afterRender", {
-  //     srcElement: this
-  //   });
-  //   this.event.dispatchEvent(aftrRenderEvent);
-  // }
-
   getRunId() {
-    return this.runId;
+    return this.props.runId;
   }
 
   initCanvasSize(width, height, minWidth = this.CHART_DATA.minWidth, minHeight = this.CHART_DATA.minHeight) {

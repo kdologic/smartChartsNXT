@@ -25,8 +25,7 @@ class HorizontalLabels extends Component{
     };
     this.state = {
       fontSize: this.config.fontSize, 
-      labelTransform:false,
-      renderCounter:0
+      labelTransform:false
     };
     this.intervalThreshold = 30;
   }
@@ -36,10 +35,7 @@ class HorizontalLabels extends Component{
   }
 
   componentDidMount() {
-    this.state.renderCounter++; 
-    //if(this.state.renderCounter < 3 ){
-      this.checkLabelsWidth();
-    //}
+    this.checkLabelsWidth();
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 

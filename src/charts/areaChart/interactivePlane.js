@@ -43,7 +43,7 @@ class InteractivePlane extends Component{
   }
 
   onMouseMove(e) {
-    let mousePos = UiCore.cursorPoint(this.props.rootNodeId, e);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     this.emitter.emit('interactiveMouseMove', mousePos);
   }
 

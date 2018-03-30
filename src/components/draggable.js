@@ -1,9 +1,9 @@
-/*
+/**
  * draggable.js
- * @Version:1.0.0
- * @CreatedOn:31-Aug-2017
- * @Author:SmartChartsNXT
- * @Description: This class will make components draggable.
+ * @version:2.0.0
+ * @createdOn:31-Aug-2017
+ * @author:SmartChartsNXT
+ * @description: This class will make components draggable.
  * To drag a component just double click on it then the component will be showed as selected then we can drag it 
  * to fix that position jus double click again on the component. 
  */
@@ -39,12 +39,11 @@ class Draggable extends Component{
       <g class='dragger drag-handler-container' transform={this.state.tranMatrix} style={{cursor: this.state.showHandler ?'move':'default'}}
         events={this.getHandlerEventMap()} >
       {
-        this.state.showHandler ? 
+        this.state.showHandler &&
         <rect class='dragger drag-handler-outerbox' 
           x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height} 
           stroke-dasharray='5, 5' fill='none' pointer-events='all' stroke='#009688' stroke-width='1' opacity='1'>
         </rect>
-        : null
       }
       </g>
     );

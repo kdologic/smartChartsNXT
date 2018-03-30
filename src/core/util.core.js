@@ -33,6 +33,9 @@ class UtilCore {
    * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
    */
   extends(source, source1) {
+    if(!source || !source1) {
+      return {}; 
+    }
     let mergedJSON = source;
     for (let attrname in source1) {
       if (mergedJSON.hasOwnProperty(attrname)) {

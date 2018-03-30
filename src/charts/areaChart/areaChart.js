@@ -71,14 +71,13 @@ class AreaChart extends Component {
       }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
-      this.childrens = {
+      this.subComp = {
         area: []
       };
-      console.log(this.CHART_OPTIONS);
 
       this.init();
     } catch (ex) {
-      ex.errorIn = `Error in AreaChart with runId:${this.props.runId}`;
+      ex.errorIn = `Error in AreaChart with runId:${this.context.runId}`;
       throw ex;
     }
   }
@@ -132,6 +131,9 @@ class AreaChart extends Component {
     this.CHART_DATA.newCatgList = [];
     this.CHART_DATA.windowLeftIndex = 0;
     this.CHART_DATA.windowRightIndex = -1;
+    this.subComp = {
+      area: []
+    };
   }
 
   prepareDataSet(dataSet) {
@@ -162,13 +164,15 @@ class AreaChart extends Component {
     this.CHART_DATA.objInterval = UiCore.calcInterval(this.CHART_DATA.minima, this.CHART_DATA.maxima);
     ({iVal: this.CHART_DATA.valueInterval, iCount: this.CHART_DATA.hGridCount} = this.CHART_DATA.objInterval);
     this.CHART_DATA.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.CHART_DATA.hGridCount)); 
-    
-    //fire Event afterParseData
-    // let afterParseDataEvent = new this.event.Event("afterParseData", {
-    //   srcElement: self
-    // });
-    // this.event.dispatchEvent(afterParseDataEvent);
   } 
+
+  propsWillReceive(nextProps){
+    this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
+    this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
+    this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
+    this.CHART_DATA.hScrollBoxHeight = nextProps.hideHorizontalScroller ? 0 : 60,
+    this.init(); 
+  }
 
   render() {
     return (
@@ -190,13 +194,13 @@ class AreaChart extends Component {
           gridCount={this.CHART_DATA.hGridCount} gridHeight={this.CHART_DATA.gridHeight}>
         </Grid> 
 
-        <VerticalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.yAxis || {}}
+        <VerticalLabels onRef={ref => this.subComp.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.yAxis || {}}
           posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} valueInterval={this.CHART_DATA.valueInterval}
           labelCount={this.CHART_DATA.hGridCount} intervalLen={this.CHART_DATA.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
 
-        <HorizonalLabels onRef={ref => this.childrens.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
+        <HorizonalLabels onRef={ref => this.subComp.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
           categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
@@ -214,12 +218,12 @@ class AreaChart extends Component {
           this.drawSeries() 
         }
 
-        <Tooltip onRef={ref => this.childrens.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}} rootNodeId={this.CHART_OPTIONS.targetElem} 
+        <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
         
-        <InteractivePlane onRef={ref => this.childrens.interactivePlane = ref} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} rootNodeId={this.CHART_OPTIONS.targetElem} >
+        <InteractivePlane onRef={ref => this.subComp.interactivePlane = ref} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
         </InteractivePlane>
       </g>
     );
@@ -233,33 +237,33 @@ class AreaChart extends Component {
         <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.childrens.area.push(ref)} >
+          maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.subComp.area.push(ref)} >
         </AreaFill>
       );
     });
   }
 
   updateLabelTip(e, labelData) {
-    let mousePos = UiCore.cursorPoint(this.CHART_OPTIONS.targetElem, e);
-    this.childrens.tooltip.updateTip(mousePos, null, labelData);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    this.subComp.tooltip.updateTip(mousePos, null, labelData);
   }
 
   // updateTooltip(originPoint, index, pointData) {
-  //   if(!this.childrens.tooltip) {
+  //   if(!this.subComp.tooltip) {
   //     return; 
   //   }
   //   if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content)
   //   {
-  //     this.childrens.tooltip.updateTip(originPoint, index, pointData);
+  //     this.subComp.tooltip.updateTip(originPoint, index, pointData);
   //   } else {
   //     let row1 = pointData.label + ", " + pointData.value;
   //     let row2 = pointData.percent.toFixed(2) + "%";
-  //     this.childrens.tooltip.updateTip(originPoint, index, pointData, row1, row2);
+  //     this.subComp.tooltip.updateTip(originPoint, index, pointData, row1, row2);
   //   }
   // }
 
   hideTip() {
-    this.childrens.tooltip && this.childrens.tooltip.hide(); 
+    this.subComp.tooltip && this.subComp.tooltip.hide(); 
   }
 
   getStyle() {

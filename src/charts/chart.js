@@ -21,8 +21,9 @@ class Chart {
       eventEmitter.createInstance(this.runId);
       this.targetNode = document.querySelector("#" + opts.targetElem);
       this.targetNode.setAttribute("runId", this.runId);
-      this.chartNode = mountTo(<BaseChart opts={opts} runid={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
+      this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false); 
+      console.log(this.core);
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 
@@ -30,7 +31,7 @@ class Chart {
   }
 
   onResize() {
-    this.chartNode.self.setState({width: this.targetNode.offsetWidth, height: this.targetNode.offsetHeight});
+    this.core.self.setState({width: this.targetNode.offsetWidth, height: this.targetNode.offsetHeight});
   }
 
   showErrorScreen(opts, ex, errorIn) {

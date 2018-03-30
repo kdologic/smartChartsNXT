@@ -48,86 +48,7 @@
             "fontFamily": "Lato",
             "maxFontSize": "18"
           },
-          "canvasBorder": 2,
-          "bgColor": "none",
-          "toolTip": {
-            "content": '<table>' +
-              '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
-              '<tr><td>a total Sales of <b>Rs. {{point.value}} </b></td></tr>' +
-              '<tr><td>on <b>{{point.label}}</b></tr>' +
-              '</table>'
-          },
-          "dataSet": {
-            "xAxis": {
-              "title": "Date"
-            },
-            "yAxis": {
-              "title": "Total Sales",
-              "prefix": "Rs. "
-            },
-            "series": [{
-              "lineWidth": 2,
-              "bgColor": "#009688",
-              "name": 'Raphael',
-              "noPointMarker": false,
-              "markerRadius": 3.5,
-              "spline": true,
-              "areaOpacity": "0.4",
-              "data": generateData(10, 500, 5)//[  
-              //   {label:"Jan",value:"51"},{label:"Feb",value:"0"},{label:"Mar",value:"0"},{label:"Apr",value:"0"},
-              //   {label:"May",value:"1"},{label:"Jun",value:"60"},{label:"Jul",value:"40"},{label:"Aug",value:"70"},
-              //   {label:"Sep",value:"30"},{label:"Oct",value:"80"},{label:"Nov",value:"20"},{label:"Dec",value:"90"}
-              // ]
-            }]
-          },
-          // events: {
-          //   afterRender: function (e) {
-          //     console.log(e, "event after rendering complete");
-          //   },
-          //   onInit: function (e) {
-          //     console.log(e, "event onInit");
-          //   },
-          //   afterParseData: function (e) {
-          //     console.log(e, "event afterParseData");
-          //   },
-          //   beforeSave: function (e) {
-          //     console.log(e, "event beforeSave");
-          //   },
-          //   afterSave: function (e) {
-          //     console.log(e, "event afterSave");
-          //   },
-          //   beforePrint: function (e) {
-          //     console.log(e, "event beforePrint");
-          //   },
-          //   afterPrint: function (e) {
-          //     console.log(e, "event afterPrint");
-          //   }
-          // },
-          // zoomWindow: {
-          //   "leftIndex": 10,
-          //   "rightIndex": 20
-          // }
-        });
-      });
-      SmartChartsNXT.ready(function () {
-        let areaChart = new SmartChartsNXT.Chart({
-          "type": "AreaChart",
-          "targetElem": "chartContainer2",
-          "title": "Area Chart",
-          "subtitle": "Single series",
-          "titleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
-            "fontFamily": "Lato",
-            "maxFontSize": "25"
-          },
-          "subtitleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
-            "fontFamily": "Lato",
-            "maxFontSize": "18"
-          },
-          "canvasBorder": 2,
+          "canvasBorder": 0,
           "bgColor": "none",
           "toolTip": {
             "content": '<table>' +
@@ -194,8 +115,7 @@
 
 <body >
   <div>
-    <div id='chartContainer' style="width:100%; height:50%;"></div>
-    <div id='chartContainer2' style="width:100%; height:50%;"></div>
+    <div id='chartContainer' style="width:100%; height:100%;"></div>
   </div>
 </body>
 

@@ -82,7 +82,9 @@ class Menu extends Component {
     saveAs[type].call(saveAs, eventOpts); 
   }
 
+
   render() {
+    this.menuPosition = new Point(this.props.x, this.props.y);
     return (
       <g id='smartChartsNXT-menu2'>
         <style> {this.getStyle()} </style> 
