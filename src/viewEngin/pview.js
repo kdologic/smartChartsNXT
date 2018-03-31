@@ -103,6 +103,7 @@ function renderDOM(vnode) {
     }
 
     let renderedComp = renderDOM.call({context: objChildContext}, subNodes);
+    objComp.props.children = vnode.children; 
     component.self = objComp;
     ({ node: component.node, children: component.children } = renderedComp);
     component.eventStack.push.apply(component.eventStack, renderedComp.eventStack);
@@ -252,6 +253,7 @@ class Component {
     let vnodeNow = this.render();
     vnodeNow.children = vnodeNow.children || [];
     vnodeNow.children.push(...(this.props.children || []));
+    debugger;
     if (detectDiff(this.vnode, vnodeNow)) {
       this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
