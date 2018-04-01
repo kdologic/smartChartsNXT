@@ -92,9 +92,10 @@ function renderDOM(vnode) {
   // when vnode is type of object which is previously constructed
   else if (typeof vnode.nodeName === "object" && vnode.nodeName.ref) {
     let objComp = vnode.nodeName;
+    objComp.__proto__.context = this.context || {}; 
     let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
-    
     let subNodes = vnode.nodeName.getVirtualNode(); 
+    
     if(subNodes.children && subNodes.children.length){
       replaceClassWithObject(subNodes, objComp.ref);
     }
@@ -253,7 +254,7 @@ class Component {
     let vnodeNow = this.render();
     vnodeNow.children = vnodeNow.children || [];
     vnodeNow.children.push(...(this.props.children || []));
-    debugger;
+    
     if (detectDiff(this.vnode, vnodeNow)) {
       this.vnode = vnodeNow;
       let parent = this.ref.node.parentNode;
