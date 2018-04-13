@@ -60,7 +60,7 @@ function renderDOM(vnode) {
     children: [],
     eventStack: []
   };
-  // when vnode is string like - any tag [text, svg, line, path etc.]
+  /* when vnode is string like - any tag [text, svg, line, path etc.] */
   if (typeof vnode.nodeName === 'string') {
     let isHtml = vnode.nodeName.match('html-'); 
     component.node = isHtml ? document.createElement(vnode.nodeName.substring('html-'.length)) : document.createElementNS(svgNS, vnode.nodeName);
@@ -75,9 +75,9 @@ function renderDOM(vnode) {
       component.node.setAttribute(key, attrVal);
     });
   } 
-  // when vnode is a class constructor of type pview component
+  /* when vnode is a class constructor of type pview component */
   else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) {
-    vnode.attributes.children = vnode.children;
+    vnode.attributes.extChildren = vnode.children;
     vnode.nodeName.prototype.context = this.context || {}; 
     let objComp = new vnode.nodeName(vnode.attributes);
     let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
@@ -88,8 +88,9 @@ function renderDOM(vnode) {
     component.eventStack.push.apply(component.eventStack, renderedComp.eventStack);
     ({ node: objComp.ref.node, children: objComp.ref.children} = component);
 
+    return component;
   }
-  // when vnode is type of object which is previously constructed
+  /* when vnode is type of object which is previously constructed */
   else if (typeof vnode.nodeName === "object" && vnode.nodeName.ref) {
     let objComp = vnode.nodeName;
     objComp.__proto__.context = this.context || {}; 
@@ -99,19 +100,17 @@ function renderDOM(vnode) {
     if(subNodes.children && subNodes.children.length){
       replaceClassWithObject(subNodes, objComp.ref);
     }
-    if(vnode.children && vnode.children.length) {
-      replaceClassWithObject(vnode, objComp.ref);
-    }
 
     let renderedComp = renderDOM.call({context: objChildContext}, subNodes);
-    objComp.props.children = vnode.children; 
+    objComp.props.extChildren = vnode.children; 
     component.self = objComp;
     ({ node: component.node, children: component.children } = renderedComp);
     component.eventStack.push.apply(component.eventStack, renderedComp.eventStack);
     ({ node: objComp.ref.node, children: objComp.ref.children} = component);
     
+    return component; 
   }
-  // when vnode is type normal function
+  /* when vnode is type normal function */
   else if (typeof vnode.nodeName === 'function') {
     ({ node: component.node, children: component.children } = renderDOM(vnode.nodeName(vnode.attributes)));
   } 
@@ -143,36 +142,41 @@ function renderDOM(vnode) {
 }
 
 /**
- * Method will replace the vitual class with real object which previously constructed to avoid constructor call during 
+ * Method will recursively replace the vitual class with real object which previously constructed to avoid constructor call during 
  * component update. 
  * @param {*} subNodes virtual nodeds with component class
  * @param {*} refs real object that previously constructed
  */
-function replaceClassWithObject(subNodes, refs){
+function replaceClassWithObject(subNodes, refs) {
   try {
-    for(let i=0; i < subNodes.children.length; i++) {
-      let subNode = subNodes.children[i]; 
-      for(let c=0; c < refs.children.length; c++) {
-        let refChld = refs.children[c];  
-        if(refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
-          subNode.nodeName = refChld.self; 
-          if (refChld.self && typeof refChld.self.propsWillReceive === 'function') {
-            refChld.self.propsWillReceive.call(refChld.self, subNode.attributes);
-            refChld.self.props = Object.assign({}, refChld.self.props, subNode.attributes);
+    for (let i = 0; i < subNodes.children.length; i++) {
+      let subNode = subNodes.children[i];
+      for (let c = 0; c < refs.children.length; c++) {
+        let refChld = refs.children[c];
+        if (refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
+          /*Match instaceId for support multiple instace of same component type under same parent node */
+          if(refChld.self.props.instanceId === subNode.attributes.instanceId){
+            subNode.nodeName = refChld.self;
+            if (refChld.self && typeof refChld.self.propsWillReceive === 'function') {
+              refChld.self.propsWillReceive.call(refChld.self, subNode.attributes);
+              refChld.self.props = Object.assign({}, refChld.self.props, subNode.attributes, { extChildren: subNode.children });
+            }
+            break;
           }
-          break; 
         }
       }
-      if(subNode.children && subNode.children.length && refs.children[i] && refs.children[i].children.length){
+      if (subNode.children && subNode.children.length && refs.children[i] && refs.children[i].children.length) {
         replaceClassWithObject(subNode, refs.children[i]);
       }
     }
-  }catch(ex) {
-    throw ex; 
+  } catch (ex) {
+    throw ex;
   }
 }
 
-/** hyperscript generator, gets called by transpiled JSX */
+/** 
+ * Hyperscript generator, gets called by transpiled JSX 
+ */
 window.__h__ = window.__h__ || 
 function(nodeName, attributes, ...args) {
   args = args.filter((v) => {
@@ -198,7 +202,12 @@ function parseStyleProps(objStyle) {
   return sArr.join(';');
 }
 
-/** this method will attach events with real DOM */
+/**
+ * Attach events with real DOM 
+ * @param {*} events JSON List of events
+ * @param {*} node Real DOM Element
+ * @return {String} Returns List of attached events as string 
+ */
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
     node.addEventListener(e, events[e], false);
@@ -249,11 +258,10 @@ class Component {
 
   /**
    * Fires when we want to re-render a component
+   * @returns {Object} Component type object
    */
   update() {
     let vnodeNow = this.render();
-    vnodeNow.children = vnodeNow.children || [];
-    vnodeNow.children.push(...(this.props.children || []));
     
     if (detectDiff(this.vnode, vnodeNow)) {
       this.vnode = vnodeNow;
@@ -262,19 +270,23 @@ class Component {
       let objChildContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
       let renderedComp = renderDOM.call(
         {context : objChildContext || {}}, 
-        {nodeName: this, children: (this.props.children || []), attributes: this.vnode.attributes});
+        {nodeName: this, children: (this.props.extChildren), attributes: this.vnode.attributes});
       
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       return mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
     }
   }
 
-  /** Interface that child may override - returns context that will pass on child context */
+  /** 
+   * Interface that child may override - returns context that will pass on child context 
+   */
   passContext() {
     return {} ;
   }
 
-  /** Interface that child must override - return virtual DOM of the component */
+  /** 
+   * Interface that child must override - return virtual DOM of the component 
+   */
   render() {
     return (<g> child must override this render method </g>);
   }
@@ -285,10 +297,14 @@ class Component {
    */
   propsWillReceive(nextProps) {}
 
-  /** Lifecycle event - fires before the mounting component on parent DOM */
+  /** 
+   * Lifecycle event - fires before the mounting component on parent DOM 
+   */
   componentWillMount() {}
 
-  /** Lifecycle event - fires after the component mounted on parent DOM */
+  /** 
+   * Lifecycle event - fires after the component mounted on parent DOM 
+   */
   componentDidMount() {}
 }
 
