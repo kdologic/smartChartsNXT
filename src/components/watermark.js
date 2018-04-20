@@ -2,7 +2,7 @@
  * watermark.js
  * @createdOn: 05-Jan-2018
  * @author: SmartChartsNXT
- * @version: 1.0.0
+ * @version: 2.0.0
  * @description:This is a component class will create watermark area. 
  */ 
 
@@ -24,8 +24,8 @@ class Watermark extends Component {
           {this.getStyle()}
         </style> 
         <text fill='#717171' text-rendering='geometricPrecision' style='cursor: pointer;' 
-        events={{click : () => {window.open('http://www.smartcharts.cf');}}}>
-          <tspan text-anchor='start' class='watermark-text' x={this.props.posX} y={this.props.posY} >{this.props.text}</tspan>
+        events={{click : () => {window.open(this.props.link);}}}>
+          <tspan text-anchor='start' class='watermark-text' x={this.props.posX} y={this.props.posY} >{this.props.extChildren}</tspan>
         </text>
       </g>
     );

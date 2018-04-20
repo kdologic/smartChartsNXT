@@ -121,11 +121,11 @@ class BaseChart extends Component {
         </g>}
 
         {this.CHART_OPTIONS.watermark !== false && 
-          <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} text="Powered by SmartChartsNXT"/>
+          <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link="http://www.smartcharts.cf">Powered by SmartChartsNXT</Watermark>
         }
         
         <g id={`${this.getChartId()}_cont`} >
-          <Chart chartOptions={this.CHART_OPTIONS} chartData={this.CHART_DATA} chartConst={this.CHART_CONST} /> 
+          <Chart chartOptions={this.CHART_OPTIONS} chartData={this.CHART_DATA} chartConst={this.CHART_CONST} ></Chart>
         </g>
 
         {this.CHART_OPTIONS.showMenu !== false &&

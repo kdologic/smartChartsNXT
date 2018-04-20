@@ -43,7 +43,7 @@ class VerticalLabels extends Component{
 
   render() {
     return (
-      <g class='vertical-text-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
+      <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <text font-family={this.config.fontFamily} fill={this.config.color} stroke='none' font-size={this.state.fontSize} opacity={this.config.opacity} text-rendering='geometricPrecision' >
         {
           this.getLabels()

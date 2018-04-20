@@ -42,19 +42,17 @@ class AreaFill extends Component{
     this.prepareData();
     let path = this.props.spline ? this.getCurvedLinePath() : this.getLinePath(); 
     return (
-      <g class='sc-area-fill'>
+      <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
           <clipPath id={this.clipPathId}>
             <rect x={0} y={0} width={this.props.width} height={this.props.height} />
           </clipPath>
         </defs>
-        <g transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
-          <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.fill} 
-            d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
-          </path> 
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width='1' opacity='1'></path> 
-          <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
-        </g>
+        <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.fill} 
+          d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
+        </path> 
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width='1' opacity='1'></path> 
+        <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
       </g>
     );
   }
