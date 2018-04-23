@@ -12,7 +12,7 @@
         //let datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
         let datum = sRand(x, y);
         dataSet.push({
-          label: newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          label: (i+1) ,//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
           //value: (i % 2 === 0 ? 1 : -1) * datum
           value: datum.toFixed(2)
           //value : (i-30)
@@ -50,12 +50,16 @@
           },
           "canvasBorder": 0,
           "bgColor": "none",
-          "toolTip": {
-            "content": '<table>' +
-              '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
-              '<tr><td>a total Sales of <b>Rs. {{point.value}} </b></td></tr>' +
-              '<tr><td>on <b>{{point.label}}</b></tr>' +
-              '</table>'
+          "tooltip": {
+            "content": function() {
+              return this.map(function(point) {
+                return '<table>' +
+                '<tr><td><b>' + point.seriesName + '</b> has produces </td></tr>' +
+                '<tr><td>a total Sales of <b>Rs.'+ point.value + '</b></td></tr>' +
+                '<tr><td>on <b>' + point.label + '</b></tr>' +
+                '</table>';
+              });
+            }
           },
           "dataSet": {
             "xAxis": {

@@ -78,7 +78,13 @@ class GeomCore {
     svg.appendChild(newElement);
   } /*End createRect()*/
 
-  findClosestPoint(pSet, pt, realIndex) {
+  /**
+   * Find the closest point from a set of Points. 
+   * @param {Point} pSet Point set range for search.
+   * @param {Point} pt Point to search the nearest in range.
+   * @param {Boolean} ignoreY if --true then only consider the x axis distance, y axis distance will be ignored.
+   */
+  findClosestPoint(pSet, pt, ignoreY) {
     let halfLen = Math.ceil(pSet.length/2); 
     let lSet = pSet.slice(0, halfLen); 
     let rSet = pSet.slice(halfLen);
@@ -86,18 +92,18 @@ class GeomCore {
     if(halfLen < 3) {
       let min = Number.MAX_SAFE_INTEGER; 
       for(let p of pSet) {
-        let d = this.getDistanceBetween(p,pt);
+        let d = ignoreY ? this.xDist(p,pt) : this.getDistanceBetween(p,pt);
         if( d < min) {
-          min = d; 
           nearPoint = p; 
+          nearPoint.dist = min = d; 
         }
       }
       return nearPoint; 
     }else {
       if(this.xDist(lSet[halfLen-1], pt) <=  this.xDist(rSet[0], pt)) {
-        nearPoint= this.findClosestPoint(lSet, pt);
+        nearPoint= this.findClosestPoint(lSet, pt, ignoreY);
       } else {
-        nearPoint = this.findClosestPoint(rSet, pt);
+        nearPoint = this.findClosestPoint(rSet, pt, ignoreY);
       }
       return nearPoint;
     }
@@ -108,8 +114,8 @@ class GeomCore {
   }
 
   getDistanceBetween(p1, p2) {
-    return Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2) || 0;
-  } /*End getDistanceBetween()*/
+    return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)) || 0;
+  } 
 
   polarToCartesian(centerX, centerY, radius, angleInDegrees) {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;

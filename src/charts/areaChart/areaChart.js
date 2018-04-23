@@ -16,6 +16,7 @@ import { Component } from "./../../viewEngin/pview";
 import defaultConfig from "./../../settings/config";
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
+import eventEmitter from './../../core/eventEmitter';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Grid from './../../components/grid';
@@ -75,7 +76,10 @@ class AreaChart extends Component {
         area: []
       };
 
+      this.emitter = eventEmitter.getInstance(this.context.runId); 
+
       this.init();
+      this.bindEventsOfDataTooltips(); 
     } catch (ex) {
       ex.errorIn = `Error in AreaChart with runId:${this.context.runId}`;
       throw ex;
@@ -200,14 +204,12 @@ class AreaChart extends Component {
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
 
-        <Draggable>
         <HorizonalLabels onRef={ref => this.subComp.vLabel = ref}  opts={this.CHART_OPTIONS.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
           categorySet = {this.CHART_OPTIONS.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </HorizonalLabels>   
-        </Draggable>
-        
+
         <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
           <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
         </text>
@@ -236,7 +238,7 @@ class AreaChart extends Component {
     
     return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
       return (
-        <AreaFill dataSet={series} index={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
+        <AreaFill dataSet={series} index={i} instanceId={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.subComp.area.push(ref)} >
@@ -247,22 +249,75 @@ class AreaChart extends Component {
 
   updateLabelTip(e, labelData) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    this.subComp.tooltip.updateTip(mousePos, null, labelData);
+    if(this.subComp.tooltip) {
+      this.subComp.tooltip.updateTip(mousePos, null, labelData);
+    }
   }
 
-  // updateTooltip(originPoint, index, pointData) {
-  //   if(!this.subComp.tooltip) {
-  //     return; 
-  //   }
-  //   if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content)
-  //   {
-  //     this.subComp.tooltip.updateTip(originPoint, index, pointData);
-  //   } else {
-  //     let row1 = pointData.label + ", " + pointData.value;
-  //     let row2 = pointData.percent.toFixed(2) + "%";
-  //     this.subComp.tooltip.updateTip(originPoint, index, pointData, row1, row2);
-  //   }
-  // }
+  bindEventsOfDataTooltips() {
+    let pointData = [], originPoints, counter = 0;
+    this.emitter.on('onPointHighlight', (e) => {
+      counter++; 
+      if(e.highlightedPoint === null) {
+        return; 
+      }
+      let series = this.CHART_OPTIONS.dataSet.series[e.highlightedPoint.seriesIndex];
+      let point = series.data[e.highlightedPoint.pointIndex];
+      let hPoint = {
+        label: point.label,
+        value: point.value,
+        seriesName: series.name,
+        seriesIndex: e.highlightedPoint.seriesIndex, 
+        pointIndex: e.highlightedPoint.pointIndex,
+        seriesColor: series.bgColor || UtilCore.getColor(e.highlightedPoint.seriesIndex),
+        dist: e.highlightedPoint.dist
+      };
+
+      if(originPoints) {
+        originPoints = new Point((e.highlightedPoint.x + originPoints.x) / 2, (e.highlightedPoint.y + originPoints.y) / 2);
+      } else {
+        originPoints = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
+      }
+      pointData.push(hPoint);
+      if (counter >= this.CHART_OPTIONS.dataSet.series.length) {
+        this.updateDataTooltip(originPoints, pointData);
+        pointData = [];
+        originPoints = undefined;
+        counter = 0; 
+      }
+    });
+  }
+
+  updateDataTooltip(originPoint, pointData) {
+    if(!this.subComp.tooltip) {
+      return; 
+    }
+    if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content) {
+      this.subComp.tooltip.updateTip(originPoint, pointData);
+    } 
+    else {
+      let row1 = this.getDefaultTooltipHTML.call(pointData); 
+      let row2 = 'html'; 
+      this.subComp.tooltip.updateTip(originPoint, pointData, row1, row2);
+    }
+  }
+
+  getDefaultTooltipHTML(){
+    return '<table>' +
+      '<tbody>' +
+        '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
+          '<th colspan="2" style="padding: 2px 5px; ">' + this[0].label + '</th>' +
+        '</tr>' +
+          this.map(function(point) {
+            return '<tr>' + 
+                '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
+                  '<span style="background-color:' + point.seriesColor +'; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName + '</td>' +
+                '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">'+ point.value + '</td>' +
+              '</tr>';
+          }).join('') +
+      '</tbody>' +
+    '</table>';
+  }
 
   hideTip() {
     this.subComp.tooltip && this.subComp.tooltip.hide(); 

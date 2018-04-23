@@ -44,15 +44,16 @@ class InteractivePlane extends Component{
 
   onMouseMove(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    this.emitter.emit('interactiveMouseMove', mousePos);
+    e.pos = mousePos; 
+    this.emitter.emit('interactiveMouseMove', e);
   }
 
   onMouseEnter(e) {
-    this.emitter.emit('interactiveMouseEnter');
+    this.emitter.emit('interactiveMouseEnter', e);
   }
 
   onMouseLeave(e) {
-    this.emitter.emit('interactiveMouseLeave');
+    this.emitter.emit('interactiveMouseLeave', e);
   }
 
 

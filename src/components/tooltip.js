@@ -114,7 +114,7 @@ class Tooltip extends Component {
           line1 = this.props.opts.content.call(pointData); 
           line2 = 'html'; 
         }else if(typeof this.props.opts.content === 'string'){
-          let tooltipContent = tthis.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
+          let tooltipContent = this.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
           line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
           line2 = 'html'; 
         }

@@ -14,7 +14,6 @@ import Geom from "./../../core/geom.core";
 import DataPoints from "./../../components/dataPoints";
 import eventEmitter from './../../core/eventEmitter';
 
-
 class AreaFill extends Component{
   constructor(props) {
     super(props);
@@ -102,11 +101,24 @@ class AreaFill extends Component{
     this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave.bind(this));
   }
 
-  interactiveMouseMove(mousePos) {
+  interactiveMouseMove(e) {
+    let mousePos = e.pos; 
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
-    let nearPoint = Geom.findClosestPoint(this.pointSet, pt); 
+    let nearPoint = Geom.findClosestPoint(this.pointSet, pt, true); 
     this.subComp.dataPoints.doHighlight(false);
-    this.subComp.dataPoints.doHighlight(nearPoint.index); 
+    if(nearPoint.dist < (this.scaleX / 2)) {
+      this.subComp.dataPoints.doHighlight(nearPoint.index); 
+      e.highlightedPoint = {
+        x: (this.props.posX + nearPoint.x),
+        y: (this.props.posY + nearPoint.y),
+        dist: nearPoint.dist,
+        pointIndex: nearPoint.index,
+        seriesIndex: this.props.index
+      };
+    } else {
+      e.highlightedPoint = null; 
+    }
+    this.emitter.emit("onPointHighlight", e);
   }
 
   interactiveMouseLeave(e) {

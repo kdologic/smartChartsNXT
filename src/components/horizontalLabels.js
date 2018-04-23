@@ -17,6 +17,7 @@ class HorizontalLabels extends Component{
 
   constructor(props) {
     super(props);
+    this.intervalThreshold = 30;
     this.config = {
       color: this.props.opts.fillColor || defaultConfig.theme.fontColorDark,
       fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeMedium,
@@ -25,9 +26,9 @@ class HorizontalLabels extends Component{
     };
     this.state = {
       fontSize: this.config.fontSize, 
-      labelTransform:false
+      labelRotate:false,
+      intervalLen: this.intervalThreshold
     };
-    this.intervalThreshold = 30;
   }
 
   componentWillMount() {
@@ -35,8 +36,16 @@ class HorizontalLabels extends Component{
   }
 
   componentDidMount() {
-    this.checkLabelsWidth();
+    !this.state.labelRotate && this.checkLabelsWidth();
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
+  }
+
+  propsWillReceive(nextProps) {
+    this.state = {
+      fontSize: this.config.fontSize, 
+      labelRotate:false,
+      intervalLen: this.intervalThreshold
+    };
   }
 
   render() {
@@ -61,13 +70,13 @@ class HorizontalLabels extends Component{
 
   getEachLabel(val, index) {
     let x = index * this.state.intervalLen; 
-    let y = 12; 
-    let transform = this.state.labelTransform ? "rotate(-45," + x + "," + y + ")" : ""; 
+    let y = 18; 
+    let transform = this.state.labelRotate ? "rotate(-45," + x + "," + y + ")" : ""; 
     return (
       <text font-family={this.config.fontFamily} fill={this.config.color} x={x} y={y} 
         transform={transform} font-size={this.state.fontSize} opacity={this.config.opacity} stroke='none' text-rendering='geometricPrecision' >
 
-        <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor={this.state.labelTransform ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+        <tspan class={`hlabel-${index}`} labelIndex={index} text-anchor={this.state.labelRotate ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
           {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
         </tspan>
 
@@ -82,26 +91,26 @@ class HorizontalLabels extends Component{
       let newCategories = [];
       let skipLen = Math.ceil(this.intervalThreshold / interval);
       for (let i = 0; i < this.props.categorySet.length; i += skipLen) {
-          newCategories.push(this.props.categorySet[i]);
+        newCategories.push(this.props.categorySet[i]);
       }
-      
+
       interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (newCategories.length - 1);
-      if((newCategories.length-1) * interval > this.props.maxWidth) {
-        newCategories.splice(-1,1);
+      if ((newCategories.length - 1) * interval > this.props.maxWidth) {
+        newCategories.splice(-1, 1);
       }
       this.state.categories = newCategories;
     }
-    this.state.intervalLen = interval; 
+    this.state.intervalLen = interval;
   }
 
   checkLabelsWidth() {  
     for(let i=0; i < this.state.categories.length; i++) {
       let textLen = this.ref.node.querySelector('.hlabel-'+ i).getComputedTextLength(); 
-      if(textLen > this.intervalThreshold) {
+      if(textLen > Math.max(this.intervalThreshold, this.state.intervalLen-10)) {
         if(this.state.fontSize > defaultConfig.theme.fontSizeSmall) {
           this.setState({fontSize: this.state.fontSize-1});  
-        } else if(!this.state.labelTransform){
-          this.setState({labelTransform: true});
+        } else if(!this.state.labelRotate){
+          this.setState({labelRotate: true, fontSize: this.config.fontSize});
         }
         return; 
       }
