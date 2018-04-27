@@ -9,6 +9,8 @@
  * @description:This will create a View Engin Aka - pView, for render JSX virtual DOM to a real DOM. 
  * "virtual DOM"? It's just JSON - each "VNode" is an object with 3 properties. nodeName, Attributes, children
  * The whole process (JSX -> VDOM -> DOM) in one step
+ * 
+ * TODO: If the first element in jsx is a component type then behave incorrecly, Need to fix this. 
  */
 
  
@@ -95,7 +97,7 @@ function renderDOM(vnode) {
     let objComp = vnode.nodeName;
     objComp.__proto__.context = this.context || {}; 
     let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
-    let subNodes = vnode.nodeName.getVirtualNode(); 
+    let subNodes = vnode.fromUpdate ? objComp.vnode : objComp.getVirtualNode(); 
     
     if(subNodes.children && subNodes.children.length){
       replaceClassWithObject(subNodes, objComp.ref);
@@ -242,7 +244,7 @@ class Component {
     if (typeof stateParams === 'function') {
       stateParams = stateParams.call(this, this.state);
     }
-    Object.keys(stateParams).forEach(key => {
+    stateParams && Object.keys(stateParams).forEach(key => {
       this.state[key] = stateParams[key];
     });
     return this.update();
@@ -270,7 +272,7 @@ class Component {
       let objChildContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
       let renderedComp = renderDOM.call(
         {context : objChildContext || {}}, 
-        {nodeName: this, children: (this.props.extChildren), attributes: this.vnode.attributes});
+        {nodeName: this, children: (this.props.extChildren), attributes: this.vnode.attributes, fromUpdate:true});
       
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
       return mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
