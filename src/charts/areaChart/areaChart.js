@@ -255,7 +255,7 @@ class AreaChart extends Component {
   }
 
   bindEventsOfDataTooltips() {
-    let pointData = [], originPoints, counter = 0;
+    let pointData = [], originPoint, prevOriginPoint, counter = 0;
     this.emitter.on('onPointHighlight', (e) => {
       counter++; 
       if(e.highlightedPoint === null) {
@@ -273,18 +273,28 @@ class AreaChart extends Component {
         dist: e.highlightedPoint.dist
       };
 
-      if(originPoints) {
-        originPoints = new Point((e.highlightedPoint.x + originPoints.x) / 2, (e.highlightedPoint.y + originPoints.y) / 2);
+      if(originPoint) {
+        originPoint = new Point(e.highlightedPoint.x , (e.highlightedPoint.y + originPoint.y) / 2);
       } else {
-        originPoints = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
+        originPoint = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
       }
       pointData.push(hPoint);
       if (counter >= this.CHART_OPTIONS.dataSet.series.length) {
-        this.updateDataTooltip(originPoints, pointData);
+        if(!prevOriginPoint || (originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
+          this.updateDataTooltip(originPoint, pointData);
+        }
         pointData = [];
-        originPoints = undefined;
+        prevOriginPoint = originPoint; 
+        originPoint = undefined;
         counter = 0; 
       }
+    });
+
+    this.emitter.on('interactiveMouseLeave', (e) => {
+      if(!this.subComp.tooltip) {
+        return; 
+      } 
+      this.hideTip(); 
     });
   }
 
