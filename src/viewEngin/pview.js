@@ -13,6 +13,7 @@
  * TODO: If the first element in jsx is a component type then behave incorrecly, Need to fix this. 
  */
 
+import ployfills from "./shims/polyfills";
  
 /** 
  * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
@@ -199,9 +200,9 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]}`);
+    sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
   });
-  return sArr.join(';');
+  return sArr.join('');
 }
 
 /**
@@ -310,4 +311,4 @@ class Component {
   componentDidMount() {}
 }
 
-export { mountTo, renderDOM, Component };
+export { mountTo, renderDOM, Component, parseStyleProps };
