@@ -1,15 +1,12 @@
+"use strict";
+
 /**
  * SVG Area Chart :: areaChart.js
  * @version:2.0.0
  * @createdOn:31-05-2016
  * @author:SmartChartsNXT
  * @description: SVG Area Chart, that support multiple series, and zoom window.
- * 
- * JSFiddle:
- * Sample caller code:
  */
-
- "use strict";
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
@@ -26,7 +23,9 @@ import HorizonalLabels from './../../components/horizontalLabels';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
 
-
+/** This components will create an Area Chart. 
+ * @extends Component
+ */
 class AreaChart extends Component {
   constructor(props) {
     super(props);
@@ -257,10 +256,10 @@ class AreaChart extends Component {
   bindEventsOfDataTooltips() {
     let pointData = [], originPoint, prevOriginPoint, counter = 0;
     this.emitter.on('onPointHighlight', (e) => {
-      counter++; 
       if(e.highlightedPoint === null) {
         return; 
       }
+      counter++; 
       let series = this.CHART_OPTIONS.dataSet.series[e.highlightedPoint.seriesIndex];
       let point = series.data[e.highlightedPoint.pointIndex];
       let hPoint = {
@@ -294,6 +293,10 @@ class AreaChart extends Component {
       if(!this.subComp.tooltip) {
         return; 
       } 
+      pointData = [];
+      counter = 0; 
+      originPoint = undefined;
+      prevOriginPoint = undefined; 
       this.hideTip(); 
     });
   }

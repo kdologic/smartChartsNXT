@@ -2,8 +2,6 @@
 
 "use strict";
 
-import { Component } from "./pview";
-
 /**
  * transitionGroup.js
  * @version:2.0.0
@@ -11,13 +9,21 @@ import { Component } from "./pview";
  * @author:SmartChartsNXT
  * @description: This component will be used to create css transition on top of pView Library. 
  *               Must use InstanceId as props to uniquely identify elements.
+ */
+
+import { Component } from "./pview";
+
+/**This component will be used to create css transition on top of pView Library. 
+ * Must use InstanceId as props to uniquely identify elements.
  * 
  * It accept the following props :
  * 
- * transitionName='box-effect' // Name of the transition
- * transitionEnterDelay='1000' // How long the animation playes when new element added
- * transitionExitDelay='300' // How long the animation playes when element removed
+ * transitionName='box-effect' // Name of the transition.
+ * transitionEnterDelay='1000' // How long the animation playes when new element added.
+ * transitionExitDelay='300' // How long the animation playes when element removed.
  * applyForNew=true // Apply transition only for new elements OR all the existing elements also.
+ * 
+ * @extends Component
  */
 
 class TransitionGroup extends Component {
@@ -91,7 +97,7 @@ class TransitionGroup extends Component {
     this.removedExtChildren = this.findRemovedChildren();
     this.mergedExtChildren = this.mergeChildren();
     return (
-      <g class='transition-group'>
+      <g class='sc-transition-group'>
         {this.mergedExtChildren}
       </g>
     );
@@ -116,7 +122,7 @@ class TransitionGroup extends Component {
   }
 
   mergeChildren() {
-    return this.props.extChildren.concat(this.removedExtChildren);  
+    return (this.props.extChildren || []).concat(this.removedExtChildren);  
   }
 }
 

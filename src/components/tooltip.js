@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * tooltip.js
  * @version:2.0.0
@@ -26,8 +28,6 @@
     }
  */
 
-"use strict";
-
 import defaultConfig from "./../settings/config";
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
@@ -35,7 +35,12 @@ import UiCore from "./../core/ui.core";
 import UtilCore from "./../core/util.core";
 import SpeechBox from './../components/speechBox'; 
 import TransitionGroup from './../viewEngin/transitionGroup'; 
+import Style from './../viewEngin/style'; 
 
+
+/** This components will create tooltip area for the chart. 
+ * @extends Component
+ */
 class Tooltip extends Component {
     constructor(props) {
       super(props);
@@ -72,49 +77,33 @@ class Tooltip extends Component {
       typeof this.props.onRef === 'function' && this.props.onRef(this); 
     }
 
-    getStyle() {
-      return (`
-        .tooltip-transform-enter {
-          opacity: ${this.state.opacity};
-          transform: ${this.state.transformOld};
-        }
-
-        .tooltip-transform-enter.tooltip-transform-enter-active {
-          transform: ${this.state.transformNew};
-          transition: transform 0.3s ease-in-out, opacity 0.2s ease-in-out;
-        }
-
-        .tooltip-transform-exit {
-          opacity: ${this.state.opacity};
-        }
-
-        .tooltip-transform-exit.tooltip-transform-leave-active {
-          opacity: ${this.state.opacity};
-        }
-      `);
-    }
-
     render() {
       return (
-        <g class='tooltip-container' pointer-events='none'>
-          <style>{this.getStyle()}</style>
-          <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionLeaveDelay='300'>
-            <g >
-              <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
-                fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
-                stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
-              </path>
-              
-              {/* this.state.topLeft &&
-                <SpeechBox x={this.state.topLeft.x} y={this.state.topLeft.y} width={this.state.width} height={this.state.height} cpoint={this.state.cPoint}
-                  bgColor={this.config.bgColor} opacity='1' shadow={false} strokeColor={this.state.strokeColor}> 
-                </SpeechBox> */
-              }
-              <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
-                <foreignObject class='tooltip-content' innerHTML={this.state.tooltipContent} x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
-                </foreignObject>
+        <g class='sc-tooltip-container' pointer-events='none'>
+          <Style>
+          {{
+            ".tooltip-transform-enter": {
+              transform: this.state.transformOld
+            },
+            ".tooltip-transform-enter.tooltip-transform-enter-active": {
+              transform: this.state.transformNew,
+              transition: "transform 0.3s ease-in-out"
+            }
+          }}
+          </Style>
+          <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'>
+            {this.state.opacity && 
+              <g instanceId='tooltip-inst' transform={this.state.transformNew.replace(/px/gi,'')}>
+                <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
+                  fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
+                  stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
+                </path>
+                <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
+                  <foreignObject class='tooltip-content' innerHTML={this.state.tooltipContent} x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
+                  </foreignObject>
+                </g>
               </g>
-            </g>
+            }
           </TransitionGroup>
           {UiCore.dropShadow('tooltip-border-smartcharts-shadow')}
         </g>
@@ -262,16 +251,14 @@ class Tooltip extends Component {
         });
         this.ref.node.querySelector('.tooltip-content').innerHTML = this.state.tooltipContent;
       }
-      
-
     }
 
     show() {
-      this.ref.node.style.opacity = 1;
+      this.setState({opacity: 1});
     }
 
     hide() {
-      this.ref.node.style.opacity = 0;
+      this.setState({opacity: 0, transformOld: '', transformNew: ''});
     }
 }
 
