@@ -10,7 +10,7 @@
         newDate.setDate(newDate.getDate() + i);
         var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
         dataSet.push({
-          label: newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          label: (i+1),//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
           value: datum
         });
       }
@@ -24,17 +24,37 @@
           "title": "Multi Series Chart",
           "subTitle": "Area Chart",
           "targetElem": "chartContainer",
-          "canvasBorder": true,
+          "titleStyle": {
+            "fillColor":"#717171",
+            "borderColor":"none",
+            "fontFamily": "Lato",
+            "maxFontSize": "25"
+          },
+          "subtitleStyle": {
+            "fillColor":"#717171",
+            "borderColor":"none",
+            "fontFamily": "Lato",
+            "maxFontSize": "18"
+          },
+          "canvasBorder": 0,
           "bgColor": "none",
-          "showLegend": true,
-          "animated": true,
-          "hideHorizontalScroller": false,
-          "toolTip": {
-            "content": '<table>' +
-              '<tr><td><b>{{point.series.name}}</b> has produces </td></tr>' +
-              '<tr><td>a total Sales of <b>Rs. {{point.value}} </b></td></tr>' +
-              '<tr><td>on <b>{{point.label}}</b></tr>' +
-              '</table>'
+          "tooltip": {
+            "content": function() {
+              return '<table>' +
+                '<tbody>' +
+                  '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
+                    '<th colspan="2" style="padding: 2px 5px; ">' + this[0].label + '</th>' +
+                  '</tr>' +
+                    this.map(function(point) {
+                      return '<tr>' + 
+                          '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
+                            '<span style="background-color:' + point.seriesColor +'; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName + '</td>' +
+                          '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">'+ point.value + '</td>' +
+                        '</tr>';
+                    }).join('') +
+                '</tbody>' +
+              '</table>';
+            }
           },
           "dataSet": {
             "xAxis": {
@@ -46,22 +66,22 @@
             },
             "series": [{
                 "lineWidth": 1,
-                "color": "#FFC107",
+                "bgColor": "#009688",
                 "name": 'Raphael',
                 "areaOpacity": "0.3",
-                "smoothedLine": false,
-                "data": generateData(10, 50, 45)
+                "spline": true,
+                "data": generateData(10, 50, 50)
               },
               {
                 "lineWidth": 1,
-                "color": "#F44336",
+                "bgColor": "#F44336",
                 "noPointMarker": false,
                 "markerRadius": 3.5,
-                "smoothedLine": false,
-                "showGradient": true,
+                "spline": false,
+                //"showGradient": true, //TODO: To be implemented
                 "areaOpacity": "0.5",
-                "name": 'Wilson',
-                "data": generateData(5, 20, 100)
+                "name": 'Willson',
+                "data": generateData(5, 20, 50)
               }
             ]
           },
@@ -88,17 +108,17 @@
           //     console.log(e, "event afterPrint");
           //   }
           // },
-          zoomWindow: {
-            "leftIndex": 10,
-            "rightIndex": 20
-          }
+          // zoomWindow: {
+          //   "leftIndex": 10,
+          //   "rightIndex": 20
+          // }
         });
       });
     };
   </script>
 </head>
 
-<body>
+<body style='overflow:hidden;'>
   <div>
     <div id='chartContainer' style="width:100%; height:100%;">
     </div>

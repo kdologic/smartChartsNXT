@@ -1,9 +1,11 @@
+"use strict";
+
 /**
  * tooltip.js
- * @version:1.1.0
+ * @version:2.0.0
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
- * @description: This components will tooltip area for the chart. 
+ * @description: This components will create tooltip area for the chart. 
  * 
  * Accepted config --
  * "tooltip": {
@@ -26,20 +28,25 @@
     }
  */
 
-"use strict";
-
 import defaultConfig from "./../settings/config";
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
 import UiCore from "./../core/ui.core";
 import UtilCore from "./../core/util.core";
+import SpeechBox from './../components/speechBox'; 
+import TransitionGroup from './../viewEngin/transitionGroup'; 
+import Style from './../viewEngin/style'; 
 
+
+/** This components will create tooltip area for the chart. 
+ * @extends Component
+ */
 class Tooltip extends Component {
     constructor(props) {
       super(props);
       let padding = 10;
       this.config = {
-        color: this.props.opts.color || defaultConfig.theme.fontColorLight,
+        color: this.props.opts.color || defaultConfig.theme.fontColorDark,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
         fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
@@ -49,6 +56,8 @@ class Tooltip extends Component {
         opacity:this.props.opts.opacity || "0.9"
       };
       this.state = {
+        transformOld: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
+        transformNew: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
         tooltipContent: '', 
         contentX: this.config.xPadding, 
         contentY: this.config.yPadding, 
@@ -63,23 +72,39 @@ class Tooltip extends Component {
     componentWillMount() {
       typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
     }
+    
     componentDidMount() {
       typeof this.props.onRef === 'function' && this.props.onRef(this); 
     }
 
     render() {
       return (
-        <g class='tooltip-container' pointer-events='none' 
-          transform={`translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`} 
-          style={{opacity: this.state.opacity, 'transition': 'transform 0.3s ease-out, opacity 0.2s ease-out'}} >
-          <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
-            fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
-            stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
-          </path>
-          <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
-            <foreignObject class='tooltip-content' x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
-            </foreignObject>
-          </g>
+        <g class='sc-tooltip-container' pointer-events='none'>
+          <Style>
+          {{
+            ".tooltip-transform-enter": {
+              transform: this.state.transformOld
+            },
+            ".tooltip-transform-enter.tooltip-transform-enter-active": {
+              transform: this.state.transformNew,
+              transition: "transform 0.3s ease-in-out"
+            }
+          }}
+          </Style>
+          <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'>
+            {this.state.opacity && 
+              <g instanceId='tooltip-inst' transform={this.state.transformNew.replace(/px/gi,'')}>
+                <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
+                  fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
+                  stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
+                </path>
+                <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
+                  <foreignObject class='tooltip-content' innerHTML={this.state.tooltipContent} x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
+                  </foreignObject>
+                </g>
+              </g>
+            }
+          </TransitionGroup>
           {UiCore.dropShadow('tooltip-border-smartcharts-shadow')}
         </g>
       );
@@ -95,7 +120,7 @@ class Tooltip extends Component {
       return strContents; 
     }
 
-    updateTip(originPoint, index, pointData, line1, line2) {
+    updateTip(originPoint, pointData, line1, line2) {
       let xPadding = this.config.xPadding; 
       let yPadding = this.config.yPadding; 
       let strContents = "";
@@ -114,7 +139,7 @@ class Tooltip extends Component {
           line1 = this.props.opts.content.call(pointData); 
           line2 = 'html'; 
         }else if(typeof this.props.opts.content === 'string'){
-          let tooltipContent = tthis.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
+          let tooltipContent = this.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
           line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
           line2 = 'html'; 
         }
@@ -213,25 +238,27 @@ class Tooltip extends Component {
         opacity:1
       };
 
-      
-      let tipContent = this.ref.node.querySelector('.tooltip-content');
-      tipContent.innerHTML = newState.tooltipContent;
-      tipContent.setAttribute('width', newState.contentWidth); 
-      tipContent.setAttribute('height', newState.contentHeight); 
-
-      let tipBorder = this.ref.node.querySelector('.tooltip-border');
-      tipBorder.setAttribute('stroke', newState.strokeColor); 
-      tipBorder.setAttribute('d', newState.tooltipPath); 
-      this.ref.node.setAttribute('transform',`translate(${topLeft.x},${topLeft.y})`);
-      this.show(); 
+      if (this.state.transformNew !== `translate(${topLeft.x}px,${topLeft.y}px)`) {
+        this.setState({
+          transformOld: this.state.transformNew,
+          transformNew: `translate(${topLeft.x}px,${topLeft.y}px)`,
+          tooltipPath: newState.tooltipPath,
+          strokeColor: newState.strokeColor,
+          contentWidth: newState.contentWidth,
+          contentHeight: newState.contentHeight,
+          tooltipContent: newState.tooltipContent,
+          opacity: newState.opacity
+        });
+        this.ref.node.querySelector('.tooltip-content').innerHTML = this.state.tooltipContent;
+      }
     }
 
     show() {
-      this.ref.node.style.opacity = 1;
+      this.setState({opacity: 1});
     }
 
     hide() {
-      this.ref.node.style.opacity = 0;
+      this.setState({opacity: 0, transformOld: '', transformNew: ''});
     }
 }
 

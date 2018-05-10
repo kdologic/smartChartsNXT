@@ -2,6 +2,7 @@
 /dist
 /public
 /node_modules
+/src/viewEngin/testSuite/build
 .vscode
 *.log
 *.swp

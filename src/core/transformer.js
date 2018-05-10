@@ -1,8 +1,8 @@
-/*
+/**
  * transformer.js
- * @CreatedOn: 31-July-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
+ * @createdOn: 31-July-2017
+ * @author: SmartChartsNXT
+ * @version: 2.0.0
  * @description:This class will generate css transformation matrix. 
  * Will merge multiple transform operation (like rotate, skes, translate etc.) into a single transformation matrix. 
  */
@@ -13,6 +13,11 @@
 class Transformer {
   constructor() {}
 
+  /**
+   * Returns unit matrix as base matrix
+   * @return unit matrix 
+   */
+
   getBase() {
     return [
       [1, 0, 0],
@@ -21,10 +26,10 @@ class Transformer {
     ];
   }
 
-  /*
-   * @param {Array of String} trnsOprtns - Array of transformation operations like ["scaleX(1.5)","skewY(0.5)","translateY(200)"]
-   * @param {Arry of Number} baseMatrix - Array of pre-exist transformation matrix.
-   * @return {string}  Of transformation matrix 
+  /**
+   * @param {String} trnsOprtns Array of transformation operations like ["scaleX(1.5)","skewY(0.5)","translateY(200)"]
+   * @param {Number} baseMatrix Array of pre-exist transformation matrix.
+   * @return {String} String value of transformation matrix 
    */
   getTransformMatrix(trnsOprtns, baseMatrix) {
     let matrix = baseMatrix || this.getBase();
@@ -83,7 +88,7 @@ class Transformer {
           ]);
           break;
         case "skew":
-          var angle =
+          let angle =
             matrix = this.multiply(matrix, [
               [1, Math.tan(degToRad(arrOpr[1])), 0],
               [Math.tan(degToRad(arrOpr[2])), 1, 0],
@@ -109,6 +114,11 @@ class Transformer {
     return `matrix(${[matrix[0][0],matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
   }
 
+  /**
+   * Converts transformation string into 2d matrix
+   * @param {String} strMatrix String value of transformation matrix
+   * @returns {Number[][]}  Transformation matrix in 2d array form
+   */
   convertTransformMatrix(strMatrix) {
     let arr = strMatrix.replace(/[matrix\(\) ]/g, "").split(",");
     if (!strMatrix || arr.length < 6) {
@@ -122,6 +132,11 @@ class Transformer {
     return arrMatrix;
   }
 
+  /**
+   * Returns present transformation matrix of input element
+   * @param {DOM} element DOM element 
+   * @return {Number[][]}  Transformation matrix in 2d array form
+   */
   getElementTransformation(element) {
     if (element) {
       let computedStyle = window.getComputedStyle(element);
@@ -130,7 +145,11 @@ class Transformer {
     return null;
 
   }
-
+/**
+ * Set transformation of a DOM element
+ * @param {DOM} element DOM element
+ * @param {String} strTrns String value of transformation matrix
+ */
   setElementTransformation(element, strTrns) {
     if (element) {
       element.style["-webkit-transform"] = strTrns;
@@ -141,10 +160,22 @@ class Transformer {
     }
   }
 
+/**
+ * Convert Degree value into Radian value
+ * @param {Number} x Degree value
+ * @return {Numebr} Radian value
+ */
   degToRad(x) {
     return Number(x) * Math.PI / 180;
   }
 
+
+/**
+ * Matrix multiplication 
+ * @param {Numebr[][]} a Input matrix 1
+ * @param {Numebr[][]} b Input matrix 2
+ * @return {Numebr[][]} Multiplication result of two matrix
+ */
   multiply(a, b) {
     let aNumRows = a.length;
     let aNumCols = a[0].length;

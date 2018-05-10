@@ -78,12 +78,44 @@ class GeomCore {
     svg.appendChild(newElement);
   } /*End createRect()*/
 
+  /**
+   * Find the closest point from a set of Points. 
+   * @param {Point} pSet Point set range for search.
+   * @param {Point} pt Point to search the nearest in range.
+   * @param {Boolean} ignoreY if --true then only consider the x axis distance, y axis distance will be ignored.
+   */
+  findClosestPoint(pSet, pt, ignoreY) {
+    let halfLen = Math.ceil(pSet.length/2); 
+    let lSet = pSet.slice(0, halfLen); 
+    let rSet = pSet.slice(halfLen);
+    let nearPoint = undefined;
+    if(halfLen < 3) {
+      let min = Number.MAX_SAFE_INTEGER; 
+      for(let p of pSet) {
+        let d = ignoreY ? this.xDist(p,pt) : this.getDistanceBetween(p,pt);
+        if( d < min) {
+          nearPoint = p; 
+          nearPoint.dist = min = d; 
+        }
+      }
+      return nearPoint; 
+    }else {
+      if(this.xDist(lSet[halfLen-1], pt) <=  this.xDist(rSet[0], pt)) {
+        nearPoint= this.findClosestPoint(lSet, pt, ignoreY);
+      } else {
+        nearPoint = this.findClosestPoint(rSet, pt, ignoreY);
+      }
+      return nearPoint;
+    }
+  }
 
+  xDist(p1, p2) {
+    return Math.abs(p1.x - p2.x);
+  }
 
-  getDistanceBetween(point1, point2) {
-    let dist = Math.sqrt((point1.x - point2.x) * (point1.x - point2.x) + (point1.y - point2.y) * (point1.y - point2.y)) || 0;
-    return dist;
-  } /*End getDistanceBetween()*/
+  getDistanceBetween(p1, p2) {
+    return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)) || 0;
+  } 
 
   polarToCartesian(centerX, centerY, radius, angleInDegrees) {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
@@ -98,6 +130,9 @@ class GeomCore {
   } /*End getMidPoint()*/
 
   getEllipticalRadius(rx, ry, angleInDegrees) {
+    if (!rx || !ry) {
+      return 0;
+    }
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
@@ -174,6 +209,123 @@ class GeomCore {
     /* if line1 and line2 are segments, they intersect if both of the above are true*/
     return result;
   } /*End checkLineIntersection()*/
+
+  /* 
+   * @param {Point} pointSet 
+   * @return {object []} Bézier curve path
+   */
+  getBezierSplines(pointSet) {
+    /*grab (x,y) coordinates of the control points*/
+    let x = [];
+    let y = [];
+    let curvedPath = [];
+
+    /*use parseInt to convert string to let*/
+    for (let i = 0; i < pointSet.length; i++) {
+      x[i] = parseInt(pointSet[i].x);
+      y[i] = parseInt(pointSet[i].y);
+    }
+
+    let cp = this.getCurveControlPoints(pointSet);
+    /*updates path settings, the browser will draw the new spline*/
+    for (let i = 0; i < pointSet.length - 1; i++) {
+      curvedPath.push(path(x[i], y[i], cp.p1[i].x, cp.p1[i].y, cp.p2[i].x, cp.p2[i].y, x[i + 1], y[i + 1]));
+    }
+
+    function path(x1, y1, px1, py1, px2, py2, x2, y2) {
+      return "C " + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
+    }
+
+    return curvedPath;
+  }
+
+  getCurveControlPoints(knots) {
+    let firstControlPoints = [];
+    let secondControlPoints = [];
+    if (knots === null) {
+      throw new Error("null argument");
+    }
+    let n = knots.length - 1;
+    if (n < 1) {
+      throw new Error("At least two knot points required");
+    }
+    if (n === 1) { // Special case: Bezier curve should be a straight line.
+      firstControlPoints = [new Point()]; //:: 3P1 = 2P0 + P3 ::
+      firstControlPoints[0].x = (2 * knots[0].x + knots[1].x) / 3;
+      firstControlPoints[0].y = (2 * knots[0].y + knots[1].y) / 3;
+
+      secondControlPoints = [new Point()]; // :: P2 = 2P1 – P0 ::
+      secondControlPoints[0].x = 2 * firstControlPoints[0].x - knots[0].x;
+      secondControlPoints[0].y = 2 * firstControlPoints[0].y - knots[0].y;
+      return {
+        p1: firstControlPoints,
+        p2: secondControlPoints
+      };
+    }
+
+    // Calculate first Bezier control points
+    // Right hand side vector
+    let rhs = [];
+
+    // Set right hand side x values
+    for (let i = 1; i < n - 1; ++i) {
+      rhs[i] = 4 * knots[i].x + 2 * knots[i + 1].x;
+    }
+    rhs[0] = knots[0].x + 2 * knots[1].x;
+    rhs[n - 1] = (8 * knots[n - 1].x + knots[n].x) / 2.0;
+
+    // Get first control points x-values
+    let x = this.getFirstControlPoints(rhs);
+
+    // Set right hand side y values
+    for (let i = 1; i < n - 1; ++i) {
+      rhs[i] = 4 * knots[i].y + 2 * knots[i + 1].y;
+    }
+    rhs[0] = knots[0].y + 2 * knots[1].y;
+    rhs[n - 1] = (8 * knots[n - 1].y + knots[n].y) / 2.0;
+
+    // Get first control points y-values
+    let y = this.getFirstControlPoints(rhs);
+
+    // Fill output arrays.
+    firstControlPoints = [];
+    secondControlPoints = [];
+    for (let i = 0; i < n; ++i) {
+      firstControlPoints[i] = new Point(x[i], y[i]);
+      if (i < n - 1) {
+        secondControlPoints[i] = new Point(2 * knots[i + 1].x - x[i + 1], 2 * knots[i + 1].y - y[i + 1]);
+      } else {
+        secondControlPoints[i] = new Point((knots[n].x + x[n - 1]) / 2, (knots[n].y + y[n - 1]) / 2);
+      }
+    }
+    return {
+      p1: firstControlPoints,
+      p2: secondControlPoints
+    };
+  }
+
+  /**
+   * Solves a tridiagonal system for one of coordinates (x or y) of first Bezier control points.
+   * @param {*} rhs 
+   */
+  getFirstControlPoints(rhs) {
+    let n = rhs.length;
+    let x = []; // Solution vector.
+    let tmp = []; // Temp workspace.
+
+    let b = 2.0;
+    x[0] = rhs[0] / b;
+    for (let i = 1; i < n; i++) { // Decomposition and forward substitution.
+      tmp[i] = 1 / b;
+      b = (i < n - 1 ? 4.0 : 3.5) - tmp[i];
+      x[i] = (rhs[i] - x[i - 1]) / b;
+    }
+    for (let i = 1; i < n; i++) {
+      x[n - i - 1] -= tmp[n - i] * x[n - i]; // Backsubstitution.
+    }
+    return x;
+  }
+
 }
 
 export default new GeomCore();
