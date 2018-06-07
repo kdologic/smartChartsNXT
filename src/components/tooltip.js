@@ -38,13 +38,15 @@ import TransitionGroup from './../viewEngin/transitionGroup';
 import Style from './../viewEngin/style'; 
 
 
-/** This components will create tooltip area for the chart. 
+/** 
+ * This components will create tooltip area for the chart. 
  * @extends Component
  */
+
 class Tooltip extends Component {
     constructor(props) {
       super(props);
-      let padding = 10;
+      let padding = 0;
       this.config = {
         color: this.props.opts.color || defaultConfig.theme.fontColorDark,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
@@ -52,10 +54,12 @@ class Tooltip extends Component {
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
         xPadding: Number(this.props.opts.xPadding) || padding,
         yPadding: Number(this.props.opts.yPadding) || padding,
-        strokeWidth: this.props.opts.borderWidth || "1",
+        strokeWidth: this.props.opts.borderWidth || "2",
         opacity:this.props.opts.opacity || "0.9"
       };
       this.state = {
+        cPoint: new Point(0,0),
+        topLeft: new Point(0,0),
         transformOld: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
         transformNew: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
         tooltipContent: '', 
@@ -64,8 +68,7 @@ class Tooltip extends Component {
         contentWidth: 0,
         contentHeight: 0,
         strokeColor: 'rgb(124, 181, 236)', 
-        tooltipPath: '',
-        opacity:'0'
+        opacity: 0
       };
     }
 
@@ -74,10 +77,15 @@ class Tooltip extends Component {
     }
     
     componentDidMount() {
-      typeof this.props.onRef === 'function' && this.props.onRef(this); 
+      typeof this.props.onRef === 'function' && this.props.onRef(this);
+      let node = this.ref.node.querySelector('.tooltip-content') ;  
+      node && (node.innerHTML = this.state.tooltipContent);
     }
 
     render() {
+      if(this.props.opts.enable === false) {
+        return <tooltip-disabled></tooltip-disabled>;
+      }
       return (
         <g class='sc-tooltip-container' pointer-events='none'>
           <Style>
@@ -94,10 +102,9 @@ class Tooltip extends Component {
           <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'>
             {this.state.opacity && 
               <g instanceId='tooltip-inst' transform={this.state.transformNew.replace(/px/gi,'')}>
-                <path class='tooltip-border' filter='url(#tooltip-border-smartcharts-shadow)' 
-                  fill={this.config.bgColor} stroke={this.state.strokeColor} d={this.state.tooltipPath} 
-                  stroke-width={this.config.strokeWidth} opacity={this.config.opacity}>
-                </path>
+                <SpeechBox x={0} y={0} width={this.state.contentWidth} height={this.state.contentHeight} cpoint={this.state.cPoint }
+                  bgColor={this.config.bgColor} opacity={this.config.opacity} shadow={true} strokeColor={this.state.strokeColor} strokeWidth={this.config.strokeWidth} > 
+                </SpeechBox> 
                 <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
                   <foreignObject class='tooltip-content' innerHTML={this.state.tooltipContent} x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
                   </foreignObject>
@@ -105,7 +112,6 @@ class Tooltip extends Component {
               </g>
             }
           </TransitionGroup>
-          {UiCore.dropShadow('tooltip-border-smartcharts-shadow')}
         </g>
       );
     }
@@ -120,18 +126,16 @@ class Tooltip extends Component {
       return strContents; 
     }
 
-    updateTip(originPoint, pointData, line1, line2) {
+    updateTip(originPoint, pointData, line1, line2, preAlign = 'top') {
       let xPadding = this.config.xPadding; 
       let yPadding = this.config.yPadding; 
       let strContents = "";
-      let cPoint;
-      let delta = 10; 
+      let delta = 10; // is anchor height
       let newState = {};
 
       if(!pointData && !line1 && !line2) {
         return; 
       }
-
       let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.state.strokeColor;
 
       if(pointData && this.props.opts && this.props.opts.content) {
@@ -145,11 +149,6 @@ class Tooltip extends Component {
         }
       }
 
-      /*Prevent call-by-sharing*/
-      if (originPoint) {
-        cPoint = new Point(originPoint.x, originPoint.y);
-      }
-     
       strContents = line2 === 'html' ? line1 : this.createTooltipContent(line1, line2);
       let temp = document.createElement("div");
       temp.innerHTML = strContents;
@@ -164,69 +163,11 @@ class Tooltip extends Component {
      
       let txtWidth = containBox.width;
       let lineHeight = containBox.height;
-
-      cPoint.y -= (2*delta);
-      let topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
       let width = txtWidth + (2 * xPadding);
       let height = lineHeight + (2 * yPadding);
-      let d = [
-        "M", 0, 0, //TOP-LEFT CORNER
-        "L", width, 0, //LINE TO TOP-RIGHT CORNER
-        "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
-        "L", (width/2) + delta, height,
-        "L", (width/2), height + delta,
-        "L", (width/2) - delta, height,
-        "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
-        "Z"
-      ];
-      if (topLeft.x + width > this.props.svgWidth) {
-        cPoint.x -= (2*delta);
-        cPoint.y += (2*delta);
-        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
-        topLeft.x -= (width / 2);
-        topLeft.y += (height / 2);
-        d = [
-          "M", 0, 0, //TOP-LEFT CORNER
-          "L", width, 0, //LINE TO TOP-RIGHT CORNER
-          "L", width, (height/2) - delta,
-          "L", (width + delta), (height/2),
-          "L", width, (height/2) + delta,
-          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
-          "Z"
-        ];
-      } else if (topLeft.x <= 0) {
-        cPoint.x += delta;
-        cPoint.y += (2 * delta);
-        topLeft = new Point(cPoint.x + (txtWidth / 2) + xPadding + delta, cPoint.y - lineHeight - delta - yPadding);
-        topLeft.x -= (width / 2);
-        topLeft.y += (height / 2);
-        d = [
-          "M", 0, 0, //TOP-LEFT CORNER
-          "L", width, 0, //LINE TO TOP-RIGHT CORNER
-          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, height, // LINE TO BOTTOM-LEFT CORNER
-          "L", 0, (height/2) + delta, // LINE TO BEFORE C-POINT BEND
-          "L", (-delta), (height/2), // LINE TO C-POINT
-          "L", 0, (height/2) - delta, //LINE TO AFTER C-POINT BEND
-          "Z"
-        ];
-      } else if (topLeft.y < 0) {
-        cPoint.y += (4*delta);
-        topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y);
-        d = [
-          "M", 0, 0, //TOP-LEFT CORNER
-          "L", (width/2) - delta, 0,
-          "L", (width/2), (-delta),
-          "L", (width/2) + delta, 0,
-          "L", width, 0, //LINE TO TOP-RIGHT CORNER
-          "L", width, height, //LINE TO BOTTOM-RIGHT CORNER
-          "L", 0, height, //LINE TO BOTTOM-LEFT CORNER
-          "Z"
-        ];
-      }
-
-      let textPos = new Point(topLeft.x + 5, topLeft.y + 5);
+      let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
+      let textPos = new Point(topLeft.x, topLeft.y);
+      
       newState = {
         tooltipContent: strContents, 
         contentX: textPos.x, 
@@ -234,23 +175,72 @@ class Tooltip extends Component {
         contentWidth: (containBox.width + xPadding),
         contentHeight: (containBox.height + yPadding),
         strokeColor: strokeColor,
-        tooltipPath: d.join(' '),
         opacity:1
       };
 
       if (this.state.transformNew !== `translate(${topLeft.x}px,${topLeft.y}px)`) {
         this.setState({
+          topLeft,
+          cPoint : new Point(cPoint.x - topLeft.x, cPoint.y - topLeft.y),
           transformOld: this.state.transformNew,
           transformNew: `translate(${topLeft.x}px,${topLeft.y}px)`,
-          tooltipPath: newState.tooltipPath,
           strokeColor: newState.strokeColor,
           contentWidth: newState.contentWidth,
           contentHeight: newState.contentHeight,
           tooltipContent: newState.tooltipContent,
           opacity: newState.opacity
         });
-        this.ref.node.querySelector('.tooltip-content').innerHTML = this.state.tooltipContent;
       }
+    }
+
+    reAlign(alignment, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, loopCount) {
+      let topLeft, cPoint, enumAlign = ['left', 'right','top', 'bottom']; 
+      switch (alignment) {
+        case 'left':
+          ({ topLeft, cPoint } = this.alignLeft(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta));
+          break;
+        case 'right':
+          ({ topLeft, cPoint } = this.alignRight(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta));
+          break;
+        case 'top':
+          ({ topLeft, cPoint } = this.alignTop(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta));
+          break;
+        case 'bottom':
+          ({ topLeft, cPoint } = this.alignBottom(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta));
+          break;
+      }
+      if(loopCount < 4 && (topLeft.x < 0 || topLeft.x > this.props.svgWidth || topLeft.y < 0 || topLeft.y > this.props.svgHeight)) {
+        return this.reAlign(enumAlign[(enumAlign.indexOf(alignment) + 1) % 4], originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, loopCount+1);
+      }
+      return { topLeft, cPoint }; 
+    }
+
+    alignLeft(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta) {
+      let cPoint = new Point(originPoint.x, originPoint.y);
+      let topLeft = new Point(cPoint.x - (txtWidth / 2) - delta - xPadding, cPoint.y - lineHeight - yPadding);
+      topLeft.x -= (width / 2);
+      topLeft.y += (height / 2);
+      return {topLeft, cPoint}; 
+    }
+
+    alignRight(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta) {
+      let cPoint = new Point(originPoint.x, originPoint.y);
+      let topLeft = new Point(cPoint.x + (txtWidth / 2) + xPadding + delta, cPoint.y - lineHeight - yPadding);
+      topLeft.x -= (width / 2);
+      topLeft.y += (height / 2);
+      return {topLeft, cPoint}; 
+    }
+
+    alignTop(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta) {
+      let cPoint = new Point(originPoint.x, originPoint.y);
+      let topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y - lineHeight - delta - yPadding);
+      return {topLeft, cPoint}; 
+    }
+
+    alignBottom(originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta) {
+      let cPoint = new Point(originPoint.x, originPoint.y);
+      let topLeft = new Point(cPoint.x - (txtWidth / 2) - xPadding, cPoint.y + delta);
+      return {topLeft, cPoint}; 
     }
 
     show() {

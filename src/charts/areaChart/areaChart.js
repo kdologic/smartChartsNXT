@@ -5,7 +5,7 @@
  * @version:2.0.0
  * @createdOn:31-05-2016
  * @author:SmartChartsNXT
- * @description: SVG Area Chart, that support multiple series, and zoom window.
+ * @description: SVG Area Chart, that support multiple series and zoom window.
  */
 
 import Point from "./../../core/point";
@@ -23,9 +23,11 @@ import HorizonalLabels from './../../components/horizontalLabels';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
 
-/** This components will create an Area Chart. 
+/** 
+ * SVG Area Chart, that support multiple series and zoom window.
  * @extends Component
  */
+
 class AreaChart extends Component {
   constructor(props) {
     super(props);
@@ -254,13 +256,36 @@ class AreaChart extends Component {
   }
 
   bindEventsOfDataTooltips() {
-    let pointData = [], originPoint, prevOriginPoint, counter = 0;
+    let pointData = [], originPoint, prevOriginPoint;
+    let eventStream = {}; 
+    let self = this; 
+
     this.emitter.on('onPointHighlight', (e) => {
-      if(e.highlightedPoint === null) {
-        return; 
+      if(!eventStream[e.timeStamp] ) {
+        eventStream[e.timeStamp] = [e]; 
+      } else {
+        eventStream[e.timeStamp].push(e); 
       }
-      counter++; 
-      let series = this.CHART_OPTIONS.dataSet.series[e.highlightedPoint.seriesIndex];
+      //consume events when all events are received
+      if(eventStream[e.timeStamp].length === this.CHART_OPTIONS.dataSet.series.length) {
+        for(let evt of eventStream[e.timeStamp]) {
+          if(evt.highlightedPoint === null) {
+            continue; 
+          }
+          pointData.push(consumeEvents(evt));
+        }
+        if(!prevOriginPoint || (originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
+          this.updateDataTooltip(originPoint, pointData);
+        }
+        pointData = [];
+        prevOriginPoint = originPoint; 
+        originPoint = undefined;
+        delete eventStream[e.timeStamp]; 
+      } 
+    });
+
+    function consumeEvents(e) {
+      let series = self.CHART_OPTIONS.dataSet.series[e.highlightedPoint.seriesIndex];
       let point = series.data[e.highlightedPoint.pointIndex];
       let hPoint = {
         label: point.label,
@@ -271,47 +296,39 @@ class AreaChart extends Component {
         seriesColor: series.bgColor || UtilCore.getColor(e.highlightedPoint.seriesIndex),
         dist: e.highlightedPoint.dist
       };
-
+  
       if(originPoint) {
         originPoint = new Point(e.highlightedPoint.x , (e.highlightedPoint.y + originPoint.y) / 2);
       } else {
         originPoint = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
       }
-      pointData.push(hPoint);
-      if (counter >= this.CHART_OPTIONS.dataSet.series.length) {
-        if(!prevOriginPoint || (originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
-          this.updateDataTooltip(originPoint, pointData);
-        }
-        pointData = [];
-        prevOriginPoint = originPoint; 
-        originPoint = undefined;
-        counter = 0; 
-      }
-    });
+      return hPoint; 
+    }
 
     this.emitter.on('interactiveMouseLeave', (e) => {
       if(!this.subComp.tooltip) {
         return; 
       } 
       pointData = [];
-      counter = 0; 
       originPoint = undefined;
       prevOriginPoint = undefined; 
       this.hideTip(); 
     });
   }
 
+  
+
   updateDataTooltip(originPoint, pointData) {
     if(!this.subComp.tooltip) {
       return; 
     }
     if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content) {
-      this.subComp.tooltip.updateTip(originPoint, pointData);
+      this.subComp.tooltip.updateTip(originPoint, pointData, undefined, undefined, 'left');
     } 
     else {
       let row1 = this.getDefaultTooltipHTML.call(pointData); 
       let row2 = 'html'; 
-      this.subComp.tooltip.updateTip(originPoint, pointData, row1, row2);
+      this.subComp.tooltip.updateTip(originPoint, pointData, row1, row2, 'left');
     }
   }
 

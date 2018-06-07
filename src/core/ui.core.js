@@ -1,26 +1,37 @@
+"use strict";
+
 /**
  * ui.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
  * @version: 2.0.0
- * @description:SmartChartsNXT Core Library components. That contains ui functionality.
+ * @description:SmartChartsNXT Core Library components. This contains UI functionality.
  */
 
 /*-----------SmartChartsNXT UI functions------------- */
 
-"use strict";
+
 
 import Point from './point';
 import Geom from './geom.core'; 
 
+/**
+ * SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
+ */
+
 class UiCore {
   constructor() {}
 
+  /**
+   * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element. 
+   * @param {String} shadowId Element ID of dropshadow Component.
+   * @returns Virtual node of drop shadow component. 
+   */
   dropShadow(shadowId) {
     return (
       <defs>
         <filter xmlns="http://www.w3.org/2000/svg" id={shadowId} height="130%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="0"/> 
+          <feGaussianBlur in="SourceAlpha" stdDeviation="1"/> 
           <feOffset dx="4" dy="4" result="offsetblur"/>
           <feComponentTransfer>
             <feFuncA type="linear" slope="0.2"/>
@@ -71,6 +82,12 @@ class UiCore {
     );
   }
 
+  /**
+   * Calculate font size according to scale and max size.
+   * @param {Number} totalWidth Max width of component.
+   * @param {Number} scale Scale factor when width change.
+   * @param {Number} maxSize Max font size bound.
+   */
   getScaledFontSize(totalWidth, scale, maxSize) {
     let fSize = totalWidth / scale;
     return fSize < maxSize ? fSize : maxSize;
@@ -83,7 +100,11 @@ class UiCore {
     return "ontouchstart" in document.documentElement;
   }
 
-  /* Get point in global SVG space*/
+  /**
+   * Convert Window screen coordinate into SVG point coordinate in global SVG space
+   * @param {String} targetElem SVG element in which point coordinate will be calculated
+   * @param {*} evt Ponter event related to screen like mouse or touch point
+   */
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {
       targetElem = document.querySelector("#" + targetElem + " svg");

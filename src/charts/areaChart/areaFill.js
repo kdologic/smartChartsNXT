@@ -1,18 +1,24 @@
+"use strict";
+
 /**
  * areaFill.js
  * @version:2.0.0
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
- * @description: This components will create a area based on input points. 
+ * @description: This components will create an area based on input points. 
  */
-
-"use strict";
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import Geom from "./../../core/geom.core";
+import UtilCore from "./../../core/util.core";
 import DataPoints from "./../../components/dataPoints";
 import eventEmitter from './../../core/eventEmitter';
+
+/** 
+ * This components will create an area based on input points. 
+ * @extends Component
+ */
 
 class AreaFill extends Component{
   constructor(props) {
@@ -102,6 +108,7 @@ class AreaFill extends Component{
   }
 
   interactiveMouseMove(e) {
+    e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = e.pos; 
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
     let nearPoint = Geom.findClosestPoint(this.pointSet, pt, true); 

@@ -13,7 +13,8 @@
 
 import { Component } from "./pview";
 
-/**This component will be used to create css transition on top of pView Library. 
+/**
+ * This component will be used to create css transition on top of pView Library. 
  * Must use InstanceId as props to uniquely identify elements.
  * 
  * It accept the following props :
