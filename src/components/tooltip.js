@@ -153,11 +153,12 @@ class Tooltip extends Component {
       let temp = document.createElement("div");
       temp.innerHTML = strContents;
       temp.style.display = "inline-block";
+      temp.style.fontFamily = this.config.fontFamily;
       temp.style.visibility = 'hidden';
       document.getElementsByTagName("body")[0].appendChild(temp);
       let containBox = {
-        width: temp.offsetWidth + 8,
-        height: temp.offsetHeight + 5
+        width: temp.offsetWidth,
+        height: temp.offsetHeight
       };
       temp && temp.parentNode.removeChild(temp);
      
@@ -172,8 +173,8 @@ class Tooltip extends Component {
         tooltipContent: strContents, 
         contentX: textPos.x, 
         contentY: textPos.y, 
-        contentWidth: (containBox.width + xPadding),
-        contentHeight: (containBox.height + yPadding),
+        contentWidth: width,
+        contentHeight: height,
         strokeColor: strokeColor,
         opacity:1
       };
