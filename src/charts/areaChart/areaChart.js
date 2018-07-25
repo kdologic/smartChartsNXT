@@ -20,6 +20,7 @@ import Grid from './../../components/grid';
 import AreaFill from './areaFill'; 
 import VerticalLabels from './../../components/verticalLabels';
 import HorizonalLabels from './../../components/horizontalLabels';
+import HorizontarScroller from './../../components/horizontalScroller';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
 
@@ -46,7 +47,7 @@ class AreaChart extends Component {
         offsetWidth: 20, // distance of text label from left and right side 
         offsetHeight: 70, // distance of text label from top and bottom side
         hScrollBoxMarginTop: 70, 
-        hScrollBoxHeight: this.props.hideHorizontalScroller ? 0 : 60,
+        hScrollBoxHeight: this.props.hideHorizontalScroller ? 0 : 40,
         fullSeries: [],
         fsScaleX: 0,
         vLabelWidth: 70,
@@ -175,7 +176,7 @@ class AreaChart extends Component {
     this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
-    this.CHART_DATA.hScrollBoxHeight = nextProps.hideHorizontalScroller ? 0 : 60,
+    this.CHART_DATA.hScrollBoxHeight = nextProps.hideHorizontalScroller ? 0 : 40,
     this.init(); 
   }
 
@@ -222,6 +223,10 @@ class AreaChart extends Component {
         { 
           this.drawSeries() 
         }
+        
+        <HorizontarScroller posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight}>
+        </HorizontarScroller>
 
         <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
@@ -274,7 +279,7 @@ class AreaChart extends Component {
           }
           pointData.push(consumeEvents(evt));
         }
-        if(!prevOriginPoint || (originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
+        if(!prevOriginPoint || (originPoint && originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
           this.updateDataTooltip(originPoint, pointData);
         }
         pointData = [];

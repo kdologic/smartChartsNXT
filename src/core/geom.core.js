@@ -120,8 +120,8 @@ class GeomCore {
   polarToCartesian(centerX, centerY, radius, angleInDegrees) {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     return {
-      x: centerX + (radius * Math.cos(angleInRadians)),
-      y: centerY + (radius * Math.sin(angleInRadians))
+      x: centerX + (radius * Math.cos(angleInRadians).toFixed(4)),
+      y: centerY + (radius * Math.sin(angleInRadians).toFixed(4))
     };
   } /*End polarToCartesian()*/
 
