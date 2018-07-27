@@ -14,17 +14,20 @@ module.exports = {
   module: {
     loaders: [{
       loader: "babel-loader",
-      exclude: [
-        path.resolve(__dirname, "node_modules")
-      ],
+      exclude: /(node_modules)/,
       query: {
         plugins: [
-          ['transform-runtime'],
-          ["transform-class-properties"],
-          ['transform-object-rest-spread'],
-          ["transform-react-jsx", {"pragma": "__h__"}] // change default pragma React.createElement into __h__
+          ['@babel/plugin-transform-runtime',{
+            "helpers": true,
+            "polyfill": true,
+            "regenerator": false,
+            "moduleName": "@babel/runtime"
+          }],
+          ['@babel/plugin-proposal-class-properties'],
+          ['@babel/plugin-proposal-object-rest-spread'],
+          ['@babel/plugin-transform-react-jsx', {"pragma": "__h__"}] // change default pragma React.createElement into __h__
         ],
-        presets: ['es2015']
+        presets: ['@babel/preset-env']
       }
     }]
   }
