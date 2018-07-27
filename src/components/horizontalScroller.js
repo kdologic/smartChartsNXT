@@ -44,6 +44,12 @@ class HorizontalScroller extends Component {
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <path class='sc-hScroller-upper-path' stroke='#333' fill='none' d={this.getUpperBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
+        {this.props.extChildren}
+        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
+          events= {{
+            mousedown: this.onMouseDown.bind(this)
+          }}> 
+        </SliderWindow>
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} onRef={(obj)=>{this.slider.left = obj;}}
           events= {{
@@ -57,7 +63,7 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderRightHandle>
         { this.selectedHandler &&
-          <rect class='sc-slider-pane' x='-50' y='0' width= {this.props.width + 100} height={this.props.height} fill='none' storke='none' pointer-events='all'
+          <rect class='sc-slider-pane' x='-50' y='0' width= {this.props.width + 100} height={this.props.height} fill='none' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
             events={{
               mousemove : this.onScrollMove.bind(this),
               mouseup : this.onScrollEnd.bind(this),
@@ -80,7 +86,17 @@ class HorizontalScroller extends Component {
 
   onMouseDown(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    this.selectedHandler = e.target.classList.contains('sc-slider-left-sel') ? 'left' : 'right';
+    switch (e.target.classList.value) {
+      case 'sc-slider-left-sel':
+        this.selectedHandler = 'left';
+        break;
+      case 'sc-slider-right-sel':
+        this.selectedHandler = 'right';
+        break;
+      case 'sc-hScroll-window':
+        this.selectedHandler = 'window';
+        break;
+    }
     this.mouseDownPos = mousePos;
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
@@ -91,19 +107,39 @@ class HorizontalScroller extends Component {
     if(this.selectedHandler) {
       let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
-      if(this.selectedHandler === 'left') {
-        winWidth = this.winWidth + (this.mouseDownPos.x - mousePosNow.x);
-        lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
-      }else {
-        winWidth = this.winWidth - (this.mouseDownPos.x - mousePosNow.x);
+      switch (this.selectedHandler) {
+        case 'left':
+          winWidth = this.winWidth + (this.mouseDownPos.x - mousePosNow.x);
+          lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
+          break;
+        case 'right':
+          winWidth = this.winWidth - (this.mouseDownPos.x - mousePosNow.x);
+          break;
+        case 'window':
+          winWidth = this.winWidth; 
+          lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
+          break;
       }
-      this.state.leftOffset = lOffset < 0 ? 0 : (lOffset > this.props.width ? this.props.width : lOffset);
       
       console.log('leftoffset:', this.state.leftOffset, 'window:', this.state.windowWidth, 'winWidth',winWidth, 'handler', this.selectedHandler);
       console.log( 'mouseDownx:',this.mouseDownPos.x, 'mouseNowx', mousePosNow.x);
       
       if(lOffset + winWidth > this.props.width) {
-        winWidth = this.props.width - lOffset;
+        if(this.selectedHandler === 'window') {
+          winWidth = this.winWidth;
+          lOffset = this.props.width - this.winWidth;
+        }else {
+          winWidth = this.props.width - lOffset;
+        }
+      }
+
+      if(lOffset < 0) {
+        this.state.leftOffset = 0; 
+        winWidth = this.winWidth; 
+      }else if(lOffset > this.props.width) {
+        this.state.leftOffset =this.props.width;
+      }else {
+        this.state.leftOffset = lOffset;
       }
 
       if(winWidth < 0) {
@@ -115,7 +151,9 @@ class HorizontalScroller extends Component {
       }
       this.state.windowWidth = Math.abs(winWidth);
       
-      this.slider[this.selectedHandler].setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
+      this.sliderWindow.setState({posX:this.state.leftOffset, width: this.state.windowWidth});
+      this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
+      this.slider.right.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
     }
   }
 
@@ -123,6 +161,30 @@ class HorizontalScroller extends Component {
     console.log('scroll end');
     this.selectedHandler = undefined; 
     this.setState({});
+  }
+}
+
+class SliderWindow extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {...this.props};
+  }
+
+  componentWillMount() {
+    typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+  }
+
+  componentDidMount() {
+    typeof this.props.onRef === 'function' && this.props.onRef(this);
+  }
+ 
+  render() {
+    return (
+      <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
+        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill='#000' fill-opacity='0' storke='none' pointer-events='all' 
+        style="cursor: -webkit-grab; cursor: grab;" events={this.props.events} />
+      </g>
+    );
   }
 }
 
@@ -216,9 +278,9 @@ class SliderRightHandle extends Component {
         </defs>
         <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} fill= 'rgba(128,179,236,0.5)'  fill-opacity='0.7' stroke-width='0.1' stroke='#717171' />
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events}>
-          <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
+          <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
           <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill='#fff' filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>
-          <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
+          <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );

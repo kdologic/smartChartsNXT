@@ -57,7 +57,9 @@ class AreaFill extends Component{
           d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
         </path> 
         <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width='1' opacity='1'></path> 
-        <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
+        {this.props.marker &&
+          <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
+        }
       </g>
     );
   }
@@ -103,8 +105,10 @@ class AreaFill extends Component{
   }
 
   bindEvents() {
-    this.emitter.on('interactiveMouseMove', this.interactiveMouseMove.bind(this));
-    this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave.bind(this));
+    if(this.props.marker) {
+      this.emitter.on('interactiveMouseMove', this.interactiveMouseMove.bind(this));
+      this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave.bind(this));
+    }
   }
 
   interactiveMouseMove(e) {

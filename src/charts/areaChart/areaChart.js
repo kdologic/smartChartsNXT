@@ -46,7 +46,7 @@ class AreaChart extends Component {
         gridBoxHeight: 0,
         offsetWidth: 20, // distance of text label from left and right side 
         offsetHeight: 70, // distance of text label from top and bottom side
-        hScrollBoxMarginTop: 70, 
+        hScrollBoxMarginTop: 85, 
         hScrollBoxHeight: this.props.hideHorizontalScroller ? 0 : 40,
         fullSeries: [],
         fsScaleX: 0,
@@ -75,7 +75,8 @@ class AreaChart extends Component {
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.subComp = {
-        area: []
+        area: [], 
+        scrollArea: []
       };
 
       this.emitter = eventEmitter.getInstance(this.context.runId); 
@@ -138,7 +139,8 @@ class AreaChart extends Component {
     this.CHART_DATA.windowLeftIndex = 0;
     this.CHART_DATA.windowRightIndex = -1;
     this.subComp = {
-      area: []
+      area: [],
+      scrollArea: []
     };
   }
 
@@ -220,12 +222,11 @@ class AreaChart extends Component {
           <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
         </text>
         
-        { 
-          this.drawSeries() 
-        }
+        { this.drawSeries() }
         
         <HorizontarScroller posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight}>
+          { this.drawHScrollSeries() }
         </HorizontarScroller>
 
         <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
@@ -246,8 +247,22 @@ class AreaChart extends Component {
       return (
         <AreaFill dataSet={series} index={i} instanceId={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
-          opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
+          opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={true}
           maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.subComp.area.push(ref)} >
+        </AreaFill>
+      );
+    });
+  }
+
+  drawHScrollSeries() {
+    let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
+
+    return this.CHART_OPTIONS.dataSet.series.map((series, i) => {
+      return (
+        <AreaFill dataSet={series} index={i} instanceId={i} posX={0} posY={5} 
+          paddingX={0} width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight - 5} maxSeriesLen={maxSeriesLen} fill="#777" 
+          opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} marker={false}
+          maxVal={this.CHART_DATA.objInterval.iMax} minVal={this.CHART_DATA.objInterval.iMin} onRef={ref => this.subComp.scrollArea.push(ref)} >
         </AreaFill>
       );
     });
