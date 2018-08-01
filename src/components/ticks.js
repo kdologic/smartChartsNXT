@@ -23,18 +23,24 @@ class Ticks extends Component{
     );
   }
 
-  drawTickLinesVertical(){
+  drawTickLinesVertical() {
     let ticks = []; 
-    for (let tickCount = 0; tickCount <= this.props.tickCount; tickCount++) {
-      ticks.push(<line class={`tick-line-${tickCount}`} x1={0} y1={tickCount * this.props.tickInterval} x2={this.props.span} y2={tickCount * this.props.tickInterval} fill='none' stroke={this.props.color || "#000"} stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
+    for (let tickCount = 0; tickCount < this.props.tickCount; tickCount++) {
+      ticks.push(<line class={`tick-line-${tickCount}`} 
+        x1={0} y1={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval}
+        x2={this.props.span} y2={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} fill='none' stroke={this.props.color || "#000"} 
+        stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
     }
     return ticks;
   }
 
-  drawTickLinesHorizontal(){
+  drawTickLinesHorizontal() {
     let ticks = []; 
-    for (let tickCount = 0; tickCount <= this.props.tickCount; tickCount++) {
-      ticks.push(<line class={`tick-line-${tickCount}`} x1={tickCount * this.props.tickInterval} y1={this.props.span} x2={tickCount * this.props.tickInterval} y2={0} fill='none' stroke={this.props.color || "#000"} stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
+    for (let tickCount = 0; tickCount < this.props.tickCount; tickCount++) {
+      ticks.push(<line class={`tick-line-${tickCount}`} 
+        x1={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} y1={this.props.span} 
+        x2={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} y2={0} fill='none' stroke={this.props.color || "#000"} 
+        stroke-width='1' stroke-opacity='1' shape-rendering='optimizeSpeed'/>);
     }
     return ticks;
   }

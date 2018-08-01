@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * verticalLabels.js
  * @version:2.0.0
@@ -6,12 +8,14 @@
  * @description: This components will create a Vertical Labels for the chart. 
  */
 
-"use strict";
-
 import defaultConfig from "./../settings/config";
 import Ticks from "./ticks";
 import { Component } from "./../viewEngin/pview";
 
+/** 
+ * Create a Vertical Labels and Tick marks for the chart.
+ * @extends Component
+ */
 class VerticalLabels extends Component{
 
   constructor(props) {
@@ -49,7 +53,7 @@ class VerticalLabels extends Component{
           this.getLabels()
         }
         </text>
-        <Ticks posX={5} posY={0} span='5' tickInterval={this.props.intervalLen} tickCount={this.props.labelCount} type='vertical'></Ticks>
+        <Ticks posX={5} posY={0} span='5' tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} type='vertical'></Ticks>
       </g>
     );
   }

@@ -73,6 +73,9 @@ class AreaFill extends Component{
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
       let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
+      if(this.valueSet.length === 1) {
+        point = new Point(this.scaleX + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
+      }
       if(i > 0) {
         path.push('L', point.x, point.y);
       }
@@ -87,10 +90,13 @@ class AreaFill extends Component{
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
       let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
+      if(this.valueSet.length === 1) {
+        point = new Point(this.scaleX + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
+      }
       point.index = i; 
       return point; 
     });
-    path = Geom.getBezierSplines(this.pointSet);
+    path = this.pointSet.length === 0 ? [] : (this.pointSet.length === 1 ? ['L', this.pointSet[0].x, this.pointSet[0].y] : Geom.getBezierSplines(this.pointSet));
     path.unshift('M', this.pointSet[0].x, this.pointSet[0].y);
     return path; 
   }
@@ -99,7 +105,7 @@ class AreaFill extends Component{
     this.valueSet = this.props.dataSet.data.map((data) => {
       return data.value;
     });
-    this.scaleX = (this.props.width - (2 * this.props.paddingX)) / (this.props.maxSeriesLen-1);
+    this.scaleX = (this.props.width - (2 * this.props.paddingX)) / (this.props.maxSeriesLen-1 || 2);
     this.scaleY = this.props.height / (this.props.maxVal-this.props.minVal); 
     this.baseLine = this.props.maxVal * this.scaleY; 
   }
@@ -129,7 +135,7 @@ class AreaFill extends Component{
     } else {
       e.highlightedPoint = null; 
     }
-    this.emitter.emit("onPointHighlight", e);
+    this.emitter.emit("pointHighlighted", e);
   }
 
   interactiveMouseLeave(e) {

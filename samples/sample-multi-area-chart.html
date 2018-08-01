@@ -38,6 +38,7 @@
           },
           "canvasBorder": true,
           "bgColor": "none",
+          //"showGrid": true, // TODO: Yet to implement
           "tooltip": {
             "content": function() {
               return '<table>' +
@@ -110,10 +111,10 @@
           //     console.log(e, "event afterPrint");
           //   }
           // },
-          // zoomWindow: {
-          //   "leftIndex": 10,
-          //   "rightIndex": 20
-          // }
+          zoomWindow: {
+            "leftIndex": 5,
+            "rightIndex": 5
+          }
         });
       });
     };

@@ -13,6 +13,7 @@ import defaultConfig from "./../settings/config";
 import Geom from './../core/geom.core';
 import UiCore from './../core/ui.core';
 import { Component } from "./../viewEngin/pview";
+import eventEmitter from './../core/eventEmitter';
 
 /**
  * This components will create a Horizontal Scroll area for the chart. Where where user can drag right or left handler 
@@ -23,21 +24,29 @@ class HorizontalScroller extends Component {
   constructor(props) {
     super(props);
     this.selectedHandler = undefined;
+    this.emitter = eventEmitter.getInstance(this.context.runId); 
+    let offset = this.calcOffset(props); 
     this.state = {
-      windowWidth: 0,
       sliderLeft: "",
       sliderLeftSel: "",
       sliderLeftSelInner: "",
-      leftOffset: 0,
+      leftOffset: offset.leftOffset,
       scrollRight: this.props.width,
       sliderRight: "",
       sliderRightSel: "",
       sliderRightSelInner: "",
-      rightOffset: this.props.width
+      rightOffset: offset.rightOffset,
+      windowWidth: offset.windowWidth
     };
     
     this.slider = {}; 
     
+  }
+
+  propsWillReceive(nextProps) {
+    let widthChangePercent = ((nextProps.width - this.props.width)/this.props.width)*100;
+    this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
+    this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
   }
 
   render() {
@@ -84,6 +93,13 @@ class HorizontalScroller extends Component {
     ].join(' ');
   }
 
+  calcOffset(props) {
+    let leftOffset = (props.leftOffset * props.width / 100) || 0;
+    let rightOffset = (props.rightOffset * props.width / 100) || 0;
+    let windowWidth = rightOffset - leftOffset;
+    return { leftOffset, rightOffset, windowWidth };
+  }
+
   onMouseDown(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     switch (e.target.classList.value) {
@@ -121,9 +137,6 @@ class HorizontalScroller extends Component {
           break;
       }
       
-      console.log('leftoffset:', this.state.leftOffset, 'window:', this.state.windowWidth, 'winWidth',winWidth, 'handler', this.selectedHandler);
-      console.log( 'mouseDownx:',this.mouseDownPos.x, 'mouseNowx', mousePosNow.x);
-      
       if(lOffset + winWidth > this.props.width) {
         if(this.selectedHandler === 'window') {
           winWidth = this.winWidth;
@@ -154,11 +167,15 @@ class HorizontalScroller extends Component {
       this.sliderWindow.setState({posX:this.state.leftOffset, width: this.state.windowWidth});
       this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
       this.slider.right.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
+      this.emitter.emit('hScroll', {
+        leftOffset: ((this.state.leftOffset/this.props.width)*100).toFixed(2),
+        rightOffset: (((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100).toFixed(2),
+        windowWidth: ((this.state.windowWidth/this.props.width)*100).toFixed(2)
+      });
     }
   }
 
   onScrollEnd(e) {
-    console.log('scroll end');
     this.selectedHandler = undefined; 
     this.setState({});
   }
@@ -168,6 +185,10 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+  }
+
+  propsWillReceive(nextProps) {
+    this.state = {...this.state, ...nextProps};
   }
 
   componentWillMount() {
@@ -192,6 +213,10 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+  }
+
+  propsWillReceive(nextProps) {
+    this.state = {...this.state, ...nextProps};
   }
 
   componentWillMount() {
@@ -249,6 +274,10 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+  }
+
+  propsWillReceive(nextProps) {
+    this.state = {...this.state, ...nextProps};
   }
 
   componentWillMount() {
