@@ -30,16 +30,21 @@ class AreaFill extends Component{
     this.pointSet = []; 
     this.valueSet = []; 
     this.clipPathId = 'sc-clip-' + Math.round(Math.random()*100001);
+    this.mouseMoveBind = this.interactiveMouseMove.bind(this);
+    this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.prepareData(); 
-    this.bindEvents(); 
+    
   }
   
   componentWillMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
+    this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
+    this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
   }
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
+    this.bindEvents(); 
   }
 
   render() {
@@ -112,12 +117,13 @@ class AreaFill extends Component{
 
   bindEvents() {
     if(this.props.marker) {
-      this.emitter.on('interactiveMouseMove', this.interactiveMouseMove.bind(this));
-      this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave.bind(this));
+      this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
+      this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     }
   }
 
   interactiveMouseMove(e) {
+    console.log('interactiveMouseMove:',this.props.dataSet); 
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = e.pos; 
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 

@@ -126,7 +126,7 @@ class UiCore {
     let arrWeight = [1, 2, 5];
     let minIntvCount = 6;
     let maxIntvCount = 13;
-    let mid = (maxVal - minVal) / 2;
+    let mid = (maxVal + minVal) / 2;
     let tMinVal = minVal > 0 ? 0 : minVal;
     maxVal = maxVal < 0 ? 0 : maxVal;
     let digitBase10 = Math.round(mid).toString().length;

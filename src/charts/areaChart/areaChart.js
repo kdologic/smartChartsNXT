@@ -72,7 +72,7 @@ class AreaChart extends Component {
           this.leftOffset = index * 100 / longSeriesLen; 
         },
         get windowLeftIndex() {
-          return this._windowLeftIndex || 0; 
+          return typeof this._windowLeftIndex === 'undefined' ? 0 : this._windowLeftIndex;
         },
         set windowRightIndex(index) {
           let longSeriesLen = self.CHART_OPTIONS.dataSet.series[self.CHART_DATA.longestSeries].data.length;
@@ -80,7 +80,7 @@ class AreaChart extends Component {
           this.rightOffset = index * 100 / longSeriesLen; 
         },
         get windowRightIndex() {
-          return this._windowRightIndex || -1; 
+          return typeof this._windowRightIndex === 'undefined' ? -1 : this._windowRightIndex; 
         },
         hGridCount: 6,
         gridHeight: 0,
