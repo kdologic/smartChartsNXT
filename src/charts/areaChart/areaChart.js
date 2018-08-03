@@ -61,8 +61,7 @@ class AreaChart extends Component {
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.subComp = {
-        area: [], 
-        scrollArea: []
+        tooltip: undefined
       };
 
       this.state = {
@@ -100,11 +99,17 @@ class AreaChart extends Component {
         }
       }; 
 
+      this.pointData = [], 
+      this.originPoint;
+      this.prevOriginPoint;
+      this.eventStream = {}; 
       this.emitter = eventEmitter.getInstance(this.context.runId); 
+      this.onHScrollBind = this.onHScroll.bind(this); 
+      this.onPointHighlightedBind = this.onPointHighlighted.bind(this);
+      this.onMouseLeaveBind = this.onMouseLeave.bind(this);
 
       this.init();
-      this.bindEventsOfDataTooltips(); 
-      this.bindHScrollEvents();
+      
     } catch (ex) {
       ex.errorIn = `Error in AreaChart with runId:${this.context.runId}`;
       throw ex;
@@ -195,6 +200,17 @@ class AreaChart extends Component {
     this.init(); 
   }
 
+  componentDidMount() {
+    this.bindEventsOfDataTooltips(); 
+    this.emitter.on('hScroll', this.onHScrollBind);
+  }
+
+  componentWillUnmount() {
+    this.emitter.removeListener('hScroll', this.onHScrollBind); 
+    this.emitter.removeListener('pointHighlighted', this.onPointHighlightedBind); 
+    this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeaveBind); 
+  }
+
   render() {
     return (
       <g>
@@ -215,13 +231,13 @@ class AreaChart extends Component {
           gridCount={this.state.hGridCount} gridHeight={this.state.gridHeight}>
         </Grid> 
 
-        <VerticalLabels onRef={ref => this.subComp.vLabel = ref}  opts={this.state.cs.dataSet.yAxis || {}}
+        <VerticalLabels  opts={this.state.cs.dataSet.yAxis || {}}
           posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.objInterval.iMax} minVal={this.state.cs.objInterval.iMin} valueInterval={this.state.cs.valueInterval}
           labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
 
-        <HorizonalLabels onRef={ref => this.subComp.vLabel = ref}  opts={this.state.cs.dataSet.xAxis || {}}
+        <HorizonalLabels opts={this.state.cs.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
           categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
@@ -246,7 +262,7 @@ class AreaChart extends Component {
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
         
-        <InteractivePlane onRef={ref => this.subComp.interactivePlane = ref} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+        <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
         </InteractivePlane>
       </g>
@@ -255,13 +271,16 @@ class AreaChart extends Component {
 
   drawSeries() {
     let maxSeriesLen = this.state.cs.dataSet.series[this.CHART_DATA.longestSeries].data.length; //slice(this.state.windowLeftIndex, this.state.windowRightIndex + 1).length;
-    
+    let isBothSinglePoint = true; 
+    this.state.cs.dataSet.series.map(s => {
+      isBothSinglePoint = !!(isBothSinglePoint * (s.data.length == 1));
+    });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series, i) => {
       return (
         <AreaFill dataSet={series} index={i} instanceId={i} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={true}
-          maxVal={this.state.cs.objInterval.iMax} minVal={this.state.cs.objInterval.iMin} onRef={ref => this.subComp.area.push(ref)} >
+          maxVal={this.state.cs.objInterval.iMax} minVal={this.state.cs.objInterval.iMin} centerSinglePoint={isBothSinglePoint}>
         </AreaFill>
       );
     });
@@ -275,20 +294,22 @@ class AreaChart extends Component {
         <AreaFill dataSet={series} index={i} instanceId={i} posX={0} posY={5} 
           paddingX={0} width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight - 5} maxSeriesLen={maxSeriesLen} fill="#777" 
           opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} marker={false}
-          maxVal={this.state.fs.objInterval.iMax} minVal={this.state.fs.objInterval.iMin} onRef={ref => this.subComp.scrollArea.push(ref)} >
+          maxVal={this.state.fs.objInterval.iMax} minVal={this.state.fs.objInterval.iMin} centerSinglePoint={false}>
         </AreaFill>
       );
     });
   }
 
-  bindHScrollEvents() {
-    this.emitter.on('hScroll', (e) => {
-      let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
-      this.state.windowLeftIndex = Math.round(maxSeriesLen * e.leftOffset / 100); 
-      this.state.windowRightIndex = Math.round(maxSeriesLen * e.rightOffset / 100);
+  onHScroll(e) {
+    let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.CHART_DATA.longestSeries].data.length;
+    let leftIndex =  Math.round(maxSeriesLen * e.leftOffset / 100); 
+    let rightIndex = Math.round(maxSeriesLen * e.rightOffset / 100);
+    if(this.state.windowLeftIndex != leftIndex || this.state.windowRightIndex != rightIndex) {
+      this.state.windowLeftIndex = leftIndex; 
+      this.state.windowRightIndex = rightIndex; 
       this.prepareDataSet();
-      this.update(); 
-    });
+      this.update();
+    }
   }
 
   updateLabelTip(e, labelData) {
@@ -299,66 +320,66 @@ class AreaChart extends Component {
   }
 
   bindEventsOfDataTooltips() {
-    let pointData = [], originPoint, prevOriginPoint;
-    let eventStream = {}; 
-    let self = this; 
-    this.emitter.on('pointHighlighted', (e) => {
-      if(!eventStream[e.timeStamp] ) {
-        eventStream[e.timeStamp] = [e]; 
-      } else {
-        eventStream[e.timeStamp].push(e); 
-      }
-      //consume events when all events are received
-      if(eventStream[e.timeStamp].length === this.CHART_OPTIONS.dataSet.series.length) {
-        for(let evt of eventStream[e.timeStamp]) {
-          if(evt.highlightedPoint === null) {
-            continue; 
-          }
-          pointData.push(consumeEvents(evt));
-        }
-        if(pointData.length && !prevOriginPoint || (originPoint && originPoint.x !== prevOriginPoint.x && originPoint.y !== prevOriginPoint.y)) {
-          this.updateDataTooltip(originPoint, pointData);
-        }
-        if(!pointData.length) {
-          this.hideTip();
-        }
-        pointData = [];
-        prevOriginPoint = originPoint; 
-        originPoint = undefined;
-        delete eventStream[e.timeStamp]; 
-      } 
-    });
+    this.emitter.on('pointHighlighted', this.onPointHighlightedBind);
+    this.emitter.on('interactiveMouseLeave', this.onMouseLeaveBind);
+  }
 
-    function consumeEvents(e) {
-      let series = self.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
-      let point = series.data[e.highlightedPoint.pointIndex];
-      let hPoint = {
-        label: point.label,
-        value: point.value,
-        seriesName: series.name,
-        seriesIndex: e.highlightedPoint.seriesIndex, 
-        pointIndex: e.highlightedPoint.pointIndex,
-        seriesColor: series.bgColor || UtilCore.getColor(e.highlightedPoint.seriesIndex),
-        dist: e.highlightedPoint.dist
-      };
-  
-      if(originPoint) {
-        originPoint = new Point(e.highlightedPoint.x , (e.highlightedPoint.y + originPoint.y) / 2);
-      } else {
-        originPoint = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
-      }
-      return hPoint; 
+  consumeEvents(e) {
+    let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
+    let point = series.data[e.highlightedPoint.pointIndex];
+    let hPoint = {
+      label: point.label,
+      value: point.value,
+      seriesName: series.name,
+      seriesIndex: e.highlightedPoint.seriesIndex, 
+      pointIndex: e.highlightedPoint.pointIndex,
+      seriesColor: series.bgColor || UtilCore.getColor(e.highlightedPoint.seriesIndex),
+      dist: e.highlightedPoint.dist
+    };
+
+    if(this.originPoint) {
+      this.originPoint = new Point(e.highlightedPoint.x , (e.highlightedPoint.y + this.originPoint.y) / 2);
+    } else {
+      this.originPoint = new Point(e.highlightedPoint.x, e.highlightedPoint.y);
     }
+    return hPoint; 
+  }
 
-    this.emitter.on('interactiveMouseLeave', (e) => {
-      if(!this.subComp.tooltip) {
-        return; 
-      } 
-      pointData = [];
-      originPoint = undefined;
-      prevOriginPoint = undefined; 
-      this.hideTip(); 
-    });
+  onPointHighlighted(e) {
+    if(!this.eventStream[e.timeStamp] ) {
+      this.eventStream[e.timeStamp] = [e]; 
+    } else {
+      this.eventStream[e.timeStamp].push(e); 
+    }
+    //consume events when all events are received
+    if(this.eventStream[e.timeStamp].length === this.state.cs.dataSet.series.filter(s => s.data.length > 0).length) {
+      for(let evt of this.eventStream[e.timeStamp]) {
+        if(evt.highlightedPoint === null) {
+          continue; 
+        }
+        this.pointData.push(this.consumeEvents(evt));
+      }
+      if(this.pointData.length && !this.prevOriginPoint || (this.originPoint && this.originPoint.x !== this.prevOriginPoint.x && this.originPoint.y !== this.prevOriginPoint.y)) {
+        this.updateDataTooltip(this.originPoint, this.pointData);
+      }
+      if(!this.pointData.length) {
+        this.hideTip();
+      }
+      this.pointData = [];
+      this.prevOriginPoint = this.originPoint; 
+      this.originPoint = undefined;
+      delete this.eventStream[e.timeStamp]; 
+    } 
+  }
+
+  onMouseLeave(e) {
+    if(!this.subComp.tooltip) {
+      return; 
+    } 
+    this.pointData = [];
+    this.originPoint = undefined;
+    this.prevOriginPoint = undefined; 
+    this.hideTip(); 
   }
 
   updateDataTooltip(originPoint, pointData) {
@@ -375,7 +396,7 @@ class AreaChart extends Component {
     }
   }
 
-  getDefaultTooltipHTML(){
+  getDefaultTooltipHTML() {
     return '<table>' +
       '<tbody>' +
         '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +

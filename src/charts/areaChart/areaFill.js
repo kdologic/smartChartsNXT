@@ -38,13 +38,16 @@ class AreaFill extends Component{
   
   componentWillMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
-    this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
-    this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
   }
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.bindEvents(); 
+  }
+
+  componentWillUnmount() {
+    this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
+    this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
   }
 
   render() {
@@ -78,7 +81,7 @@ class AreaFill extends Component{
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
       let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
-      if(this.valueSet.length === 1) {
+      if(this.props.centerSinglePoint && this.valueSet.length === 1) {
         point = new Point(this.scaleX + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
       }
       if(i > 0) {
@@ -95,7 +98,7 @@ class AreaFill extends Component{
     let path = [];
     this.pointSet = this.valueSet.map((data, i) => {
       let point = new Point((i * this.scaleX) + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
-      if(this.valueSet.length === 1) {
+      if(this.props.centerSinglePoint && this.valueSet.length === 1) {
         point = new Point(this.scaleX + this.props.paddingX, (this.baseLine) - (data * this.scaleY));
       }
       point.index = i; 
@@ -123,7 +126,6 @@ class AreaFill extends Component{
   }
 
   interactiveMouseMove(e) {
-    console.log('interactiveMouseMove:',this.props.dataSet); 
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = e.pos; 
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 

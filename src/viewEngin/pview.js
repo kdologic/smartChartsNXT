@@ -41,7 +41,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null) {
     targetNode.replaceChild(component.node, oldNode); 
   }
   
-  if(component.eventStack && component.eventStack instanceof Array){
+  if(component.eventStack && component.eventStack instanceof Array) {
     component.eventStack.forEach(evt => evt());
   }
 
@@ -100,7 +100,7 @@ function renderDOM(vnode) {
     let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let subNodes = vnode.fromUpdate ? objComp.vnode : objComp.getVirtualNode(); 
     
-    if(subNodes.children && subNodes.children.length){
+    if(subNodes.children && subNodes.children.length) {
       replaceClassWithObject(subNodes, objComp.ref);
     }
 
@@ -151,14 +151,21 @@ function renderDOM(vnode) {
  * @param {*} refs real object that previously constructed
  */
 function replaceClassWithObject(subNodes, refs) {
+
   try {
+    for (let c = 0; c < refs.children.length; c++) {
+      let refChld = refs.children[c];
+      if (refChld.self && typeof refChld.self.componentWillUnmount === 'function') {
+        refChld.self.componentWillUnmount.call(refChld.self);
+      }
+    }
     for (let i = 0; i < subNodes.children.length; i++) {
       let subNode = subNodes.children[i];
       for (let c = 0; c < refs.children.length; c++) {
         let refChld = refs.children[c];
         if (refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
           /*Match instaceId for support multiple instace of same component type under same parent node */
-          if(refChld.self.props.instanceId === subNode.attributes.instanceId){
+          if(refChld.self.props.instanceId === subNode.attributes.instanceId) {
             subNode.nodeName = refChld.self;
             if (refChld.self && typeof refChld.self.propsWillReceive === 'function') {
               refChld.self.propsWillReceive.call(refChld.self, subNode.attributes);
@@ -170,6 +177,12 @@ function replaceClassWithObject(subNodes, refs) {
       }
       if (subNode.children && subNode.children.length && refs.children[i] && refs.children[i].children.length) {
         replaceClassWithObject(subNode, refs.children[i]);
+      }
+    }
+    for (let c = 0; c < refs.children.length; c++) {
+      let refChld = refs.children[c];
+      if (refChld.self && typeof refChld.self.componentDidUnmount === 'function') {
+        refChld.self.componentDidUnmount.call(refChld.self);
       }
     }
   } catch (ex) {
@@ -271,12 +284,19 @@ class Component {
       let parent = this.ref.node.parentNode;
       let oldNode = this.ref.node; 
       let objChildContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
+      if(typeof this.componentWillUnmount === 'function') {
+        this.componentWillUnmount.call(this); 
+      }
       let renderedComp = renderDOM.call(
         {context : objChildContext || {}}, 
         {nodeName: this, children: (this.props.extChildren), attributes: this.vnode.attributes, fromUpdate:true});
       
       ({ node: this.ref.node, children: this.ref.children } = renderedComp);
-      return mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
+      let mountObj = mountTo({ node: renderedComp.node, children: renderedComp.children, self: this, eventStack: renderedComp.eventStack}, parent, 'rnode', oldNode);
+      if(typeof this.componentDidUnmount === 'function') {
+        this.componentDidUnmount.call(this); 
+      }
+      return mountObj; 
     }
   }
 
@@ -309,6 +329,16 @@ class Component {
    * Lifecycle event - fires after the component mounted on parent DOM 
    */
   componentDidMount() {}
+
+  /** 
+   * Lifecycle event - fires before the component unmounted from parent DOM 
+   */
+  componentWillUnmount() {}
+
+  /** 
+   * Lifecycle event - fires after the component unmounted from parent DOM 
+   */
+  componentDidUnmount() {}
 }
 
 export { mountTo, renderDOM, Component, parseStyleProps };
