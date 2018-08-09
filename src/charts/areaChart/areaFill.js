@@ -29,7 +29,8 @@ class AreaFill extends Component{
     this.scaleY = 0; 
     this.pointSet = []; 
     this.valueSet = []; 
-    this.clipPathId = 'sc-clip-' + Math.round(Math.random()*100001);
+    this.rid = Math.round(Math.random()*100001);
+    this.clipPathId = 'sc-clip-' + this.rid; 
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.prepareData(); 
@@ -54,6 +55,7 @@ class AreaFill extends Component{
     this.subComp = {}; 
     this.prepareData();
     let path = this.props.spline ? this.getCurvedLinePath() : this.getLinePath(); 
+    let gradId = "sc-area-fill-grad-" + this.rid;
     return (
       <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
@@ -61,12 +63,13 @@ class AreaFill extends Component{
             <rect x={0} y={0} width={this.props.width} height={this.props.height} />
           </clipPath>
         </defs>
-        <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.fill} 
+        {this.props.gradient && this.createGradient(gradId)}
+        <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.gradient ? `url(#${gradId})` : this.props.fill} 
           d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width='1' opacity='1'></path> 
-        {this.props.marker &&
-          <DataPoints pointSet={this.pointSet} type='circle' r={3} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width={this.props.strokeWidth} opacity='1'></path> 
+        {this.props.dataPoints && 
+          <DataPoints pointSet={this.pointSet} type='circle' opacity={~~this.props.marker} r={this.props.markerRadius} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
         }
       </g>
     );
@@ -108,6 +111,17 @@ class AreaFill extends Component{
     path.unshift('M', this.pointSet[0].x, this.pointSet[0].y);
     return path; 
   }
+
+  createGradient(gardId) {
+    return(
+      <defs>
+        <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+          <stop offset="0%" stop-color={this.props.fill} stop-opacity="1" />
+          <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+    );
+  }
   
   prepareData() {
     this.valueSet = this.props.dataSet.data.map((data) => {
@@ -119,7 +133,7 @@ class AreaFill extends Component{
   }
 
   bindEvents() {
-    if(this.props.marker) {
+    if(this.props.dataPoints) {
       this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
       this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     }

@@ -76,7 +76,8 @@ class HorizontalScroller extends Component {
             events={{
               mousemove : this.onScrollMove.bind(this),
               mouseup : this.onScrollEnd.bind(this),
-              mouseout : this.onScrollEnd.bind(this)
+              mouseout : this.onScrollEnd.bind(this),
+              mouseleave : this.onScrollEnd.bind(this)
             }}
           />
         }
@@ -116,7 +117,7 @@ class HorizontalScroller extends Component {
     this.mouseDownPos = mousePos;
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
-    this.setState({});
+    this.update(); 
   }
 
   onScrollMove(e) {
@@ -177,7 +178,7 @@ class HorizontalScroller extends Component {
 
   onScrollEnd(e) {
     this.selectedHandler = undefined; 
-    this.setState({});
+    this.update(); 
   }
 }
 
@@ -244,7 +245,7 @@ class SliderLeftHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} fill= 'rgba(128,179,236,0.5)'  fill-opacity='0.7' stroke-width='0.1' stroke='#717171' />
+        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0.7' stroke-width='0.1' stroke='#717171' />
         <g style={{'cursor': 'ew-resize'}} events={this.props.events}>
           <path class='sc-slider-left' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderLeft}  pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
           <path class='sc-slider-left-sel' stroke='rgb(178, 177, 182)' fill='#fff' filter={`url(#slider-dropshadow-left)`} d={this.state.sliderLeftSel} pointer-events='all' stroke-width='0' opacity='1'></path>
@@ -305,7 +306,7 @@ class SliderRightHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} fill= 'rgba(128,179,236,0.5)'  fill-opacity='0.7' stroke-width='0.1' stroke='#717171' />
+        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0.7' stroke-width='0.1' stroke='#717171' />
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events}>
           <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
           <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill='#fff' filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>

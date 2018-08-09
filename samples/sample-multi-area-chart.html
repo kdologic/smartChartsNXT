@@ -22,7 +22,7 @@
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
           "title": "Multi Series Chart",
-          "subTitle": "Area Chart",
+          "subtitle": "Area Chart",
           "targetElem": "chartContainer",
           "titleStyle": {
             "fillColor":"#717171",
@@ -68,21 +68,21 @@
               "prefix": "Rs. "
             },
             "series": [{
-                "lineWidth": 1,
+                "lineWidth": 1.5,
                 "bgColor": "#2278b4",
                 "name": 'Raphael',
-                "areaOpacity": "0.3",
+                "areaOpacity": 0.3,
                 "spline": true,
                 "data": generateData(10, 50, 50)
               },
               {
-                "lineWidth": 1,
+                "lineWidth": 1.5,
                 "bgColor": "#ff7f0e",
-                "noPointMarker": false,
-                "markerRadius": 3.5,
+                "marker": true,
+                "markerRadius": 3,
                 "spline": false,
-                //"showGradient": true, //TODO: To be implemented
-                "areaOpacity": "0.5",
+                "gradient": true,
+                "areaOpacity": 0.5,
                 "name": 'Willson',
                 "data": generateData(5, 20, 40)
               }
