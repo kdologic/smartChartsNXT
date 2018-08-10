@@ -71,7 +71,7 @@ class AreaChart extends Component {
           this.leftOffset = index * 100 / (longSeriesLen - 1); 
         },
         get windowLeftIndex() {
-          return typeof this._windowLeftIndex === 'undefined' ? 0 : this._windowLeftIndex;
+          return this._windowLeftIndex;
         },
         set windowRightIndex(index) {
           let longSeriesLen = self.CHART_OPTIONS.dataSet.series[self.CHART_DATA.longestSeries].data.length;
@@ -79,7 +79,7 @@ class AreaChart extends Component {
           this.rightOffset = index * 100 / (longSeriesLen - 1); 
         },
         get windowRightIndex() {
-          return typeof this._windowRightIndex === 'undefined' ? -1 : this._windowRightIndex; 
+          return this._windowRightIndex; 
         },
         hGridCount: 6,
         gridHeight: 0,
@@ -139,11 +139,11 @@ class AreaChart extends Component {
     
     /* Will set initial zoom window */
     if (this.CHART_OPTIONS.zoomWindow) {
-      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen - 1) {
-        this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex;
+      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < longSeriesLen) {
+        this.state.windowLeftIndex = typeof this.state.windowLeftIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.leftIndex - 1 : this.state.windowLeftIndex;
       }
-      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen - 1) {
-        this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex;
+      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= longSeriesLen) {
+        this.state.windowRightIndex = typeof this.state.windowRightIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.rightIndex - 1 : this.state.windowRightIndex;
       } else {
         this.state.windowRightIndex = longSeriesLen - 1;
       }
@@ -196,7 +196,7 @@ class AreaChart extends Component {
     this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
-    this.CHART_DATA.hScrollBoxHeight = nextProps.hideHorizontalScroller ? 0 : 40,
+    this.CHART_DATA.hScrollBoxHeight = nextProps.hideHorizontalScroller ? 0 : 40;
     this.init(); 
   }
 
