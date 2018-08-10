@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * horizontalLabels.js
  * @version:2.0.0
@@ -6,13 +8,14 @@
  * @description: This components will create a Horizontal Labels for the chart. 
  */
 
-"use strict";
-
 import defaultConfig from "./../settings/config";
 import { Component } from "./../viewEngin/pview";
 import Ticks from "./ticks";
 
-
+/** 
+ * Create a Horizontal Labels and Tick marks for the chart.
+ * @extends Component
+ */
 class HorizontalLabels extends Component{
 
   constructor(props) {
@@ -55,7 +58,7 @@ class HorizontalLabels extends Component{
         {
           this.getLabels()
         }
-        <Ticks posX={0} posY={0} span='6' tickInterval={this.state.intervalLen} tickCount={this.props.categorySet.length-1} type='horizontal'></Ticks>
+        <Ticks posX={0} posY={0} span='6' tickInterval={this.state.intervalLen} tickCount={this.props.categorySet.length} type='horizontal'></Ticks>
       </g>
     );
   }
@@ -69,7 +72,7 @@ class HorizontalLabels extends Component{
   }
 
   getEachLabel(val, index) {
-    let x = index * this.state.intervalLen; 
+    let x =  this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen; 
     let y = 18; 
     let transform = this.state.labelRotate ? "rotate(-45," + x + "," + y + ")" : ""; 
     return (
@@ -85,7 +88,7 @@ class HorizontalLabels extends Component{
   }
 
   setIntervalLength() {
-    let interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1);
+    let interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1 || 2);
     this.state.categories = this.props.categorySet;
     if (interval < this.intervalThreshold) {
       let newCategories = [];

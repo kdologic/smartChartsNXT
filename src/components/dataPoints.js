@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * dataPoints.js
  * @version:2.0.0
@@ -6,10 +8,14 @@
  * @description: This components will plot data points in chart area. 
  */
 
-"use strict";
-
 import defaultConfig from "./../settings/config";
 import { Component } from "./../viewEngin/pview";
+
+
+/** 
+ * This components will plot data points in chart area.
+ * @extends Component
+ */
 
 class DataPoints extends Component{
 
@@ -30,13 +36,11 @@ class DataPoints extends Component{
 
   render() {
     return (
-      <g>
-        {
+      <g> {
           this.props.pointSet.map((point, i) => {
             return this.getEachPoint(point, i);
           })
-        }
-      </g>
+      } </g>
     ); 
   }
 
@@ -44,25 +48,31 @@ class DataPoints extends Component{
     switch(this.props.type) {
       case 'circle': 
       default:
-      return (<g class={`sc-data-point-${index}`}>
-        <circle cx={point.x} cy={point.y} r={this.props.r + 5} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' style={{'transition': 'fill-opacity 0.2s linear'}} > </circle>
-        <circle cx={point.x} cy={point.y} r={this.props.r + 2} class='outer-offset' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
-        <circle cx={point.x} cy={point.y} r={this.props.r} class='inner-dot' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
+      return (
+      <g class={`sc-data-point-${index}`} opacity={typeof this.props.opacity === 'undefined' ? 1 : this.props.opacity}>
+        <circle cx={point.x} cy={point.y} r={this.props.r + 3} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' style={{'transition': 'fill-opacity 0.2s linear'}} > </circle>
+        <circle cx={point.x} cy={point.y} r={this.props.r + 1} class='outer-offset' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
+        <circle cx={point.x} cy={point.y} r={this.props.r} class='inner-dot' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
       </g>);
     }
   }
 
   doHighlight(index) {
     let fillOpacity = 1; 
+    let pointDom;
     if(index === false) {
       index = this.state.highlitedIndex || 0; 
       fillOpacity = 0; 
-      this.state.highlitedIndex = null; 
+      this.state.highlitedIndex = null;
+      pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`); 
+      pointDom.setAttribute('opacity', typeof this.props.opacity === 'undefined' ? 0 : this.props.opacity);
     } else {
       this.state.highlitedIndex = index;
+      pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`); 
+      pointDom.setAttribute('opacity', 1);
     }
-    let highlighterElem = this.ref.node.querySelector(`.sc-data-point-${index} .outer-highliter`);
-    let innerDot = this.ref.node.querySelector(`.sc-data-point-${index} .inner-dot`);
+    let highlighterElem = pointDom.querySelector(`.outer-highliter`);
+    let innerDot = pointDom.querySelector(`.inner-dot`);
     highlighterElem.setAttribute('fill-opacity', fillOpacity);  
     innerDot.setAttribute('fill-opacity', +!fillOpacity);  
   }

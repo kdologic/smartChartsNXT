@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * interactivePlane.js
  * @version:2.0.0
@@ -6,11 +8,14 @@
  * @description: This components will create an interactive plane over chart area. 
  */
 
-"use strict";
-
 import { Component } from "./../../viewEngin/pview";
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
+
+/** 
+ * This components will create an interactive plane over chart area. Where user can interact with mouse or touch.
+ * @extends Component
+ */
 
 class InteractivePlane extends Component{
 
@@ -55,7 +60,6 @@ class InteractivePlane extends Component{
   onMouseLeave(e) {
     this.emitter.emit('interactiveMouseLeave', e);
   }
-
 
 }
 

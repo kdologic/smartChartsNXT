@@ -1,20 +1,21 @@
+"use strict";
+
 /** 
  * speechBox.js
  * @createdOn:23-Jan-2018
  * @version:2.0.0
  * @author:SmartChartsNXT
- * @description:This will generate speech box with svg.
+ * @description:This components will create speech box with SVG by providing top-left point and c-point.
  */
-
-"use strict";
 
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
+import UiCore from "./../core/ui.core"; 
 
-//import UiCore from './../core/ui.core'; 
-//import Geom from './../core/geom.core'; 
-
-
+/** 
+ * This components will create speech box with SVG by providing top-left point and c-point. 
+ * @extends Component
+ */
 class SpeechBox extends Component {
   constructor(props) {
     super(props);
@@ -25,8 +26,6 @@ class SpeechBox extends Component {
       aLeft:false,
       aRight:false
     };
-    this.cpoint = this.props.cpoint; 
-
   }
   set cpoint(point) {
     this._cpoint = point; 
@@ -38,34 +37,15 @@ class SpeechBox extends Component {
   }
 
   render() {
+    this.cpoint = this.props.cpoint; 
     let cp = new Point(this.props.cpoint.x - this.props.x, this.props.cpoint.y - this.props.y);
     return (
       <g class='speech-box' transform={`translate(${this.props.x},${this.props.y})`}>
-        {this.props.shadow && 
-        <defs>
-          <filter id="speech-box-drop-shadow" height="130%">
-            <feOffset result="offOut" in="SourceGraphic" dx="0" dy="3"></feOffset>
-            <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.6 0 0 0 0 0 0.6 0 0 0 0 0 0.6 0 0 0 0 0 1 0"></feColorMatrix><feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="3"></feGaussianBlur>
-            <feBlend in="SourceGraphic" in2="blurOut" mode="normal"></feBlend>
-          </filter>
-        </defs>}
-        <path class='speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} filter={this.props.shadow ? 'url(#speech-box-drop-shadow)' : ''} stroke={this.props.strokeColor} strokeWidth='1' shape-rendering="geometricPrecision" vector-effect="non-scaling-stroke"/>
-        {/* <circle cx={cp.x} cy={cp.y} r='10' fill='red' events={{mousemove: this.onMouseMove.bind(this)}}></circle> */}
+        {this.props.shadow && UiCore.dropShadow('sc-speech-box-drop-shadow')}
+        <path class='speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''} stroke={this.props.strokeColor} stroke-width={this.props.strokeWidth || 1} shape-rendering="geometricPrecision" vector-effect="non-scaling-stroke"/>
       </g> 
     );
   }
-
-  // onMouseMove(e) {
-  //   let mousePosNow = {
-  //     x: (e.clientX || e.touches[0].clientX),
-  //     y: (e.clientY || e.touches[0].clientY)
-  //   };
-
-  //   this.cpoint = new Point(mousePosNow.x, mousePosNow.y); 
-  //   this.ref.node.querySelector('.speech-box-path').setAttribute('d',this.getBoxPath()); 
-  //   this.ref.node.querySelector('circle').setAttribute('cx', mousePosNow.x - this.props.x - 5); 
-  //   this.ref.node.querySelector('circle').setAttribute('cy', mousePosNow.y - this.props.y - 5); 
-  // }
 
   getBoxPath() {
     let d = ['M', 0, 0]; 

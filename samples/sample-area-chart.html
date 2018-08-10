@@ -4,6 +4,33 @@
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
 
   <script>
+    function getData(n) {
+      var arr = [], i, x, a, b, c, spike;
+      for (i = 0, x = Date.UTC(new Date().getUTCFullYear(), 0, 1) - n * 36e5; i < n; i = i + 1, x = x + 36e5) {
+        if (i % 100 === 0) {
+          a = 2 * Math.random();
+        }
+        if (i % 1000 === 0) {
+          b = 2 * Math.random();
+        }
+        if (i % 10000 === 0) {
+          c = 2 * Math.random();
+        }
+        if (i % 50000 === 0) {
+          spike = 10;
+        } else {
+          spike = 0;
+        }
+        arr.push({
+          label: x, 
+          value: 2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
+        });
+      }
+      return arr;
+    }
+
+    
+
     function generateData(x, y, count) {
       let dataSet = [];
       for (let i = 0; i < count; i++) {
@@ -12,7 +39,7 @@
         //let datum = Math.round(Math.random() * (y + i / x)) + 20 + i;
         let datum = sRand(x, y);
         dataSet.push({
-          label: (i+1) ,//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          label: (i + 1), //newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
           //value: (i % 2 === 0 ? 1 : -1) * datum
           value: datum.toFixed(2)
           //value : (i-30)
@@ -21,14 +48,15 @@
       return dataSet;
     }
     //let seed = Math.round(Math.random()*10);
-    let seed = 6; 
+    let seed = 6;
+
     function sRand(min, max) {
-			min = min === undefined ? 0 : min;
-			max = max === undefined ? 1 : max;
-			seed = (seed * 9301 + 49297) % 233280;
-			return min + (seed / 233280) * (max - min);
+      min = min === undefined ? 0 : min;
+      max = max === undefined ? 1 : max;
+      seed = (seed * 9301 + 49297) % 233280;
+      return min + (seed / 233280) * (max - min);
     }
-    
+
     window.onload = function () {
       SmartChartsNXT.ready(function () {
         let areaChart = new SmartChartsNXT.Chart({
@@ -37,29 +65,31 @@
           "title": "Area Chart",
           "subtitle": "Single series",
           "titleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
+            "fillColor": "#717171",
+            "borderColor": "none",
             "fontFamily": "Lato",
             "maxFontSize": "25"
           },
           "subtitleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
+            "fillColor": "#717171",
+            "borderColor": "none",
             "fontFamily": "Lato",
             "maxFontSize": "18"
           },
           "canvasBorder": 0,
           "bgColor": "none",
           "tooltip": {
-            "content": function() {
-              return this.map(function(point) {
+            "content": function () {
+              return this.map(function (point) {
                 return '<table>' +
-                '<tr><td><b>' + point.seriesName + '</b> has produces </td></tr>' +
-                '<tr><td>a total Sales of <b>Rs.'+ point.value + '</b></td></tr>' +
-                '<tr><td>on <b>' + point.label + '</b></tr>' +
-                '</table>';
+                  '<tr><td><b>' + point.seriesName + '</b> has produces </td></tr>' +
+                  '<tr><td>a total Sales of <b>Rs.' + point.value + '</b></td></tr>' +
+                  '<tr><td>on <b>' + point.label + '</b></tr>' +
+                  '</table>';
               });
-            }
+            },
+            "xPadding": 3,
+            "yPadding": 3,
           },
           "dataSet": {
             "xAxis": {
@@ -70,14 +100,15 @@
               "prefix": "Rs. "
             },
             "series": [{
-              "lineWidth": 2,
+              "lineWidth": 1.5,
               "bgColor": "#009688",
               "name": 'Raphael',
-              "noPointMarker": false,
-              "markerRadius": 3.5,
-              "spline": true,
-              "areaOpacity": "0.4",
-              "data": generateData(10, 500, 5)//[  
+              "marker": false,
+              "gradient": true,
+              "markerRadius": 2.5,
+              "spline": false,
+              "areaOpacity": 0.4,
+              "data": generateData(10, 500, 20) //[  
               //   {label:"Jan",value:"51"},{label:"Feb",value:"0"},{label:"Mar",value:"0"},{label:"Apr",value:"0"},
               //   {label:"May",value:"1"},{label:"Jun",value:"60"},{label:"Jul",value:"40"},{label:"Aug",value:"70"},
               //   {label:"Sep",value:"30"},{label:"Oct",value:"80"},{label:"Nov",value:"20"},{label:"Dec",value:"90"}
@@ -107,10 +138,10 @@
           //     console.log(e, "event afterPrint");
           //   }
           // },
-          // zoomWindow: {
-          //   "leftIndex": 10,
-          //   "rightIndex": 20
-          // }
+          zoomWindow: { // index start from 1 
+            "leftIndex": 10, 
+            "rightIndex": 20
+          }
         });
       });
     };

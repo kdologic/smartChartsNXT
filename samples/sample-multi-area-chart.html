@@ -22,7 +22,7 @@
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
           "title": "Multi Series Chart",
-          "subTitle": "Area Chart",
+          "subtitle": "Area Chart",
           "targetElem": "chartContainer",
           "titleStyle": {
             "fillColor":"#717171",
@@ -36,8 +36,9 @@
             "fontFamily": "Lato",
             "maxFontSize": "18"
           },
-          "canvasBorder": 0,
+          "canvasBorder": true,
           "bgColor": "none",
+          //"showGrid": true, // TODO: Yet to implement
           "tooltip": {
             "content": function() {
               return '<table>' +
@@ -54,7 +55,9 @@
                     }).join('') +
                 '</tbody>' +
               '</table>';
-            }
+            },
+            "xPadding": 3,
+            "yPadding": 3,
           },
           "dataSet": {
             "xAxis": {
@@ -65,23 +68,23 @@
               "prefix": "Rs. "
             },
             "series": [{
-                "lineWidth": 1,
-                "bgColor": "#009688",
+                "lineWidth": 1.5,
+                "bgColor": "#2278b4",
                 "name": 'Raphael',
-                "areaOpacity": "0.3",
+                "areaOpacity": 0.3,
                 "spline": true,
                 "data": generateData(10, 50, 50)
               },
               {
-                "lineWidth": 1,
-                "bgColor": "#F44336",
-                "noPointMarker": false,
-                "markerRadius": 3.5,
+                "lineWidth": 1.5,
+                "bgColor": "#ff7f0e",
+                "marker": true,
+                "markerRadius": 3,
                 "spline": false,
-                //"showGradient": true, //TODO: To be implemented
-                "areaOpacity": "0.5",
+                "gradient": true,
+                "areaOpacity": 0.5,
                 "name": 'Willson',
-                "data": generateData(5, 20, 50)
+                "data": generateData(5, 20, 40)
               }
             ]
           },
@@ -108,10 +111,10 @@
           //     console.log(e, "event afterPrint");
           //   }
           // },
-          // zoomWindow: {
-          //   "leftIndex": 10,
-          //   "rightIndex": 20
-          // }
+          zoomWindow: {
+            "leftIndex": 5,
+            "rightIndex": 15
+          }
         });
       });
     };
