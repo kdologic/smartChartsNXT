@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * horizontalScroller.js
  * @createdOn:14-Jul-2017
@@ -72,7 +70,7 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderRightHandle>
         { this.selectedHandler &&
-          <rect class='sc-slider-pane' x='-50' y='0' width= {this.props.width + 100} height={this.props.height} fill='none' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
+          <rect class='sc-slider-pane' x='-50' y='0' width= {this.props.width + 100} height={this.props.height} fill='#000' fill-opacity='0.2' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
             events={{
               mousemove : this.onScrollMove.bind(this),
               mouseup : this.onScrollEnd.bind(this),
@@ -124,10 +122,11 @@ class HorizontalScroller extends Component {
     if(this.selectedHandler) {
       let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
+      
       switch (this.selectedHandler) {
         case 'left':
-          winWidth = this.winWidth + (this.mouseDownPos.x - mousePosNow.x);
           lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
+          winWidth = this.winWidth + (this.mouseDownPos.x - mousePosNow.x);
           break;
         case 'right':
           winWidth = this.winWidth - (this.mouseDownPos.x - mousePosNow.x);
@@ -137,33 +136,47 @@ class HorizontalScroller extends Component {
           lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
           break;
       }
-      
-      if(lOffset + winWidth > this.props.width) {
-        if(this.selectedHandler === 'window') {
-          winWidth = this.winWidth;
-          lOffset = this.props.width - this.winWidth;
-        }else {
-          winWidth = this.props.width - lOffset;
-        }
-      }
 
-      if(lOffset < 0) {
-        this.state.leftOffset = 0; 
-        winWidth = this.winWidth; 
-      }else if(lOffset > this.props.width) {
-        this.state.leftOffset =this.props.width;
-      }else {
-        this.state.leftOffset = lOffset;
-      }
-
+      console.log('window -->',winWidth, 'leftoffset---->', lOffset);
       if(winWidth < 0) {
-        this.selectedHandler = this.selectedHandler === 'left' ? 'right' : 'left'; 
-        this.winWidth = 0; 
-        this.state.windowWidth = 0;
-        this.mouseDownPos = mousePosNow;
-        this.lOffset = lOffset; 
+        if(this.selectedHandler === 'right') {
+          lOffset = this.lOffset + winWidth; 
+        }else {
+          lOffset += winWidth; 
+        }
+        winWidth = Math.abs(winWidth); 
       }
-      this.state.windowWidth = Math.abs(winWidth);
+      this.state.leftOffset = lOffset;
+      this.state.windowWidth = winWidth;
+      console.log('leftoffset', lOffset);
+      console.log('window width:', this.state.windowWidth, 'mPos:', this.mouseDownPos.x, 'mPosNow:', mousePosNow.x);
+      
+      // if(lOffset + winWidth > this.props.width) {
+      //   if(this.selectedHandler === 'window') {
+      //     winWidth = this.winWidth;
+      //     lOffset = this.props.width - this.winWidth;
+      //   }else {
+      //     winWidth = this.props.width - lOffset;
+      //   }
+      // }
+
+      // if(lOffset < 0) {
+      //   this.state.leftOffset = 0; 
+      //   winWidth = this.winWidth; 
+      // }else if(lOffset > this.props.width) {
+      //   this.state.leftOffset =this.props.width;
+      // }else {
+      //   this.state.leftOffset = lOffset;
+      // }
+
+      // if(winWidth < 0) {
+      //   this.selectedHandler = this.selectedHandler === 'left' ? 'right' : 'left'; 
+      //   this.winWidth = 0; 
+      //   this.state.windowWidth = 0;
+      //   //this.mouseDownPos = mousePosNow;
+      //   this.lOffset = lOffset; 
+      // }
+      //this.state.windowWidth = Math.abs(winWidth);
       
       this.sliderWindow.setState({posX:this.state.leftOffset, width: this.state.windowWidth});
       this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
