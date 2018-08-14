@@ -138,6 +138,17 @@ class GeomCore {
     return r;
   } /*End getEllipticalRadius()*/
 
+  /**
+   * Return path of an Elliptical Arc.
+   * @param {Number} cx - Center x value of arc.
+   * @param {Number} cy Center y value of arc.
+   * @param {Number} rx X radius of arc.
+   * @param {Number} ry Y radius of arc.
+   * @param {Number} startAngle Arc strat angle.
+   * @param {Number} endAngle Arc end angle.
+   * @param {Boolean} sweepFlag Swip flag for clock or anti-clock.
+   * @returns {Object} Path of eliptical arc. 
+   */
   describeEllipticalArc(cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
     let fullArc = false;
     if (startAngle % 360 === endAngle % 360) {
@@ -169,7 +180,7 @@ class GeomCore {
       endAngle: endAngle
     };
     return path;
-  } /*End describeEllipticalArc()*/
+  } 
 
   checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
     /* if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point*/
