@@ -45,6 +45,11 @@ class VerticalLabels extends Component{
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 
+  propsWillReceive(nextProps) {
+    this.minLabelVal = nextProps.minVal < 0 ? Math.floor(nextProps.minVal / nextProps.valueInterval) * nextProps.valueInterval : 0; 
+    this.maxLabelVal = nextProps.maxVal < 0 ? 0 : nextProps.valueInterval * nextProps.labelCount; 
+  }
+
   render() {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>

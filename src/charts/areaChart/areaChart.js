@@ -187,7 +187,7 @@ class AreaChart extends Component {
     this.state[dataFor].dataSet.xAxis.categories = categories; 
     this.state[dataFor].maxima = Math.max.apply(null, maxSet);
     this.state[dataFor].minima = Math.min.apply(null, minSet);
-    this.state[dataFor].objInterval = UiCore.calcInterval(this.state[dataFor].minima, this.state[dataFor].maxima);
+    this.state[dataFor].objInterval = UiCore.calcIntervalbyMinMax(this.state[dataFor].minima, this.state[dataFor].maxima);
     ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].objInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 

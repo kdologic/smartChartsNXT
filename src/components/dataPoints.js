@@ -8,7 +8,6 @@
  * @description: This components will plot data points in chart area. 
  */
 
-import defaultConfig from "./../settings/config";
 import { Component } from "./../viewEngin/pview";
 
 
