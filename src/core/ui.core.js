@@ -5,18 +5,7 @@
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
  * @version: 2.0.0
- * @description:SmartChartsNXT Core Library components. This contains UI functionality.
- */
-
-/*-----------SmartChartsNXT UI functions------------- */
-
-
-
-import Point from './point';
-import Geom from './geom.core'; 
-
-/**
- * SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
+ * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
  */
 
 class UiCore {
@@ -132,8 +121,7 @@ class UiCore {
     let tMinVal = minVal > 0 ? 0 : minVal;
     maxVal = maxVal < 0 ? 0 : maxVal;
     let digitBase10 = Math.round(mid).toString().length;
-
-    for(let w = 0; w <= 100 ; w = (w+1)%arrWeight.length) {
+    for(let w = 0; w <= 100 ; w = (w + 1) % arrWeight.length) {
       let weight = arrWeight[w] * weightDecimalLevel;
       let tInt = Math.pow(10, digitBase10 - 1) * weight;
       if(w === arrWeight.length -1) {
@@ -141,12 +129,12 @@ class UiCore {
       }
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
         let hitIntv = +parseFloat(tInt * intv).toFixed(2);
-        tMinVal = minVal <= 0 && tMinVal >= minVal ? (Math.floor(tMinVal / tInt) * tInt) : tMinVal;
+        tMinVal = minVal <= 0 && tMinVal >= minVal ? (Math.ceil(tMinVal / tInt) * tInt) : tMinVal;
         if ((tMinVal + hitIntv) >= (maxVal + tInt)) {
           let iMax = tMinVal + hitIntv;
-          if (minVal <= 0) {
-            tMinVal -= tInt;
-            intv++;
+          if (minVal < 0) {
+            tMinVal -= (2*tInt);
+            intv+=2;
           }
           return {
             iVal: tInt,

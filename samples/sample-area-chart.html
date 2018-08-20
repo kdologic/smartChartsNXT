@@ -106,13 +106,15 @@
               "marker": false,
               "gradient": true,
               "markerRadius": 2.5,
-              "spline": false,
+              "spline": true,
               "areaOpacity": 0.4,
-              "data": generateData(10, 500, 20) //[  
+              "data": generateData(10, 500, 20) 
+              //[  
+                //{label:1, value:67},{label:2, value:-86},{label:3, value:89},{label:4, value:72},{label:5, value:64}
               //   {label:"Jan",value:"51"},{label:"Feb",value:"0"},{label:"Mar",value:"0"},{label:"Apr",value:"0"},
               //   {label:"May",value:"1"},{label:"Jun",value:"60"},{label:"Jul",value:"40"},{label:"Aug",value:"70"},
               //   {label:"Sep",value:"30"},{label:"Oct",value:"80"},{label:"Nov",value:"20"},{label:"Dec",value:"90"}
-              // ]
+              //]
             }]
           },
           // events: {
@@ -139,8 +141,8 @@
           //   }
           // },
           zoomWindow: { // index start from 1 
-            "leftIndex": 10, 
-            "rightIndex": 20
+            "leftIndex": 2, 
+            "rightIndex": 15
           }
         });
       });

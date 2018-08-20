@@ -1,19 +1,15 @@
 "use strict";
 
+import defaultConfig from "./../settings/config";
+import Ticks from "./ticks";
+import { Component } from "./../viewEngin/pview";
+
 /**
  * verticalLabels.js
  * @version:2.0.0
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
- * @description: This components will create a Vertical Labels for the chart. 
- */
-
-import defaultConfig from "./../settings/config";
-import Ticks from "./ticks";
-import { Component } from "./../viewEngin/pview";
-
-/** 
- * Create a Vertical Labels and Tick marks for the chart.
+ * @description: This components will create a Vertical Labels and Tick marks for the chart.
  * @extends Component
  */
 class VerticalLabels extends Component{
@@ -30,8 +26,8 @@ class VerticalLabels extends Component{
       fontSize: this.config.fontSize
     };
     this.valueSet = []; 
-    this.minLabelVal = this.props.minVal < 0 ? Math.floor(this.props.minVal / this.props.valueInterval) * this.props.valueInterval : 0; 
-    this.maxLabelVal = this.props.maxVal < 0 ? 0 : this.props.valueInterval * this.props.labelCount; 
+    this.minLabelVal = this.props.minVal; 
+    this.maxLabelVal = this.props.maxVal; 
   }
 
   componentWillMount() {
@@ -46,8 +42,8 @@ class VerticalLabels extends Component{
   }
 
   propsWillReceive(nextProps) {
-    this.minLabelVal = nextProps.minVal < 0 ? Math.floor(nextProps.minVal / nextProps.valueInterval) * nextProps.valueInterval : 0; 
-    this.maxLabelVal = nextProps.maxVal < 0 ? 0 : nextProps.valueInterval * nextProps.labelCount; 
+    this.minLabelVal = nextProps.minVal; 
+    this.maxLabelVal = nextProps.maxVal; 
   }
 
   render() {
