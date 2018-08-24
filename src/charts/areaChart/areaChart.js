@@ -17,6 +17,7 @@ import eventEmitter from './../../core/eventEmitter';
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Grid from './../../components/grid';
+import PointerCrosshair from './../../components/pointerCrosshair';
 import AreaFill from './areaFill'; 
 import VerticalLabels from './../../components/verticalLabels';
 import HorizonalLabels from './../../components/horizontalLabels';
@@ -61,7 +62,8 @@ class AreaChart extends Component {
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.subComp = {
-        tooltip: undefined
+        tooltip: undefined,
+        pointerCrosshair: undefined
       };
 
       this.state = {
@@ -259,10 +261,14 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}> 
         </HorizontarScroller>
 
+        <PointerCrosshair> 
+
+        </PointerCrosshair>
+
         <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
-        
+
         <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
         </InteractivePlane>
@@ -271,7 +277,7 @@ class AreaChart extends Component {
   }
 
   drawSeries() {
-    let maxSeriesLen = this.state.cs.dataSet.series[this.CHART_DATA.longestSeries].data.length; //slice(this.state.windowLeftIndex, this.state.windowRightIndex + 1).length;
+    let maxSeriesLen = this.state.cs.dataSet.series[this.CHART_DATA.longestSeries].data.length;
     let isBothSinglePoint = true; 
     this.state.cs.dataSet.series.map(s => {
       isBothSinglePoint = !!(isBothSinglePoint * (s.data.length == 1));
@@ -383,6 +389,10 @@ class AreaChart extends Component {
     this.originPoint = undefined;
     this.prevOriginPoint = undefined; 
     this.hideTip(); 
+  }
+
+  updateCrosshair(data) {
+    this.emitter.emit('setVerticalCrosshair');
   }
 
   updateDataTooltip(originPoint, pointData) {
