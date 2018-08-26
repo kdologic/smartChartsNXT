@@ -1,7 +1,7 @@
 "use strict";
 
 import { Component } from "./../viewEngin/pview";
-import eventEmitter from './../../core/eventEmitter';
+import eventEmitter from './../core/eventEmitter';
 
 /**
  * pointerCrosshair.js
@@ -55,12 +55,33 @@ class PointerCrosshair extends Component{
     );
   }
 
-  setVCrosshair(e) {
-
+  setVCrosshair(data) {
+    if(!data) {
+      this.setState({ vx1: 0, vy1: 0, vx2: 0, vy2: 0});
+      return; 
+    }
+    let topY = this.props.fullY ? this.props.vLineStart : Math.min(...data.map(d => d.y)); 
+    this.setState({
+      vx1: data[0].x,
+      vy1: topY, 
+      vx2: data[0].x,
+      vy2: this.props.vLineEnd
+    }); 
   }
 
-  setHCrosshair(e) {
-
+  setHCrosshair(data) {
+    if(!data) {
+      this.setState({ vx1: 0, vy1: 0, vx2: 0, vy2: 0});
+      return; 
+    }
+    let topY = Math.min(...data.map(d => d.y)); 
+    
+    this.setState({
+      hx1: this.props.hLineStart, 
+      hy1: topY, 
+      hx2: this.props.fullX ? this.props.hLineEnd : data[0].x,
+      hy2: topY
+    }); 
   }
 
 }

@@ -253,6 +253,11 @@ class AreaChart extends Component {
           <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
         </text>
         
+        <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
+          vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
+          fullX={false} fullY={true}> 
+        </PointerCrosshair>
+
         { this.drawSeries() }
         
         { this.drawHScrollSeries() }
@@ -260,10 +265,6 @@ class AreaChart extends Component {
         <HorizontarScroller posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}> 
         </HorizontarScroller>
-
-        <PointerCrosshair> 
-
-        </PointerCrosshair>
 
         <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
@@ -337,6 +338,8 @@ class AreaChart extends Component {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
     let point = series.data[e.highlightedPoint.pointIndex];
     let hPoint = {
+      x: e.highlightedPoint.x,
+      y: e.highlightedPoint.y,
       label: point.label,
       value: point.value,
       seriesName: series.name,
@@ -370,9 +373,11 @@ class AreaChart extends Component {
       }
       if(this.pointData.length && !this.prevOriginPoint || (this.originPoint && this.originPoint.x !== this.prevOriginPoint.x && this.originPoint.y !== this.prevOriginPoint.y)) {
         this.updateDataTooltip(this.originPoint, this.pointData);
+        this.updateCrosshair(this.pointData);
       }
       if(!this.pointData.length) {
         this.hideTip();
+        this.updateCrosshair(null);
       }
       this.pointData = [];
       this.prevOriginPoint = this.originPoint; 
@@ -392,7 +397,8 @@ class AreaChart extends Component {
   }
 
   updateCrosshair(data) {
-    this.emitter.emit('setVerticalCrosshair');
+    this.emitter.emit('setVerticalCrosshair', data);
+    //this.emitter.emit('setHorizontalCrosshair', data);
   }
 
   updateDataTooltip(originPoint, pointData) {
