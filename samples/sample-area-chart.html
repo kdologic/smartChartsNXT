@@ -78,6 +78,23 @@
           },
           "canvasBorder": 0,
           "bgColor": "none",
+          //"gridLine": true, // TODO: Yet to implement
+          "pointerCrosshair": {
+            "vertical": {
+              "style": "dashed",  //: [dashed | solid]
+              "spread" : "full",//: [full | inPoint | none]
+              "color" : "#000",
+              "lineWidth": '1',
+              "opacity": '1'
+            },
+            "horizontal": {
+              "style": "dashed",  
+              "spread" : "none",
+              "color" : "#000",
+              "lineWidth": '1',
+              "opacity": '1'
+            }
+          },
           "tooltip": {
             "content": function () {
               return this.map(function (point) {
@@ -118,6 +135,9 @@
             }]
           },
           // events: {
+          //   beforeRender: function (e) {
+          //     console.log(e, "event before rendering.");
+          //   },
           //   afterRender: function (e) {
           //     console.log(e, "event after rendering complete");
           //   },

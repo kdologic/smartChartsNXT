@@ -179,16 +179,16 @@ class AreaChart extends Component {
           categories.push(dataSet.series[i].data[j].label);
         }
       }
-      let maxVal = Math.max.apply(null, arrData);
-      let minVal = Math.min.apply(null, arrData);
+      let maxVal = Math.max(...arrData);
+      let minVal = Math.min(...arrData);
       maxSet.push(maxVal);
       minSet.push(minVal);
       dataSet.series[i].color = dataSet.series[i].color || UtilCore.getColor(i);
     }
     this.state[dataFor].dataSet = dataSet; 
     this.state[dataFor].dataSet.xAxis.categories = categories; 
-    this.state[dataFor].maxima = Math.max.apply(null, maxSet);
-    this.state[dataFor].minima = Math.min.apply(null, minSet);
+    this.state[dataFor].maxima = Math.max(...maxSet);
+    this.state[dataFor].minima = Math.min(...minSet);
     this.state[dataFor].objInterval = UiCore.calcIntervalbyMinMax(this.state[dataFor].minima, this.state[dataFor].maxima);
     ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].objInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
@@ -255,7 +255,7 @@ class AreaChart extends Component {
         
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          fullX={false} fullY={true}> 
+          opts={this.CHART_OPTIONS.pointerCrosshair || {}}> 
         </PointerCrosshair>
 
         { this.drawSeries() }
@@ -377,7 +377,6 @@ class AreaChart extends Component {
       }
       if(!this.pointData.length) {
         this.hideTip();
-        this.updateCrosshair(null);
       }
       this.pointData = [];
       this.prevOriginPoint = this.originPoint; 
@@ -398,7 +397,7 @@ class AreaChart extends Component {
 
   updateCrosshair(data) {
     this.emitter.emit('setVerticalCrosshair', data);
-    //this.emitter.emit('setHorizontalCrosshair', data);
+    this.emitter.emit('setHorizontalCrosshair', data);
   }
 
   updateDataTooltip(originPoint, pointData) {
@@ -434,6 +433,7 @@ class AreaChart extends Component {
 
   hideTip() {
     this.subComp.tooltip && this.subComp.tooltip.hide(); 
+    this.updateCrosshair(null);
   }
 
   getStyle() {

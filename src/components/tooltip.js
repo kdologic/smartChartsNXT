@@ -1,13 +1,22 @@
 "use strict";
 
+import defaultConfig from "./../settings/config";
+import Point from "./../core/point";
+import { Component } from "./../viewEngin/pview";
+import UtilCore from "./../core/util.core";
+import SpeechBox from './../components/speechBox'; 
+import TransitionGroup from './../viewEngin/transitionGroup'; 
+import Style from './../viewEngin/style'; 
+
 /**
  * tooltip.js
  * @version:2.0.0
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create tooltip area for the chart. 
+ * @extends Component. 
  * 
- * Accepted config --
+ * @config 
  * "tooltip": {
       "content": function() {
         return '<table>' +
@@ -27,22 +36,6 @@
       "opacity": 0.9
     }
  */
-
-import defaultConfig from "./../settings/config";
-import Point from "./../core/point";
-import { Component } from "./../viewEngin/pview";
-import UiCore from "./../core/ui.core";
-import UtilCore from "./../core/util.core";
-import SpeechBox from './../components/speechBox'; 
-import TransitionGroup from './../viewEngin/transitionGroup'; 
-import Style from './../viewEngin/style'; 
-
-
-/** 
- * This components will create tooltip area for the chart. 
- * @extends Component
- */
-
 class Tooltip extends Component {
     constructor(props) {
       super(props);
