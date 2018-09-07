@@ -112,7 +112,7 @@ class UiCore {
    * @return {Object} Returns interval object.
    */
   
-  calcIntervalbyMinMax(minVal, maxVal) {
+  calcIntervalByMinMax(minVal, maxVal) {
     let arrWeight = [0.1, 0.2, 0.5];
     let weightDecimalLevel = 1; 
     let minIntvCount = 6;

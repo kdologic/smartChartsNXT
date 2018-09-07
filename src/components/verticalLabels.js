@@ -16,12 +16,8 @@ class VerticalLabels extends Component{
 
   constructor(props) {
     super(props);
-    this.config = {
-      color: this.props.opts.fillColor || defaultConfig.theme.fontColorDark,
-      fontSize: this.props.opts.maxFontSize || defaultConfig.theme.fontSizeMedium,
-      fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
-      opacity:this.props.opts.opacity || "1"
-    };
+    this.config = {};
+    this.resetConfig(this.props.opts); 
     this.state = {
       fontSize: this.config.fontSize
     };
@@ -42,19 +38,30 @@ class VerticalLabels extends Component{
   }
 
   propsWillReceive(nextProps) {
+    this.resetConfig(nextProps.opts);
     this.minLabelVal = nextProps.minVal; 
     this.maxLabelVal = nextProps.maxVal; 
+  }
+
+  resetConfig(config) {
+    this.config = {...this.config, ...{
+      labelRotate: config.labelRotate || 0,
+      fontSize: config.fontSize || defaultConfig.theme.fontSizeMedium,
+      fontFamily: config.fontFamily || defaultConfig.theme.fontFamily,
+      tickOpacity: config.tickOpacity || 1,
+      tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
+      labelOpacity: config.labelOpacity || 1,
+      labelColor: config.labelColor || defaultConfig.theme.fontColorDark
+    }};
   }
 
   render() {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <text font-family={this.config.fontFamily} fill={this.config.color} stroke='none' font-size={this.state.fontSize} opacity={this.config.opacity} text-rendering='geometricPrecision' >
         {
           this.getLabels()
         }
-        </text>
-        <Ticks posX={5} posY={0} span='5' tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} type='vertical'></Ticks>
+        <Ticks posX={5} posY={0} span={this.props.opts.tickSpan || 5} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
       </g>
     );
   }
@@ -70,10 +77,16 @@ class VerticalLabels extends Component{
   }
 
   getEachLabel(val, index) {
+    let x =  0; 
+    let y = this.valueSet.length === 1 ? this.props.valueInterval : index * this.props.intervalLen; 
+    let transform = this.config.labelRotate ? "rotate(" + this.config.labelRotate + "," + x + "," + y + ")" : "";
     return (
-      <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
-        {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
-      </tspan>
+      <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none' 
+        font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
+        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+          {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
+        </tspan>
+      </text>
     );
   }
 

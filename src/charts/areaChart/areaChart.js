@@ -1,13 +1,5 @@
 "use strict";
 
-/**
- * SVG Area Chart :: areaChart.js
- * @version:2.0.0
- * @createdOn:31-05-2016
- * @author:SmartChartsNXT
- * @description: SVG Area Chart, that support multiple series and zoom window.
- */
-
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import defaultConfig from "./../../settings/config";
@@ -25,8 +17,12 @@ import HorizontarScroller from './../../components/horizontalScroller';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
 
-/** 
- * SVG Area Chart, that support multiple series and zoom window.
+/**
+ * SVG Area Chart :: areaChart.js
+ * @version:2.0.0
+ * @createdOn:31-05-2016
+ * @author:SmartChartsNXT
+ * @description: SVG Area Chart, that support multiple series and zoom window.
  * @extends Component
  */
 
@@ -89,14 +85,14 @@ class AreaChart extends Component {
           maxima: 0, 
           minima: 0, 
           valueInterval:0,
-          objInterval: {},
+          yInterval: {},
           dataSet: []
         },
         fs: {
           maxima: 0, 
           minima: 0, 
           valueInterval:0,
-          objInterval: {},
+          yInterval: {},
           dataSet: []
         }
       }; 
@@ -189,8 +185,8 @@ class AreaChart extends Component {
     this.state[dataFor].dataSet.xAxis.categories = categories; 
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].objInterval = UiCore.calcIntervalbyMinMax(this.state[dataFor].minima, this.state[dataFor].maxima);
-    ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].objInterval);
+    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima);
+    ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].yInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 
 
@@ -234,7 +230,7 @@ class AreaChart extends Component {
         </Grid> 
 
         <VerticalLabels  opts={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.objInterval.iMax} minVal={this.state.cs.objInterval.iMin} valueInterval={this.state.cs.valueInterval}
+          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
           labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
           updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
         </VerticalLabels> 
@@ -289,7 +285,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 3} centerSinglePoint={isBothSinglePoint} strokeWidth={series.lineWidth || 1.5} 
-          maxVal={this.state.cs.objInterval.iMax} minVal={this.state.cs.objInterval.iMin} dataPoints={true}>
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true}>
         </AreaFill>
       );
     });
@@ -304,7 +300,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight - 5} maxSeriesLen={maxSeriesLen} fill="#777" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} strokeWidth="1"
-          maxVal={this.state.fs.objInterval.iMax} minVal={this.state.fs.objInterval.iMin} dataPoints={false}>
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}>
         </AreaFill>
       );
     });

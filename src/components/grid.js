@@ -1,3 +1,8 @@
+"use strict";
+
+import defaultConfig from "./../settings/config";
+import { Component } from "./../viewEngin/pview";
+
 /**
  * grid.js
  * @version:2.0.0
@@ -5,11 +10,6 @@
  * @author:SmartChartsNXT
  * @description: This components will create a grid for the chart. 
  */
-
-"use strict";
-
-import defaultConfig from "./../settings/config";
-import { Component } from "./../viewEngin/pview";
 
 class Grid extends Component{
   constructor(props) {
