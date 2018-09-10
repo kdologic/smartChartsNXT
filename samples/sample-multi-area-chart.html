@@ -38,7 +38,7 @@
           },
           "canvasBorder": true,
           "bgColor": "none",
-          // "gridBox": {  // :YET TO DO
+          // "gridBox": {  // : TODO
           //   "vertical": {
           //     "style": "dashed", //[dashed | solid]
           //     "gridColor": "#000",
@@ -77,7 +77,7 @@
               return '<table>' +
                 '<tbody>' +
                   '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-                    '<th colspan="2" style="padding: 2px 5px; ">' + this[0].label + '</th>' +
+                    '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
                   '</tr>' +
                     this.map(function(point) {
                       return '<tr>' + 
@@ -96,15 +96,15 @@
             "xAxis": {
               "title": "Date",
               "prefix": "",
-              "parseAsDate": true,           // To DO
-              "dateFormat": "dd mmm, yy",   // To DO
+              "parseAsDate": true,
+              "dateFormat": "dd mmm",
               "labelRotate": -45,
               "intervalThreshold": 40,
               "tickOpacity": 1,
               "tickColor": '#222',
               "tickSpan": 6,
               "labelOpacity": 1,
-              "labelColor": "#009688",
+              //"labelColor": "#009688",
               "fontSize": 14,
               "fontFamily": "Lato"
             },
@@ -116,7 +116,7 @@
               "tickColor": '#222',
               "tickSpan": 5,
               "labelOpacity": 1,
-              "labelColor": "#009688",
+              //"labelColor": "#009688",
               "fontSize": 20,
               "fontFamily": "Lato"
             },

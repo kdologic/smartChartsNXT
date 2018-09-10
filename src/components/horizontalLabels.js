@@ -64,7 +64,7 @@ class HorizontalLabels extends Component{
       labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
       tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
       intervalThreshold: config.intervalThreshold || 30,
-      dateFormat: config.dateFormat || 'dd mmm, yy'
+      dateFormat: config.dateFormat || defaultConfig.formatting.dateFormat
     }};
   }
 

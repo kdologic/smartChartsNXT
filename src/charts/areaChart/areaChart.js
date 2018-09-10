@@ -16,6 +16,7 @@ import HorizonalLabels from './../../components/horizontalLabels';
 import HorizontarScroller from './../../components/horizontalScroller';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
+import dateFormat from "dateformat";
 
 /**
  * SVG Area Chart :: areaChart.js
@@ -333,10 +334,15 @@ class AreaChart extends Component {
   consumeEvents(e) {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
     let point = series.data[e.highlightedPoint.pointIndex];
+    let formatedLabel = point.label;
+    if(this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.parseAsDate) {
+      formatedLabel = dateFormat(formatedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
+    }
     let hPoint = {
       x: e.highlightedPoint.x,
       y: e.highlightedPoint.y,
       label: point.label,
+      formattedLabel: formatedLabel,
       value: point.value,
       seriesName: series.name,
       seriesIndex: e.highlightedPoint.seriesIndex, 
