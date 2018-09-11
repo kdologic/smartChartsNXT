@@ -2,6 +2,7 @@
 
 import defaultConfig from "./../settings/config";
 import Point from "./../core/point";
+import eventEmitter from './../core/eventEmitter';
 import { Component } from "./../viewEngin/pview";
 import UtilCore from "./../core/util.core";
 import SpeechBox from './../components/speechBox'; 
@@ -40,6 +41,7 @@ class Tooltip extends Component {
     constructor(props) {
       super(props);
       let padding = 0;
+      this.emitter = eventEmitter.getInstance(this.context.runId);
       this.config = {
         color: this.props.opts.color || defaultConfig.theme.fontColorDark,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
@@ -63,6 +65,8 @@ class Tooltip extends Component {
         strokeColor: 'rgb(124, 181, 236)', 
         opacity: 0
       };
+      this.updateTipBind = this.updateTip.bind(this);
+      this.hideTipBind = this.hide.bind(this); 
     }
 
     componentWillMount() {
@@ -73,6 +77,13 @@ class Tooltip extends Component {
       typeof this.props.onRef === 'function' && this.props.onRef(this);
       let node = this.ref.node.querySelector('.tooltip-content') ;  
       node && (node.innerHTML = this.state.tooltipContent);
+      this.emitter.on('updateTooltip', this.updateTipBind);
+      this.emitter.on('hideTooltip', this.hideTipBind);
+    }
+
+    componentWillUnmount() {
+      this.emitter.removeListener('updateTooltip', this.updateTipBind);
+      this.emitter.removeListener('hideTooltip', this.hideTipBind);
     }
 
     render() {
@@ -119,7 +130,9 @@ class Tooltip extends Component {
       return strContents; 
     }
 
-    updateTip(originPoint, pointData, line1, line2, preAlign = 'top') {
+    updateTip(event) {
+      let {originPoint, pointData, line1, line2} = event;
+      let preAlign = !event.preAlign ? 'top' : event.preAlign;
       let xPadding = this.config.xPadding; 
       let yPadding = this.config.yPadding; 
       let strContents = "";

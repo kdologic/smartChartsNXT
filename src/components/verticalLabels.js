@@ -1,5 +1,6 @@
 "use strict";
 
+import eventEmitter from './../core/eventEmitter';
 import defaultConfig from "./../settings/config";
 import Ticks from "./ticks";
 import { Component } from "./../viewEngin/pview";
@@ -11,11 +12,24 @@ import { Component } from "./../viewEngin/pview";
  * @author:SmartChartsNXT
  * @description: This components will create a Vertical Labels and Tick marks for the chart.
  * @extends Component
+ * "yAxis": {
+      "title": "Total Sales",
+      "prefix": "Rs. ",
+      "labelRotate": 0,
+      "tickOpacity": 1,
+      "tickColor": '#222',
+      "tickSpan": 5,
+      "labelOpacity": 1,
+      "labelColor": "#009688",
+      "fontSize": 20,
+      "fontFamily": "Lato"
+    }
  */
 class VerticalLabels extends Component{
 
   constructor(props) {
     super(props);
+    this.emitter = eventEmitter.getInstance(this.context.runId);
     this.config = {};
     this.resetConfig(this.props.opts); 
     this.state = {
@@ -99,18 +113,15 @@ class VerticalLabels extends Component{
         return Number(value).toFixed(2);
     }
   }
-  
+
   onMouseEnter(e) {
-    if(typeof this.props.updateTip === 'function') {
-      let lblIndex = e.target.classList[0].replace('vlabel-',''); 
-      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.valueSet[lblIndex]);
-    }
+    let lblIndex = e.target.classList[0].replace('vlabel-',''); 
+    e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : "") + this.valueSet[lblIndex];
+    this.emitter.emit('vLabelEnter', e);
   }
 
   onMouseLeave(e) {
-    if(typeof this.props.hideTip === 'function') {
-      this.props.hideTip(e);
-    }
+    this.emitter.emit('vLabelExit', e);
   }
 }
 

@@ -1,5 +1,6 @@
 "use strict";
 
+import eventEmitter from './../core/eventEmitter';
 import defaultConfig from "./../settings/config";
 import UtilCore from './../core/util.core';
 import { Component } from "./../viewEngin/pview";
@@ -13,6 +14,23 @@ import dateFormat from "dateformat";
  * @author:SmartChartsNXT
  * @description: This components will create a Horizontal Labels for the chart.
  * @extends Component 
+ * 
+ * @config 
+ * "xAxis": {
+      "title": "Date",
+      "prefix": "",
+      "parseAsDate": true,
+      "dateFormat": "dd mmm",
+      "labelRotate": -45,
+      "intervalThreshold": 40,
+      "tickOpacity": 1,
+      "tickColor": '#222',
+      "tickSpan": 6,
+      "labelOpacity": 1,
+      "labelColor": "#009688",
+      "fontSize": 14,
+      "fontFamily": "Lato"
+    }
  */
 
 class HorizontalLabels extends Component{
@@ -20,6 +38,7 @@ class HorizontalLabels extends Component{
   constructor(props) {
     super(props);
     let self = this;
+    this.emitter = eventEmitter.getInstance(this.context.runId);
     this.config = {};
     this.resetConfig(this.props.opts); 
     this.state = {
@@ -120,16 +139,19 @@ class HorizontalLabels extends Component{
   }
 
   onMouseEnter(e) {
-    if(typeof this.props.updateTip === 'function') {
+    //if(typeof this.props.updateTip === 'function') {
       let lblIndex = e.target.classList[0].replace('hlabel-',''); 
-      this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex]);
-    }
+      e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex];
+      //this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex]);
+      this.emitter.emit('hLabelEnter', e);
+    //}
   }
 
   onMouseLeave(e) {
-    if(typeof this.props.hideTip === 'function') {
-      this.props.hideTip(e);
-    }
+    // if(typeof this.props.hideTip === 'function') {
+    //   this.props.hideTip(e);
+    // }
+    this.emitter.emit('hLabelExit', e);
   }
 
 }

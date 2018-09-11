@@ -58,11 +58,6 @@ class AreaChart extends Component {
       }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
-      this.subComp = {
-        tooltip: undefined,
-        pointerCrosshair: undefined
-      };
-
       this.state = {
         set windowLeftIndex(index) {
           let longSeriesLen = self.CHART_OPTIONS.dataSet.series[self.CHART_DATA.longestSeries].data.length;
@@ -106,6 +101,8 @@ class AreaChart extends Component {
       this.onHScrollBind = this.onHScroll.bind(this); 
       this.onPointHighlightedBind = this.onPointHighlighted.bind(this);
       this.onMouseLeaveBind = this.onMouseLeave.bind(this);
+      this.updateLabelTipBind = this.updateLabelTip.bind(this);
+      this.hideTipBind = this.hideTip.bind(this);
 
       this.init();
       
@@ -200,14 +197,23 @@ class AreaChart extends Component {
   }
 
   componentDidMount() {
-    this.bindEventsOfDataTooltips(); 
     this.emitter.on('hScroll', this.onHScrollBind);
+    this.emitter.on('pointHighlighted', this.onPointHighlightedBind);
+    this.emitter.on('interactiveMouseLeave', this.onMouseLeaveBind);
+    this.emitter.on('vLabelEnter', this.updateLabelTipBind);
+    this.emitter.on('vLabelExit', this.hideTipBind);
+    this.emitter.on('hLabelEnter', this.updateLabelTipBind);
+    this.emitter.on('hLabelExit', this.hideTipBind);
   }
 
   componentWillUnmount() {
     this.emitter.removeListener('hScroll', this.onHScrollBind); 
     this.emitter.removeListener('pointHighlighted', this.onPointHighlightedBind); 
-    this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeaveBind); 
+    this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeaveBind);
+    this.emitter.removeListener('vLabelEnter', this.updateLabelTipBind);
+    this.emitter.removeListener('vLabelExit', this.hideTipBind);
+    this.emitter.removeListener('hLabelEnter', this.updateLabelTipBind);
+    this.emitter.removeListener('hLabelExit', this.hideTipBind); 
   }
 
   render() {
@@ -232,14 +238,12 @@ class AreaChart extends Component {
 
         <VerticalLabels  opts={this.state.cs.dataSet.yAxis || {}}
           posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
-          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} 
-          updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
+          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} >
         </VerticalLabels> 
 
         <HorizonalLabels opts={this.state.cs.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
-          categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
-          updateTip={this.updateLabelTip.bind(this)} hideTip={this.hideTip.bind(this)}>
+          categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX} >
         </HorizonalLabels>   
 
         <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
@@ -263,7 +267,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}> 
         </HorizontarScroller>
 
-        <Tooltip onRef={ref => this.subComp.tooltip = ref} opts={this.CHART_OPTIONS.tooltip || {}}
+        <Tooltip opts={this.CHART_OPTIONS.tooltip || {}}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
         </Tooltip>
 
@@ -319,16 +323,13 @@ class AreaChart extends Component {
     }
   }
 
-  updateLabelTip(e, labelData) {
-    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    if(this.subComp.tooltip) {
-      this.subComp.tooltip.updateTip(mousePos, null, labelData);
-    }
-  }
-
-  bindEventsOfDataTooltips() {
-    this.emitter.on('pointHighlighted', this.onPointHighlightedBind);
-    this.emitter.on('interactiveMouseLeave', this.onMouseLeaveBind);
+  updateLabelTip(e) { 
+    this.emitter.emit('updateTooltip', {
+      originPoint: UiCore.cursorPoint(this.context.rootContainerId, e), 
+      pointData: undefined,
+      line1: e.labelText,
+      line2: undefined
+    });
   }
 
   consumeEvents(e) {
@@ -388,9 +389,6 @@ class AreaChart extends Component {
   }
 
   onMouseLeave(e) {
-    if(!this.subComp.tooltip) {
-      return; 
-    } 
     this.pointData = [];
     this.originPoint = undefined;
     this.prevOriginPoint = undefined; 
@@ -403,16 +401,12 @@ class AreaChart extends Component {
   }
 
   updateDataTooltip(originPoint, pointData) {
-    if(!this.subComp.tooltip) {
-      return; 
-    }
     if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content) {
-      this.subComp.tooltip.updateTip(originPoint, pointData, undefined, undefined, 'left');
+      this.emitter.emit('updateTooltip', {originPoint, pointData, line1: undefined, line2: undefined, preAlign: 'left'}); 
     } 
     else {
       let row1 = this.getDefaultTooltipHTML.call(pointData); 
-      let row2 = 'html'; 
-      this.subComp.tooltip.updateTip(originPoint, pointData, row1, row2, 'left');
+      this.emitter.emit('updateTooltip', {originPoint, pointData, line1: row1, line2: 'html', preAlign: 'left'}); 
     }
   }
 
@@ -420,7 +414,7 @@ class AreaChart extends Component {
     return '<table>' +
       '<tbody>' +
         '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-          '<th colspan="2" style="padding: 2px 5px; ">' + this[0].label + '</th>' +
+          '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
         '</tr>' +
           this.map(function(point) {
             return '<tr>' + 
@@ -433,8 +427,8 @@ class AreaChart extends Component {
     '</table>';
   }
 
-  hideTip() {
-    this.subComp.tooltip && this.subComp.tooltip.hide(); 
+  hideTip(e) {
+    this.emitter.emit('hideTooltip', e);
     this.updateCrosshair(null);
   }
 
