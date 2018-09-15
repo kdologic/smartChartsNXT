@@ -70,6 +70,38 @@ class UtilCore {
     return Math.min(Math.max(val, min), max);
   }
 
+  /**
+   * Check if it is a date.
+   * @param {Number} ms Milliseconds since Jan 1, 1970, 00:00:00.000 GMT 
+   * @return boolean
+   */
+  isDate(ms) {
+    try {
+      let d = new Date(ms); 
+      return d instanceof Date && !isNaN(d);
+    }catch(e){
+      return false; 
+    }
+  }
+
+  /**
+   * Return memoized version of a function
+   * @param {Function} fn A function to memoize. 
+   * @return Function
+   */
+  memoize = (fn) => {
+    let cache = {};
+    return (...args) => {
+      if (args in cache) {
+        return cache[args];
+      }
+      else {
+        let result = fn(...args);
+        cache[args] = result;
+        return result;
+      }
+    };
+  }
 
   getColor(index, ranbowFlag) {
     let Colors = {};

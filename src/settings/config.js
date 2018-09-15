@@ -1,12 +1,12 @@
+"use strict";
+
 /** 
  * config.js
- * @version:1.0.0
+ * @version:2.0.0
  * @createdOn:24-Nov-2017
  * @author:SmartChartsNXT
  * @description:This will be the Global default configureation for all charts.
  */
-
-"use strict";
 
 export default {
   theme: {
@@ -21,5 +21,8 @@ export default {
     bgColorLight: "#fff",
     bgColorMedium: "#8B8A88",
     bgColorDark: "#000"
+  },
+  formatting: {
+    dateFormat: 'dd mmm, yy'
   }
 };
