@@ -139,18 +139,12 @@ class HorizontalLabels extends Component{
   }
 
   onMouseEnter(e) {
-    //if(typeof this.props.updateTip === 'function') {
-      let lblIndex = e.target.classList[0].replace('hlabel-',''); 
-      e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex];
-      //this.props.updateTip(e, (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex]);
-      this.emitter.emit('hLabelEnter', e);
-    //}
+    let lblIndex = e.target.classList[0].replace('hlabel-',''); 
+    e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex];
+    this.emitter.emit('hLabelEnter', e);
   }
 
   onMouseLeave(e) {
-    // if(typeof this.props.hideTip === 'function') {
-    //   this.props.hideTip(e);
-    // }
     this.emitter.emit('hLabelExit', e);
   }
 

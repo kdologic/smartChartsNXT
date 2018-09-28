@@ -1,15 +1,4 @@
-
-
 "use strict";
-
-/**
- * transitionGroup.js
- * @version:2.0.0
- * @createdOn:26-Apr-2018
- * @author:SmartChartsNXT
- * @description: This component will be used to create css transition on top of pView Library. 
- *               Must use InstanceId as props to uniquely identify elements.
- */
 
 import { Component } from "./pview";
 
@@ -20,10 +9,27 @@ import { Component } from "./pview";
  * It accept the following props :
  * 
  * transitionName='box-effect' // Name of the transition.
- * transitionEnterDelay='1000' // How long the animation playes when new element added.
- * transitionExitDelay='300' // How long the animation playes when element removed.
- * applyForNew=true // Apply transition only for new elements OR all the existing elements also.
  * 
+ * transitionEnterDelay='1000' // How long the animation playes when new element added.
+ * 
+ * transitionExitDelay='300' // How long the animation playes when element removed.
+ * 
+ * applyForNew=true //If true then transition only for new elements and if false then all the existing elements also.
+ * 
+ * ${transition-name}-enter -- Apply this class just before mount.
+ * 
+ * ${transition-name}-enter-active -- Apply this class after mount and remove after animation completed.
+ * 
+ * ${transition-name}-exit -- Apply this class just before remove an element.
+ * 
+ * ${transition-name}-exit-active -- Apply this class after remove an element and remove when transitionExitDelay completed.
+ *
+ * transitionGroup.js
+ * @version:2.0.0
+ * @createdOn:26-Apr-2018
+ * @author:SmartChartsNXT
+ * @description: This component will be used to create css transition on top of pView Library. 
+ *               Must use InstanceId as props to uniquely identify elements.
  * @extends Component
  */
 

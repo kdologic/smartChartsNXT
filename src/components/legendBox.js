@@ -1,9 +1,17 @@
+"use strict";
+
+import defaultConfig from "./../settings/config";
+import Geom from './../core/geom.core';
+import eventEmitter from './../core/eventEmitter';
+import { Component } from "./../viewEngin/pview";
+
 /**
  * legendBox.js
  * @createdOn: 06-Nov-2017
  * @author: SmartChartsNXT
  * @version: 1.1.0
  * @description:This is a component class will create legned area. 
+ * @extends Component
  * 
  * Legend box accept 3 positioning parameters -
  * {Number} left, {Number} right, {String} float - [top | bottom | left | right]
@@ -17,8 +25,9 @@
       "enable" : true,
       "top": 10,
       "left": 10, 
-      "alignment": "horizontal",
-      "float": "bottom",
+      "alignment": "horizontal",  // [horizontal | vertical]
+      "display"="inline"          // [inline | block] block will take entire row but inline only take space as much required
+      "float": "bottom",          // [top | bottom | left | right]
       "color": "#000",
       "bgColor": "#eee",
       "hoverColor":"#999",
@@ -38,22 +47,16 @@
     }
  */
 
-"use strict";
-
-import defaultConfig from "./../settings/config";
-import Geom from './../core/geom.core';
-import UiCore from './../core/ui.core';
-import { Component } from "./../viewEngin/pview";
-
 class LegendBox extends Component {
   constructor(props) {
     super(props);
-
+    this.emitter = eventEmitter.getInstance(this.context.runId); 
     this.config = {
       top: this.props.opts.top || this.props.top,
       left: this.props.opts.left || this.props.left,
       type: this.props.opts.alignment || this.props.type || "horizontal",
-      float: this.props.opts.float || this.props.float || "bottom",
+      float: this.props.opts.float || this.props.float || "none",
+      display: this.props.opts.display || this.props.display || "inline",
       color: this.props.opts.color || defaultConfig.theme.fontColorDark,
       bgColor: this.props.opts.bgColor || this.props.background || "none",
       hoverColor: this.props.opts.hoverColor || this.props.hoverColor || "#999",
@@ -69,7 +72,7 @@ class LegendBox extends Component {
     this.state = {
       legendSet: this.props.legendSet.map(lSet => {
         lSet.eachWidth = lSet.labelLength = lSet.valueLength = 0;
-        lSet.isToggeled = false;
+        lSet.isToggeled = lSet.isToggeled === undefined ? false : lSet.isToggeled;
         return lSet;
       }),
       left: 0,
@@ -147,8 +150,8 @@ class LegendBox extends Component {
             </rect>
           }
           <text class={`legend-${index} legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14} fill={this.config.color} font-family={this.config.fontFamily} pointer-events='none' >
-            <tspan class={`legend-${index} legend-txt-label-${index}`}>{!this.props.opts.hideLabel && data.label}</tspan>
-            <tspan class={`legend-${index} legend-txt-value-${index}`} 
+            <tspan class={`legend-${index} legend-txt-label-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}>{!this.props.opts.hideLabel && data.label}</tspan>
+            <tspan class={`legend-${index} legend-txt-value-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}
               dx={this.state.lengthSet.max.labelLength-this.state.legendSet[index].labelLength + this.padding}>
               {!this.props.opts.hideValue && data.value}
             </tspan>
@@ -176,6 +179,7 @@ class LegendBox extends Component {
         this.state.trnsX = this.props.canvasWidth - this.containerWidth - this.padding;
         this.state.trnsY = this.config.top || this.padding;
         break;
+      case 'none':
       default:
         this.state.trnsX = this.config.left || this.padding;
         this.state.trnsY = this.config.top || this.padding;
@@ -196,7 +200,15 @@ class LegendBox extends Component {
   }
 
   getMaxLegendInLine(eachLength) {
-    return this.config.type === 'horizontal' ? Math.floor((this.props.canvasWidth - (2*this.padding)) / eachLength) : 1;
+    if(this.config.type === 'horizontal'){
+      if(this.config.display === 'block') {
+        return Math.floor((this.props.canvasWidth - (2*this.padding)) / eachLength);
+      }else {
+        return this.state.legendSet.length;
+      }
+    }else {
+      return 1; 
+    }
   }
 
   calcElementSpacing() {
@@ -222,7 +234,7 @@ class LegendBox extends Component {
   setContainerWidthHeight() {
     let eachLength = this.getEachLegendLength();
     let maxElemInLine = this.getMaxLegendInLine(eachLength);
-    this.containerWidth = this.config.type === 'horizontal' ? this.props.canvasWidth - (2 * this.padding) : eachLength + (2 * this.padding);
+    this.containerWidth = this.config.display === 'block' ? this.props.canvasWidth - (2 * this.padding) : (maxElemInLine * eachLength) + (2 * this.padding);
     this.containerHeight = (Math.ceil(this.state.legendSet.length / maxElemInLine) * this.lineHeight) + this.padding;
   }
 
@@ -239,6 +251,16 @@ class LegendBox extends Component {
     };
   }
 
+  assignLegendData(index, e) {
+    let legend = this.state.legendSet[index];
+    e.label = legend.label; 
+    e.value = legend.value; 
+    e.color = legend.color; 
+    e.index = index;
+    e.isToggeled = legend.isToggeled;
+    return e;
+  }
+
   onClick(e) {
     if(e.type === "keyup" && (e.which || e.keyCode) !== 32) {
       return; 
@@ -248,40 +270,46 @@ class LegendBox extends Component {
       this.state.legendSet[index].isToggeled = !this.state.legendSet[index].isToggeled;
       this.update();
     }
-    if (typeof this.props.onLegendClick === 'function') {
-      this.props.onLegendClick(index);
-    }
-    if (typeof this.props.opts.onLegendClick === 'function') {
-      let legendData = {index}; 
-      ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-      this.props.opts.onLegendClick.call(legendData);
-    }
+    this.assignLegendData(index, e);
+    this.emitter.emit('legendClick', e);
+    // if (typeof this.props.onLegendClick === 'function') {
+    //   this.props.onLegendClick(index);
+    // }
+    // if (typeof this.props.opts.onLegendClick === 'function') {
+    //   let legendData = {index}; 
+    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
+    //   this.props.opts.onLegendClick.call(legendData);
+    // }
   }
 
   onHover(e) {
     let index = e.target.classList[0].substring("legend-".length);
     this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0.9; 
-    if (typeof this.props.onLegendHover === 'function') {
-      this.props.onLegendHover(index);
-    }
-    if (typeof this.props.opts.onLegendHover === 'function') {
-      let legendData = {index}; 
-      ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-      this.props.opts.onLegendHover.call(legendData);
-    }
+    this.assignLegendData(index, e);
+    this.emitter.emit('legendHover', e);
+    // if (typeof this.props.onLegendHover === 'function') {
+    //   this.props.onLegendHover(index);
+    // }
+    // if (typeof this.props.opts.onLegendHover === 'function') {
+    //   let legendData = {index}; 
+    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
+    //   this.props.opts.onLegendHover.call(legendData);
+    // }
   }
 
   onLeave(e) {
     let index = e.target.classList[0].substring("legend-".length);
     this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0; 
-    if (typeof this.props.onLegendLeave === 'function') {
-      this.props.onLegendLeave(index);
-    }
-    if (typeof this.props.opts.onLegendLeave === 'function') {
-      let legendData = {index}; 
-      ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-      this.props.opts.onLegendLeave.call(legendData);
-    }
+    this.assignLegendData(index, e);
+    this.emitter.emit('legendLeave', e);
+    // if (typeof this.props.onLegendLeave === 'function') {
+    //   this.props.onLegendLeave(index);
+    // }
+    // if (typeof this.props.opts.onLegendLeave === 'function') {
+    //   let legendData = {index}; 
+    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
+    //   this.props.opts.onLegendLeave.call(legendData);
+    // }
   }
 }
 

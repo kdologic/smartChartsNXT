@@ -28,10 +28,13 @@ class AreaFill extends Component{
       scaleY: 0,
       baseLine: 0,
       pointSet: [], 
-      valueSet: []
+      valueSet: [],
+      strokeOpacity: this.props.strokeOpacity || 1,
+      opacity: this.props.opacity || 1
     };
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
+    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this); 
     this.prepareData(); 
     
   }
@@ -42,12 +45,17 @@ class AreaFill extends Component{
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    this.bindEvents(); 
+    if(this.props.dataPoints) {
+      this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
+      this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
+    }
+    this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
   }
 
   componentWillUnmount() {
     this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
+    this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightnessBind);
   }
 
   propsWillReceive(nextProps) {
@@ -68,9 +76,9 @@ class AreaFill extends Component{
         </defs>
         {this.props.gradient && this.createGradient(gradId)}
         <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.gradient ? `url(#${gradId})` : this.props.fill} 
-          d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.props.opacity} >
+          d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.state.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} fill='none' d={path.join(' ')} stroke-width={this.props.strokeWidth} opacity='1'></path> 
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} stroke-opacity={this.state.strokeOpacity} fill='none' d={path.join(' ')} stroke-width={this.props.strokeWidth} opacity='1'></path> 
         {this.props.dataPoints &&
           <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
         }
@@ -127,6 +135,7 @@ class AreaFill extends Component{
   }
   
   prepareData() {
+    debugger;
     this.state.valueSet = this.props.dataSet.data.map((data) => {
       return data.value;
     });
@@ -134,13 +143,6 @@ class AreaFill extends Component{
     this.state.scaleY = this.props.height / (this.props.maxVal-this.props.minVal); 
     this.state.baseLine = this.props.maxVal * this.state.scaleY; 
     this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker; 
-  }
-
-  bindEvents() {
-    if(this.props.dataPoints) {
-      this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
-      this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
-    }
   }
 
   interactiveMouseMove(e) {
@@ -166,6 +168,12 @@ class AreaFill extends Component{
 
   interactiveMouseLeave(e) {
     this.subComp.dataPoints.doHighlight(false);
+  }
+
+  changeAreaBrightness(e) {
+    if(this.props.instanceId === e.instanceId && e.strokeOpacity) {
+      this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1}); 
+    }
   }
 
 }

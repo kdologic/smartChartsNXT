@@ -177,11 +177,10 @@ class PieChart extends Component {
           </Draggable>
         </g>
         <g class='legend-container'>
-          {
-            (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable === false) ? null :
+          {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
             <Draggable>
               <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={10} top={10} opts={this.CHART_OPTIONS.legends || {}} 
-                canvasWidth={this.CHART_OPTIONS.width} canvasHeight={this.CHART_OPTIONS.height} type={this.legendBoxType} background='#eee'
+                display="block" canvasWidth={this.CHART_OPTIONS.width} canvasHeight={this.CHART_OPTIONS.height} type={this.legendBoxType} background='#eee'
                 onLegendClick={this.onLegendClick.bind(this)} onLegendHover={this.onLegendHover.bind(this)} onLegendLeave={this.onLegendLeave.bind(this)}
                 onRef={ref => this.childObj.legendBox = ref}
               /> 
