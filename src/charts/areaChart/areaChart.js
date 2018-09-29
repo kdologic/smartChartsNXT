@@ -59,49 +59,51 @@ class AreaChart extends Component {
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
       
       this.state = {
-        _longSeriesLen: 0,
+        _maxSeriesLen: 0,
         _longestSeries: 0,
+        _maxSeriesLenFS: 0, 
+        _windowLeftIndex: 0,
+        _windowRightIndex: 0, 
         get longestSeries() {
-          // if(!this.cs.dataSet.length) {
-          //   return 0; 
-          // }
-          debugger;
           let dataSet = this.cs.dataSet || self.CHART_OPTIONS.dataSet;
+          this._maxSeriesLen = 0; 
           for (let index = 0; index < dataSet.series.length; index++) {
-            if (dataSet.series[index].data.length >= this._longSeriesLen) {
+            if (dataSet.series[index].data.length >= this._maxSeriesLen) {
               this._longestSeries = index;
-              this._longSeriesLen = dataSet.series[index].data.length;
+              this._maxSeriesLen = dataSet.series[index].data.length;
             }
           }
           return this._longestSeries; 
         },
-        get longSeriesLen() {
-          // if(!this.cs.dataSet.length) {
-          //   return 0; 
-          // }
+        get maxSeriesLen() {
           let dataSet = this.cs.dataSet || self.CHART_OPTIONS.dataSet;
+          this._maxSeriesLen = 0; 
           for (let index = 0; index < dataSet.series.length; index++) {
-            if (dataSet.series[index].data.length > this._longSeriesLen) {
+            if (dataSet.series[index].data.length > this._maxSeriesLen) {
               this._longestSeries = index;
-              this._longSeriesLen = dataSet.series[index].data.length;
+              this._maxSeriesLen = dataSet.series[index].data.length;
             }
           }
-          return this._longSeriesLen;
+          return this._maxSeriesLen;
         },
-        _windowLeftIndex: 0,
-        _windowRightIndex: 0, 
+        get maxSeriesLenFS() {
+          for (let index = 0; index < self.CHART_OPTIONS.dataSet.series.length; index++) {
+            if (self.CHART_OPTIONS.dataSet.series[index].data.length > this._maxSeriesLenFS) {
+              this._maxSeriesLenFS = self.CHART_OPTIONS.dataSet.series[index].data.length;
+            }
+          }
+          return this._maxSeriesLenFS;
+        },
         set windowLeftIndex(index) {
-          //let longSeriesLen = self.CHART_OPTIONS.dataSet.series[self.CHART_DATA.longestSeries].data.length;
           this._windowLeftIndex = index;
-          this.leftOffset = index * 100 / (this.longSeriesLen - 1); 
+          this.leftOffset = index * 100 / (this.maxSeriesLen - 1); 
         },
         get windowLeftIndex() {
           return this._windowLeftIndex;
         },
         set windowRightIndex(index) {
-          //let longSeriesLen = self.CHART_OPTIONS.dataSet.series[self.CHART_DATA.longestSeries].data.length;
           this._windowRightIndex = index;
-          this.rightOffset = index * 100 / (this.longSeriesLen - 1); 
+          this.rightOffset = index * 100 / (this.maxSeriesLen - 1); 
         },
         get windowRightIndex() {
           return this._windowRightIndex; 
@@ -159,35 +161,28 @@ class AreaChart extends Component {
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
 
-    let longestSeries = 0;
-    let longSeriesLen = 0;
     for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
       if(this.CHART_OPTIONS.dataSet.series[index].visible == undefined) {
         this.CHART_OPTIONS.dataSet.series[index].visible = true;
       }
-      // if (this.CHART_OPTIONS.dataSet.series[index].data.length > longSeriesLen) {
-      //   longestSeries = index;
-      //   longSeriesLen = this.CHART_OPTIONS.dataSet.series[index].data.length;
-      // }
     }
-    //this.CHART_DATA.longestSeries = longestSeries;
     
     /* Will set initial zoom window */
     if (this.CHART_OPTIONS.zoomWindow) {
-      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.longSeriesLen) {
+      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
         this.state.windowLeftIndex = typeof this.state.windowLeftIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.leftIndex - 1 : this.state.windowLeftIndex;
       }
-      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.longSeriesLen) {
+      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLen) {
         this.state.windowRightIndex = typeof this.state.windowRightIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.rightIndex - 1 : this.state.windowRightIndex;
       } else {
-        this.state.windowRightIndex = this.state.longSeriesLen - 1;
+        this.state.windowRightIndex = this.state.maxSeriesLen - 1;
       }
     } 
     if(!this.state.windowLeftIndex ){
       this.state.windowLeftIndex = 0; 
     }
     if(!this.state.windowRightIndex || this.state.windowRightIndex === -1) {
-      this.state.windowRightIndex = this.state.longSeriesLen - 1;
+      this.state.windowRightIndex = this.state.maxSeriesLen - 1;
     }
 
     /* Prepare data set for Horizontal scroll */
@@ -343,7 +338,6 @@ class AreaChart extends Component {
   }
 
   drawSeries() {
-    let maxSeriesLen = this.state.cs.dataSet.series[this.state.longestSeries].data.length;
     let isBothSinglePoint = true; 
     this.state.cs.dataSet.series.map(s => {
       isBothSinglePoint = !!(isBothSinglePoint * (s.data.length == 1));
@@ -351,7 +345,7 @@ class AreaChart extends Component {
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
         <AreaFill dataSet={series} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 3} centerSinglePoint={isBothSinglePoint} strokeWidth={series.lineWidth || 1.5} 
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true}>
@@ -361,12 +355,10 @@ class AreaChart extends Component {
   }
 
   drawHScrollSeries() {
-    let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.state.longestSeries].data.length;
-
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
         <AreaFill dataSet={series} index={series.index} instanceId={'fs'+ series.index} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop + 5} paddingX={0} 
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight - 5} maxSeriesLen={maxSeriesLen} fill="#777" 
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.hScrollBoxHeight - 5} maxSeriesLen={this.state.maxSeriesLenFS} fill="#777" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} strokeWidth="1"
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}>
@@ -376,9 +368,8 @@ class AreaChart extends Component {
   }
 
   onHScroll(e) {
-    let maxSeriesLen = this.CHART_OPTIONS.dataSet.series[this.state.longestSeries].data.length;
-    let leftIndex =  Math.round(maxSeriesLen * e.leftOffset / 100); 
-    let rightIndex = Math.round(maxSeriesLen * e.rightOffset / 100);
+    let leftIndex =  Math.round(this.state.maxSeriesLenFS * e.leftOffset / 100); 
+    let rightIndex = Math.round(this.state.maxSeriesLenFS * e.rightOffset / 100);
     if(this.state.windowLeftIndex != leftIndex || this.state.windowRightIndex != rightIndex) {
       this.state.windowLeftIndex = leftIndex; 
       this.state.windowRightIndex = rightIndex; 

@@ -135,7 +135,6 @@ class AreaFill extends Component{
   }
   
   prepareData() {
-    debugger;
     this.state.valueSet = this.props.dataSet.data.map((data) => {
       return data.value;
     });
