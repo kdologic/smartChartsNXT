@@ -9,8 +9,8 @@
     }
 
     window.onload = function () {
-      //^BSESN, RCOM.NS
-      getStock('GRAPHITE.NS').then(data => {
+      //^BSESN, RCOM.NS, GRAPHITE.NS
+      getStock('RCOM.NS').then(data => {
         console.log(data);
         var dataSet = prepareData(data);
         displayChart('RCom', dataSet); 

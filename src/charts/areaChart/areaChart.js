@@ -170,17 +170,15 @@ class AreaChart extends Component {
     /* Will set initial zoom window */
     if (this.CHART_OPTIONS.zoomWindow) {
       if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
-        this.state.windowLeftIndex = typeof this.state.windowLeftIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.leftIndex - 1 : this.state.windowLeftIndex;
+        this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
       }
       if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLen) {
-        this.state.windowRightIndex = typeof this.state.windowRightIndex === 'undefined' ? this.CHART_OPTIONS.zoomWindow.rightIndex - 1 : this.state.windowRightIndex;
+        this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
       } else {
         this.state.windowRightIndex = this.state.maxSeriesLen - 1;
       }
     } 
-    if(!this.state.windowLeftIndex ){
-      this.state.windowLeftIndex = 0; 
-    }
+    
     if(!this.state.windowRightIndex || this.state.windowRightIndex === -1) {
       this.state.windowRightIndex = this.state.maxSeriesLen - 1;
     }
@@ -339,7 +337,7 @@ class AreaChart extends Component {
 
   drawSeries() {
     let isBothSinglePoint = true; 
-    this.state.cs.dataSet.series.map(s => {
+    this.state.cs.dataSet.series.filter(d => d.data.length > 0).map(s => {
       isBothSinglePoint = !!(isBothSinglePoint * (s.data.length == 1));
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
