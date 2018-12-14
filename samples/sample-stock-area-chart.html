@@ -25,7 +25,8 @@
           value: data['Time Series (Daily)'][key]['4. close']
         });
       }
-      return dataSet; 
+      dataSet = dataSet.filter(d => d.value > 0 );
+      return dataSet.reverse(); 
     }
 
 
@@ -33,8 +34,8 @@
       SmartChartsNXT.ready(function () {
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
-          "title": "Multi Series Chart",
-          "subtitle": "Area Chart",
+          "title": "Stock Chart",
+          "subtitle": "Time Series (Daily)",
           "targetElem": "chartContainer",
           "titleStyle": {
             "fillColor":"#717171",
@@ -48,7 +49,7 @@
             "fontFamily": "Lato",
             "maxFontSize": "18"
           },
-          "canvasBorder": true,
+          "canvasBorder": false,
           "bgColor": "none",
           "pointerCrosshair": {
             "vertical": {
@@ -120,7 +121,8 @@
               "labelOpacity": 1,
               //"labelColor": "#009688",
               "fontSize": 20,
-              "fontFamily": "Lato"
+              "fontFamily": "Lato",
+              "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
             },
             "series": [{
                 "lineWidth": 1.5,
@@ -147,11 +149,11 @@
               //   ] 
               // }
             ]
-          },
-          zoomWindow: {
-            "leftIndex": 1,
-            "rightIndex": dataSet.length
           }
+          // zoomWindow: {
+          //   "leftIndex": dataSet.length-20,
+          //   "rightIndex": dataSet.length
+          // }
         });
       });
     }

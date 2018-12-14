@@ -107,7 +107,7 @@
             "xAxis": {
               "title": "Date",
               "prefix": "",
-              "parseAsDate": true,
+              "parseAsDate": false,
               "dateFormat": "dd mmm",
               //"labelRotate": -45,
               "intervalThreshold": 40,
@@ -129,7 +129,8 @@
               "labelOpacity": 1,
               "labelColor": "#000",
               "fontSize": 20,
-              "fontFamily": "Lato"
+              "fontFamily": "Lato",
+              "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
             },
             "series": [{
                 "lineWidth": 1.5,
@@ -137,10 +138,10 @@
                 "name": 'Raphael',
                 "areaOpacity": 0.3,
                 "spline": true,
-                "data": generateData(10, 50, 2) 
-                // [
-                //   {label:1, value:100},{label:2, value:-10}
-                // ] 
+                "data": //generateData(10, 50, 200) 
+                [
+                  {label:1, value:1000},{label:2, value:-10},{label:3, value:-120},{label:4, value:300},{label:5, value:500},{label:6, value:900}
+                ] 
               },
               {
                 "lineWidth": 1.5,
@@ -152,11 +153,11 @@
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Willson',
-                "visible": false,
-                "data": generateData(5, 20, 10)
-                // [
-                //   {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1220}
-                // ] 
+                //"visible": false,
+                "data": //generateData(5, 20, 200)
+                [
+                  {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1220}
+                ] 
               }
             ]
           },
@@ -187,7 +188,7 @@
           //   }
           // },
           zoomWindow: {
-            "leftIndex": 2,
+            "leftIndex": 3,
             "rightIndex": 50
           }
         });

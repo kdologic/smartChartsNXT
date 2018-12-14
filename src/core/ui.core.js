@@ -111,15 +111,19 @@ class UiCore {
    * @param {Number} maxVal Maximum Value
    * @return {Object} Returns interval object.
    */
-  
-  calcIntervalByMinMax(minVal, maxVal) {
+
+  calcIntervalByMinMax(minVal, maxVal, zeroBase) {
     let arrWeight = [0.1, 0.2, 0.5];
     let weightDecimalLevel = 1; 
     let minIntvCount = 6;
     let maxIntvCount = 12;
     let mid = (maxVal + minVal) / 2;
-    let tMinVal = minVal > 0 ? 0 : minVal;
-    maxVal = maxVal < 0 ? 0 : maxVal;
+    let tMinVal = minVal;
+    if(zeroBase) {
+      tMinVal = minVal > 0 ? 0 : minVal;
+      maxVal = maxVal < 0 ? 0 : maxVal;
+    }
+    
     let digitBase10 = Math.round(mid).toString().length;
     for(let w = 0; w <= 100 ; w = (w + 1) % arrWeight.length) {
       let weight = arrWeight[w] * weightDecimalLevel;
@@ -129,13 +133,21 @@ class UiCore {
       }
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
         let hitIntv = +parseFloat(tInt * intv).toFixed(2);
-        tMinVal = minVal <= 0 && tMinVal >= minVal ? (Math.ceil(tMinVal / tInt) * tInt) : tMinVal;
+        if(minVal <= 0) {
+          tMinVal = (Math.ceil(tMinVal / tInt) * tInt);
+        }else {
+          tMinVal = (Math.floor(tMinVal / tInt) * tInt) ;
+        }
         if ((tMinVal + hitIntv) >= (maxVal + tInt)) {
           let iMax = tMinVal + hitIntv;
           if (minVal < 0) {
             tMinVal -= (2*tInt);
-            intv+=2;
+            intv += 2;
+          }else if(tMinVal == Math.floor(minVal)) {
+            tMinVal -= tInt; 
+            intv++;
           }
+          
           return {
             iVal: tInt,
             iCount: intv,

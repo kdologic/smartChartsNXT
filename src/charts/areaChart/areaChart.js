@@ -172,17 +172,15 @@ class AreaChart extends Component {
       if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
         this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
       }
-      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLen) {
+      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLenFS) {
         this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
       } else {
-        this.state.windowRightIndex = this.state.maxSeriesLen - 1;
+        this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
       }
-    } 
-    
-    if(!this.state.windowRightIndex || this.state.windowRightIndex === -1) {
-      this.state.windowRightIndex = this.state.maxSeriesLen - 1;
+    } else {
+      this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
     }
-
+    
     /* Prepare data set for Horizontal scroll */
     this.prepareDataSet(true); 
     /* Prepare data set for chart area. */
@@ -225,7 +223,7 @@ class AreaChart extends Component {
     this.state[dataFor].dataSet.xAxis.categories = categories; 
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima);
+    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
     ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].yInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 
