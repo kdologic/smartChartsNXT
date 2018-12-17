@@ -1,25 +1,24 @@
 "use strict";
 
-let gulp = require('gulp');
-let insert = require('gulp-insert');
-let connect = require('gulp-connect');
+const argv = require('yargs').argv;
 
-let uglifyEs = require('uglify-es'); //  `uglify-es` for ES6 support
-let composer = require('gulp-uglify/composer');
-let minify = composer(uglifyEs, console);
+process.env.NODE_ENV = argv.env == "production" ? "production" : "development"; 
 
-let util = require('gulp-util');
-let rename = require('gulp-rename');
+const gulp = require('gulp');
+const insert = require('gulp-insert');
 
-let webpack = require("webpack-stream");
-let webpackConfig = require('./webpack.config.js');
+const minify = require('gulp-uglify-es').default;
+const rename = require('gulp-rename');
 
-let pkg = require('./package.json');
-let srcDir = './src/';
-let buildDir = './public/';
-let testDir = './test/';
+const webpack = require("webpack-stream");
+const webpackConfig = require('./webpack.config.js');
 
-let header = `/** 
+const pkg = require('./package.json');
+const srcDir = './src/';
+const buildDir = './public/';
+const testDir = './test/';
+
+const header = `/** 
 * SmartChartsNXT
 * http://www.smartcharts.cf
 * Version:${pkg.version}
@@ -35,7 +34,8 @@ let header = `/**
  */
 
 function buildTask() {
-  return gulp.src(srcDir + 'build.core.js')
+
+  return gulp.src(srcDir + 'index.js')
     .pipe(webpack(webpackConfig))
     .pipe(rename('smartChartsNXT.bundle.js'))
     .pipe(insert.prepend(header))
@@ -44,7 +44,10 @@ function buildTask() {
 
 function minifyTask() {
   return gulp.src(buildDir + 'smartChartsNXT.bundle.js')
-    .pipe(minify({}))
+    .pipe(minify({
+      keep_classnames: true,
+      keep_fnames: true
+    }))
     .pipe(rename('smartChartsNXT.bundle.min.js'))
     .pipe(insert.prepend(header))
     .pipe(gulp.dest(buildDir));
@@ -55,7 +58,7 @@ function watchTask() {
 }
 
 gulp.task('build', buildTask);
-gulp.task('minify', ['build'], minifyTask );
+gulp.task('minify', ['build'], minifyTask);
 gulp.task('watch', watchTask);
 gulp.task('default', ['build', 'watch']);
 gulp.task('release', ['build', 'minify']);
