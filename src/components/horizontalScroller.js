@@ -1,11 +1,4 @@
-/**
- * horizontalScroller.js
- * @createdOn:14-Jul-2017
- * @version:2.0.0
- * @author:SmartChartsNXT
- * @description: This components will create a Horizontal Scroll area for the chart. 
- */
-
+"use strict";
 
 import Geom from './../core/geom.core';
 import UiCore from './../core/ui.core';
@@ -13,7 +6,11 @@ import { Component } from "./../viewEngin/pview";
 import eventEmitter from './../core/eventEmitter';
 
 /**
- * This components will create a Horizontal Scroll area for the chart. Where where user can drag right or left handler 
+ * horizontalScroller.js
+ * @createdOn:14-Jul-2017
+ * @version:2.0.0
+ * @author:SmartChartsNXT
+ * @description: This components will create a Horizontal Scroll area for the chart. Where where user can drag right or left handler 
  * to adjust the window area. 
  * @extends Component
  */
@@ -38,7 +35,6 @@ class HorizontalScroller extends Component {
     };
     
     this.slider = {}; 
-    
   }
 
   propsWillReceive(nextProps) {
@@ -354,7 +350,7 @@ class SliderRightHandle extends Component {
       sliderRight: ['M', 0, 0, 'L', 0, this.props.height].join(' '),
       sliderRightSel: Geom.describeEllipticalArc(0, (this.props.height/2), 15, 15, 180, 360, 1).d, 
       sliderRightSelInner: innerBarRight.join(' '),
-      rightOffset: this.props.width - (this.state.leftOffset + this.state.windowWidth)
+      rightOffset: Math.abs(this.props.width - (this.state.leftOffset + this.state.windowWidth))
     };
   }
 }

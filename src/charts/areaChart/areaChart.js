@@ -62,8 +62,8 @@ class AreaChart extends Component {
         _maxSeriesLen: 0,
         _longestSeries: 0,
         _maxSeriesLenFS: 0, 
-        _windowLeftIndex: 0,
-        _windowRightIndex: 0, 
+        _windowLeftIndex: -1,
+        _windowRightIndex: -1, 
         get longestSeries() {
           let dataSet = this.cs.dataSet || self.CHART_OPTIONS.dataSet;
           this._maxSeriesLen = 0; 
@@ -166,19 +166,22 @@ class AreaChart extends Component {
         this.CHART_OPTIONS.dataSet.series[index].visible = true;
       }
     }
-    
-    /* Will set initial zoom window */
-    if (this.CHART_OPTIONS.zoomWindow) {
-      if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
-        this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
-      }
-      if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLenFS) {
-        this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
+
+    if(this.state.windowLeftIndex < 0 && this.state.windowRightIndex < 0) {
+      /* Will set initial zoom window */
+      if (this.CHART_OPTIONS.zoomWindow) {
+        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
+          this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
+        }
+        if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLenFS) {
+          this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
+        } else {
+          this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
+        }
       } else {
+        this.state.windowLeftIndex = 0; 
         this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
       }
-    } else {
-      this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
     }
     
     /* Prepare data set for Horizontal scroll */
