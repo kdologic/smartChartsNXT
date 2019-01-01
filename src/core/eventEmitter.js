@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * eventEmitter.js
  * @createdOn: 14-Mar-2018
@@ -6,9 +8,7 @@
  * @description:This is singleTone class for event emitter. For propagate events between components. 
  */
 
-"use strict";
-
-let events = require('events');
+const EventEmitter = require('events');
 let instance = {};
 
 class EventEmitterSingleTone {
@@ -25,7 +25,7 @@ class EventEmitterSingleTone {
   }
 
   createInstance(runId) {
-    instance[runId] = new events.EventEmitter();
+    return instance[runId] = new EventEmitter();
   }
 
   getInstance(runId) {
@@ -34,24 +34,3 @@ class EventEmitterSingleTone {
 }
 
 export default new EventEmitterSingleTone();
-
-// class EventEmitterSingleTone {
-//   constructor() {
-//     if (!instance) {
-//       instance = new events.EventEmitter();
-//     }
-
-//     this._type = 'EventEmitterSingleTone';
-//     return instance;
-//   }
-
-//   get type() {
-//     return this._type;
-//   }
-
-//   set type(value) {
-//     this._type = value;
-//   }
-// }
-
-// export default new EventEmitterSingleTone();

@@ -103,6 +103,11 @@
             "xPadding": 3,
             "yPadding": 3,
           },
+          "horizontalScroller": {
+            "enable": true,
+            "height": 40,
+            "chartInside": true
+          },
           "dataSet": {
             "xAxis": {
               "title": "Date",
@@ -192,6 +197,9 @@
             "rightIndex": 50
           }
         });
+
+        /** add event listner on Horizontal scroll **/
+        //areaChart.events.on('hScroll', function(e) {console.log(e)});
       });
     };
   </script>
