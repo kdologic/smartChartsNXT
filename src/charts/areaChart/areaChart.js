@@ -56,7 +56,7 @@ class AreaChart extends Component {
         },
         horizontalScroller: {
           enable: true,
-          height: 40,
+          height: 35,
           chartInside: true
         }
       }, this.props.chartOptions);

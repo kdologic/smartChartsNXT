@@ -108,8 +108,8 @@ class BaseChart extends Component {
         {this.CHART_OPTIONS.canvasBorder &&
         <g>
           <rect x='1' y='1' class="sc-canvas-border" vector-effect='non-scaling-stroke'
-            width={this.CHART_OPTIONS.width - 1}
-            height={this.CHART_OPTIONS.height - 1}
+            width={this.CHART_OPTIONS.width - 2}
+            height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
             style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}

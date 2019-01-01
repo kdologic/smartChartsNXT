@@ -43,7 +43,9 @@ class HorizontalScroller extends Component {
       sliderRightSel: "",
       sliderRightSelInner: "",
       rightOffset: offset.rightOffset,
-      windowWidth: offset.windowWidth
+      windowWidth: offset.windowWidth,
+      leftHandlerColor: '#fff',
+      rightHandlerColor: '#fff'
     };
     
     this.slider = {}; 
@@ -70,11 +72,15 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderWindow>
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
-          width={this.props.width} height={this.props.height} onRef={(obj)=>{this.slider.left = obj;}}
+          width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this)
+              touchstart: this.onMouseDown.bind(this),
+              mouseenter: this.onHoverInHandler.bind(this),
+              mouseleave: this.onLeaveInHandler.bind(this),
+              focusin: this.onHoverInHandler.bind(this),
+              focusout: this.onLeaveInHandler.bind(this)
             },
             offsetEvent: {
               click: this.onOffsetClick.bind(this)
@@ -82,11 +88,15 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderLeftHandle>
         <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
-          width={this.props.width} height={this.props.height} onRef={(obj)=>{this.slider.right = obj;}}
+          width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this)
+              touchstart: this.onMouseDown.bind(this),
+              mouseenter: this.onHoverInHandler.bind(this),
+              mouseleave: this.onLeaveInHandler.bind(this),
+              focusin: this.onHoverInHandler.bind(this),
+              focusout: this.onLeaveInHandler.bind(this)
             },
             offsetEvent: {
               click: this.onOffsetClick.bind(this)
@@ -222,6 +232,22 @@ class HorizontalScroller extends Component {
     this.onScrollMove(e);
     this.onScrollEnd(e);
   }
+
+  onHoverInHandler(e) {
+    if(e.target.querySelector('.sc-slider-left-sel')) {
+      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#ddd';
+    }else if(e.target.querySelector('.sc-slider-right-sel')) {
+      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#ddd';
+    }
+  }
+
+  onLeaveInHandler(e) {
+    if(e.target.querySelector('.sc-slider-left-sel')) {
+      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#fff';
+    }else if(e.target.querySelector('.sc-slider-right-sel')) {
+      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#fff';
+    }
+  }
 }
 
 class SliderWindow extends Component {
@@ -251,6 +277,7 @@ class SliderWindow extends Component {
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
         <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'rgb(102,133,194)'  fill-opacity='0.2' storke='none' pointer-events='all' 
         style="transition: fill-opacity 0.3s linear; cursor: -webkit-grab; cursor: grab;" events={this.state.events} />
+        <title> Slider Window (Grab to move) </title>
       </g>
     );
   }
@@ -289,7 +316,7 @@ class SliderLeftHandle extends Component {
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-left" height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
-              <feOffset dx="0" dy="0" result="offsetblur"></feOffset>
+              <feOffset dx="-1" dy="0" result="offsetblur"></feOffset>
               <feComponentTransfer>
                 <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
@@ -299,9 +326,12 @@ class SliderLeftHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' />
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent}>
-          <path class='sc-slider-left-sel' stroke='rgb(178, 177, 182)' fill='#fff' filter={`url(#slider-dropshadow-left)`} d={this.state.sliderLeftSel} pointer-events='all' stroke-width='0' opacity='1'></path>
+        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+          <title> Click to move window here  </title>
+        </rect>
+        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} tabindex="0">
+          <title> Left Slider Handle </title>
+          <path class='sc-slider-left-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-left)`} d={this.state.sliderLeftSel} pointer-events='all' stroke-width='0' opacity='1'></path>
           <path class='sc-slider-left-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
           <path class='sc-slider-left' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderLeft}  pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
@@ -350,9 +380,9 @@ class SliderRightHandle extends Component {
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-right" height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"></feGaussianBlur>
-              <feOffset dx="0" dy="0" result="offsetblur"></feOffset>
+              <feOffset dx="1" dy="" result="offsetblur"></feOffset>
               <feComponentTransfer>
-                <feFuncA type="linear" slope="1"></feFuncA>
+                <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
               <feMerge>
                 <feMergeNode></feMergeNode>
@@ -360,9 +390,12 @@ class SliderRightHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' />
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent}>
-          <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill='#fff' filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>
+        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+          <title> Click to move window here  </title>
+        </rect>
+        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} tabindex="0">
+          <title> Right Slider Handle </title>
+          <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>
           <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
           <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
