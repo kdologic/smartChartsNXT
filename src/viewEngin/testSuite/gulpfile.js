@@ -13,9 +13,8 @@ let testDir = './test/';
 let header = `/** 
 * PView test suite
 * 
-* Copyright 2018 Kausik Dey
+* Copyright 2019 Kausik Dey
 * Released under the MIT license
-* https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
 */
 `;
 
