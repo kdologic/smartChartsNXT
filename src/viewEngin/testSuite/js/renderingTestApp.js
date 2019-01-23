@@ -36,7 +36,7 @@ class RenderingTestApp extends Component {
         }} >
           <g>
             <Button instanceId='plusBtn' posx={100} posy={150} width={100} height='40' bgColor='#28a745' borderColor='#1e7e34' borderRadius='5'
-              onClick= { (e) => { this.setState({boxCount: this.state.boxCount + 1});}} >
+              onClick= { (e) => { this.setState({boxCount: this.state.boxCount + 1, boxPosX: this.state.boxPosX+10});}} >
               <text x="35" y="35" fill="#fff" font-size="50" font-weight="bold"> + </text>
             </Button>
 
@@ -53,9 +53,9 @@ class RenderingTestApp extends Component {
             {this.getBoxes()}
             {this.getRects()}
             {/* { this.state.boxCount > 0 && 
-              <Rect id={'rect-'+this.state.boxCount} x={120} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
-                <Rect id={'rect-child-'+this.state.boxCount} x={120} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
-                <text x={120} y={this.state.boxPosY + 100}>{'text-child-'+this.state.boxCount}</text>
+              <Rect id={'rect-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
+                <Rect id={'rect-child-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
+                <text x={this.state.boxPosX} y={this.state.boxPosY + 100}>{'text-child-'+this.state.boxCount}</text>
               </Rect>
             } */}
           </g>
@@ -76,8 +76,6 @@ class RenderingTestApp extends Component {
     return arrBoxes;
   }
 
-  
-  
   getRects = () => {
     let arrRects = []; 
     for(let i = 0; i < this.state.boxCount; i++) {
@@ -90,6 +88,12 @@ class RenderingTestApp extends Component {
   }
 
 }
+
+// Text = (props) => {
+//   return (
+//     <text x={props.x} y={props.y}>{props.text}</text>
+//   );
+// }; 
 
 class Rect extends Component {
   constructor(props) {
@@ -112,11 +116,20 @@ class Rect extends Component {
     console.log('componentWillUnmount --', this.props.id);
   }
 
+  shouldComponentUpdate(nextProps) {
+    console.log('shouldComponentUpdate-->',nextProps);
+    if(nextProps.id.match('child') !== null && nextProps.x > 30) {
+      return false;
+    }
+    return true;
+  }
+
   render() {
     return (
       <g>
-        <rect id={this.props.id} x={this.props.x} y={this.props.y} rx={5} width={90} height={10} fill={this.props.color} stroke="none" >
+        <rect id={this.props.id} x={this.props.x} y={this.props.y} rx={5} width={90} height={20} fill={this.props.color} stroke="none" >
         </rect>
+        <text x={this.props.x+5} y={this.props.y+15}>{this.props.id}</text>
         {this.props.extChildren}
       </g>
     );
@@ -126,6 +139,10 @@ class Rect extends Component {
 class Box extends Component {
   constructor(props) {
     super(props);
+  }
+
+  propsWillReceive(nextProps) {
+    console.log('propsWillReceive --', this.props.index ,'(new)', nextProps.index);
   }
 
   render() {

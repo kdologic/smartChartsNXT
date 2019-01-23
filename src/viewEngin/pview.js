@@ -47,6 +47,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
   
   if(component.eventStack && component.eventStack instanceof Array) {
     component.eventStack.forEach(evt => evt());
+    delete component.eventStack; 
   }
 
   if (component.self && typeof component.self.componentDidMount === 'function') {
@@ -69,8 +70,8 @@ function renderDOM(vnode) {
   };
   /* when vnode is string like - any tag [text, svg, line, path etc.] */
   if (typeof vnode.nodeName === 'string') {
-    let isHtml = vnode.nodeName.match('html-'); 
-    component.node = isHtml ? document.createElement(vnode.nodeName.substring('html-'.length)) : document.createElementNS(svgNS, vnode.nodeName);
+    let isHtml = vnode.nodeName.match('x-'); 
+    component.node = isHtml ? document.createElement(vnode.nodeName.substring('x-'.length)) : document.createElementNS(svgNS, vnode.nodeName);
     Object.keys(vnode.attributes || {}).forEach(key => {
       let attrVal = ((k) => {
         switch (k) {
@@ -119,7 +120,7 @@ function renderDOM(vnode) {
   }
   /* when vnode is type normal function */
   else if (typeof vnode.nodeName === 'function') {
-    ({ node: component.node, children: component.children } = renderDOM(vnode.nodeName(vnode.attributes)));
+    ({ node: component.node, children: component.children } = renderDOM.call({}, vnode.nodeName(vnode.attributes)));
   } 
   else {
     throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
@@ -138,10 +139,11 @@ function renderDOM(vnode) {
 
     if(childComp.eventStack && childComp.eventStack instanceof Array) {
       component.eventStack.push.apply(component.eventStack, childComp.eventStack);
+      delete childComp.eventStack;
     }
 
     if (childComp.self && typeof childComp.self.componentDidMount === 'function') {
-      component.eventStack.unshift(childComp.self.componentDidMount.bind(childComp.self));
+      component.eventStack.push(childComp.self.componentDidMount.bind(childComp.self));
     }
   });
 
@@ -184,8 +186,8 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
   }
 }
 
-/** 
- * Hyperscript generator, gets called by transpiled JSX 
+/**
+ * Hyperscript generator, gets called by transpiled JSX
  */
 window.__h__ = window.__h__ || 
 function(nodeName, attributes, ...args) {
@@ -227,7 +229,7 @@ function parseEventsProps(events, node) {
 
 /** This will return true if instace is es6 class type  */
 function isNativeClass(instance, Constructor) {
-  return !!instance.toString().match(/_classCallCheck/);
+  return instance.prototype.__proto__.constructor.name === 'Component';
 }
 
 /**
@@ -290,10 +292,10 @@ class Component {
 
   /**
    * Traverse virtual node and Heuristic O(n) compare with old node to minimize DOM update.
-   * @param {*} oldVNode 
-   * @param {*} newVNode 
-   * @param {*} ref 
-   * @param {*} context 
+   * @param {*} oldVNode Previous virtual node that rendered.
+   * @param {*} newVNode Newly created virtual node that constructed recent update after passing new props.
+   * @param {*} ref Object reference of the component.
+   * @param {*} context Combination of existing self context and new context that passed from parent. 
    */
   _reconsile(oldVNode, newVNode, ref, context={}) {
     let newRenderedVnode = undefined; 
@@ -307,8 +309,14 @@ class Component {
     }
 
     if(typeof newVNode.nodeName === 'object') {
+      let newProps = Object.assign({}, ref.self.props, newVNode.attributes, { extChildren: newVNode.children });
+      if(ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
+        let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
+        if(!shouldUpdate) {
+          return false;
+        }
+      }
       if (ref.self && typeof ref.self.propsWillReceive === 'function') {
-        let newProps = Object.assign({}, ref.self.props, newVNode.attributes, { extChildren: newVNode.children });
         ref.self.propsWillReceive.call(ref.self, newProps);
         ref.self.props = newProps; 
       }
@@ -323,7 +331,9 @@ class Component {
     switch(differ.type) {
       case 'NODE_ATTR_DIFF': 
         if(typeof newVNode.nodeName === 'object') {
-          this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref);
+          this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
+          newVNode.nodeName.vnode = newRenderedVnode;
+          return;
         }else if(typeof newVNode.nodeName === 'string') {
           for(let attr in differ.attributes) {
             this._updateAttr(ref.node, attr, differ.attributes[attr]);
@@ -376,8 +386,13 @@ class Component {
     }
   }
 
+  /**
+   * Update internal text node
+   * @param {*} nodePos Index of node in virtual node children list.
+   * @param {*} newVNode Newly rendered virtual node.
+   * @param {*} ref Object reference of component.
+   */
   _updateTextNode(nodePos=0, newVNode, ref) {
-    console.log('update text node', newVNode.children[nodePos]);
     let newText = newVNode.children[nodePos];
     if(typeof newText === 'string') {
       ref.node.textContent = newText;
@@ -385,16 +400,27 @@ class Component {
     }
   }
 
+  /**
+   * Render and Mount new DOM node.
+   * @param {*} nodePos Index of node in virtual node children list.
+   * @param {*} newVNode Newly rendered virtual node.
+   * @param {*} ref Object reference of component.
+   * @param {*} context Combination of existing self context and new context that passed from parent. 
+   */
   _createNewNode(nodePos=0, newVNode, ref, context) {
-    console.log('create new node');
     let newComponent = renderDOM.call({ context: context || {} }, newVNode.children[nodePos]);
     ref.children.splice(nodePos+1, 0, newComponent);   
     
     return mountTo(newComponent, ref.node, 'rnode', undefined, context);
   }
 
+  /**
+   * Remove the old node from DOM and Object reference. 
+   * @param {*} nodePos Index of node in virtual node children list.
+   * @param {*} oldVNode Previously rendered virtual node.
+   * @param {*} ref Object reference of component.
+   */
   _removeOldNode(nodePos=0, oldVNode, ref) {
-    console.log('destroy old node');
     let destroyableNode = oldVNode.children[nodePos];
     if(typeof destroyableNode.nodeName === 'object') {
       if (typeof destroyableNode.nodeName.componentWillUnmount === 'function') {
@@ -407,8 +433,13 @@ class Component {
     ref.children[nodePos] = undefined;
   }
 
+  /**
+   * Update only attribute of existing DOM node.
+   * @param {*} dom DOM reference on the node. 
+   * @param {*} attr Attribute name to be modify. 
+   * @param {*} val New value of the attibute.
+   */
   _updateAttr(dom, attr, val) {
-    console.log('update attr', attr, val);
     dom.setAttribute(attr, val); 
   }
 
@@ -417,8 +448,9 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
-    console.time('update');
-    
+    if(!this.shouldComponentUpdate(this.props)) {
+      return false;
+    }
     let vnodeNow = this.render();
     let objContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
     if (this.vnode.children && this.vnode.children.length) {
@@ -426,8 +458,6 @@ class Component {
     }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext); 
     this.vnode = vnodeNow;
-
-    console.timeEnd('update');
   }
 
   /** 
@@ -460,19 +490,19 @@ class Component {
    */
   componentDidMount() {}
 
+  /**
+   * Call before render and determite component update
+   * @param {*} nextProps Next set of props that will receive by component.
+   * @returns {boolean} Return boolean true or false.
+   */
+  shouldComponentUpdate(nextProps) {
+    return true;
+  }
+
   /** 
    * Lifecycle event - fires before the component unmounted from parent DOM 
    */
   componentWillUnmount() {}
-
-  /* TODO : Will add these lifecycle hooks 
-
-    May depricate propsWillReceive(nextProps) and introduce getDerivedStateFromProps(props, state)
-    shouldComponentUpdate(nextProps, nextState)
-    getSnapshotBeforeUpdate(prevProps, prevState)
-    componentDidUpdate(prevProps, prevState, snapshot)
-  */
-
 }
 
 export { mountTo, renderDOM, Component, parseStyleProps };
