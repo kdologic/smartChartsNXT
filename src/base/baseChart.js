@@ -1,3 +1,12 @@
+"use strict";
+
+import Point from "./../core/point";
+import UtilCore from './../core/util.core';
+import { Component } from "./../viewEngin/pview";
+import defaultConfig from "./../settings/config";
+import Watermark from './../components/watermark'; 
+import Menu from './../components/menu'; 
+
 /**
  * baseChart.js
  * @createdOn: 10-May-2017
@@ -5,19 +14,6 @@
  * @version: 2.0.0
  * @description:This is base chart with defaulf config and this will initiate loading of a specific chart type. 
  */
-
-"use strict";
-
-//let EventCore = require("./../core/event.core");
-//let Event = require("./../core/event");
-
-import Geom from './../core/geom.core'; 
-import Point from "./../core/point";
-import UtilCore from './../core/util.core';
-import { Component } from "./../viewEngin/pview";
-import defaultConfig from "./../settings/config";
-import Watermark from './../components/watermark'; 
-import Menu from './../components/menu'; 
 
 /** ------- Requireing all chart types ------- */
 const CHART_MODULES = {
@@ -111,9 +107,9 @@ class BaseChart extends Component {
 
         {this.CHART_OPTIONS.canvasBorder &&
         <g>
-          <rect x='0' y='0' vector-effect='non-scaling-stroke'
-            width={this.CHART_OPTIONS.width - 1}
-            height={this.CHART_OPTIONS.height - 1}
+          <rect x='1' y='1' class="sc-canvas-border" vector-effect='non-scaling-stroke'
+            width={this.CHART_OPTIONS.width - 2}
+            height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
             style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}

@@ -11,7 +11,7 @@ module.exports = {
   mode: process.env.NODE_ENV,
   devtool: !isProduction ? 'eval' : undefined,
   plugins: [
-    //new BundleAnalyzerPlugin(),
+    new BundleAnalyzerPlugin()
   ],
   module: {
     rules: [{
