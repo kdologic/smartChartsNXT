@@ -167,6 +167,7 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
         if (refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
           /* Match instaceId for support multiple instace of same component type under same parent node */
           if(refChld.self.props.instanceId === subNode.attributes.instanceId) {
+            subNode.class = subNode.nodeName;
             subNode.nodeName = refChld.self;
             refChldObj = refChld;
             break;
@@ -332,6 +333,9 @@ class Component {
       case 'NODE_ATTR_DIFF': 
         if(typeof newVNode.nodeName === 'object') {
           this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
+          if(typeof ref.self.componentDidUpdate === 'function') {
+            ref.self.componentDidUpdate(oldVNode.attributes);
+          }
           newVNode.nodeName.vnode = newRenderedVnode;
           return;
         }else if(typeof newVNode.nodeName === 'string') {
@@ -366,6 +370,10 @@ class Component {
           }
           if(reconsileDiff && reconsileDiff.type === 'NODE_NAME_DIFF') {
             this._removeOldNode(child, oldVNode, ref);
+            if(typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
+              newVNode.children[child].nodeName  = newVNode.children[child].class; 
+              delete newVNode.children[child].class;
+            }
             this._createNewNode(child, newVNode, ref, context);
           }
           if(reconsileDiff && reconsileDiff.type === 'NODE_TEXT_DIFF') {
@@ -375,6 +383,10 @@ class Component {
             ref.children = ref.children.filter(v => v != undefined);
           }
         }else if(!oldVNode.children[child]) {
+          if(typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
+            newVNode.children[child].nodeName  = newVNode.children[child].class; 
+            delete newVNode.children[child].class;
+          }
           this._createNewNode(child, newVNode, ref, context);
         }else {
           this._removeOldNode(child, oldVNode, ref);
@@ -382,6 +394,9 @@ class Component {
       }
     }
     if(typeof newVNode.nodeName === 'object') {
+      if(typeof ref.self.componentDidUpdate === 'function') {
+        ref.self.componentDidUpdate(oldVNode.props);
+      }
       newVNode.nodeName.vnode = newRenderedVnode;
     }
   }
@@ -421,11 +436,22 @@ class Component {
    * @param {*} ref Object reference of component.
    */
   _removeOldNode(nodePos=0, oldVNode, ref) {
-    let destroyableNode = oldVNode.children[nodePos];
+    let destroyableNode = oldVNode.children[nodePos], destroyableObj;
     if(typeof destroyableNode.nodeName === 'object') {
-      if (typeof destroyableNode.nodeName.componentWillUnmount === 'function') {
-        destroyableNode.nodeName.componentWillUnmount.call(destroyableNode.nodeName);
+      destroyableObj = destroyableNode.nodeName;
+      destroyableNode = destroyableNode.nodeName.vnode;
+    }
+    if(destroyableNode.children && destroyableNode.children instanceof Array) {
+      for(let c = 0; c < destroyableNode.children.length; c++) {
+        this._removeOldNode(c, destroyableNode, ref.children[nodePos]);
       }
+    }
+
+    if (destroyableObj && typeof destroyableObj.componentWillUnmount === 'function') {
+      destroyableObj.componentWillUnmount.call(destroyableObj);
+    }
+    
+    if(typeof destroyableNode.nodeName === 'object') {
       destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
     }else if(typeof destroyableNode.nodeName === 'string') {
       ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
@@ -457,6 +483,9 @@ class Component {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext); 
+    if(typeof this.componentDidUpdate === 'function') {
+      this.componentDidUpdate(this.vnode.props);
+    }
     this.vnode = vnodeNow;
   }
 
@@ -498,6 +527,12 @@ class Component {
   shouldComponentUpdate(nextProps) {
     return true;
   }
+
+  /** 
+   * Lifecycle event - fires after the component update on parent DOM.
+   * @param {*} prevProps set of props that was there before update that component.
+   */
+  componentDidUpdate(prevProps){}
 
   /** 
    * Lifecycle event - fires before the component unmounted from parent DOM 

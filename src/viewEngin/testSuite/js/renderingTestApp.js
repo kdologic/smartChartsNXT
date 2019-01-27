@@ -36,7 +36,7 @@ class RenderingTestApp extends Component {
         }} >
           <g>
             <Button instanceId='plusBtn' posx={100} posy={150} width={100} height='40' bgColor='#28a745' borderColor='#1e7e34' borderRadius='5'
-              onClick= { (e) => { this.setState({boxCount: this.state.boxCount + 1, boxPosX: this.state.boxPosX+10});}} >
+              onClick= { (e) => { this.setState({boxCount: this.state.boxCount + 1});}} >
               <text x="35" y="35" fill="#fff" font-size="50" font-weight="bold"> + </text>
             </Button>
 
@@ -54,7 +54,9 @@ class RenderingTestApp extends Component {
             {this.getRects()}
             {/* { this.state.boxCount > 0 && 
               <Rect id={'rect-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
-                <Rect id={'rect-child-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
+                <g>
+                  <Rect id={'rect-child-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
+                </g>
                 <text x={this.state.boxPosX} y={this.state.boxPosY + 100}>{'text-child-'+this.state.boxCount}</text>
               </Rect>
             } */}
@@ -81,7 +83,7 @@ class RenderingTestApp extends Component {
     for(let i = 0; i < this.state.boxCount; i++) {
       let color = this.state.boxCount%2==0?'#03a9f4':'#cddc39';
       arrRects.push(
-        <rect x={(i*120)+5} y={this.state.boxPosY + 130} rx={5} width={90} height={10} fill={color} stroke={color} />
+        <Rect instanceId={'rect-'+i} id={'rect-'+i} x={(i*120)+5} y={this.state.boxPosY + 130} color={color} ></Rect>
       );
     }
     return arrRects;
@@ -105,11 +107,15 @@ class Rect extends Component {
   }
 
   componentWillMount() {
-    console.log('componentWillMount --', this.props.id);
+    console.log('componentWillMount --', this.props);
   }
 
   componentDidMount() {
-    console.log('componentDidMount --', this.props.id);
+    console.log('componentDidMount --', this.props);
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log('componentDidUpdate --', prevProps);
   }
 
   componentWillUnmount() {
@@ -117,10 +123,6 @@ class Rect extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    console.log('shouldComponentUpdate-->',nextProps);
-    if(nextProps.id.match('child') !== null && nextProps.x > 30) {
-      return false;
-    }
     return true;
   }
 
@@ -142,7 +144,7 @@ class Box extends Component {
   }
 
   propsWillReceive(nextProps) {
-    console.log('propsWillReceive --', this.props.index ,'(new)', nextProps.index);
+    console.log('propsWillReceive --', this.props ,'(new)', nextProps);
   }
 
   render() {
