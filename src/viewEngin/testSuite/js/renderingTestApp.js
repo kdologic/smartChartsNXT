@@ -53,9 +53,11 @@ class RenderingTestApp extends Component {
             {this.getBoxes()}
             {this.getRects()}
             {/* { this.state.boxCount > 0 && 
-              <Rect id={'rect-'+this.state.boxCount} x={120} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
-                <Rect id={'rect-child-'+this.state.boxCount} x={120} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
-                <text x={120} y={this.state.boxPosY + 100}>{'text-child-'+this.state.boxCount}</text>
+              <Rect id={'rect-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
+                <g>
+                  <Rect id={'rect-child-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
+                </g>
+                <text x={this.state.boxPosX} y={this.state.boxPosY + 100}>{'text-child-'+this.state.boxCount}</text>
               </Rect>
             } */}
           </g>
@@ -76,20 +78,24 @@ class RenderingTestApp extends Component {
     return arrBoxes;
   }
 
-  
-  
   getRects = () => {
     let arrRects = []; 
     for(let i = 0; i < this.state.boxCount; i++) {
       let color = this.state.boxCount%2==0?'#03a9f4':'#cddc39';
       arrRects.push(
-        <rect x={(i*120)+5} y={this.state.boxPosY + 130} rx={5} width={90} height={10} fill={color} stroke={color} />
+        <Rect instanceId={'rect-'+i} id={'rect-'+i} x={(i*120)+5} y={this.state.boxPosY + 130} color={color} ></Rect>
       );
     }
     return arrRects;
   }
 
 }
+
+// Text = (props) => {
+//   return (
+//     <text x={props.x} y={props.y}>{props.text}</text>
+//   );
+// }; 
 
 class Rect extends Component {
   constructor(props) {
@@ -101,22 +107,31 @@ class Rect extends Component {
   }
 
   componentWillMount() {
-    console.log('componentWillMount --', this.props.id);
+    console.log('componentWillMount --', this.props);
   }
 
   componentDidMount() {
-    console.log('componentDidMount --', this.props.id);
+    console.log('componentDidMount --', this.props);
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log('componentDidUpdate --', prevProps);
   }
 
   componentWillUnmount() {
     console.log('componentWillUnmount --', this.props.id);
   }
 
+  shouldComponentUpdate(nextProps) {
+    return true;
+  }
+
   render() {
     return (
       <g>
-        <rect id={this.props.id} x={this.props.x} y={this.props.y} rx={5} width={90} height={10} fill={this.props.color} stroke="none" >
+        <rect id={this.props.id} x={this.props.x} y={this.props.y} rx={5} width={90} height={20} fill={this.props.color} stroke="none" >
         </rect>
+        <text x={this.props.x+5} y={this.props.y+15}>{this.props.id}</text>
         {this.props.extChildren}
       </g>
     );
@@ -126,6 +141,10 @@ class Rect extends Component {
 class Box extends Component {
   constructor(props) {
     super(props);
+  }
+
+  propsWillReceive(nextProps) {
+    console.log('propsWillReceive --', this.props ,'(new)', nextProps);
   }
 
   render() {
