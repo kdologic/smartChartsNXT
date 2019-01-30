@@ -164,7 +164,7 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
       let refChldObj = undefined;
       for (let c = 0; c < refs.children.length; c++) {
         let refChld = refs.children[c];
-        if (refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
+        if (refChld && refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
           /* Match instaceId for support multiple instace of same component type under same parent node */
           if(refChld.self.props.instanceId === subNode.attributes.instanceId) {
             subNode.class = subNode.nodeName;
@@ -305,23 +305,23 @@ class Component {
       _replaceClassWithObject(newVNode, ref, true);
     }
 
-    if(ref.self && typeof ref.self.passContext === 'function') {
+    if(ref && ref.self && typeof ref.self.passContext === 'function') {
       context = Object.assign({}, context, ref.self.passContext());
     }
 
     if(typeof newVNode.nodeName === 'object') {
-      let newProps = Object.assign({}, ref.self.props, newVNode.attributes, { extChildren: newVNode.children });
-      if(ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
+      let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes, { extChildren: newVNode.children });
+      if(ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if(!shouldUpdate) {
           return false;
         }
       }
-      if (ref.self && typeof ref.self.propsWillReceive === 'function') {
+      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
         ref.self.propsWillReceive.call(ref.self, newProps);
         ref.self.props = newProps; 
       }
-      if(ref.self) {
+      if(ref && ref.self) {
         ref.self.__proto__.context = context; 
         newRenderedVnode = ref.self.render();
       }
@@ -392,6 +392,9 @@ class Component {
           this._removeOldNode(child, oldVNode, ref);
         }
       }
+      if(ref.children instanceof Array && ref.children.length) {
+        ref.children = ref.children.filter(v => v != undefined);
+      }
     }
     if(typeof newVNode.nodeName === 'object') {
       if(typeof ref.self.componentDidUpdate === 'function') {
@@ -424,7 +427,7 @@ class Component {
    */
   _createNewNode(nodePos=0, newVNode, ref, context) {
     let newComponent = renderDOM.call({ context: context || {} }, newVNode.children[nodePos]);
-    ref.children.splice(nodePos+1, 0, newComponent);   
+    ref.children.splice(nodePos, 0, newComponent);   
     
     return mountTo(newComponent, ref.node, 'rnode', undefined, context);
   }
@@ -443,7 +446,9 @@ class Component {
     }
     if(destroyableNode.children && destroyableNode.children instanceof Array) {
       for(let c = 0; c < destroyableNode.children.length; c++) {
-        this._removeOldNode(c, destroyableNode, ref.children[nodePos]);
+        if(ref.children[nodePos]) {
+          this._removeOldNode(c, destroyableNode, ref.children[nodePos]);
+        }
       }
     }
 
@@ -454,7 +459,7 @@ class Component {
     if(typeof destroyableNode.nodeName === 'object') {
       destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
     }else if(typeof destroyableNode.nodeName === 'string') {
-      ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      ref.children[nodePos] && ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
     }
     ref.children[nodePos] = undefined;
   }
@@ -474,6 +479,7 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
+    console.time('update');
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -487,6 +493,7 @@ class Component {
       this.componentDidUpdate(this.vnode.props);
     }
     this.vnode = vnodeNow;
+    console.timeEnd('update');
   }
 
   /** 

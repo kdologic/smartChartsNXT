@@ -8,7 +8,6 @@ import eventEmitter from './../core/eventEmitter';
 /**
  * horizontalScroller.js
  * @createdOn:14-Jul-2017
- * @version:2.0.0
  * @author:SmartChartsNXT
  * @description: This components will create a Horizontal Scroll area for the chart. Where where user can drag right or left handler 
  * to adjust the window area. 
@@ -23,7 +22,7 @@ import eventEmitter from './../core/eventEmitter';
   }
 
  * Supported events - 
- hScroll : fire when user perform scrolling. 
+ * hScroll : fire when user perform scrolling. 
 
  */
 

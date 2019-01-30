@@ -11,7 +11,6 @@ import Style from './../viewEngin/style';
 
 /**
  * tooltip.js
- * @version:2.0.0
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create tooltip area for the chart. 
@@ -75,10 +74,13 @@ class Tooltip extends Component {
     
     componentDidMount() {
       typeof this.props.onRef === 'function' && this.props.onRef(this);
-      let node = this.ref.node.querySelector('.tooltip-content') ;  
-      node && (node.innerHTML = this.state.tooltipContent);
       this.emitter.on('updateTooltip', this.updateTipBind);
       this.emitter.on('hideTooltip', this.hideTipBind);
+    }
+
+    componentDidUpdate(prevProps) {
+      let node = this.ref.node.querySelector('.tooltip-content') ;  
+      node && (node.innerHTML = this.state.tooltipContent);
     }
 
     componentWillUnmount() {
@@ -103,7 +105,7 @@ class Tooltip extends Component {
             }
           }}
           </Style>
-          <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'>
+          {/* <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'> */}
             {this.state.opacity && 
               <g instanceId='tooltip-inst' transform={this.state.transformNew.replace(/px/gi,'')}>
                 <SpeechBox x={0} y={0} width={this.state.contentWidth} height={this.state.contentHeight} cpoint={this.state.cPoint }
@@ -115,7 +117,7 @@ class Tooltip extends Component {
                 </g>
               </g>
             }
-          </TransitionGroup>
+          {/* </TransitionGroup> */}
         </g>
       );
     }

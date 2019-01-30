@@ -20,7 +20,6 @@ import dateFormat from "dateformat";
 
 /**
  * SVG Area Chart :: areaChart.js
- * @version:2.0.0
  * @createdOn:31-05-2016
  * @author:SmartChartsNXT
  * @description: SVG Area Chart, that support multiple series and zoom window.
@@ -100,14 +99,14 @@ class AreaChart extends Component {
         },
         set windowLeftIndex(index) {
           this._windowLeftIndex = index;
-          this.leftOffset = index * 100 / (this.maxSeriesLen - 1); 
+          this.leftOffset = index * 100 / (this.maxSeriesLenFS - 1); 
         },
         get windowLeftIndex() {
           return this._windowLeftIndex;
         },
         set windowRightIndex(index) {
           this._windowRightIndex = index;
-          this.rightOffset = index * 100 / (this.maxSeriesLen - 1); 
+          this.rightOffset = index * 100 / (this.maxSeriesLenFS - 1); 
         },
         get windowRightIndex() {
           return this._windowRightIndex; 
@@ -253,9 +252,9 @@ class AreaChart extends Component {
     this.emitter.on('vLabelExit', this.hideTipBind);
     this.emitter.on('hLabelEnter', this.updateLabelTipBind);
     this.emitter.on('hLabelExit', this.hideTipBind);
-    this.emitter.on('legendClick', this.onLegendClickBind);
-    this.emitter.on('legendHover', this.onLegendHoverBind);
-    this.emitter.on('legendLeave', this.onLegendLeaveBind);
+    this.emitter.on('legendClicked', this.onLegendClickBind);
+    this.emitter.on('legendHovered', this.onLegendHoverBind);
+    this.emitter.on('legendLeaved', this.onLegendLeaveBind);
   }
 
   componentWillUnmount() {
@@ -266,9 +265,9 @@ class AreaChart extends Component {
     this.emitter.removeListener('vLabelExit', this.hideTipBind);
     this.emitter.removeListener('hLabelEnter', this.updateLabelTipBind);
     this.emitter.removeListener('hLabelExit', this.hideTipBind); 
-    this.emitter.removeListener('legendClick', this.onLegendClickBind);
-    this.emitter.removeListener('legendHover', this.onLegendHoverBind);
-    this.emitter.removeListener('legendLeave', this.onLegendLeaveBind);
+    this.emitter.removeListener('legendClicked', this.onLegendClickBind);
+    this.emitter.removeListener('legendHovered', this.onLegendHoverBind);
+    this.emitter.removeListener('legendLeaved', this.onLegendLeaveBind);
   }
 
   render() {
@@ -313,9 +312,11 @@ class AreaChart extends Component {
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
           opts={this.CHART_OPTIONS.pointerCrosshair || {}}> 
         </PointerCrosshair>
-
-        { this.drawSeries() }
-
+        
+        <g class='sc-chart-area-container'>
+          { this.drawSeries() }
+        </g>
+        
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           <Draggable>
             <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.offsetHeight+5} opts={this.CHART_OPTIONS.legends || {}} 
@@ -337,7 +338,9 @@ class AreaChart extends Component {
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop} 
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}> 
-            {this.drawHScrollSeries()}
+            <g class='sc-fs-chart-area-container'>
+              {this.drawHScrollSeries()}
+            </g>
           </HorizontalScroller>
         }
       </g>

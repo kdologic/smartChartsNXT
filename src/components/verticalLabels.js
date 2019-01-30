@@ -7,7 +7,6 @@ import { Component } from "./../viewEngin/pview";
 
 /**
  * verticalLabels.js
- * @version:2.0.0
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create a Vertical Labels and Tick marks for the chart.
@@ -45,9 +44,13 @@ class VerticalLabels extends Component{
   }
 
   componentDidMount() {
-    if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
-      this.setState({fontSize: this.state.fontSize-1});
-    }
+    this.intervalId = setInterval(() => {
+      if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
+        this.setState({fontSize: this.state.fontSize-1});
+      }else {
+        clearInterval(this.intervalId);
+      }
+    });
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 
