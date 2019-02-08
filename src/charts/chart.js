@@ -25,7 +25,7 @@ class Chart {
       this.targetNode.setAttribute("runId", this.runId);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false); 
-      console.log(this.core);
+      debug && console.log(this.core);
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 

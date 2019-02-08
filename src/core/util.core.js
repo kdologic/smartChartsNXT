@@ -1,15 +1,13 @@
+"use strict";
+
+/*-----------SmartChartsNXT Utility functions------------- */
+
 /**
  * util.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @version: 1.1.0
  * @description:SmartChartsNXT Core Library components. That contains utillity functions.
  */
-
-
-/*-----------SmartChartsNXT Utility functions------------- */
-
-"use strict";
 
 class UtilCore {
   constructor() {}
@@ -27,10 +25,10 @@ class UtilCore {
     }
   }
 
-
   /**
-   * Properties from the Souce1 object will be copied to source Object.
-   * Note: This method will return a new merged object, Source1 and source original values will not be replaced.
+   * Properties from the Souce1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
+   * @param {Object} source First Source object. 
+   * @param {Object} source1 Second Source Object.
    */
   extends(source, source1) {
     if(!source || !source1) {
@@ -102,7 +100,12 @@ class UtilCore {
       }
     };
   }
-
+/**
+ * Return a color HEX code from index.
+ * @param {Number} index Index of color HEX code.
+ * @param {Boolean} ranbowFlag Return rainbow color HEX code.
+ * @returns {String} Color HEX code.
+ */
   getColor(index, ranbowFlag) {
     let Colors = {};
     Colors.names = {
@@ -169,8 +172,7 @@ class UtilCore {
     }
     lum = lum || 0;
     /* convert to decimal and change luminosity*/
-    let rgb = "#",
-      c, i;
+    let rgb = "#", c, i;
     for (i = 0; i < 3; i++) {
       c = parseInt(hex.substr(i * 2, 2), 16);
       c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
@@ -183,7 +185,10 @@ class UtilCore {
     return new Function(params, "return `" + literal + "`;"); // TODO: Proper escaping
   }
 
-  /* will generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant*/
+  /** 
+   * Generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant.
+   * @returns {string} Return a GUID.
+   */
   uuidv4() {
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)

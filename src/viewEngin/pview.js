@@ -13,7 +13,8 @@
  */
 
 import ployfills from "./shims/polyfills";
- 
+
+window.debug = false; 
 /** 
  * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
  * @param {object} node - It will be a real DOM node or Virtual node which can be mount.
@@ -271,10 +272,14 @@ class Component {
    * @param {*} newVNode 
    */
   _detectDiff(oldVNode, newVNode) {
-    if(typeof oldVNode === 'string' && typeof newVNode === 'string' && oldVNode !== newVNode) {
-      return {type: 'NODE_TEXT_DIFF'};
+    if(typeof oldVNode === 'string' && typeof newVNode === 'string') {
+      if(oldVNode !== newVNode){
+        return {type: 'NODE_TEXT_DIFF'};
+      }else {
+        return {type: 'NODE_NO_DIFF'};
+      }
     }
-    if(oldVNode.nodeName === newVNode.nodeName) {
+    if(oldVNode.nodeName === newVNode.nodeName && oldVNode.attributes.instanceId === newVNode.attributes.instanceId) {
       let attrChanges = {};
       for(let attr in newVNode.attributes) {
         if(JSON.stringify(oldVNode.attributes[attr]) !== JSON.stringify(newVNode.attributes[attr])) {
@@ -479,7 +484,7 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
-    console.time('update');
+    debug && console.time('update');
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -493,7 +498,7 @@ class Component {
       this.componentDidUpdate(this.vnode.props);
     }
     this.vnode = vnodeNow;
-    console.timeEnd('update');
+    debug && console.timeEnd('update');
   }
 
   /** 
