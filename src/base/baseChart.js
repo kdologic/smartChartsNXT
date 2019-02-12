@@ -105,7 +105,7 @@ class BaseChart extends Component {
             height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
-            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}
+            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium, pointerEvents: 'none'}}
           />
         </g>}
 

@@ -1,19 +1,19 @@
+"use strict";
+
+import transformer from "./../core/transformer";
+import { Component } from "./../viewEngin/pview";
+import UiCore from './../core/ui.core';
+
 /**
  * draggable.js
- * @version:2.0.0
  * @createdOn:31-Aug-2017
  * @author:SmartChartsNXT
  * @description: This class will make components draggable.
  * To drag a component just double click on it then the component will be showed as selected then we can drag it 
  * to fix that position jus double click again on the component. Touch device also supported, to drag long press to 
  * select that element then you can drag it. 
+ * @extends Component
  */
-
-"use strict";
-
-import transformer from "./../core/transformer";
-import { Component } from "./../viewEngin/pview";
-import UiCore from './../core/ui.core';
 
 class Draggable extends Component{
   constructor(props) {
@@ -47,10 +47,19 @@ class Draggable extends Component{
     this.initialIntersectElems = null;
     this.initialSvgWidth = this.context.svgWidth; 
     this.initialSvgHeight = this.context.svgHeight;
+    
+    this.onDoubleClick =  this.onDoubleClick.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this); 
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onClickHandler = this.onClickHandler.bind(this);
+    this.onMouseDownHandler = this.onMouseDownHandler.bind(this);
   }
 
   componentDidMount() {
     this.rootSVG = document.getElementById(this.context.rootSvgId);
+  }
+
+  componentDidUpdate() {
     if (this.initialIntersectElems && this.mouseDrag) {
       let intersectedElemsNow = this.getIntersectedElems();
       
@@ -69,7 +78,7 @@ class Draggable extends Component{
       this.state.showHandler = false; 
     }
     return (
-      <g class='dragger drag-handler-container' events={this.getHandlerEventMap()} transform={this.state.tranMatrix} style={{cursor: this.state.showHandler ?'move':'default'}}>
+      <g class='dragger drag-handler-container' events={this.getHandlerEventMap()} transform={this.state.tranMatrix} style={{"pointer-events":'all',cursor: this.state.showHandler ?'move':'default'}}>
         <g clsss='dragger drag-innter-child-container'>
           {this.props.extChildren}
         </g>
@@ -132,10 +141,7 @@ class Draggable extends Component{
 
   onClickHandler(e) {
     let delay = 200;
-    this.timer = setTimeout(function () {
-      if (!this.prevent) {
-        //do nothing; 
-      }
+    this.timer = setTimeout(() => {
       this.prevent = false;
     }, delay);
   }
@@ -225,13 +231,13 @@ class Draggable extends Component{
 
   getHandlerEventMap() {
     let evtList = {
-      dblclick: this.onDoubleClick.bind(this),
-      touchstart: this.onTouchStart.bind(this), 
-      touchend: this.onTouchEnd.bind(this)
+      dblclick: this.onDoubleClick,
+      touchstart: this.onTouchStart,
+      touchend: this.onTouchEnd
     }; 
     return this.state.showHandler ? Object.assign(evtList, {
-      click: this.onClickHandler.bind(this),
-      mousedown: this.onMouseDownHandler.bind(this) 
+      click: this.onClickHandler,
+      mousedown: this.onMouseDownHandler
     }) : evtList;
   }
 }

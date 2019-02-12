@@ -97,6 +97,9 @@ class LegendBox extends Component {
     this.hoverHeight = 15; 
     this.lineHeight = 30;
     this.toggleColor = '#bbb';
+    this.onClick = this.onClick.bind(this);
+    this.onHover = this.onHover.bind(this);
+    this.onLeave = this.onLeave.bind(this);
   }
 
   componentWillMount() {
@@ -132,12 +135,12 @@ class LegendBox extends Component {
       return (
         <g class={`legend-${index} series-legend`} tabindex='0' transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
           events={{
-            click:this.onClick.bind(this),
-            keyup:this.onClick.bind(this),
-            mouseenter:this.onHover.bind(this),
-            mouseleave: this.onLeave.bind(this),
-            focusin: this.onHover.bind(this),
-            focusout: this.onLeave.bind(this)
+            click:this.onClick,
+            keyup:this.onClick,
+            mouseenter:this.onHover,
+            mouseleave: this.onLeave,
+            focusin: this.onHover,
+            focusout: this.onLeave
           }} >
           <rect class={`legend-${index} legend-border-${index}`} x={this.state.left + (this.padding/2)} y={this.state.top + (this.padding/2)} rx='7'
            width={this.state.lengthSet.max.width + this.padding} height={this.hoverHeight + this.padding} fill={this.config.hoverColor}  

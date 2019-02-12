@@ -5,7 +5,6 @@ import eventEmitter from './../core/eventEmitter';
 
 /**
  * pointerCrosshair.js
- * @version:2.0.0
  * @createdOn:21-Apr-2018
  * @author:SmartChartsNXT
  * @description: This components will create a vertical and horizontal cross line to follow the pointer or touch location. 

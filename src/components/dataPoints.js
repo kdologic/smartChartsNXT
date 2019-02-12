@@ -4,7 +4,6 @@ import { Component } from "./../viewEngin/pview";
 
 /**
  * dataPoints.js
- * @version:2.0.0
  * @createdOn:09-Mar-2018
  * @author:SmartChartsNXT
  * @description: This components will plot data points in chart area. 

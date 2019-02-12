@@ -264,7 +264,6 @@ class Component {
   getVirtualNode() {
     return this.vnode = this.render();
   }
-
  
   /**
    * Compare nodeName, attributes to detect exact changes
@@ -280,20 +279,94 @@ class Component {
       }
     }
     if(oldVNode.nodeName === newVNode.nodeName && oldVNode.attributes.instanceId === newVNode.attributes.instanceId) {
-      let attrChanges = {};
-      for(let attr in newVNode.attributes) {
-        if(JSON.stringify(oldVNode.attributes[attr]) !== JSON.stringify(newVNode.attributes[attr])) {
-          attrChanges[attr] = newVNode.attributes[attr];
-        }
-      }
-      if(Object.keys(attrChanges).length) {
-        return {type: 'NODE_ATTR_DIFF', attributes: attrChanges};
+      let attrDiff = this._jsonDiff(oldVNode.attributes, newVNode.attributes, 1);
+      if(attrDiff.length) {
+        return {type: 'NODE_ATTR_DIFF', attributes: attrDiff};
       }else {
         return {type: 'NODE_NO_DIFF'};
       }
     }else {
       return {type: 'NODE_NAME_DIFF'};
     }
+  }
+/**
+ * Get a diff json by comparing two JSON objects.
+ * @param {Object} obj1 First object to compare.
+ * @param {Object} obj2 Second object to compare with First object.
+ * @param {Number} level Number of hierarchical level to compare also will run (undefined for compare all levels).
+ */
+  _jsonDiff(obj1, obj2, level) {
+    let diff = {
+      $added: {},
+      $deleted: {},
+      $updated: {},
+      $object: {},
+      $unchanges: {}
+    };
+    let properties = this.arrayUnique(Object.keys(obj1).concat(Object.keys(obj2)));
+    for (let key = 0; key < properties.length; key++) {
+      let p = properties[key];
+      if (!obj1[p]) {
+        diff.$added[p] = obj2[p];
+      } else if (!obj2[p]) {
+        diff.$deleted[p] = obj1[p];
+      } else {
+        if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
+          if (obj1[p] instanceof Array || obj2[p] instanceof Array) {
+            diff.$updated[p] = obj2[p];
+          } else if (level == undefined || level > 0) {
+            diff.$object[p] = this._jsonDiff(obj1[p], obj2[p], level !== undefined ? level - 1 : level);
+          } else {
+            diff.$updated[p] = obj2[p];
+          }
+        } else if (obj1[p] !== obj2[p]) {
+          diff.$updated[p] = obj2[p];
+        } else {
+          diff.$unchanges[p] = obj2[p];
+        }
+      }
+    }
+    diff.length = (Object.keys(diff.$added).length + Object.keys(diff.$deleted).length + Object.keys(diff.$updated).length + Object.keys(diff.$object).length);
+    return diff;
+  }
+/**
+ * Compare and return an unique array with elements.
+ * @param {Array} array 
+ */
+  arrayUnique(array) {
+    let a = array.concat();
+    for (let i = 0; i < a.length; ++i) {
+      for (let j = i + 1; j < a.length; ++j) {
+        if (a[i] === a[j]) {
+          a.splice(j--, 1);
+        }
+      }
+    }
+    return a;
+  }
+
+  /**
+   * Properties from the Souce1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
+   * @param {Object} source First Source object. 
+   * @param {Object} source1 Second Source Object.
+   */
+  _extends(source1, source2) {
+    if(!source1 || !source2) {
+      return {}; 
+    }
+    let mergedJSON = source1;
+    for (let attrname in source2) {
+      if (mergedJSON.hasOwnProperty(attrname)) {
+        if (source2[attrname] != null && source2[attrname].constructor == Object) {
+          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source2[attrname]);
+        } else { 
+          mergedJSON[attrname] = source2[attrname];
+        }
+      } else { 
+        mergedJSON[attrname] = source2[attrname];
+      }
+    }
+    return mergedJSON;
   }
 
   /**
@@ -333,7 +406,7 @@ class Component {
     }
 
     let differ = this._detectDiff(oldVNode, newVNode);
-
+    
     switch(differ.type) {
       case 'NODE_ATTR_DIFF': 
         if(typeof newVNode.nodeName === 'object') {
@@ -344,9 +417,7 @@ class Component {
           newVNode.nodeName.vnode = newRenderedVnode;
           return;
         }else if(typeof newVNode.nodeName === 'string') {
-          for(let attr in differ.attributes) {
-            this._updateAttr(ref.node, attr, differ.attributes[attr]);
-          }
+          this._updateAttr(ref.node, differ.attributes);
         }
       break;
       case 'NODE_TEXT_DIFF':
@@ -365,9 +436,9 @@ class Component {
         if(oldVNode.children[child] && newVNode.children[child]) {
           let reconsileDiff; 
           if(typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
-            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newVNode.nodeName.render(), ref.self.ref, JSON.parse(JSON.stringify(context)));
+            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newVNode.nodeName.render(), ref.self.ref, this._extends({}, context));
           }else {
-            reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], JSON.parse(JSON.stringify(context)));
+            reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
             
             if(ref.children[child].children instanceof Array && ref.children[child].children.length) {
               ref.children[child].children = ref.children[child].children.filter(v => v != undefined);
@@ -472,11 +543,40 @@ class Component {
   /**
    * Update only attribute of existing DOM node.
    * @param {*} dom DOM reference on the node. 
-   * @param {*} attr Attribute name to be modify. 
-   * @param {*} val New value of the attibute.
+   * @param {*} attrChanges Attributes to be modify. 
    */
-  _updateAttr(dom, attr, val) {
-    dom.setAttribute(attr, val); 
+  _updateAttr(dom, attrChanges) {
+    let groups = ['$added','$updated','$object'];
+    groups.forEach((group) => {
+      Object.keys(attrChanges[group]).forEach(key => {
+        let attrVal = ((k) => {
+          switch (k) {
+            case 'style': 
+            let styles = "";
+            if(typeof attrChanges[group][k] === 'object') {
+              groups.forEach((grp) => {
+                styles += parseStyleProps(attrChanges[group][k][grp]);
+              });
+              styles += parseStyleProps(attrChanges[group][k].$unchanges);
+            }else {
+              styles = attrChanges[group][k];
+            }
+            return styles;
+            case 'events': 
+              let evtNames = Object.keys(attrChanges[group][k].$unchanges);
+              groups.forEach((grp) => {
+                evtNames = evtNames.concat(parseEventsProps(attrChanges[group][k][grp], dom).split(','));
+              });
+              Object.keys(attrChanges[group][k].$deleted).forEach((evt) => {
+                dom.removeEventListener(evt, attrChanges[group][k].$deleted[evt]);
+              });
+              return evtNames.filter(v => !!v).join();
+            default: return attrChanges[group][k];
+          }
+        })(key);
+        dom.setAttribute(key, attrVal);
+      });
+    });
   }
 
   /**
@@ -497,8 +597,8 @@ class Component {
     if(typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.vnode.props);
     }
-    this.vnode = vnodeNow;
     debug && console.timeEnd('update');
+    return this.vnode = vnodeNow;
   }
 
   /** 

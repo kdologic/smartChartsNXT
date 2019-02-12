@@ -13,7 +13,7 @@ import { Component } from "./../viewEngin/pview";
 
 class Grid extends Component{
   constructor(props) {
-      super(props);
+    super(props);
   }
   
   render() {

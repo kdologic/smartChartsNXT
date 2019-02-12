@@ -1,21 +1,17 @@
 "use strict";
 
-/** 
- * speechBox.js
- * @createdOn:23-Jan-2018
- * @version:2.0.0
- * @author:SmartChartsNXT
- * @description:This components will create speech box with SVG by providing top-left point and c-point.
- */
-
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
 import UiCore from "./../core/ui.core"; 
 
 /** 
- * This components will create speech box with SVG by providing top-left point and c-point. 
+ * speechBox.js
+ * @createdOn:23-Jan-2018
+ * @author:SmartChartsNXT
+ * @description:This components will create speech box with SVG by providing top-left point and c-point.
  * @extends Component
  */
+
 class SpeechBox extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +34,6 @@ class SpeechBox extends Component {
 
   render() {
     this.cpoint = this.props.cpoint; 
-    let cp = new Point(this.props.cpoint.x - this.props.x, this.props.cpoint.y - this.props.y);
     return (
       <g class='speech-box' transform={`translate(${this.props.x},${this.props.y})`}>
         {this.props.shadow && UiCore.dropShadow('sc-speech-box-drop-shadow')}

@@ -1,14 +1,13 @@
+"use strict";
+
+import { Component } from "./../viewEngin/pview";
+
 /**
  * tick.js
- * @version:2.0.0
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create a tick mark for the chart. 
  */
-
-"use strict";
-
-import { Component } from "./../viewEngin/pview";
 
 class Ticks extends Component{
   constructor(props) {

@@ -36,7 +36,9 @@ class VerticalLabels extends Component{
     };
     this.valueSet = []; 
     this.minLabelVal = this.props.minVal; 
-    this.maxLabelVal = this.props.maxVal; 
+    this.maxLabelVal = this.props.maxVal;
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
   }
 
   componentWillMount() {
@@ -100,7 +102,7 @@ class VerticalLabels extends Component{
     return (
       <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none' 
         font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave}}> 
           {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
         </tspan>
       </text>

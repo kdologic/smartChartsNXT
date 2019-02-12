@@ -1,16 +1,16 @@
-/**
- * watermark.js
- * @createdOn: 05-Jan-2018
- * @author: SmartChartsNXT
- * @version: 2.0.0
- * @description:This is a component class will create watermark area. 
- */ 
-
 "use strict";
 
 import { Component } from "./../viewEngin/pview";
 import UiCore from './../core/ui.core';
 import defaultConfig from "./../settings/config";
+
+/**
+ * watermark.js
+ * @createdOn: 05-Jan-2018
+ * @author: SmartChartsNXT
+ * @description:This is a component class will create watermark area. 
+ * @extends: Component
+ */ 
 
 class Watermark extends Component {
   constructor(props) {

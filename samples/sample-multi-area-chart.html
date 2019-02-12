@@ -3,7 +3,7 @@
 <head>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
-    var debug = true; 
+    var debug = false; 
     function generateData(x, y, count) {
       var dataSet = [];
       for (var i = 0; i < count; i++) {
@@ -20,7 +20,7 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
-        let areaChart = new SmartChartsNXT.Chart({
+        var areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
           "title": "Multi Series Chart",
           "subtitle": "Area Chart",

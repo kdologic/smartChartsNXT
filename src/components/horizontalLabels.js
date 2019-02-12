@@ -9,7 +9,6 @@ import dateFormat from "dateformat";
 
 /**
  * horizontalLabels.js
- * @version:2.0.0
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create a Horizontal Labels for the chart.
@@ -57,7 +56,8 @@ class HorizontalLabels extends Component{
       }
     };
     this.state.categories = this.props.categorySet;
-      
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
   }
 
   componentWillMount() {
@@ -115,7 +115,7 @@ class HorizontalLabels extends Component{
       <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} 
         transform={transform} font-size={this.config.fontSize} opacity={this.config.labelOpacity} stroke="none" text-rendering='geometricPrecision' >
 
-        <tspan class={`hlabel-${index} label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+        <tspan class={`hlabel-${index} label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave}}> 
           {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
         </tspan>
 

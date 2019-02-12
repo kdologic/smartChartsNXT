@@ -48,6 +48,12 @@ class HorizontalScroller extends Component {
     };
     
     this.slider = {}; 
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onHoverInHandler = this.onHoverInHandler.bind(this);
+    this.onLeaveInHandler = this.onLeaveInHandler.bind(this);
+    this.onOffsetClick = this.onOffsetClick.bind(this);
+    this.onScrollMove = this.onScrollMove.bind(this);
+    this.onScrollEnd = this.onScrollEnd.bind(this);
   }
 
   propsWillReceive(nextProps) {
@@ -66,23 +72,23 @@ class HorizontalScroller extends Component {
         <path class='sc-hScroller-lower-path' stroke='#333' fill='none' d={this.getLowerBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
           events= {{
-            mousedown: this.onMouseDown.bind(this),
-            touchstart: this.onMouseDown.bind(this)
+            mousedown: this.onMouseDown,
+            touchstart: this.onMouseDown
           }}> 
         </SliderWindow>
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
           events= {{
             handlerEvent: {
-              mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this),
-              mouseenter: this.onHoverInHandler.bind(this),
-              mouseleave: this.onLeaveInHandler.bind(this),
-              focusin: this.onHoverInHandler.bind(this),
-              focusout: this.onLeaveInHandler.bind(this)
+              mousedown: this.onMouseDown,
+              touchstart: this.onMouseDown,
+              mouseenter: this.onHoverInHandler,
+              mouseleave: this.onLeaveInHandler,
+              focusin: this.onHoverInHandler,
+              focusout: this.onLeaveInHandler
             },
             offsetEvent: {
-              click: this.onOffsetClick.bind(this)
+              click: this.onOffsetClick
             }
           }}> 
         </SliderLeftHandle>
@@ -90,27 +96,27 @@ class HorizontalScroller extends Component {
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
           events= {{
             handlerEvent: {
-              mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this),
-              mouseenter: this.onHoverInHandler.bind(this),
-              mouseleave: this.onLeaveInHandler.bind(this),
-              focusin: this.onHoverInHandler.bind(this),
-              focusout: this.onLeaveInHandler.bind(this)
+              mousedown: this.onMouseDown,
+              touchstart: this.onMouseDown,
+              mouseenter: this.onHoverInHandler,
+              mouseleave: this.onLeaveInHandler,
+              focusin: this.onHoverInHandler,
+              focusout: this.onLeaveInHandler
             },
             offsetEvent: {
-              click: this.onOffsetClick.bind(this)
+              click: this.onOffsetClick
             }
           }}> 
         </SliderRightHandle>
         { this.selectedHandler &&
           <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
             events={{
-              mousemove: this.onScrollMove.bind(this),
-              touchmove: this.onScrollMove.bind(this),
-              mouseup: this.onScrollEnd.bind(this),
-              touchend: this.onScrollEnd.bind(this),
-              mouseout: this.onScrollEnd.bind(this),
-              mouseleave: this.onScrollEnd.bind(this)
+              mousemove: this.onScrollMove,
+              touchmove: this.onScrollMove,
+              mouseup: this.onScrollEnd,
+              touchend: this.onScrollEnd,
+              mouseout: this.onScrollEnd,
+              mouseleave: this.onScrollEnd
             }}
           />
         }
@@ -259,8 +265,6 @@ class SliderWindow extends Component {
 
   propsWillReceive(nextProps) {
     this.state = {...this.state, ...nextProps};
-    this.state.events['mouseenter'] = this.onHover.bind(this);
-    this.state.events['mouseleave'] = this.onLeave.bind(this);
   }
 
   componentWillMount() {
