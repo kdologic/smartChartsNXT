@@ -3,10 +3,12 @@
 /**index.js */
 
 import { mountTo } from "./../../pview";
+import AttrUpdateApp from "./attrUpdateApp";
 
 const modules = {
   ClickerApp: require("./clickerApp").default,
-  RenderingTestApp: require("./renderingTestApp").default
+  RenderingTestApp: require("./renderingTestApp").default,
+  AttrUpdateApp: require("./attrUpdateApp").default
 };
 
 window.loadModule = function(moduleName, targetNode) {

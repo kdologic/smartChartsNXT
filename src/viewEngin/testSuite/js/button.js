@@ -24,8 +24,8 @@ class Button extends Component {
             }
           }}
         </Style>
-        <rect x='0' y='0' rx={this.props.borderRadius} width={this.props.width} height={this.props.height} fill={this.props.bgColor} stroke={this.props.borderColor}/>
-        {this.props.extChildren}
+        <rect x='0' y='0' rx={this.props.borderRadius} width={this.props.width} height={this.props.height} fill={this.props.bgColor} stroke={this.props.borderColor} style="cursor:pointer;" />
+        <g style='pointer-events: none;'>{this.props.extChildren}</g>
       </g>
     );
   }

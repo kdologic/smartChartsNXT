@@ -1,13 +1,11 @@
-/*
- * point.js
- * @CreatedOn: 11-July-2017
- * @Author: SmartChartsNXT
- * @Version: 1.1.0
- * @description:Define a Point class to store coordinate values.
- */
-
-
 "use strict";
+
+/**
+ * point.js
+ * @createdOn: 11-July-2017
+ * @author: SmartChartsNXT
+ * @description: Define a Point class to store coordinate values.
+ */
 
 class Point {
     constructor(x = 0, y = 0) {

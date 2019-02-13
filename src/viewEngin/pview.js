@@ -211,7 +211,11 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
+    if(objStyle[key].old && objStyle[key].new) {
+      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
+    }else {
+      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
+    }
   });
   return sArr.join('');
 }
@@ -224,7 +228,12 @@ function parseStyleProps(objStyle) {
  */
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
-    node.addEventListener(e, events[e], false);
+    if(events[e].new && events[e].old) {
+      node.addEventListener(e, events[e].new, false);
+      node.removeEventListener(e, events[e].old);
+    }else {
+      node.addEventListener(e, events[e], false);
+    }
   });
   return Object.keys(events).join();
 }
@@ -289,6 +298,7 @@ class Component {
       return {type: 'NODE_NAME_DIFF'};
     }
   }
+
 /**
  * Get a diff json by comparing two JSON objects.
  * @param {Object} obj1 First object to compare.
@@ -313,14 +323,23 @@ class Component {
       } else {
         if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
           if (obj1[p] instanceof Array || obj2[p] instanceof Array) {
-            diff.$updated[p] = obj2[p];
+            diff.$updated[p] = {
+              "new": obj2[p],
+              "old": obj1[p]
+            };
           } else if (level == undefined || level > 0) {
             diff.$object[p] = this._jsonDiff(obj1[p], obj2[p], level !== undefined ? level - 1 : level);
           } else {
-            diff.$updated[p] = obj2[p];
+            diff.$updated[p] = {
+              "new": obj2[p],
+              "old": obj1[p]
+            };
           }
         } else if (obj1[p] !== obj2[p]) {
-          diff.$updated[p] = obj2[p];
+          diff.$updated[p] = {
+            "new": obj2[p],
+            "old": obj1[p]
+          };
         } else {
           diff.$unchanges[p] = obj2[p];
         }
@@ -329,6 +348,7 @@ class Component {
     diff.length = (Object.keys(diff.$added).length + Object.keys(diff.$deleted).length + Object.keys(diff.$updated).length + Object.keys(diff.$object).length);
     return diff;
   }
+
 /**
  * Compare and return an unique array with elements.
  * @param {Array} array 
@@ -533,9 +553,9 @@ class Component {
     }
     
     if(typeof destroyableNode.nodeName === 'object') {
-      destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
+      destroyableNode.nodeName.ref.node.parentNode && destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
     }else if(typeof destroyableNode.nodeName === 'string') {
-      ref.children[nodePos] && ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      ref.children[nodePos] && ref.children[nodePos].node.parentNode && ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
     }
     ref.children[nodePos] = undefined;
   }
@@ -571,11 +591,27 @@ class Component {
                 dom.removeEventListener(evt, attrChanges[group][k].$deleted[evt]);
               });
               return evtNames.filter(v => !!v).join();
-            default: return attrChanges[group][k];
+            default: 
+              if(attrChanges[group][k].old && attrChanges[group][k].new) {
+                return attrChanges[group][k].new;
+              }else {
+                return attrChanges[group][k];
+              }
           }
         })(key);
         dom.setAttribute(key, attrVal);
       });
+    });
+    Object.keys(attrChanges.$deleted).forEach(key => {
+      let attr = ((k) => {
+        switch (k) {
+          case 'events': 
+            dom.removeEventListener(k, attrChanges.$deleted[k]); 
+          return k;
+          default: return k;
+        }
+      })(key);
+      dom.removeAttribute(attr);
     });
   }
 

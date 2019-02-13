@@ -4,7 +4,6 @@
  * ui.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
  */
 

@@ -3,6 +3,13 @@
 import { Component } from "./pview";
 
 /**
+ * transitionGroup.js
+ * @createdOn:26-Apr-2018
+ * @author:SmartChartsNXT
+ * @description: This component will be used to create css transition on top of pView Library. Must use InstanceId as props to uniquely identify elements.
+ * @extends Component
+ * 
+ * 
  * This component will be used to create css transition on top of pView Library. 
  * Must use InstanceId as props to uniquely identify elements.
  * 
@@ -23,14 +30,6 @@ import { Component } from "./pview";
  * ${transition-name}-exit -- Apply this class just before remove an element.
  * 
  * ${transition-name}-exit-active -- Apply this class after remove an element and remove when transitionExitDelay completed.
- *
- * transitionGroup.js
- * @version:2.0.0
- * @createdOn:26-Apr-2018
- * @author:SmartChartsNXT
- * @description: This component will be used to create css transition on top of pView Library. 
- *               Must use InstanceId as props to uniquely identify elements.
- * @extends Component
  */
 
 class TransitionGroup extends Component {

@@ -1,13 +1,11 @@
+"use strict";
+
 /**
  * polyfills.js
  * @createdOn: 08-Aug-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description: Apply polyfills for older browsers 
  */
-
-
-"use strict";
 
 class Polyfills {
   constructor() {
