@@ -38,11 +38,14 @@ class TransitionGroup extends Component {
     this.prevExtChildren = []; 
     this.removedExtChildren = [];
     this.mergedExtChildren = [];
+    this.removedChildNodes = [];
   }
 
   componentWillMount() {
+    this.newExtChildren = this.findNewChildren();
+    this.removedExtChildren = this.findRemovedChildren();
+    this.mergedExtChildren = this.mergeChildren();
     let childNodes = this.ref.node.childNodes;
-    
     for (let i = 0; i < childNodes.length; i++) {
       let isNewChild = this.newExtChildren.findIndex(c => {
         return c.attributes.instanceId === this.mergedExtChildren[i].attributes.instanceId;
@@ -65,10 +68,8 @@ class TransitionGroup extends Component {
   componentDidMount() {
     let childNodes = this.ref.node.childNodes;
     window.requestNextAnimationFrame(() => {
+      
       for (let i = 0; i < childNodes.length; i++) {
-        let isNewChild = this.newExtChildren.findIndex(c => {
-          return c.attributes.instanceId === this.mergedExtChildren[i].attributes.instanceId;
-        }) >= 0;
 
         let isRemovedChild = this.removedExtChildren.findIndex(c => {
           return c.attributes.instanceId === this.mergedExtChildren[i].attributes.instanceId;
@@ -80,7 +81,7 @@ class TransitionGroup extends Component {
         
         (function(elem, tn, td){
           setTimeout(() => {
-            elem.classList.remove(tn + '-enter', tn + '-enter-active');
+            elem && elem.classList.remove(tn + '-enter', tn + '-enter-active');
           }, td || 0);
         })(childNodes[i], this.props.transitionName, this.props.transitionEnterDelay);
           
@@ -88,7 +89,7 @@ class TransitionGroup extends Component {
         if(isRemovedChild) {
           (function(elem, td){
             setTimeout(() => {
-              elem.parentNode.removeChild(elem);
+              elem && elem.parentNode && elem.parentNode.removeChild(elem);
             }, td || 0);
           })(childNodes[i], this.props.transitionExitDelay);
         }
@@ -98,13 +99,62 @@ class TransitionGroup extends Component {
     this.prevExtChildren = this.props.extChildren || []; 
   }
 
-  render() {
+  componentWillUpdate(nextProps) {
     this.newExtChildren = this.findNewChildren();
     this.removedExtChildren = this.findRemovedChildren();
     this.mergedExtChildren = this.mergeChildren();
+    this.removedChildNodes = this.findRemoveChildNodes();
+  }
+
+  componentDidUpdate(prevProps) {
+    let childNodes = this.ref.node.childNodes;
+    for (let i = 0; i < childNodes.length; i++) {
+      let isNewChild = this.newExtChildren.findIndex(c => {
+       return this.mergedExtChildren.findIndex(m => {
+         return c.attributes.instanceId === m.attributes.instanceId;
+       }) >= 0;
+      }) >= 0;
+
+      if(this.props.applyForNew){
+        isNewChild && childNodes[i].classList.add(this.props.transitionName + '-enter');
+      }else {
+        childNodes[i].classList.add(this.props.transitionName + '-enter');
+      }
+    }
+    for (let i = 0; i < this.removedChildNodes.length; i++) {
+      this.removedChildNodes[i].classList.add(this.props.transitionName + '-exit');
+      this.ref.node.appendChild(this.removedChildNodes[i]);
+    }
+
+    window.requestNextAnimationFrame(() => {
+      
+      for (let i = 0; i < childNodes.length; i++) {
+        childNodes[i].classList.add(this.props.transitionName + '-enter-active');
+        
+        (function(elem, tn, td){
+          setTimeout(() => {
+            elem.classList.remove(tn + '-enter', tn + '-enter-active');
+          }, td || 0);
+        })(childNodes[i], this.props.transitionName, this.props.transitionEnterDelay);
+      }
+
+      for (let i = 0; i < this.removedChildNodes.length; i++) {
+        this.removedChildNodes[i].classList.add(this.props.transitionName + '-exit-active');
+        (function(elem, td){
+          setTimeout(() => {
+            elem.parentNode.removeChild(elem);
+          }, td || 0);
+        })(this.removedChildNodes[i], this.props.transitionExitDelay);
+      }
+    });
+
+    this.prevExtChildren = this.props.extChildren || []; 
+  }
+
+  render() {
     return (
       <g class='sc-transition-group'>
-        {this.mergedExtChildren}
+        {this.props.extChildren}
       </g>
     );
   }
@@ -125,6 +175,20 @@ class TransitionGroup extends Component {
       }
       return this.props.extChildren.findIndex(c => c.attributes.instanceId === v.attributes.instanceId) === -1;
     });
+  }
+
+  findRemoveChildNodes() {
+    let removedNode = []; 
+    this.ref.node.childNodes.forEach((elem) => {
+      if(!this.props.extChildren) {
+        removedNode.push(elem.cloneNode(true));
+        return;
+      }
+      if(this.props.extChildren.findIndex(c => c.attributes.instanceId === elem.getAttribute('instanceId')) === -1) {
+        removedNode.push(elem.cloneNode(true));
+      }
+    });
+    return removedNode;
   }
 
   mergeChildren() {

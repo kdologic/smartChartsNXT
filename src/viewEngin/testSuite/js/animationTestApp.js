@@ -1,24 +1,23 @@
 
 "use strict";
 
-/**clickerApp.js */
-
-import { Component } from "./../../pview";
+import { Component } from "../../pview";
 import Button from "./button"; 
 import TextBox from "./textBox";
-import TransitionGroup from "./../../transitionGroup"; 
-import Style from "./../../style"; 
+import TransitionGroup from "../../transitionGroup"; 
+import Style from "../../style"; 
 
-class ClickerApp extends Component {
+class AnimationTestApp extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      boxCount: 0,
+      boxCount: 1,
       boxPosX: 100,
       pBoxPosX: 50,
       boxPosY: 250,
-      applyForNew:false
+      applyForNew: false,
+      showBox: true
     };
   }
 
@@ -48,18 +47,33 @@ class ClickerApp extends Component {
             </Button>
 
             <Button instanceId='posXBtn' posx='430' posy='150' width='100' height='40' bgColor='#7d5eb3' borderColor='#6312f1' borderRadius='5'
-              onClick= { (e) => { this.state.boxCount > 0 && this.setState({pBoxPosX:this.state.boxPosX, boxPosX: this.state.boxPosX + 50, applyForNew: false});}} >
+              onClick= { (e) => { this.state.boxCount > 0 && this.setState({pBoxPosX:this.state.boxPosX, boxPosX: this.state.boxPosX + 50, applyForNew: false});}}>
               <text x="0" y="35" fill="#fff" font-size="45" font-weight="bold">{"X+10"}</text>
             </Button>
 
+            <Button instanceId='posXBtn' posx='540' posy='150' width='100' height='40' bgColor='#33deb3' borderColor='#33deb3' borderRadius='5'
+              onMouseEnter={(e) => {this.setState({showBox: true});}} onMouseLeave={(e) => {this.setState({showBox: false});}} >
+              <text x="35" y="30" fill="#fff" font-size="35" font-weight="bold">(.)</text>
+            </Button>
+
             <TransitionGroup transitionName='box-effect' 
-              transitionEnterDelay='1000' transitionExitDelay='300' applyForNew={this.state.applyForNew}>
-              {this.getBoxes()}
+              transitionEnterDelay='1000' transitionExitDelay='500' applyForNew={this.state.applyForNew}>
+              {this.state.showBox && this.getBoxes()}
             </TransitionGroup>
             
           </g>
         </svg>
     );
+  }
+
+  getRects = () => {
+    let arrRects = [];
+    for(let i = 0; i < this.state.boxCount; i++) {
+      arrRects.push(
+        <rect class={'tbx-' + i} instanceId={'tbx-' + i} width={100} height={50} stroke='#000' fill='gray' transform={`translate(${this.state.boxPosX + (i * 110)}, ${this.state.boxPosY})`} />
+      );
+    }
+    return arrRects;
   }
 
   getBoxes = () => {
@@ -83,7 +97,7 @@ class ClickerApp extends Component {
               },
               ['.tbx-' + i +".box-effect-exit.box-effect-exit-active"] : {
                 opacity: "0.1",
-                transition: "opacity 0.3s ease-in-out"
+                transition: "opacity 0.5s ease-in-out"
               }
             }}
           </Style>
@@ -99,4 +113,4 @@ class ClickerApp extends Component {
 
 }
 
-export default ClickerApp;
+export default AnimationTestApp;

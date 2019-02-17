@@ -14,9 +14,16 @@ class Button extends Component {
     this.btnUID = 'btn-' + Math.round(Math.random() * 100000);
   }
 
+  emptyFn = () => {}
+
   render() {
     return (
-      <g class={`btn ${this.props.instanceId} ${this.btnUID}`} transform={`translate(${this.props.posx},${this.props.posy})`} events={{click: this.props.onClick}}>
+      <g class={`btn ${this.props.instanceId} ${this.btnUID}`} transform={`translate(${this.props.posx},${this.props.posy})`} events={
+        {
+          click: this.props.onClick || this.emptyFn
+          // mouseenter: this.props.onMouseEnter || this.emptyFn,
+          // mouseleave: this.props.onMouseLeave || this.emptyFn
+        }}>
         <Style>
           {{
             [".btn." + this.btnUID + " rect:hover"] : {

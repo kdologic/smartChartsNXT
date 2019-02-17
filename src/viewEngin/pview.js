@@ -345,7 +345,11 @@ class Component {
         }
       }
     }
-    diff.length = (Object.keys(diff.$added).length + Object.keys(diff.$deleted).length + Object.keys(diff.$updated).length + Object.keys(diff.$object).length);
+    
+    diff.length = (Object.keys(diff.$added).length + Object.keys(diff.$deleted).length + Object.keys(diff.$updated).length);
+    for(let key in diff.$object) {
+      diff.length += (diff.$object[key].length || 0);
+    }
     return diff;
   }
 
@@ -408,7 +412,8 @@ class Component {
     }
 
     if(typeof newVNode.nodeName === 'object') {
-      let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes, { extChildren: newVNode.children });
+      newVNode.attributes.extChildren = newVNode.children;
+      let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes);
       if(ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if(!shouldUpdate) {
@@ -419,6 +424,11 @@ class Component {
         ref.self.propsWillReceive.call(ref.self, newProps);
         ref.self.props = newProps; 
       }
+
+      if(ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
+        ref.self.componentWillUpdate.call(ref.self, newProps);
+      }
+
       if(ref && ref.self) {
         ref.self.__proto__.context = context; 
         newRenderedVnode = ref.self.render();
@@ -430,11 +440,13 @@ class Component {
     switch(differ.type) {
       case 'NODE_ATTR_DIFF': 
         if(typeof newVNode.nodeName === 'object') {
+
           this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
-          if(typeof ref.self.componentDidUpdate === 'function') {
+          newVNode.nodeName.vnode = newRenderedVnode;
+
+          if(ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
             ref.self.componentDidUpdate(oldVNode.attributes);
           }
-          newVNode.nodeName.vnode = newRenderedVnode;
           return;
         }else if(typeof newVNode.nodeName === 'string') {
           this._updateAttr(ref.node, differ.attributes);
@@ -456,7 +468,7 @@ class Component {
         if(oldVNode.children[child] && newVNode.children[child]) {
           let reconsileDiff; 
           if(typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
-            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newVNode.nodeName.render(), ref.self.ref, this._extends({}, context));
+            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
           }else {
             reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
             
@@ -493,10 +505,10 @@ class Component {
       }
     }
     if(typeof newVNode.nodeName === 'object') {
-      if(typeof ref.self.componentDidUpdate === 'function') {
-        ref.self.componentDidUpdate(oldVNode.props);
-      }
       newVNode.nodeName.vnode = newRenderedVnode;
+      if(typeof ref.self.componentDidUpdate === 'function') {
+        ref.self.componentDidUpdate(oldVNode.nodeName.props);
+      }
     }
   }
 
@@ -629,9 +641,12 @@ class Component {
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
+    if(typeof this.componentWillUpdate === 'function') {
+      this.componentWillUpdate(vnodeNow.attributes);
+    }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext); 
     if(typeof this.componentDidUpdate === 'function') {
-      this.componentDidUpdate(this.vnode.props);
+      this.componentDidUpdate(this.vnode.attributes);
     }
     debug && console.timeEnd('update');
     return this.vnode = vnodeNow;
@@ -675,7 +690,13 @@ class Component {
   shouldComponentUpdate(nextProps) {
     return true;
   }
-
+  
+  /** 
+   * Lifecycle event - fires before the component update on parent DOM.
+   * @param {*} nextProps set of props that was there before update that component.
+   */
+  componentWillUpdate(nextProps){}
+  
   /** 
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {*} prevProps set of props that was there before update that component.
