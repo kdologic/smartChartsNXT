@@ -288,7 +288,7 @@ class Component {
       }
     }
     if(oldVNode.nodeName === newVNode.nodeName && oldVNode.attributes.instanceId === newVNode.attributes.instanceId) {
-      let attrDiff = this._jsonDiff(oldVNode.attributes, newVNode.attributes, 1);
+      let attrDiff = this._attrDiff(oldVNode.attributes, newVNode.attributes, 1, ['extChildren']);
       if(attrDiff.length) {
         return {type: 'NODE_ATTR_DIFF', attributes: attrDiff};
       }else {
@@ -305,7 +305,7 @@ class Component {
  * @param {Object} obj2 Second object to compare with First object.
  * @param {Number} level Number of hierarchical level to compare also will run (undefined for compare all levels).
  */
-  _jsonDiff(obj1, obj2, level) {
+  _attrDiff(obj1, obj2, level, ignoreList=[]) {
     let diff = {
       $added: {},
       $deleted: {},
@@ -321,14 +321,16 @@ class Component {
       } else if (!obj2[p]) {
         diff.$deleted[p] = obj1[p];
       } else {
-        if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
+        if(ignoreList.indexOf(p) >= 0) {
+          diff.$unchanges[p] = obj2[p];
+        } else if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
           if (obj1[p] instanceof Array || obj2[p] instanceof Array) {
             diff.$updated[p] = {
               "new": obj2[p],
               "old": obj1[p]
             };
           } else if (level == undefined || level > 0) {
-            diff.$object[p] = this._jsonDiff(obj1[p], obj2[p], level !== undefined ? level - 1 : level);
+            diff.$object[p] = this._attrDiff(obj1[p], obj2[p], level !== undefined ? level - 1 : level, ignoreList);
           } else {
             diff.$updated[p] = {
               "new": obj2[p],
@@ -443,7 +445,7 @@ class Component {
 
           this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
           newVNode.nodeName.vnode = newRenderedVnode;
-
+          ref.children = ref.self.ref.children;
           if(ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
             ref.self.componentDidUpdate(oldVNode.attributes);
           }
@@ -468,7 +470,9 @@ class Component {
         if(oldVNode.children[child] && newVNode.children[child]) {
           let reconsileDiff; 
           if(typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
+            child = Math.max(oldVNode.children.length, newVNode.children.length);
             reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
+            ref.children = ref.self.ref.children;
           }else {
             reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
             

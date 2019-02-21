@@ -20,9 +20,9 @@ class Button extends Component {
     return (
       <g class={`btn ${this.props.instanceId} ${this.btnUID}`} transform={`translate(${this.props.posx},${this.props.posy})`} events={
         {
-          click: this.props.onClick || this.emptyFn
-          // mouseenter: this.props.onMouseEnter || this.emptyFn,
-          // mouseleave: this.props.onMouseLeave || this.emptyFn
+          click: this.props.onClick || this.emptyFn,
+          mouseenter: this.props.onMouseEnter || this.emptyFn,
+          mouseleave: this.props.onMouseLeave || this.emptyFn
         }}>
         <Style>
           {{

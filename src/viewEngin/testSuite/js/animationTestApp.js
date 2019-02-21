@@ -51,10 +51,10 @@ class AnimationTestApp extends Component {
               <text x="0" y="35" fill="#fff" font-size="45" font-weight="bold">{"X+10"}</text>
             </Button>
 
-            <Button instanceId='posXBtn' posx='540' posy='150' width='100' height='40' bgColor='#33deb3' borderColor='#33deb3' borderRadius='5'
-              onMouseEnter={(e) => {this.setState({showBox: true});}} onMouseLeave={(e) => {this.setState({showBox: false});}} >
+             <Button instanceId='posXBtn' posx='540' posy='150' width='100' height='40' bgColor='#33deb3' borderColor='#33deb3' borderRadius='5'
+              onMouseEnter={this.onMouseEnter} onMouseLeave={this.onMouseLeave} >
               <text x="35" y="30" fill="#fff" font-size="35" font-weight="bold">(.)</text>
-            </Button>
+            </Button> 
 
             <TransitionGroup transitionName='box-effect' 
               transitionEnterDelay='1000' transitionExitDelay='500' applyForNew={this.state.applyForNew}>
@@ -65,6 +65,9 @@ class AnimationTestApp extends Component {
         </svg>
     );
   }
+
+  onMouseEnter = (e) => {this.setState({showBox: true});}
+  onMouseLeave = (e) => {this.setState({showBox: false});}
 
   getRects = () => {
     let arrRects = [];
