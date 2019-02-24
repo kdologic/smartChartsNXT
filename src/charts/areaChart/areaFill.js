@@ -19,7 +19,7 @@ class AreaFill extends Component{
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId); 
-    this.rid = Math.round(Math.random()*100001);
+    this.rid = Date.now() + '-'+ Math.round(Math.random()*101);
     this.clipPathId = 'sc-clip-' + this.rid;
     this.gradId = "sc-area-fill-grad-" + this.rid;
     this.state = {
@@ -32,6 +32,12 @@ class AreaFill extends Component{
       strokeOpacity: this.props.strokeOpacity || 1,
       opacity: this.props.opacity || 1
     };
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: this.props.width,
+      height: this.props.height
+    }, this.props.clip);
     this.subComp = {}; 
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
@@ -61,6 +67,12 @@ class AreaFill extends Component{
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
     this.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: nextProps.width,
+      height: nextProps.height
+    }, nextProps.clip);
   }
 
   render() {
@@ -68,7 +80,7 @@ class AreaFill extends Component{
       <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={0} y={0} width={this.props.width} height={this.props.height} />
+            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
           </clipPath>
         </defs>
         {this.props.gradient && this.createGradient(this.gradId)}
@@ -139,6 +151,9 @@ class AreaFill extends Component{
     this.state.scaleY = props.height / (props.maxVal-props.minVal); 
     this.state.baseLine = props.maxVal * this.state.scaleY; 
     this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker; 
+    if(typeof props.getScaleX === 'function') {
+      props.getScaleX(this.state.scaleX);
+    }
   }
 
   interactiveMouseMove(e) {

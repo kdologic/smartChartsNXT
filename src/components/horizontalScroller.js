@@ -44,7 +44,8 @@ class HorizontalScroller extends Component {
       rightOffset: offset.rightOffset,
       windowWidth: offset.windowWidth,
       leftHandlerColor: '#fff',
-      rightHandlerColor: '#fff'
+      rightHandlerColor: '#fff',
+      handlerFocused: null
     };
     
     this.slider = {}; 
@@ -54,6 +55,7 @@ class HorizontalScroller extends Component {
     this.onOffsetClick = this.onOffsetClick.bind(this);
     this.onScrollMove = this.onScrollMove.bind(this);
     this.onScrollEnd = this.onScrollEnd.bind(this);
+    this.onKeyMove = this.onKeyMove.bind(this);
   }
 
   propsWillReceive(nextProps) {
@@ -85,7 +87,8 @@ class HorizontalScroller extends Component {
               mouseenter: this.onHoverInHandler,
               mouseleave: this.onLeaveInHandler,
               focusin: this.onHoverInHandler,
-              focusout: this.onLeaveInHandler
+              focusout: this.onLeaveInHandler,
+              keydown: this.onKeyMove
             },
             offsetEvent: {
               click: this.onOffsetClick
@@ -101,7 +104,8 @@ class HorizontalScroller extends Component {
               mouseenter: this.onHoverInHandler,
               mouseleave: this.onLeaveInHandler,
               focusin: this.onHoverInHandler,
-              focusout: this.onLeaveInHandler
+              focusout: this.onLeaveInHandler,
+              keydown: this.onKeyMove
             },
             offsetEvent: {
               click: this.onOffsetClick
@@ -219,9 +223,9 @@ class HorizontalScroller extends Component {
       this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
       this.slider.right.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
       this.emitter.emit('hScroll', {
-        leftOffset: ((this.state.leftOffset/this.props.width)*100).toFixed(2),
-        rightOffset: (((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100).toFixed(2),
-        windowWidth: ((this.state.windowWidth/this.props.width)*100).toFixed(2)
+        leftOffset: ((this.state.leftOffset/this.props.width)*100),
+        rightOffset: (((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100),
+        windowWidth: ((this.state.windowWidth/this.props.width)*100)
       });
     }
   }
@@ -241,8 +245,10 @@ class HorizontalScroller extends Component {
   onHoverInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
       this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#ddd';
+      this.state.handlerFocused = e.target.querySelector('.sc-slider-left-sel');
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
       this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#ddd';
+      this.state.handlerFocused = e.target.querySelector('.sc-slider-right-sel');
     }
   }
 
@@ -253,18 +259,30 @@ class HorizontalScroller extends Component {
       this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#fff';
     }
   }
+
+  onKeyMove(e) {
+    if(e.keyCode == 37) { // left arrow pressed
+
+    }else if(e.keyCode == 39) { // right arrow pressed
+
+    }
+  }
 }
 
 class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.state.events['mouseenter'] = this.onHover.bind(this);
-    this.state.events['mouseleave'] = this.onLeave.bind(this);
+    this.onHover = this.onHover.bind(this);
+    this.onLeave = this.onLeave.bind(this);
+    this.state.events['mouseenter'] = this.onHover;
+    this.state.events['mouseleave'] = this.onLeave;
   }
 
   propsWillReceive(nextProps) {
-    this.state = {...this.state, ...nextProps};
+    this.state = Object.assign({}, this.state, nextProps);
+    this.state.events['mouseenter'] = this.onHover;
+    this.state.events['mouseleave'] = this.onLeave;
   }
 
   componentWillMount() {
@@ -278,8 +296,8 @@ class SliderWindow extends Component {
   render() {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
-        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'rgb(102,133,194)'  fill-opacity='0.2' storke='none' pointer-events='all' 
-        style="transition: fill-opacity 0.3s linear; cursor: -webkit-grab; cursor: grab;" events={this.state.events} />
+        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'rgb(102,133,194)' storke='none' pointer-events='all' 
+        style="transition: fill-opacity 0.3s linear; cursor: -webkit-grab; cursor: grab;fill-opacity:0.2" events={this.state.events} />
         <title> Slider Window (Grab to move) </title>
       </g>
     );
