@@ -80,16 +80,16 @@ class AreaFill extends Component{
       <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - this.props.markerRadius} y={this.state.clip.y} width={this.state.clip.width + (2*this.props.markerRadius)} height={this.state.clip.height} />
           </clipPath>
         </defs>
         {this.props.gradient && this.createGradient(this.gradId)}
-        <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.gradient ? `url(#${this.gradId})` : this.props.fill} 
-          d={this.getAreaPath(this.linePath.slice()).join(' ')} stroke-width='0' opacity={this.state.opacity} >
+        <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor} 
+          d={this.getAreaPath(this.linePath.slice()).join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.linePath.join(' ')} stroke-width={this.props.strokeWidth} opacity='1'></path> 
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
         {this.props.dataPoints &&
-          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.fill} onRef={(ref) => {this.subComp.dataPoints = ref;}} /> 
+          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} onRef={(ref) => {this.subComp.dataPoints = ref;}} /> 
         }
       </g>
     );
@@ -136,7 +136,7 @@ class AreaFill extends Component{
     return(
       <defs>
         <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-          <stop offset="0%" stop-color={this.props.fill} stop-opacity="1" />
+          <stop offset="0%" stop-color={this.props.areaFillColor} stop-opacity="1" />
           <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
         </linearGradient>
       </defs>
@@ -163,7 +163,14 @@ class AreaFill extends Component{
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = e.pos; 
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
-    let nearPoint = Geom.findClosestPoint(this.state.pointSet, pt, true); 
+    let pointSet = this.state.pointSet; 
+    if(this.props.clip.offsetLeft > this.props.markerRadius) {
+      pointSet = pointSet.slice(1);
+    }
+    if(this.props.clip.offsetRight > this.props.markerRadius) {
+      pointSet = pointSet.slice(0, pointSet.length-1);
+    }
+    let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 
     this.subComp.dataPoints.doHighlight(false);
     if(nearPoint.dist < (this.state.scaleX / 2)) {
       this.subComp.dataPoints.doHighlight(nearPoint.index); 

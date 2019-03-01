@@ -86,6 +86,7 @@ class BaseChart extends Component {
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
         id={this.getChartId()}
+        class="smartcharts-nxt"
         style={{
           background: this.CHART_OPTIONS.bgColor || 'none',
           MozTapHighlightColor: 'rgba(0, 0, 0, 0)',

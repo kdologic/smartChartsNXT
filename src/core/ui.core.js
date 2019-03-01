@@ -95,11 +95,11 @@ class UiCore {
    */
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {
-      targetElem = document.querySelector("#" + targetElem + " svg");
+      targetElem = document.querySelector("#" + targetElem + " .smartcharts-nxt");
     }
     let pt = targetElem.createSVGPoint();
-    pt.x = evt.clientX || evt.touches[0].clientX;
-    pt.y = evt.clientY || evt.touches[0].clientY;
+    pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches instanceof Array ? evt.touches[0].clientX : 0;
+    pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches instanceof Array ? evt.touches[0].clientY : 0;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
   } 
 

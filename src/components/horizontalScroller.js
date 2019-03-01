@@ -45,7 +45,9 @@ class HorizontalScroller extends Component {
       windowWidth: offset.windowWidth,
       leftHandlerColor: '#fff',
       rightHandlerColor: '#fff',
-      handlerFocused: null
+      sliderWindowOpacity: 0.2,
+      handlerFocused: null,
+      isGrabbed: false
     };
     
     this.slider = {}; 
@@ -56,6 +58,8 @@ class HorizontalScroller extends Component {
     this.onScrollMove = this.onScrollMove.bind(this);
     this.onScrollEnd = this.onScrollEnd.bind(this);
     this.onKeyMove = this.onKeyMove.bind(this);
+    this.onHoverInSliderWindow = this.onHoverInSliderWindow.bind(this);
+    this.onLeaveSliderWindow = this.onLeaveSliderWindow.bind(this);
   }
 
   propsWillReceive(nextProps) {
@@ -72,14 +76,10 @@ class HorizontalScroller extends Component {
         }
         <path class='sc-hScroller-upper-path' stroke='#333' fill='none' d={this.getUpperBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         <path class='sc-hScroller-lower-path' stroke='#333' fill='none' d={this.getLowerBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
-          events= {{
-            mousedown: this.onMouseDown,
-            touchstart: this.onMouseDown
-          }}> 
-        </SliderWindow>
+        
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
+          grabbed={this.state.isGrabbed}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown,
@@ -95,8 +95,23 @@ class HorizontalScroller extends Component {
             }
           }}> 
         </SliderLeftHandle>
+        
+        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
+          fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
+          events= {{
+            mousedown: this.onMouseDown,
+            touchstart: this.onMouseDown,
+            mouseenter: this.onHoverInSliderWindow,
+            mouseleave: this.onLeaveSliderWindow,
+            focusin: this.onHoverInSliderWindow,
+            focusout: this.onLeaveSliderWindow,
+            keydown: this.onKeyMove
+          }}> 
+        </SliderWindow>
+        
         <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
+          grabbed={this.state.isGrabbed}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown,
@@ -112,8 +127,9 @@ class HorizontalScroller extends Component {
             }
           }}> 
         </SliderRightHandle>
+        
         { this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;"
             events={{
               mousemove: this.onScrollMove,
               touchmove: this.onScrollMove,
@@ -151,23 +167,19 @@ class HorizontalScroller extends Component {
 
   onMouseDown(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    switch (e.target.classList.value) {
-      case 'sc-slider-left-sel' :
-        this.selectedHandler = 'left';
-        break;
-      case 'sc-slider-right-sel' :
-        this.selectedHandler = 'right';
-        break;
-      case 'sc-hScroll-window' :
-      case 'sc-slider-left-offset' :
-      case 'sc-slider-right-offset' :
-        this.selectedHandler = 'window';
-        break;
+    let classList = e.target.classList.value.split(" ");
+    if(classList.includes('sc-slider-left-sel')) {
+      this.selectedHandler = 'left';
+    }else if(classList.includes('sc-slider-right-sel')) {
+      this.selectedHandler = 'right';
+    }else if(classList.includes('sc-hScroll-window') || classList.includes('sc-slider-left-offset') || classList.includes('sc-slider-right-offset')) {
+      this.selectedHandler = 'window';
     }
+    
     this.mouseDownPos = mousePos;
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
-    this.update(); 
+    this.setState({isGrabbed: true}); 
   }
 
   onScrollMove(e) {
@@ -232,7 +244,7 @@ class HorizontalScroller extends Component {
 
   onScrollEnd(e) {
     this.selectedHandler = undefined; 
-    this.update(); 
+    this.setState({isGrabbed: false}); 
   }
 
   onOffsetClick(e) {
@@ -244,28 +256,57 @@ class HorizontalScroller extends Component {
 
   onHoverInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#ddd';
-      this.state.handlerFocused = e.target.querySelector('.sc-slider-left-sel');
+      this.setState({leftHandlerColor:'#999', handlerFocused: 'left'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#ddd';
-      this.state.handlerFocused = e.target.querySelector('.sc-slider-right-sel');
+      this.setState({rightHandlerColor:'#999', handlerFocused: 'right'});
     }
   }
 
   onLeaveInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#fff';
+      this.setState({'leftHandlerColor':'#fff'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#fff';
+      this.setState({'rightHandlerColor':'#fff'});
     }
   }
 
+  onHoverInSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.5, handlerFocused: 'window'});
+  }
+
+  onLeaveSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.2});
+  }
+
   onKeyMove(e) {
-    if(e.keyCode == 37) { // left arrow pressed
-
-    }else if(e.keyCode == 39) { // right arrow pressed
-
+    let event = {
+      clientX: this.state.leftOffset, 
+      clientY: 0
+    };
+    switch(this.state.handlerFocused) {
+      case 'left': 
+        event.target = this.ref.node.querySelector('.sc-slider-left-sel');
+        break;
+      case 'right': 
+        event.target = this.ref.node.querySelector('.sc-slider-right-sel');
+        break;
+      case 'window': 
+        event.target = this.ref.node.querySelector('.sc-hScroll-window');
+        break; 
     }
+
+    // left arrow pressed
+    if(e.keyCode == 37) { 
+      this.onMouseDown(event);
+      event.clientX = this.state.leftOffset - 10;
+
+    // right arrow pressed
+    }else if(e.keyCode == 39) { 
+      this.onMouseDown(event);
+      event.clientX = this.state.leftOffset + 10;
+    }
+    this.onScrollMove(event);
+    this.onScrollEnd(event);
   }
 }
 
@@ -273,16 +314,10 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.onHover = this.onHover.bind(this);
-    this.onLeave = this.onLeave.bind(this);
-    this.state.events['mouseenter'] = this.onHover;
-    this.state.events['mouseleave'] = this.onLeave;
   }
 
   propsWillReceive(nextProps) {
     this.state = Object.assign({}, this.state, nextProps);
-    this.state.events['mouseenter'] = this.onHover;
-    this.state.events['mouseleave'] = this.onLeave;
   }
 
   componentWillMount() {
@@ -296,19 +331,11 @@ class SliderWindow extends Component {
   render() {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
-        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'rgb(102,133,194)' storke='none' pointer-events='all' 
-        style="transition: fill-opacity 0.3s linear; cursor: -webkit-grab; cursor: grab;fill-opacity:0.2" events={this.state.events} />
+        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'red' storke='none' pointer-events='all' tabindex='0'
+        fill-opacity={this.props.fillOpacity} style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events} />
         <title> Slider Window (Grab to move) </title>
       </g>
     );
-  }
-
-  onHover(e) {
-    this.ref.node.querySelector('.sc-hScroll-window').style['fill-opacity'] = 0.5;
-  }
-
-  onLeave(e) {
-    this.ref.node.querySelector('.sc-hScroll-window').style['fill-opacity'] = 0.2;
   }
 }
 

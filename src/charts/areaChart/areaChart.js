@@ -362,14 +362,16 @@ class AreaChart extends Component {
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
         <AreaFill dataSet={series} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} fill={series.bgColor || UtilCore.getColor(i)} 
+          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 3} centerSinglePoint={isBothSinglePoint} strokeWidth={series.lineWidth || 1.5} 
+          marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true}
           getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
-            width: this.CHART_DATA.gridBoxWidth - (2*this.CHART_DATA.paddingX)
+            width: this.CHART_DATA.gridBoxWidth - (2*this.CHART_DATA.paddingX),
+            offsetLeft: this.state.offsetLeftChange, 
+            offsetRight: this.state.offsetRightChange
           }}
           >
         </AreaFill>
@@ -382,15 +384,15 @@ class AreaChart extends Component {
       return (
       <g class='sc-fs-chart-area-container'>
         <AreaFill dataSet={series} index={series.index} instanceId={'fs-'+ series.index}  posX={0} posY={5} paddingX={0} 
-          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} fill="#ddd" 
+          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} strokeWidth="1"
+          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='0'
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}>
         </AreaFill>
         <AreaFill dataSet={series} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={0} posY={5} paddingX={0} 
-          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} fill="#555" 
+          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} strokeWidth="1"
+          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='1'
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
           clip={{
             x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100, 
