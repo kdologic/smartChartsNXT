@@ -38,6 +38,8 @@ class HorizontalLabels extends Component{
     super(props);
     let self = this;
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.rid = UtilCore.getRandomID();
+    this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
     this.resetConfig(this.props.opts); 
     this.state = {
@@ -55,6 +57,12 @@ class HorizontalLabels extends Component{
         return this._categories; 
       }
     };
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: this.props.maxWidth,
+      height: this.props.maxHeight
+    }, this.props.clip);
     this.state.categories = this.props.categorySet;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -71,6 +79,12 @@ class HorizontalLabels extends Component{
   propsWillReceive(nextProps) {
     this.resetConfig(nextProps.opts); 
     this.state.categories = nextProps.categorySet;
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: nextProps.maxWidth,
+      height: nextProps.maxHeight
+    }, nextProps.clip);
   }
 
   resetConfig(config) {
@@ -90,7 +104,13 @@ class HorizontalLabels extends Component{
   render() {
     this.setIntervalLength();
     return (
-      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
+      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
+        <defs>
+          <clipPath id={this.clipPathId}>
+            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
+          </clipPath>
+        </defs>
+        <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} stroke="black" fill="#000" fill-opacity="0.2" />
         {
           this.getLabels()
         }

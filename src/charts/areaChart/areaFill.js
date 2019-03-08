@@ -19,7 +19,7 @@ class AreaFill extends Component{
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId); 
-    this.rid = Date.now() + '-'+ Math.round(Math.random()*101);
+    this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.gradId = "sc-area-fill-grad-" + this.rid;
     this.state = {

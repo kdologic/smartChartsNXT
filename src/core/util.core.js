@@ -82,6 +82,14 @@ class UtilCore {
     }
   }
 
+/**
+ * Returns a random ID combined by time and random number.
+ * @return number
+ */
+  getRandomID() {
+    return Date.now() + '-'+ Math.round(Math.random()*101);
+  }
+
   /**
    * Return memoized version of a function
    * @param {Function} fn A function to memoize. 

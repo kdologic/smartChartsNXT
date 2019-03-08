@@ -40,7 +40,7 @@ class AreaChart extends Component {
         gridBoxWidth: 0,
         gridBoxHeight: 0,
         offsetHeight: 70, // distance of text label from top and bottom side
-        hScrollBoxMarginTop: 80, 
+        hLabelHeight: 80, 
         vLabelWidth: 70,
         paddingX: 10,
         longestSeries: 0,
@@ -307,8 +307,13 @@ class AreaChart extends Component {
         </VerticalLabels> 
 
         <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft + 10} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxWidth={this.CHART_DATA.gridBoxWidth} 
-          categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX} >
+          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange + this.CHART_DATA.paddingX} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} 
+          maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+          categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
+          clip={{
+            x: this.state.offsetLeftChange,
+            width: this.CHART_DATA.gridBoxWidth
+          }} >
         </HorizontalLabels>   
 
         <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
@@ -316,7 +321,7 @@ class AreaChart extends Component {
         </text>
 
         <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="25" stroke-linejoin="round" paint-order="stroke">
-          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hScrollBoxMarginTop/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
+          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
         </text>
         
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
@@ -346,7 +351,7 @@ class AreaChart extends Component {
         </InteractivePlane>
 
         { this.CHART_OPTIONS.horizontalScroller.enable &&
-          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hScrollBoxMarginTop} 
+          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight} 
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}> 
             {this.drawHScrollSeries()}
