@@ -179,6 +179,8 @@ class AreaChart extends Component {
         this.CHART_OPTIONS.dataSet.series[index].visible = true;
       }
     }
+    this.state.offsetLeftChange = (this.state.cs.scaleX * (this.state.hScrollLeftOffset - this.state.clipLeftOffset) / (this.state.maxSeriesLenFS-1))/4;
+    this.state.offsetRightChange = (this.state.cs.scaleX * (this.state.clipRightOffset - this.state.hScrollRightOffset) / (this.state.maxSeriesLenFS-1))/4;
 
     if(this.state.windowLeftIndex < 0 && this.state.windowRightIndex < 0) {
       /* Will set initial zoom window */
@@ -427,9 +429,8 @@ class AreaChart extends Component {
       this.prepareDataSet();
     }
 
-    this.state.offsetLeftChange = (this.state.cs.scaleX * (e.leftOffset - this.state.clipLeftOffset) / (this.state.maxSeriesLenFS-1))/4;
-    this.state.offsetRightChange = (this.state.cs.scaleX * (this.state.clipRightOffset - e.rightOffset) / (this.state.maxSeriesLenFS-1))/4;
-    console.log('leftoffset', e.leftOffset, 'rightoffset', e.rightOffset, 'scaleX', this.state.cs.scaleX, 'offsetRightChange', this.state.offsetRightChange);
+    this.state.offsetLeftChange = (this.state.cs.scaleX * (this.state.hScrollLeftOffset - this.state.clipLeftOffset) / (this.state.maxSeriesLenFS-1))/4;
+    this.state.offsetRightChange = (this.state.cs.scaleX * (this.state.clipRightOffset - this.state.hScrollRightOffset) / (this.state.maxSeriesLenFS-1))/4;
      
     this.update();
   }

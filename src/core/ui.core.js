@@ -98,11 +98,10 @@ class UiCore {
       targetElem = document.querySelector("#" + targetElem + " .smartcharts-nxt");
     }
     let pt = targetElem.createSVGPoint();
-    pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches instanceof Array ? evt.touches[0].clientX : 0;
-    pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches instanceof Array ? evt.touches[0].clientY : 0;
+    pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
+    pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches[0] ? evt.touches[0].clientY : 0;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
   } 
-
 
   /**
    * Calculate interval value and also interval count for a given range. 

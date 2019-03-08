@@ -68,9 +68,14 @@ class HorizontalScroller extends Component {
     this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
   }
 
+  componentWillUnmount() {
+    this.onScrollEnd();
+  }
+
   render() {
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
+        
         { this.props.opts.chartInside && 
           this.props.extChildren
         }
@@ -127,18 +132,9 @@ class HorizontalScroller extends Component {
             }
           }}> 
         </SliderRightHandle>
-        
+
         { this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;"
-            events={{
-              mousemove: this.onScrollMove,
-              touchmove: this.onScrollMove,
-              mouseup: this.onScrollEnd,
-              touchend: this.onScrollEnd,
-              mouseout: this.onScrollEnd,
-              mouseleave: this.onScrollEnd
-            }}
-          />
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;" />
         }
       </g>
     );
@@ -180,13 +176,15 @@ class HorizontalScroller extends Component {
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
     this.setState({isGrabbed: true}); 
+
+    window.addEventListener('mousemove', this.onScrollMove, false);
+    window.addEventListener('touchmove', this.onScrollMove, false);
   }
 
   onScrollMove(e) {
     if(this.selectedHandler) {
       let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
-      
       switch (this.selectedHandler) {
         case 'left':
           lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
@@ -240,11 +238,20 @@ class HorizontalScroller extends Component {
         windowWidth: ((this.state.windowWidth/this.props.width)*100)
       });
     }
+
+    window.addEventListener('mouseup', this.onScrollEnd, false);
+    window.addEventListener('touchend', this.onScrollEnd, false);
   }
 
   onScrollEnd(e) {
     this.selectedHandler = undefined; 
-    this.setState({isGrabbed: false}); 
+    this.setState({isGrabbed: false});
+    
+    window.removeEventListener('mousemove', this.onScrollMove);
+    window.removeEventListener('mouseup', this.onScrollEnd); 
+    window.removeEventListener('touchmove', this.onScrollMove);
+    window.removeEventListener('touchend', this.onScrollEnd); 
+
   }
 
   onOffsetClick(e) {
