@@ -42,6 +42,7 @@ class HorizontalLabels extends Component{
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
     this.resetConfig(this.props.opts); 
+    this.defaultTickSpan = 6;
     this.state = {
       intervalLen: this.config.intervalThreshold,
       set categories(cat) {
@@ -107,14 +108,20 @@ class HorizontalLabels extends Component{
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
+            <rect x={-20} y={this.state.clip.y} width={this.state.clip.x + this.state.clip.width + 20} height={this.state.clip.height} />
+          </clipPath>
+          <clipPath id={this.clipPathId + '-tick'}>
+            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
           </clipPath>
         </defs>
-        <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} stroke="black" fill="#000" fill-opacity="0.2" />
-        {
-          this.getLabels()
-        }
-        <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || 6} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+        <g class="sc-horizontal-labels" transform={`translate(${this.props.paddingX}, 0)`}>
+          {
+            this.getLabels()
+          }
+        </g>
+        <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
+          <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+        </g>
       </g>
     );
   }
@@ -130,15 +137,14 @@ class HorizontalLabels extends Component{
   getEachLabel(val, index) {
     let x =  this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen; 
     let y = 18; 
+    let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity; 
     let transform = this.config.labelRotate ? "rotate(" + this.config.labelRotate + "," + x + "," + y + ")" : ""; 
     return (
-      <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} 
-        transform={transform} font-size={this.config.fontSize} opacity={this.config.labelOpacity} stroke="none" text-rendering='geometricPrecision' >
-
-        <tspan class={`hlabel-${index} label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave}}> 
+      <text instanceId={`sc-text-hlabel-${index}`} font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} opacity
+        transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke="none" text-rendering='geometricPrecision' >
+        <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy="0.4em" events={{mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave}}> 
           {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
         </tspan>
-
       </text>
     );
   }
@@ -159,7 +165,7 @@ class HorizontalLabels extends Component{
   }
 
   onMouseEnter(e) {
-    let lblIndex = e.target.classList[0].replace('hlabel-',''); 
+    let lblIndex = e.target.getAttribute('labelIndex'); 
     e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : "") + this.state.categories[lblIndex];
     this.emitter.emit('hLabelEnter', e);
   }

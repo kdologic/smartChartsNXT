@@ -83,7 +83,7 @@ class GeomCore {
     let halfLen = Math.ceil(pSet.length/2); 
     let lSet = pSet.slice(0, halfLen); 
     let rSet = pSet.slice(halfLen);
-    let nearPoint = undefined;
+    let nearPoint = {};
     if(halfLen < 3) {
       let min = Number.MAX_SAFE_INTEGER; 
       for(let p of pSet) {

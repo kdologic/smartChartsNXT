@@ -1,6 +1,5 @@
 "use strict";
 
-import Geom from './../core/geom.core';
 import UiCore from './../core/ui.core';
 import { Component } from "./../viewEngin/pview";
 import eventEmitter from './../core/eventEmitter';
@@ -82,6 +81,19 @@ class HorizontalScroller extends Component {
         <path class='sc-hScroller-upper-path' stroke='#333' fill='none' d={this.getUpperBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         <path class='sc-hScroller-lower-path' stroke='#333' fill='none' d={this.getLowerBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         
+        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
+          fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
+          events= {{
+            mousedown: this.onMouseDown,
+            touchstart: this.onMouseDown,
+            mouseenter: this.onHoverInSliderWindow,
+            mouseleave: this.onLeaveSliderWindow,
+            focusin: this.onHoverInSliderWindow,
+            focusout: this.onLeaveSliderWindow,
+            keydown: this.onKeyMove
+          }}> 
+        </SliderWindow>
+
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
           grabbed={this.state.isGrabbed}
@@ -100,19 +112,6 @@ class HorizontalScroller extends Component {
             }
           }}> 
         </SliderLeftHandle>
-        
-        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
-          fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
-          events= {{
-            mousedown: this.onMouseDown,
-            touchstart: this.onMouseDown,
-            mouseenter: this.onHoverInSliderWindow,
-            mouseleave: this.onLeaveSliderWindow,
-            focusin: this.onHoverInSliderWindow,
-            focusout: this.onLeaveSliderWindow,
-            keydown: this.onKeyMove
-          }}> 
-        </SliderWindow>
         
         <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
@@ -371,7 +370,7 @@ class SliderLeftHandle extends Component {
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-left" height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
-              <feOffset dx="-1" dy="0" result="offsetblur"></feOffset>
+              <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
                 <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
@@ -386,9 +385,8 @@ class SliderLeftHandle extends Component {
         </rect>
         <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} tabindex="0">
           <title> Left Slider Handle </title>
-          <path class='sc-slider-left-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-left)`} d={this.state.sliderLeftSel} pointer-events='all' stroke-width='0' opacity='1'></path>
+          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-left-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-          <path class='sc-slider-left' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderLeft}  pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );
@@ -396,15 +394,13 @@ class SliderLeftHandle extends Component {
 
   calcSliderPaths() {
     let innerBarLeft = [
-      "M", (- 5), (this.props.height/2) - 5,
-      "L", (- 5), (this.props.height/2) + 5,
-      "M", (- 7), (this.props.height/2) - 5,
-      "L", (- 7), (this.props.height/2) + 5
+      "M",-2, (this.props.height/2) - 5,
+      "L",-2, (this.props.height/2) + 5,
+      "M", 2, (this.props.height/2) - 5,
+      "L", 2, (this.props.height/2) + 5
     ];
 
     this.state = {...this.state, 
-      sliderLeft: ['M', 0, 0, 'L', 0, this.props.height].join(' '),
-      sliderLeftSel: Geom.describeEllipticalArc(0, (this.props.height/2), 15, 15, 180, 360, 0).d,
       sliderLeftSelInner: innerBarLeft.join(' ')
     };
   }
@@ -434,8 +430,8 @@ class SliderRightHandle extends Component {
       <g class='sc-slider-right-handle' transform={`translate(${this.state.leftOffset + this.state.windowWidth},0)`} >
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-right" height="130%" width="130%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"></feGaussianBlur>
-              <feOffset dx="1" dy="" result="offsetblur"></feOffset>
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
+              <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
                 <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
@@ -450,9 +446,8 @@ class SliderRightHandle extends Component {
         </rect>
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} tabindex="0">
           <title> Right Slider Handle </title>
-          <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>
+          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-          <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );
@@ -460,15 +455,13 @@ class SliderRightHandle extends Component {
 
   calcSliderPaths() {
     let innerBarRight = [
-      "M", 4, (this.props.height/2) - 5,
-      "L", 4, (this.props.height/2) + 5,
-      "M", 6, (this.props.height/2) - 5,
-      "L", 6, (this.props.height/2) + 5
+      "M",-1, (this.props.height/2) - 5,
+      "L",-1, (this.props.height/2) + 5,
+      "M", 3, (this.props.height/2) - 5,
+      "L", 3, (this.props.height/2) + 5
     ];
 
     this.state = {...this.state, 
-      sliderRight: ['M', 0, 0, 'L', 0, this.props.height].join(' '),
-      sliderRightSel: Geom.describeEllipticalArc(0, (this.props.height/2), 15, 15, 180, 360, 1).d, 
       sliderRightSelInner: innerBarRight.join(' '),
       rightOffset: Math.abs(this.props.width - (this.state.leftOffset + this.state.windowWidth))
     };

@@ -307,7 +307,7 @@ class AreaChart extends Component {
         </VerticalLabels> 
 
         <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange + this.CHART_DATA.paddingX} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} 
+          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} 
           maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
           categorySet = {this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
           clip={{
