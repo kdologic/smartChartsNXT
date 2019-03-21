@@ -91,7 +91,7 @@ class HorizontalLabels extends Component{
   resetConfig(config) {
     this.config = {...this.config, ...{
       labelRotate: config.labelRotate || 0,
-      fontSize: config.fontSize || defaultConfig.theme.fontSizeMedium,
+      fontSize: config.fontSize || defaultConfig.theme.fontSizeSmall,
       fontFamily: config.fontFamily || defaultConfig.theme.fontFamily,
       tickOpacity: config.tickOpacity || 1,
       labelOpacity: config.labelOpacity || 1,
@@ -108,10 +108,10 @@ class HorizontalLabels extends Component{
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={-20} y={this.state.clip.y} width={this.state.clip.x + this.state.clip.width + 20} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - 20} y={this.state.clip.y} width={this.state.clip.width + 40} height={this.state.clip.height} />
           </clipPath>
           <clipPath id={this.clipPathId + '-tick'}>
-            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
+            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width} height={this.props.opts.tickSpan || this.defaultTickSpan} />
           </clipPath>
         </defs>
         <g class="sc-horizontal-labels" transform={`translate(${this.props.paddingX}, 0)`}>

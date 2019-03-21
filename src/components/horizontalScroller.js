@@ -73,14 +73,11 @@ class HorizontalScroller extends Component {
 
   render() {
     return (
-      <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        
+      <g class="sc-horizontal-scroll-cont" transform={`translate(${this.props.posX},${this.props.posY})`}>
+        <rect class="sc-slider-bg" x={0} y={0} width={this.props.width} height={this.props.height} fill="#000" fill-opacity="0.04" />
         { this.props.opts.chartInside && 
           this.props.extChildren
         }
-        <path class='sc-hScroller-upper-path' stroke='#333' fill='none' d={this.getUpperBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-        <path class='sc-hScroller-lower-path' stroke='#333' fill='none' d={this.getLowerBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-        
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
           fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
           events= {{
@@ -380,7 +377,7 @@ class SliderLeftHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
         <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} tabindex="0">
@@ -441,7 +438,7 @@ class SliderRightHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} tabindex="0">
@@ -455,10 +452,10 @@ class SliderRightHandle extends Component {
 
   calcSliderPaths() {
     let innerBarRight = [
-      "M",-1, (this.props.height/2) - 5,
-      "L",-1, (this.props.height/2) + 5,
-      "M", 3, (this.props.height/2) - 5,
-      "L", 3, (this.props.height/2) + 5
+      "M",-2, (this.props.height/2) - 5,
+      "L",-2, (this.props.height/2) + 5,
+      "M", 2, (this.props.height/2) - 5,
+      "L", 2, (this.props.height/2) + 5
     ];
 
     this.state = {...this.state, 

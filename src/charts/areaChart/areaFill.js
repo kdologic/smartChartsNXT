@@ -80,7 +80,7 @@ class AreaFill extends Component{
       <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x - this.props.markerRadius} y={this.state.clip.y} width={this.state.clip.width + (2*this.props.markerRadius)} height={this.state.clip.height} />
+            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
           </clipPath>
         </defs>
         {this.props.gradient && this.createGradient(this.gradId)}

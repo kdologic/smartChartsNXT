@@ -42,7 +42,7 @@ class AreaChart extends Component {
         offsetHeight: 70, // distance of text label from top and bottom side
         hLabelHeight: 80, 
         vLabelWidth: 70,
-        paddingX: 10,
+        paddingX: 5,
         longestSeries: 0,
         zoomOutBoxWidth: 40,
         zoomOutBoxHeight: 40
@@ -394,7 +394,8 @@ class AreaChart extends Component {
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='0'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}>
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
+          getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
         </AreaFill>
         <AreaFill dataSet={series} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={0} posY={5} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
@@ -416,7 +417,7 @@ class AreaChart extends Component {
     let rightIndex = Math.ceil((this.state.maxSeriesLenFS-1) * e.rightOffset / 100);
     let hScrollIntervalPercent = 100 / (this.state.maxSeriesLenFS-1);
     this.state.hScrollLeftOffset = e.leftOffset; 
-    this.state.hScrollRightOffset = e.rightOffset; 
+    this.state.hScrollRightOffset = e.rightOffset;
 
     if(this.state.windowLeftIndex != leftIndex || this.state.windowRightIndex != rightIndex) {
       if(leftIndex > this.state.windowLeftIndex) {
@@ -434,9 +435,14 @@ class AreaChart extends Component {
       this.prepareDataSet();
     }
 
-    this.state.offsetLeftChange = (this.state.cs.scaleX * (this.state.hScrollLeftOffset - this.state.clipLeftOffset) / (this.state.maxSeriesLenFS-1))/4;
-    this.state.offsetRightChange = (this.state.cs.scaleX * (this.state.clipRightOffset - this.state.hScrollRightOffset) / (this.state.maxSeriesLenFS-1))/4;
-     
+    let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
+    let leftOffsetDiff = this.state.hScrollLeftOffset - this.state.clipLeftOffset;
+    let fsOffsetLeft = fsWidth * leftOffsetDiff / 100;
+    this.state.offsetLeftChange = fsOffsetLeft / this.state.fs.scaleX * this.state.cs.scaleX;
+
+    let rightOffsetDiff = this.state.clipRightOffset - this.state.hScrollRightOffset;
+    let fsOffsetRight = fsWidth * rightOffsetDiff / 100;
+    this.state.offsetRightChange = fsOffsetRight / this.state.fs.scaleX * this.state.cs.scaleX;
     this.update();
   }
 
