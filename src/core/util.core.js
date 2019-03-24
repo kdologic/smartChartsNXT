@@ -1,17 +1,20 @@
 "use strict";
 
-/*-----------SmartChartsNXT Utility functions------------- */
-
 /**
  * util.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @description:SmartChartsNXT Core Library components. That contains utillity functions.
+ * @description: SmartChartsNXT Core Library components contains utillity functions.
  */
 
 class UtilCore {
   constructor() {}
-
+  /**
+   * Merge object 2 into object 1 recursively. Object 1 will be modified. 
+   * @param {Object} obj1
+   * @param {Object} obj2 
+   * @deprecated This method is depricated and will be removed soon.
+   */
   mergeRecursive(obj1, obj2) {
     //iterate over all the properties in the object which is being consumed
     for (let p in obj2) {
@@ -80,14 +83,6 @@ class UtilCore {
     }catch(e){
       return false; 
     }
-  }
-
-/**
- * Returns a random ID combined by time and random number.
- * @return number
- */
-  getRandomID() {
-    return Date.now() + '-'+ Math.round(Math.random()*101);
   }
 
   /**
@@ -202,6 +197,18 @@ class UtilCore {
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
   }
+
+  /**
+   * Generate a 9 character (xxxx-xxxx) unique random ID (Uniqueness was tested upto 10,000 ids).
+   * @return {string} Returns a unique string.
+   */
+  getRandomID() {
+    let chr4 = () => {
+      return Math.random().toString(16).slice(-4);
+    };
+    return chr4() + '-' + chr4();
+  }
+    
 }
 
 export default new UtilCore();

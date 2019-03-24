@@ -14,6 +14,7 @@ import AreaFill from './areaFill';
 import VerticalLabels from './../../components/verticalLabels';
 import HorizontalLabels from './../../components/horizontalLabels';
 import HorizontalScroller from './../../components/horizontalScroller';
+import ZoomoutBox from './../../components/zoomOutBox';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
 import dateFormat from "dateformat";
@@ -143,14 +144,15 @@ class AreaChart extends Component {
       this.prevOriginPoint;
       this.eventStream = {}; 
       this.emitter = eventEmitter.getInstance(this.context.runId); 
-      this.onHScrollBind = this.onHScroll.bind(this); 
-      this.onPointHighlightedBind = this.onPointHighlighted.bind(this);
-      this.onMouseLeaveBind = this.onMouseLeave.bind(this);
-      this.updateLabelTipBind = this.updateLabelTip.bind(this);
-      this.hideTipBind = this.hideTip.bind(this);
-      this.onLegendClickBind = this.onLegendClick.bind(this); 
-      this.onLegendHoverBind = this.onLegendHover.bind(this); 
-      this.onLegendLeaveBind = this.onLegendLeave.bind(this); 
+      this.onHScroll = this.onHScroll.bind(this); 
+      this.onPointHighlighted = this.onPointHighlighted.bind(this);
+      this.onMouseLeave = this.onMouseLeave.bind(this);
+      this.updateLabelTip = this.updateLabelTip.bind(this);
+      this.hideTip = this.hideTip.bind(this);
+      this.onLegendClick = this.onLegendClick.bind(this); 
+      this.onLegendHover = this.onLegendHover.bind(this); 
+      this.onLegendLeave = this.onLegendLeave.bind(this); 
+      this.onZoomout = this.onZoomout.bind(this);
 
       this.init();
       
@@ -179,9 +181,11 @@ class AreaChart extends Component {
         this.CHART_OPTIONS.dataSet.series[index].visible = true;
       }
     }
-    this.state.offsetLeftChange = (this.state.cs.scaleX * (this.state.hScrollLeftOffset - this.state.clipLeftOffset) / (this.state.maxSeriesLenFS-1))/4;
-    this.state.offsetRightChange = (this.state.cs.scaleX * (this.state.clipRightOffset - this.state.hScrollRightOffset) / (this.state.maxSeriesLenFS-1))/4;
 
+    if(this.state.fs.scaleX && this.state.cs.scaleX) {
+      this.calcOffsetChanges(); 
+    }
+    
     if(this.state.windowLeftIndex < 0 && this.state.windowRightIndex < 0) {
       /* Will set initial zoom window */
       if (this.CHART_OPTIONS.zoomWindow) {
@@ -248,6 +252,17 @@ class AreaChart extends Component {
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 
 
+  calcOffsetChanges() {
+    let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
+    let leftOffsetDiff = this.state.hScrollLeftOffset - this.state.clipLeftOffset;
+    let fsOffsetLeft = fsWidth * leftOffsetDiff / 100;
+    this.state.offsetLeftChange = fsOffsetLeft / this.state.fs.scaleX * this.state.cs.scaleX;
+
+    let rightOffsetDiff = this.state.clipRightOffset - this.state.hScrollRightOffset;
+    let fsOffsetRight = fsWidth * rightOffsetDiff / 100;
+    this.state.offsetRightChange = fsOffsetRight / this.state.fs.scaleX * this.state.cs.scaleX;
+  }
+
   propsWillReceive(nextProps) {
     this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
@@ -256,29 +271,31 @@ class AreaChart extends Component {
   }
 
   componentDidMount() {
-    this.emitter.on('hScroll', this.onHScrollBind);
-    this.emitter.on('pointHighlighted', this.onPointHighlightedBind);
-    this.emitter.on('interactiveMouseLeave', this.onMouseLeaveBind);
-    this.emitter.on('vLabelEnter', this.updateLabelTipBind);
-    this.emitter.on('vLabelExit', this.hideTipBind);
-    this.emitter.on('hLabelEnter', this.updateLabelTipBind);
-    this.emitter.on('hLabelExit', this.hideTipBind);
-    this.emitter.on('legendClicked', this.onLegendClickBind);
-    this.emitter.on('legendHovered', this.onLegendHoverBind);
-    this.emitter.on('legendLeaved', this.onLegendLeaveBind);
+    this.emitter.on('hScroll', this.onHScroll);
+    this.emitter.on('pointHighlighted', this.onPointHighlighted);
+    this.emitter.on('interactiveMouseLeave', this.onMouseLeave);
+    this.emitter.on('vLabelEnter', this.updateLabelTip);
+    this.emitter.on('vLabelExit', this.hideTip);
+    this.emitter.on('hLabelEnter', this.updateLabelTip);
+    this.emitter.on('hLabelExit', this.hideTip);
+    this.emitter.on('legendClicked', this.onLegendClick);
+    this.emitter.on('legendHovered', this.onLegendHover);
+    this.emitter.on('legendLeaved', this.onLegendLeave);
+    this.emitter.on('onZoomout', this.onZoomout);
   }
 
   componentWillUnmount() {
-    this.emitter.removeListener('hScroll', this.onHScrollBind); 
-    this.emitter.removeListener('pointHighlighted', this.onPointHighlightedBind); 
-    this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeaveBind);
-    this.emitter.removeListener('vLabelEnter', this.updateLabelTipBind);
-    this.emitter.removeListener('vLabelExit', this.hideTipBind);
-    this.emitter.removeListener('hLabelEnter', this.updateLabelTipBind);
-    this.emitter.removeListener('hLabelExit', this.hideTipBind); 
-    this.emitter.removeListener('legendClicked', this.onLegendClickBind);
-    this.emitter.removeListener('legendHovered', this.onLegendHoverBind);
-    this.emitter.removeListener('legendLeaved', this.onLegendLeaveBind);
+    this.emitter.removeListener('hScroll', this.onHScroll); 
+    this.emitter.removeListener('pointHighlighted', this.onPointHighlighted); 
+    this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeave);
+    this.emitter.removeListener('vLabelEnter', this.updateLabelTip);
+    this.emitter.removeListener('vLabelExit', this.hideTip);
+    this.emitter.removeListener('hLabelEnter', this.updateLabelTip);
+    this.emitter.removeListener('hLabelExit', this.hideTip); 
+    this.emitter.removeListener('legendClicked', this.onLegendClick);
+    this.emitter.removeListener('legendHovered', this.onLegendHover);
+    this.emitter.removeListener('legendLeaved', this.onLegendLeave);
+    this.emitter.removeListener('onZoomout', this.onZoomout);
   }
 
   render() {
@@ -357,6 +374,12 @@ class AreaChart extends Component {
             {this.drawHScrollSeries()}
           </HorizontalScroller>
         }
+
+        { this.CHART_OPTIONS.horizontalScroller.enable && (this.state.hScrollLeftOffset !== 0 || this.state.hScrollRightOffset !== 100) &&
+          <ZoomoutBox posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth} posY={this.CHART_DATA.marginTop} 
+            width={this.CHART_DATA.zoomOutBoxWidth} height={this.CHART_DATA.zoomOutBoxHeight} >
+          </ZoomoutBox>
+        }
       </g>
     );
   }
@@ -434,16 +457,21 @@ class AreaChart extends Component {
       this.state.windowRightIndex = rightIndex; 
       this.prepareDataSet();
     }
-
-    let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
-    let leftOffsetDiff = this.state.hScrollLeftOffset - this.state.clipLeftOffset;
-    let fsOffsetLeft = fsWidth * leftOffsetDiff / 100;
-    this.state.offsetLeftChange = fsOffsetLeft / this.state.fs.scaleX * this.state.cs.scaleX;
-
-    let rightOffsetDiff = this.state.clipRightOffset - this.state.hScrollRightOffset;
-    let fsOffsetRight = fsWidth * rightOffsetDiff / 100;
-    this.state.offsetRightChange = fsOffsetRight / this.state.fs.scaleX * this.state.cs.scaleX;
+    this.calcOffsetChanges(); 
     this.update();
+  }
+
+  onZoomout(e) {
+    this.state.windowLeftIndex = 0; 
+    this.state.windowRightIndex = this.state.maxSeriesLenFS-1; 
+    this.state.hScrollLeftOffset = 0; 
+    this.state.hScrollRightOffset = 100;
+    this.state.clipLeftOffset = 0;
+    this.state.clipRightOffset = 100;
+    this.prepareDataSet();
+    this.calcOffsetChanges(); 
+    this.update(); 
+    this.emitter.emit('onScrollReset'); 
   }
 
   updateLabelTip(e) { 

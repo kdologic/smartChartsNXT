@@ -1,68 +1,79 @@
-/*
- * zoomOutBox.js
- * @Version:1.0.0
- * @CreatedOn:14-Jul-2017
- * @Author:SmartChartsNXT
- * @Description: This components will create zoom out box area for the chart. 
- */
-
 "use strict";
 
-let Event = require("./../core/event");
-let Geom = require("./../core/geom.core");
+import { Component } from "./../viewEngin/pview";
+import eventEmitter from './../core/eventEmitter';
+import Geom from "./../core/geom.core";
+import defaultConfig from "./../settings/config";
 
-class ZoomOutBox {
+/** 
+ * zoomOutBox.js
+ * @createdOn:14-Jul-2017
+ * @author:SmartChartsNXT
+ * @description: This components will create zoom out box area for the chart. Used full zoom out. 
+ * @extends Component
+ */
 
-    constructor(objChart, chartSVG, top, left, width, height) {
-        this.geom = new Geom();
-        this.objChart = objChart;
-        this.chartSVG = chartSVG;
-        this.top = top;
-        this.left = left;
-        this.width = width;
-        this.height = height;
-        this.createZoomOutBox(); 
-    }
+class ZoomOutBox extends Component {
+  constructor(props) {
+    super(props); 
+    this.emitter = eventEmitter.getInstance(this.context.runId); 
+    this.state = {
+      width: this.props.width,
+      height: this.props.height,
+      zoomHandStart: Geom.polarToCartesian(this.props.width/2, this.props.height/2, 10, 135),
+      zoomHandEnd: Geom.polarToCartesian(this.props.width/2, this.props.height/2, 20, 135)
+    };
 
-    createZoomOutBox() {
-        let self = this;
-        let strSVG = "<g id='zoomOutBoxCont' style='display:none;cursor:pointer;'>";
-        strSVG += "  <rect id='zoomOutBox' x='" + this.left + "' y='" + this.top + "' width='" + this.width + "' height='" + this.height + "' pointer-events='all' stroke='#717171' fill='none' stroke-width='0' \/>";
-        strSVG += "  <circle r='10' cx='" + (this.left + (this.width / 2)) + "' cy='" + (this.top + (this.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
-        strSVG += "  <line x1='" + (this.left + (this.width / 2) - 4) + "' y1='" + (this.top + (this.height / 2)) + "' x2='" + (this.left + (this.width / 2) + 4) + "' y2='" + (this.top + (this.height / 2)) + "' pointer-events='none' stroke-width='1' fill='none' stroke='#333'/>";
+    this.onClick = this.onClick.bind(this);
+    this.onMouseOver = this.onMouseOver.bind(this); 
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+    this.onKeyPress = this.onKeyPress.bind(this);
+  }
 
-        let lineStart = this.geom.polarToCartesian((this.left + (this.width / 2)), (this.top + (this.height / 2)), 10, 135);
-        let lineEnd = this.geom.polarToCartesian((this.left + (this.width / 2)), (this.top + (this.height / 2)), 20, 135);
-        strSVG += "  <line x1='" + lineStart.x + "' y1='" + lineStart.y + "' x2='" + lineEnd.x + "' y2='" + lineEnd.y + "' pointer-events='none' stroke-width='2' fill='none' stroke='#333'/>";
-        strSVG += "</g>";
+  propsWillReceive(nextProps) {
+    this.state = Object.assign({}, {
+      width: nextProps.width,
+      height: nextProps.height,
+      zoomHandStart: Geom.polarToCartesian(nextProps.width/2, nextProps.height/2, 10, 135),
+      zoomHandEnd: Geom.polarToCartesian(nextProps.width/2, nextProps.height/2, 20, 135)
+    });
+  }
 
-        this.chartSVG.insertAdjacentHTML("beforeend", strSVG);
-        this.zoomOutBoxCont = this.chartSVG.querySelector("#zoomOutBoxCont");
-        let zoomOutBox = this.zoomOutBoxCont.querySelector("#zoomOutBox");
+  render() {
+    return (
+      <g class='sc-zoomout-box-container' transform={`translate(${this.props.posX},${this.props.posY})`} role="button" aria-label="Zoom out" tabindex="0" style='cursor:pointer;' 
+        events={{
+          click: this.onClick,
+          mouseenter: this.onMouseOver,
+          mouseleave: this.onMouseLeave, 
+          focusin: this.onMouseOver,
+          focusout: this.onMouseLeave,
+          keypress: this.onKeyPress
+        }}>
+        <title>Zoom out</title> 
+        <rect class='sc-zoomout-box' x={0} y={0} width={this.state.width} height={this.state.height} pointer-events='all' stroke='none' fill='none' stroke-width='0' />
+        <circle r='10' cx={this.state.width/2} cy={this.state.height/2} stroke={defaultConfig.theme.bgColorMedium} pointer-events='none' stroke-width='1' fill={this.state.isFocused ? '#fd9848':'#ffecdd'} />";
+        <line x1={(this.state.width/2)-4} y1={this.state.height/2} x2={(this.state.width/2)+4} y2={this.state.height/2} stroke={this.state.isFocused ? '#fff' : defaultConfig.theme.bgColorMedium} pointer-events='none' stroke-width='2' fill='none' shape-rendering="optimizeSpeed"/>
+        <line x1={this.state.zoomHandStart.x} y1={this.state.zoomHandStart.y} x2={this.state.zoomHandEnd.x} y2={this.state.zoomHandEnd.y} stroke={defaultConfig.theme.bgColorMedium} pointer-events='none' stroke-width='2' fill='none' />
+      </g>
+    );
+  }
+    
+  onClick(e) {
+    this.emitter.emit('onZoomout');
+  }
 
-        /*Fire event on zoom out click */
-        zoomOutBox.addEventListener("click", function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            self.hide(); 
-            let onZoomOutEvent = new Event("onZoomOut", {
-                srcElement: self.chartSVG
-            });
-            self.objChart.event.dispatchEvent(onZoomOutEvent);
-        }, false);
-    }
+  onMouseOver(e) {
+    this.setState({ isFocused: true});
+  }
 
-    show() {
-        if (this.zoomOutBoxCont) {
-            this.zoomOutBoxCont.style.display = "block";
-        }
-    }
+  onMouseLeave(e) {
+    this.setState({ isFocused: false});
+  }
 
-    hide() {
-        if (this.zoomOutBoxCont) {
-            this.zoomOutBoxCont.style.display = "none";
-        }
-    }
+  onKeyPress(e) {
+
+  }
 }
 
 module.exports = ZoomOutBox;

@@ -31,16 +31,19 @@ class HorizontalScroller extends Component {
     this.selectedHandler = undefined;
     this.emitter = eventEmitter.getInstance(this.context.runId); 
     let offset = this.calcOffset(props); 
+
     this.state = {
       sliderLeft: "",
       sliderLeftSel: "",
       sliderLeftSelInner: "",
       leftOffset: offset.leftOffset,
+      leftOffsetPercent: offset.leftOffsetPercent,
       scrollRight: this.props.width,
       sliderRight: "",
       sliderRightSel: "",
       sliderRightSelInner: "",
       rightOffset: offset.rightOffset,
+      rightOffsetPercent: offset.rightOffsetPercent,
       windowWidth: offset.windowWidth,
       leftHandlerColor: '#fff',
       rightHandlerColor: '#fff',
@@ -59,15 +62,23 @@ class HorizontalScroller extends Component {
     this.onKeyMove = this.onKeyMove.bind(this);
     this.onHoverInSliderWindow = this.onHoverInSliderWindow.bind(this);
     this.onLeaveSliderWindow = this.onLeaveSliderWindow.bind(this);
+    this.onScrollReset = this.onScrollReset.bind(this);
   }
 
   propsWillReceive(nextProps) {
     let widthChangePercent = ((nextProps.width - this.props.width)/this.props.width)*100;
-    this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
-    this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
+    if(widthChangePercent) {
+      this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
+      this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
+    }
+  }
+
+  componentDidMount() {
+    this.emitter.on('onScrollReset', this.onScrollReset);
   }
 
   componentWillUnmount() {
+    this.emitter.removeListener('onScrollReset', this.onScrollReset); 
     this.onScrollEnd();
   }
 
@@ -91,7 +102,7 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderWindow>
 
-        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
+        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  offsetPercent={this.state.leftOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
           grabbed={this.state.isGrabbed}
           events= {{
@@ -110,7 +121,7 @@ class HorizontalScroller extends Component {
           }}> 
         </SliderLeftHandle>
         
-        <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
+        <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth} offsetPercent={this.state.rightOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
           grabbed={this.state.isGrabbed}
           events= {{
@@ -154,7 +165,7 @@ class HorizontalScroller extends Component {
     let leftOffset = (props.leftOffset * props.width / 100) || 0;
     let rightOffset = (props.rightOffset * props.width / 100) || 0;
     let windowWidth = rightOffset - leftOffset;
-    return { leftOffset, rightOffset, windowWidth };
+    return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset/props.width*100, rightOffsetPercent: rightOffset/props.width*100 };
   }
 
   onMouseDown(e) {
@@ -225,12 +236,11 @@ class HorizontalScroller extends Component {
 
       this.state.leftOffset = lOffset;
       this.state.windowWidth = winWidth;
-      this.sliderWindow.setState({posX:this.state.leftOffset, width: this.state.windowWidth});
-      this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
-      this.slider.right.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
+      this.state.leftOffsetPercent = this.state.leftOffset/this.props.width*100;
+      this.state.rightOffsetPercent = ((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100;
       this.emitter.emit('hScroll', {
-        leftOffset: ((this.state.leftOffset/this.props.width)*100),
-        rightOffset: (((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100),
+        leftOffset: this.state.leftOffsetPercent,
+        rightOffset: this.state.rightOffsetPercent,
         windowWidth: ((this.state.windowWidth/this.props.width)*100)
       });
     }
@@ -302,7 +312,6 @@ class HorizontalScroller extends Component {
     if(e.keyCode == 37) { 
       this.onMouseDown(event);
       event.clientX = this.state.leftOffset - 10;
-
     // right arrow pressed
     }else if(e.keyCode == 39) { 
       this.onMouseDown(event);
@@ -310,6 +319,16 @@ class HorizontalScroller extends Component {
     }
     this.onScrollMove(event);
     this.onScrollEnd(event);
+  }
+
+  onScrollReset(e) {
+    this.setState({
+      leftOffset: 0,
+      leftOffsetPercent: 0,
+      rightOffset: this.props.width,
+      rightOffsetPercent: 100,
+      windowWidth: this.props.width
+    });
   }
 }
 
@@ -335,7 +354,8 @@ class SliderWindow extends Component {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
         <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'red' storke='none' pointer-events='all' tabindex='0'
-        fill-opacity={this.props.fillOpacity} style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events} />
+          fill-opacity={this.props.fillOpacity} aria-label="Slider Window (Use arrow to move)" style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events}>
+        </rect>
         <title> Slider Window (Grab to move) </title>
       </g>
     );
@@ -380,7 +400,7 @@ class SliderLeftHandle extends Component {
         <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} tabindex="0">
+        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Left Slider Handle </title>
           <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-left-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
@@ -441,7 +461,7 @@ class SliderRightHandle extends Component {
         <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} tabindex="0">
+        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Right Slider Handle </title>
           <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
