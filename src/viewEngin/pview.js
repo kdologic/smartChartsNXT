@@ -229,10 +229,10 @@ function parseStyleProps(objStyle) {
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
     if(events[e].new && events[e].old) {
-      node.addEventListener(e, events[e].new, false);
+      node._addEventListener(e, events[e].new, false);
       node.removeEventListener(e, events[e].old);
     }else {
-      node.addEventListener(e, events[e], false);
+      node._addEventListener(e, events[e], false);
     }
   });
   return Object.keys(events).join();
@@ -569,9 +569,15 @@ class Component {
     }
     
     if(typeof destroyableNode.nodeName === 'object') {
-      destroyableNode.nodeName.ref.node.parentNode && destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
+      if(destroyableNode.nodeName.ref.node.parentNode) {
+        destroyableNode.nodeName.ref.node._clearEventListeners();
+        destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
+      } 
     }else if(typeof destroyableNode.nodeName === 'string') {
-      ref.children[nodePos] && ref.children[nodePos].node.parentNode && ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      if(ref.children[nodePos] && ref.children[nodePos].node.parentNode) {
+        ref.children[nodePos].node._clearEventListeners();
+        ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      } 
     }
     ref.children[nodePos] = undefined;
   }
