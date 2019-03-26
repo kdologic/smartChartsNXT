@@ -3,6 +3,7 @@
 <head>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
+    var _debug = true;
     async function getStock(stockId) {
       var data = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockId}&interval=5min&apikey=NSQWJINYQ9CB6GR3`
@@ -12,12 +13,12 @@
 
     window.onload = function () {
       //^BSESN, RCOM.NS, GRAPHITE.NS
-      // getStock('RCOM.NS').then(data => {
-      //   console.log(data);
-      //   var dataSet = prepareData(data);
-      //   displayChart('RCom', dataSet);
-      // });
-      var dataSet = prepareData(getStaticData());
+      getStock('RCOM.NS').then(data => {
+        console.log(data);
+        var dataSet = prepareData(data);
+        displayChart('RCom', dataSet);
+      });
+      //var dataSet = prepareData(getStaticData());
       displayChart('RCom', dataSet);
     };
 

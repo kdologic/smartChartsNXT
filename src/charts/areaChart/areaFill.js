@@ -3,6 +3,7 @@
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import Geom from "./../../core/geom.core";
+import UiCore from "./../../core/ui.core";
 import UtilCore from "./../../core/util.core";
 import DataPoints from "./../../components/dataPoints";
 import eventEmitter from './../../core/eventEmitter';
@@ -161,13 +162,13 @@ class AreaFill extends Component{
       return;
     }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    let mousePos = e.pos; 
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
     let pointSet = this.state.pointSet; 
     if(this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
     }
-    if(this.props.clip.offsetRight > this.props.markerRadius) {
+    if(this.props.posX + pointSet[pointSet.length-1].x >this.state.clip.x+this.state.clip.width) {
       pointSet = pointSet.slice(0, pointSet.length-1);
     }
     let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 

@@ -14,7 +14,7 @@
 
 import ployfills from "./shims/polyfills";
 
-window.debug = false; 
+window._debug = false; 
 /** 
  * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
  * @param {object} node - It will be a real DOM node or Virtual node which can be mount.
@@ -642,7 +642,7 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
-    debug && console.time('update');
+    window._debug && console.time('update');
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -658,7 +658,7 @@ class Component {
     if(typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.vnode.attributes);
     }
-    debug && console.timeEnd('update');
+    window._debug && console.timeEnd('update');
     return this.vnode = vnodeNow;
   }
 
