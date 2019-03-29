@@ -168,7 +168,7 @@ class AreaFill extends Component{
     if(this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
     }
-    if(this.props.posX + pointSet[pointSet.length-1].x >this.state.clip.x+this.state.clip.width) {
+    if(pointSet.length && this.props.posX + pointSet[pointSet.length-1].x > this.state.clip.x+this.state.clip.width) {
       pointSet = pointSet.slice(0, pointSet.length-1);
     }
     let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 

@@ -85,6 +85,7 @@ class BaseChart extends Component {
         version={1.1}
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
+        viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
         id={this.getChartId()}
         class="smartcharts-nxt"
         style={{
