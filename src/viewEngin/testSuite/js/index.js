@@ -7,7 +7,8 @@ import { mountTo } from "./../../pview";
 const modules = {
   AnimationTestApp: require("./animationTestApp").default,
   RenderingTestApp: require("./renderingTestApp").default,
-  AttrUpdateApp: require("./attrUpdateApp").default
+  AttrUpdateApp: require("./attrUpdateApp").default,
+  MorphingTestApp: require("./morphingTestApp").default
 };
 
 window.loadModule = function(moduleName, targetNode) {

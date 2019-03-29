@@ -7,6 +7,9 @@
  * @description: Apply polyfills for older browsers and unsupported methods.
  */
 
+import PathDataPolyfill from "./path-data-polyfill"; 
+import PathSegList from "./pathSegmentList";
+
 class Polyfills {
   constructor() {
     this.performanceNowSHIM();
