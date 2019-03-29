@@ -1,19 +1,15 @@
 "use strict";
 
-/**
- * style.js
- * @version:2.0.0
- * @createdOn:02-May-2018
- * @author:SmartChartsNXT
- * @description: This component will create a style element into dom. 
- */
-
 import { Component, parseStyleProps } from "./pview";
 
+/**
+ * style.js
+ * @createdOn:02-May-2018
+ * @author:SmartChartsNXT
+ * @description: This component will create a style element into dom.
+ * @extends Compoent 
+ */
 
-/** This will create a style element in DOM 
- * @extends Compoent
-*/
 class Style extends Component {
   constructor(props) {
     super(props);

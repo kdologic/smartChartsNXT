@@ -11,7 +11,6 @@ import Menu from './../components/menu';
  * baseChart.js
  * @createdOn: 10-May-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:This is base chart with defaulf config and this will initiate loading of a specific chart type. 
  */
 
@@ -34,16 +33,10 @@ const CHART_MODULES = {
     // ColumnChart: require("./../charts/columnChart/columnChart")
 };
 
-/* ------------- Require pulgIns --------------*/
-//let animator = require("./../plugIns/animator");
-
 class BaseChart extends Component {
   constructor(props) {
     try {
       super(props); 
-      // this.plugins = {
-      //   animator: animator
-      // };
       this.chartType = this.props.opts.type;
       this.CHART_OPTIONS = UtilCore.extends(this.props.opts, { width: 1, height: 1});
       this.CHART_DATA = {scaleX: 0, scaleY: 0};
@@ -92,7 +85,9 @@ class BaseChart extends Component {
         version={1.1}
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
+        viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
         id={this.getChartId()}
+        class="smartcharts-nxt"
         style={{
           background: this.CHART_OPTIONS.bgColor || 'none',
           MozTapHighlightColor: 'rgba(0, 0, 0, 0)',
@@ -112,7 +107,7 @@ class BaseChart extends Component {
             height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
             fill-opacity='0.001'
-            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium }}
+            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium, pointerEvents: 'none'}}
           />
         </g>}
 
@@ -121,7 +116,7 @@ class BaseChart extends Component {
         }
         
         <g id={`${this.getChartId()}_cont`} >
-          <Chart chartOptions={this.CHART_OPTIONS} chartData={this.CHART_DATA} chartConst={this.CHART_CONST} ></Chart>
+          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} ></Chart>
         </g>
 
         {this.CHART_OPTIONS.showMenu !== false &&

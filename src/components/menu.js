@@ -1,19 +1,19 @@
-/** 
- * menu.js
- * @createdOn:06-Jan-2018
- * @version:2.0.0
- * @author:SmartChartsNXT
- * @description:This will generate a menu in chart.
- */
-
 "use strict";
 
 import Point from "./../core/point";
 import { Component } from "./../viewEngin/pview";
 import defaultConfig from "./../settings/config";
-import Geom from './../core/geom.core'; 
 import SpeechBox from './../components/speechBox'; 
 import saveAs from './../core/saveAs';
+
+/** 
+ * menu.js
+ * @createdOn:06-Jan-2018
+ * @author:SmartChartsNXT
+ * @description:This will generate a menu in chart.
+ * @extends Component
+ */
+
 
 class Menu extends Component {
   constructor(props) {
@@ -65,6 +65,7 @@ class Menu extends Component {
       }
       ]
     };
+    this.showMenu = this.showMenu.bind(this);
   }
 
   onMenuClick(type) {
@@ -95,10 +96,10 @@ class Menu extends Component {
         </defs>
 
         { this.state.showTopMenu &&  
-          <rect x={0} y={0} width={this.props.svgWidth} height={this.props.svgHeight} opacity='0.0001' events={{click:this.showMenu.bind(this)}}></rect>
+          <rect x={0} y={0} width={this.props.svgWidth} height={this.props.svgHeight} opacity='0.0001' events={{click:this.showMenu}}></rect>
         }
 
-        <g events={{click: this.showMenu.bind(this)}} transform={`translate(${this.menuPosition.x},${this.menuPosition.y})`}>
+        <g events={{click: this.showMenu}} transform={`translate(${this.menuPosition.x},${this.menuPosition.y})`}>
           <rect id='smartCharts-menu-icon' x={0} y={0} width={this.state.menuIconWidth} height={24} pointer-events='all' fill='#f1f1f1' stroke-width='1' stroke-opacity='0' opacity={this.state.showTopMenu ? 1 : 0} stroke={defaultConfig.theme.fontColorDark} style={{cursor:'pointer'}} />
           <g class='vBarIcon' stroke={defaultConfig.theme.fontColorDark} stroke-width='1' 
             vector-effect="non-scaling-stroke" style={{cursor:'pointer'}}>

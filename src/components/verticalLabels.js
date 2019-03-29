@@ -7,7 +7,6 @@ import { Component } from "./../viewEngin/pview";
 
 /**
  * verticalLabels.js
- * @version:2.0.0
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create a Vertical Labels and Tick marks for the chart.
@@ -37,7 +36,9 @@ class VerticalLabels extends Component{
     };
     this.valueSet = []; 
     this.minLabelVal = this.props.minVal; 
-    this.maxLabelVal = this.props.maxVal; 
+    this.maxLabelVal = this.props.maxVal;
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
   }
 
   componentWillMount() {
@@ -45,9 +46,13 @@ class VerticalLabels extends Component{
   }
 
   componentDidMount() {
-    if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
-      this.setState({fontSize: this.state.fontSize-1});
-    }
+    this.intervalId = setInterval(() => {
+      if(this.ref.node.getBoundingClientRect().width > this.props.maxWidth){
+        this.setState({fontSize: this.state.fontSize-1});
+      }else {
+        clearInterval(this.intervalId);
+      }
+    });
     typeof this.props.onRef === 'function' && this.props.onRef(this); 
   }
 
@@ -97,7 +102,7 @@ class VerticalLabels extends Component{
     return (
       <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none' 
         font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter.bind(this), mouseleave: this.onMouseLeave.bind(this)}}> 
+        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy="0.4em" events={{mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave}}> 
           {(this.props.opts.prefix ? this.props.opts.prefix : "") + val} 
         </tspan>
       </text>

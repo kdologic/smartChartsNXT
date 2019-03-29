@@ -1,18 +1,13 @@
+"use strict";
+
+import Point from "./point";
+
 /**
  * geom.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @version: 1.1.0
  * @description:SmartChartsNXT Core Library components. That contains geometric functionality.
  */
-
-
-
-/*---------------Related mathematical shapes---------------------------*/
-
-"use strict";
-
-import Point from "./point";
 
 class GeomCore {
   constructor() {}
@@ -21,7 +16,7 @@ class GeomCore {
     return [
       "M", (x + radius), y, "h", (width - (2 * radius)), "a", radius, radius, " 0 0 1 ", radius, radius, "v", (height - (2 * radius)), "a", radius, radius, " 0 0 1 ", -radius, radius, "h", ((2 * radius) - width), "a", radius, radius, " 0 0 1 ", -radius, -radius, "v", ((2 * radius) - height), "a", radius, radius, " 0 0 1 ", radius, -radius, "z"
     ];
-  } /*End describeRoundedRect()*/
+  }
 
   describeBezireArc(point1, point2, point3) {
     let mid2 = this.getMidPoint(point2, point3);
@@ -36,7 +31,7 @@ class GeomCore {
       mid2.y
     ];
     return c;
-  } /*End describeBezireArc()*/
+  }
 
   createDot(center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
     let svg;
@@ -60,7 +55,7 @@ class GeomCore {
     newElement.setAttribute("stroke-width", strokeWidth || 1); //Set stroke width
     newElement.setAttribute("pointer-events", "none"); //set no pointer event for dot
     svg.appendChild(newElement);
-  } /*End createDot()*/
+  }
 
 
   createRect(left, top, width, height, color, cls, opacity, stroke, strokeWidth) {
@@ -76,7 +71,7 @@ class GeomCore {
     newElement.setAttribute("stroke-width", strokeWidth || 1); //Set stroke width
     newElement.setAttribute("class", cls || "bbox"); //Set class
     svg.appendChild(newElement);
-  } /*End createRect()*/
+  }
 
   /**
    * Find the closest point from a set of Points. 
@@ -88,7 +83,7 @@ class GeomCore {
     let halfLen = Math.ceil(pSet.length/2); 
     let lSet = pSet.slice(0, halfLen); 
     let rSet = pSet.slice(halfLen);
-    let nearPoint = undefined;
+    let nearPoint = {};
     if(halfLen < 3) {
       let min = Number.MAX_SAFE_INTEGER; 
       for(let p of pSet) {
@@ -123,11 +118,11 @@ class GeomCore {
       x: centerX + (radius * Math.cos(angleInRadians).toFixed(4)),
       y: centerY + (radius * Math.sin(angleInRadians).toFixed(4))
     };
-  } /*End polarToCartesian()*/
+  }
 
   getMidPoint(point1, point2) {
     return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
-  } /*End getMidPoint()*/
+  }
 
   getEllipticalRadius(rx, ry, angleInDegrees) {
     if (!rx || !ry) {
@@ -136,7 +131,7 @@ class GeomCore {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
-  } /*End getEllipticalRadius()*/
+  }
 
   /**
    * Return path of an Elliptical Arc.

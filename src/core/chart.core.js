@@ -9,7 +9,6 @@ const PRE_LOADER_IMG = "<svg width='135' height='140' viewBox='0 0 135 140' xmln
  * chart.core.js
  * @createdOn:10-Jul-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:SmartChartsNXT Core Library components. It's bootstrap the code, 
  * by loading appropriate dependencies. Loading ployfills and shims, fonts etc. 
  */

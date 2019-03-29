@@ -9,7 +9,6 @@ import { Component } from "./../viewEngin/pview";
  * legendBox.js
  * @createdOn: 06-Nov-2017
  * @author: SmartChartsNXT
- * @version: 1.1.0
  * @description:This is a component class will create legned area. 
  * @extends Component
  * 
@@ -40,11 +39,12 @@ import { Component } from "./../viewEngin/pview";
       "toggleType": false,
       "hideIcon": false, 
       "hideLabel": false, 
-      "hideValue": false,
-      "onLegendClick": function() {console.log("onClick-",this)},
-      "onLegendHover": function() {console.log("onHover-",this)},
-      "onLegendLeave": function() {console.log("onLeave-",this)}
+      "hideValue": false
     }
+ * Supported events - 
+ * legendClicked - Triggered when clicked on a legend box.
+ * legendHovered - Triggered when mouse hover on a legend box.
+ * legendLeaved - Triggered when move out of legend box.
  */
 
 class LegendBox extends Component {
@@ -97,6 +97,9 @@ class LegendBox extends Component {
     this.hoverHeight = 15; 
     this.lineHeight = 30;
     this.toggleColor = '#bbb';
+    this.onClick = this.onClick.bind(this);
+    this.onHover = this.onHover.bind(this);
+    this.onLeave = this.onLeave.bind(this);
   }
 
   componentWillMount() {
@@ -132,12 +135,12 @@ class LegendBox extends Component {
       return (
         <g class={`legend-${index} series-legend`} tabindex='0' transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
           events={{
-            click:this.onClick.bind(this),
-            keyup:this.onClick.bind(this),
-            mouseenter:this.onHover.bind(this),
-            mouseleave: this.onLeave.bind(this),
-            focusin: this.onHover.bind(this),
-            focusout: this.onLeave.bind(this)
+            click:this.onClick,
+            keyup:this.onClick,
+            mouseenter:this.onHover,
+            mouseleave: this.onLeave,
+            focusin: this.onHover,
+            focusout: this.onLeave
           }} >
           <rect class={`legend-${index} legend-border-${index}`} x={this.state.left + (this.padding/2)} y={this.state.top + (this.padding/2)} rx='7'
            width={this.state.lengthSet.max.width + this.padding} height={this.hoverHeight + this.padding} fill={this.config.hoverColor}  
@@ -271,45 +274,23 @@ class LegendBox extends Component {
       this.update();
     }
     this.assignLegendData(index, e);
-    this.emitter.emit('legendClick', e);
-    // if (typeof this.props.onLegendClick === 'function') {
-    //   this.props.onLegendClick(index);
-    // }
-    // if (typeof this.props.opts.onLegendClick === 'function') {
-    //   let legendData = {index}; 
-    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-    //   this.props.opts.onLegendClick.call(legendData);
-    // }
+    this.emitter.emit('legendClicked', e);
   }
 
   onHover(e) {
     let index = e.target.classList[0].substring("legend-".length);
     this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0.9; 
     this.assignLegendData(index, e);
-    this.emitter.emit('legendHover', e);
-    // if (typeof this.props.onLegendHover === 'function') {
-    //   this.props.onLegendHover(index);
-    // }
-    // if (typeof this.props.opts.onLegendHover === 'function') {
-    //   let legendData = {index}; 
-    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-    //   this.props.opts.onLegendHover.call(legendData);
-    // }
+    this.emitter.emit('legendHovered', e);
   }
 
   onLeave(e) {
     let index = e.target.classList[0].substring("legend-".length);
-    this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0; 
+    if(this.ref.node.querySelector(`.legend-border-${index}`)){
+      this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0; 
+    }
     this.assignLegendData(index, e);
-    this.emitter.emit('legendLeave', e);
-    // if (typeof this.props.onLegendLeave === 'function') {
-    //   this.props.onLegendLeave(index);
-    // }
-    // if (typeof this.props.opts.onLegendLeave === 'function') {
-    //   let legendData = {index}; 
-    //   ({label:legendData.label, value:legendData.value, color:legendData.color} = this.state.legendSet[index]);
-    //   this.props.opts.onLegendLeave.call(legendData);
-    // }
+    this.emitter.emit('legendLeaved', e);
   }
 }
 

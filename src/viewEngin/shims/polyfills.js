@@ -1,19 +1,18 @@
+"use strict";
+
 /**
  * polyfills.js
  * @createdOn: 08-Aug-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
- * @description: Apply polyfills for older browsers 
+ * @description: Apply polyfills for older browsers and unsupported methods.
  */
-
-
-"use strict";
 
 class Polyfills {
   constructor() {
     this.performanceNowSHIM();
     this.requestAnimFrameSHIM();
     this.requestNextAnimationFrameSHIM();
+    this.supportEventLisenerList();
   }
 
   /*window.performance.now() SHIM for all browser*/
@@ -92,6 +91,60 @@ class Polyfills {
         }
       };
     }
+  }
+
+  /**
+   * Maintain a list of event listener that attached with each node. 
+   * So that we can remove all listener handler before removing the node 
+   * to avoid possible momory leak. 
+   */
+  supportEventLisenerList() {
+    Element.prototype._addEventListener = function (eventName, handle, useCapture) {
+      if (useCapture == undefined) {
+        useCapture = false;
+      }
+      this.addEventListener(eventName, handle, useCapture);
+      if (!this.eventListenerList) {
+        this.eventListenerList = {};
+      }
+      if (!this.eventListenerList[eventName]) {
+        this.eventListenerList[eventName] = [];
+      }
+      this.eventListenerList[eventName].push({
+        listener: handle,
+        useCapture: useCapture
+      });
+    };
+
+    Element.prototype._getEventListeners = function (eventName) {
+      if (!this.eventListenerList) {
+        this.eventListenerList = {};
+      }
+      if (eventName == undefined) {
+        return this.eventListenerList;
+      }
+      return this.eventListenerList[eventName];
+    };
+
+    Element.prototype._clearEventListeners = function (eventName) {
+      if (!this.eventListenerList) {
+        this.eventListenerList = {};
+      }
+      if (eventName == undefined) {
+        for (let e in (this._getEventListeners())) {
+          this._clearEventListeners(e);
+        }
+        return;
+      }
+      let el = this._getEventListeners(eventName);
+      if (el == undefined) {
+        return;
+      }
+      for (let i = el.length - 1; i >= 0; --i) {
+        let ev = el[i];
+        this.removeEventListener(eventName, ev.listener, ev.useCapture);
+      }
+    };
   }
 }
 

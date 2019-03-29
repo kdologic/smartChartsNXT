@@ -1,5 +1,3 @@
-
-
 "use strict";
 
 import { mountTo } from "./../viewEngin/pview";
@@ -12,7 +10,6 @@ import Error from "./../components/errorView";
  * chart.js
  * @createdOn: 22-Oct-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:This class will be the entry point of all charts.
  */
 
@@ -25,7 +22,7 @@ class Chart {
       this.targetNode.setAttribute("runId", this.runId);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false); 
-      console.log(this.core);
+      _debug && console.debug(this.core);
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex; 

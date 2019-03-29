@@ -1,19 +1,14 @@
 "use strict";
 
-/**
- * interactivePlane.js
- * @version:2.0.0
- * @createdOn:14-Mar-2018
- * @author:SmartChartsNXT
- * @description: This components will create an interactive plane over chart area. 
- */
-
 import { Component } from "./../../viewEngin/pview";
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
 
-/** 
- * This components will create an interactive plane over chart area. Where user can interact with mouse or touch.
+/**
+ * interactivePlane.js
+ * @createdOn:14-Mar-2018
+ * @author: SmartChartsNXT
+ * @description: This components will create an interactive plane over chart area. Where user can interact with mouse or touch.
  * @extends Component
  */
 
@@ -22,6 +17,9 @@ class InteractivePlane extends Component{
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId); 
+    this.onMouseEnter = this.onMouseEnter.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
   }
 
   componentWillMount() {
@@ -37,12 +35,11 @@ class InteractivePlane extends Component{
       <g class='sc-interactive' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <rect class='sc-interactive-plane' width={this.props.width} height={this.props.height} fill='none' style={{pointerEvents: 'all'}} 
           events={{
-            mouseenter: this.onMouseEnter.bind(this),
-            mouseleave: this.onMouseLeave.bind(this),
-            mousemove: this.onMouseMove.bind(this)
+            mouseenter: this.onMouseEnter,
+            mouseleave: this.onMouseLeave,
+            mousemove: this.onMouseMove
           }}
         />
-        
       </g>
     );
   }

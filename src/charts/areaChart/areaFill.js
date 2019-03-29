@@ -3,13 +3,13 @@
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
 import Geom from "./../../core/geom.core";
+import UiCore from "./../../core/ui.core";
 import UtilCore from "./../../core/util.core";
 import DataPoints from "./../../components/dataPoints";
 import eventEmitter from './../../core/eventEmitter';
 
 /**
  * areaFill.js
- * @version:2.0.0
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
@@ -20,8 +20,9 @@ class AreaFill extends Component{
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId); 
-    this.rid = Math.round(Math.random()*100001);
-    this.clipPathId = 'sc-clip-' + this.rid; 
+    this.rid = UtilCore.getRandomID();
+    this.clipPathId = 'sc-clip-' + this.rid;
+    this.gradId = "sc-area-fill-grad-" + this.rid;
     this.state = {
       marker: ~~this.props.marker,
       scaleX: 0,
@@ -32,11 +33,18 @@ class AreaFill extends Component{
       strokeOpacity: this.props.strokeOpacity || 1,
       opacity: this.props.opacity || 1
     };
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: this.props.width,
+      height: this.props.height
+    }, this.props.clip);
+    this.subComp = {}; 
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this); 
-    this.prepareData(); 
-    
+    this.prepareData(this.props); 
+    this.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
   }
   
   componentWillMount() {
@@ -45,10 +53,8 @@ class AreaFill extends Component{
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    if(this.props.dataPoints) {
-      this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
-      this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
-    }
+    this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
+    this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
   }
 
@@ -60,27 +66,31 @@ class AreaFill extends Component{
 
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
+    this.prepareData(nextProps);
+    this.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: nextProps.width,
+      height: nextProps.height
+    }, nextProps.clip);
   }
 
   render() {
-    this.subComp = {}; 
-    this.prepareData();
-    let path = this.props.spline ? this.getCurvedLinePath() : this.getLinePath(); 
-    let gradId = "sc-area-fill-grad-" + this.rid;
     return (
       <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={0} y={0} width={this.props.width} height={this.props.height} />
+            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
           </clipPath>
         </defs>
-        {this.props.gradient && this.createGradient(gradId)}
-        <path class={`sc-series-area-path-${this.props.index}`} stroke='none' fill={this.props.gradient ? `url(#${gradId})` : this.props.fill} 
-          d={this.getAreaPath(path.slice()).join(' ')} stroke-width='0' opacity={this.state.opacity} >
+        {this.props.gradient && this.createGradient(this.gradId)}
+        <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor} 
+          d={this.getAreaPath(this.linePath.slice()).join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.fill} stroke-opacity={this.state.strokeOpacity} fill='none' d={path.join(' ')} stroke-width={this.props.strokeWidth} opacity='1'></path> 
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
         {this.props.dataPoints &&
-          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.fill} onRef={ref => this.subComp.dataPoints = ref} /> 
+          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} onRef={(ref) => {this.subComp.dataPoints = ref;}} /> 
         }
       </g>
     );
@@ -91,12 +101,12 @@ class AreaFill extends Component{
     return linePath;
   }
 
-  getLinePath() {
+  getLinePath(props) {
     let path = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
-      let point = new Point((i * this.state.scaleX) + this.props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
-      if(this.props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new Point(this.state.scaleX + this.props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      if(props.centerSinglePoint && this.state.valueSet.length === 1) {
+        point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       if(i > 0) {
         path.push('L', point.x, point.y);
@@ -108,12 +118,12 @@ class AreaFill extends Component{
     return path; 
   }
 
-  getCurvedLinePath() {
+  getCurvedLinePath(props) {
     let path = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
-      let point = new Point((i * this.state.scaleX) + this.props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
-      if(this.props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new Point(this.state.scaleX + this.props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      if(props.centerSinglePoint && this.state.valueSet.length === 1) {
+        point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       point.index = i; 
       return point; 
@@ -127,28 +137,41 @@ class AreaFill extends Component{
     return(
       <defs>
         <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-          <stop offset="0%" stop-color={this.props.fill} stop-opacity="1" />
+          <stop offset="0%" stop-color={this.props.areaFillColor} stop-opacity="1" />
           <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
         </linearGradient>
       </defs>
     );
   }
   
-  prepareData() {
-    this.state.valueSet = this.props.dataSet.data.map((data) => {
+  prepareData(props) {
+    this.state.valueSet = props.dataSet.data.map((data) => {
       return data.value;
     });
-    this.state.scaleX = (this.props.width - (2 * this.props.paddingX)) / (this.props.maxSeriesLen-1 || 2);
-    this.state.scaleY = this.props.height / (this.props.maxVal-this.props.minVal); 
-    this.state.baseLine = this.props.maxVal * this.state.scaleY; 
+    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen-1 || 2);
+    this.state.scaleY = props.height / (props.maxVal-props.minVal); 
+    this.state.baseLine = props.maxVal * this.state.scaleY; 
     this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker; 
+    if(typeof props.getScaleX === 'function') {
+      props.getScaleX(this.state.scaleX);
+    }
   }
 
   interactiveMouseMove(e) {
+    if(!this.props.dataPoints) {
+      return;
+    }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    let mousePos = e.pos; 
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
-    let nearPoint = Geom.findClosestPoint(this.state.pointSet, pt, true); 
+    let pointSet = this.state.pointSet; 
+    if(this.props.clip.offsetLeft > this.props.markerRadius) {
+      pointSet = pointSet.slice(1);
+    }
+    if(pointSet.length && this.props.posX + pointSet[pointSet.length-1].x > this.state.clip.x+this.state.clip.width) {
+      pointSet = pointSet.slice(0, pointSet.length-1);
+    }
+    let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 
     this.subComp.dataPoints.doHighlight(false);
     if(nearPoint.dist < (this.state.scaleX / 2)) {
       this.subComp.dataPoints.doHighlight(nearPoint.index); 
@@ -166,7 +189,9 @@ class AreaFill extends Component{
   }
 
   interactiveMouseLeave(e) {
-    this.subComp.dataPoints.doHighlight(false);
+    if(this.props.dataPoints) {
+      this.subComp.dataPoints.doHighlight(false);
+    }
   }
 
   changeAreaBrightness(e) {

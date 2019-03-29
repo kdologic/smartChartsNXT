@@ -13,7 +13,8 @@
  */
 
 import ployfills from "./shims/polyfills";
- 
+
+window._debug = false; 
 /** 
  * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
  * @param {object} node - It will be a real DOM node or Virtual node which can be mount.
@@ -164,9 +165,10 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
       let refChldObj = undefined;
       for (let c = 0; c < refs.children.length; c++) {
         let refChld = refs.children[c];
-        if (refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
+        if (refChld && refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
           /* Match instaceId for support multiple instace of same component type under same parent node */
           if(refChld.self.props.instanceId === subNode.attributes.instanceId) {
+            subNode.class = subNode.nodeName;
             subNode.nodeName = refChld.self;
             refChldObj = refChld;
             break;
@@ -209,7 +211,11 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
+    if(objStyle[key].old && objStyle[key].new) {
+      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
+    }else {
+      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
+    }
   });
   return sArr.join('');
 }
@@ -222,7 +228,12 @@ function parseStyleProps(objStyle) {
  */
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
-    node.addEventListener(e, events[e], false);
+    if(events[e].new && events[e].old) {
+      node._addEventListener(e, events[e].new, false);
+      node.removeEventListener(e, events[e].old);
+    }else {
+      node._addEventListener(e, events[e], false);
+    }
   });
   return Object.keys(events).join();
 }
@@ -262,7 +273,6 @@ class Component {
   getVirtualNode() {
     return this.vnode = this.render();
   }
-
  
   /**
    * Compare nodeName, attributes to detect exact changes
@@ -270,24 +280,119 @@ class Component {
    * @param {*} newVNode 
    */
   _detectDiff(oldVNode, newVNode) {
-    if(typeof oldVNode === 'string' && typeof newVNode === 'string' && oldVNode !== newVNode) {
-      return {type: 'NODE_TEXT_DIFF'};
-    }
-    if(oldVNode.nodeName === newVNode.nodeName) {
-      let attrChanges = {};
-      for(let attr in newVNode.attributes) {
-        if(JSON.stringify(oldVNode.attributes[attr]) !== JSON.stringify(newVNode.attributes[attr])) {
-          attrChanges[attr] = newVNode.attributes[attr];
-        }
+    if(typeof oldVNode === 'string' && typeof newVNode === 'string') {
+      if(oldVNode !== newVNode){
+        return {type: 'NODE_TEXT_DIFF'};
+      }else {
+        return {type: 'NODE_NO_DIFF'};
       }
-      if(Object.keys(attrChanges).length) {
-        return {type: 'NODE_ATTR_DIFF', attributes: attrChanges};
+    }
+    if(oldVNode.nodeName === newVNode.nodeName && oldVNode.attributes.instanceId === newVNode.attributes.instanceId) {
+      let attrDiff = this._attrDiff(oldVNode.attributes, newVNode.attributes, 1, ['extChildren']);
+      if(attrDiff.length) {
+        return {type: 'NODE_ATTR_DIFF', attributes: attrDiff};
       }else {
         return {type: 'NODE_NO_DIFF'};
       }
     }else {
       return {type: 'NODE_NAME_DIFF'};
     }
+  }
+
+/**
+ * Get a diff json by comparing two JSON objects.
+ * @param {Object} obj1 First object to compare.
+ * @param {Object} obj2 Second object to compare with First object.
+ * @param {Number} level Number of hierarchical level to compare also will run (undefined for compare all levels).
+ */
+  _attrDiff(obj1, obj2, level, ignoreList=[]) {
+    let diff = {
+      $added: {},
+      $deleted: {},
+      $updated: {},
+      $object: {},
+      $unchanges: {}
+    };
+    let properties = this.arrayUnique(Object.keys(obj1).concat(Object.keys(obj2)));
+    for (let key = 0; key < properties.length; key++) {
+      let p = properties[key];
+      if (!obj1[p]) {
+        diff.$added[p] = obj2[p];
+      } else if (!obj2[p]) {
+        diff.$deleted[p] = obj1[p];
+      } else {
+        if(ignoreList.indexOf(p) >= 0) {
+          diff.$unchanges[p] = obj2[p];
+        } else if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
+          if (obj1[p] instanceof Array || obj2[p] instanceof Array) {
+            diff.$updated[p] = {
+              "new": obj2[p],
+              "old": obj1[p]
+            };
+          } else if (level == undefined || level > 0) {
+            diff.$object[p] = this._attrDiff(obj1[p], obj2[p], level !== undefined ? level - 1 : level, ignoreList);
+          } else {
+            diff.$updated[p] = {
+              "new": obj2[p],
+              "old": obj1[p]
+            };
+          }
+        } else if (obj1[p] !== obj2[p]) {
+          diff.$updated[p] = {
+            "new": obj2[p],
+            "old": obj1[p]
+          };
+        } else {
+          diff.$unchanges[p] = obj2[p];
+        }
+      }
+    }
+    
+    diff.length = (Object.keys(diff.$added).length + Object.keys(diff.$deleted).length + Object.keys(diff.$updated).length);
+    for(let key in diff.$object) {
+      diff.length += (diff.$object[key].length || 0);
+    }
+    return diff;
+  }
+
+/**
+ * Compare and return an unique array with elements.
+ * @param {Array} array 
+ */
+  arrayUnique(array) {
+    let a = array.concat();
+    for (let i = 0; i < a.length; ++i) {
+      for (let j = i + 1; j < a.length; ++j) {
+        if (a[i] === a[j]) {
+          a.splice(j--, 1);
+        }
+      }
+    }
+    return a;
+  }
+
+  /**
+   * Properties from the Souce1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
+   * @param {Object} source First Source object. 
+   * @param {Object} source1 Second Source Object.
+   */
+  _extends(source1, source2) {
+    if(!source1 || !source2) {
+      return {}; 
+    }
+    let mergedJSON = source1;
+    for (let attrname in source2) {
+      if (mergedJSON.hasOwnProperty(attrname)) {
+        if (source2[attrname] != null && source2[attrname].constructor == Object) {
+          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source2[attrname]);
+        } else { 
+          mergedJSON[attrname] = source2[attrname];
+        }
+      } else { 
+        mergedJSON[attrname] = source2[attrname];
+      }
+    }
+    return mergedJSON;
   }
 
   /**
@@ -304,40 +409,49 @@ class Component {
       _replaceClassWithObject(newVNode, ref, true);
     }
 
-    if(ref.self && typeof ref.self.passContext === 'function') {
+    if(ref && ref.self && typeof ref.self.passContext === 'function') {
       context = Object.assign({}, context, ref.self.passContext());
     }
 
     if(typeof newVNode.nodeName === 'object') {
-      let newProps = Object.assign({}, ref.self.props, newVNode.attributes, { extChildren: newVNode.children });
-      if(ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
+      newVNode.attributes.extChildren = newVNode.children;
+      let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes);
+      if(ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if(!shouldUpdate) {
           return false;
         }
       }
-      if (ref.self && typeof ref.self.propsWillReceive === 'function') {
+      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
         ref.self.propsWillReceive.call(ref.self, newProps);
         ref.self.props = newProps; 
       }
-      if(ref.self) {
+
+      if(ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
+        ref.self.componentWillUpdate.call(ref.self, newProps);
+      }
+
+      if(ref && ref.self) {
         ref.self.__proto__.context = context; 
         newRenderedVnode = ref.self.render();
       }
     }
 
     let differ = this._detectDiff(oldVNode, newVNode);
-
+    
     switch(differ.type) {
       case 'NODE_ATTR_DIFF': 
         if(typeof newVNode.nodeName === 'object') {
+
           this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
           newVNode.nodeName.vnode = newRenderedVnode;
+          ref.children = ref.self.ref.children;
+          if(ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
+            ref.self.componentDidUpdate(oldVNode.attributes);
+          }
           return;
         }else if(typeof newVNode.nodeName === 'string') {
-          for(let attr in differ.attributes) {
-            this._updateAttr(ref.node, attr, differ.attributes[attr]);
-          }
+          this._updateAttr(ref.node, differ.attributes);
         }
       break;
       case 'NODE_TEXT_DIFF':
@@ -356,9 +470,11 @@ class Component {
         if(oldVNode.children[child] && newVNode.children[child]) {
           let reconsileDiff; 
           if(typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
-            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newVNode.nodeName.render(), ref.self.ref, JSON.parse(JSON.stringify(context)));
+            child = Math.max(oldVNode.children.length, newVNode.children.length);
+            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
+            ref.children = ref.self.ref.children;
           }else {
-            reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], JSON.parse(JSON.stringify(context)));
+            reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
             
             if(ref.children[child].children instanceof Array && ref.children[child].children.length) {
               ref.children[child].children = ref.children[child].children.filter(v => v != undefined);
@@ -366,6 +482,10 @@ class Component {
           }
           if(reconsileDiff && reconsileDiff.type === 'NODE_NAME_DIFF') {
             this._removeOldNode(child, oldVNode, ref);
+            if(typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
+              newVNode.children[child].nodeName  = newVNode.children[child].class; 
+              delete newVNode.children[child].class;
+            }
             this._createNewNode(child, newVNode, ref, context);
           }
           if(reconsileDiff && reconsileDiff.type === 'NODE_TEXT_DIFF') {
@@ -375,14 +495,24 @@ class Component {
             ref.children = ref.children.filter(v => v != undefined);
           }
         }else if(!oldVNode.children[child]) {
+          if(typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
+            newVNode.children[child].nodeName  = newVNode.children[child].class; 
+            delete newVNode.children[child].class;
+          }
           this._createNewNode(child, newVNode, ref, context);
         }else {
           this._removeOldNode(child, oldVNode, ref);
         }
       }
+      if(ref.children instanceof Array && ref.children.length) {
+        ref.children = ref.children.filter(v => v != undefined);
+      }
     }
     if(typeof newVNode.nodeName === 'object') {
       newVNode.nodeName.vnode = newRenderedVnode;
+      if(typeof ref.self.componentDidUpdate === 'function') {
+        ref.self.componentDidUpdate(oldVNode.nodeName.props);
+      }
     }
   }
 
@@ -409,7 +539,7 @@ class Component {
    */
   _createNewNode(nodePos=0, newVNode, ref, context) {
     let newComponent = renderDOM.call({ context: context || {} }, newVNode.children[nodePos]);
-    ref.children.splice(nodePos+1, 0, newComponent);   
+    ref.children.splice(nodePos, 0, newComponent);   
     
     return mountTo(newComponent, ref.node, 'rnode', undefined, context);
   }
@@ -421,14 +551,33 @@ class Component {
    * @param {*} ref Object reference of component.
    */
   _removeOldNode(nodePos=0, oldVNode, ref) {
-    let destroyableNode = oldVNode.children[nodePos];
+    let destroyableNode = oldVNode.children[nodePos], destroyableObj;
     if(typeof destroyableNode.nodeName === 'object') {
-      if (typeof destroyableNode.nodeName.componentWillUnmount === 'function') {
-        destroyableNode.nodeName.componentWillUnmount.call(destroyableNode.nodeName);
+      destroyableObj = destroyableNode.nodeName;
+      destroyableNode = destroyableNode.nodeName.vnode;
+    }
+    if(destroyableNode.children && destroyableNode.children instanceof Array) {
+      for(let c = 0; c < destroyableNode.children.length; c++) {
+        if(ref.children[nodePos]) {
+          this._removeOldNode(c, destroyableNode, ref.children[nodePos]);
+        }
       }
-      destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
+    }
+
+    if (destroyableObj && typeof destroyableObj.componentWillUnmount === 'function') {
+      destroyableObj.componentWillUnmount.call(destroyableObj);
+    }
+    
+    if(typeof destroyableNode.nodeName === 'object') {
+      if(destroyableNode.nodeName.ref.node.parentNode) {
+        destroyableNode.nodeName.ref.node._clearEventListeners();
+        destroyableNode.nodeName.ref.node.parentNode.removeChild(destroyableNode.nodeName.ref.node);
+      } 
     }else if(typeof destroyableNode.nodeName === 'string') {
-      ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      if(ref.children[nodePos] && ref.children[nodePos].node.parentNode) {
+        ref.children[nodePos].node._clearEventListeners();
+        ref.children[nodePos].node.parentNode.removeChild(ref.children[nodePos].node);
+      } 
     }
     ref.children[nodePos] = undefined;
   }
@@ -436,11 +585,56 @@ class Component {
   /**
    * Update only attribute of existing DOM node.
    * @param {*} dom DOM reference on the node. 
-   * @param {*} attr Attribute name to be modify. 
-   * @param {*} val New value of the attibute.
+   * @param {*} attrChanges Attributes to be modify. 
    */
-  _updateAttr(dom, attr, val) {
-    dom.setAttribute(attr, val); 
+  _updateAttr(dom, attrChanges) {
+    let groups = ['$added','$updated','$object'];
+    groups.forEach((group) => {
+      Object.keys(attrChanges[group]).forEach(key => {
+        let attrVal = ((k) => {
+          switch (k) {
+            case 'style': 
+            let styles = "";
+            if(typeof attrChanges[group][k] === 'object') {
+              groups.forEach((grp) => {
+                styles += parseStyleProps(attrChanges[group][k][grp]);
+              });
+              styles += parseStyleProps(attrChanges[group][k].$unchanges);
+            }else {
+              styles = attrChanges[group][k];
+            }
+            return styles;
+            case 'events': 
+              let evtNames = Object.keys(attrChanges[group][k].$unchanges);
+              groups.forEach((grp) => {
+                evtNames = evtNames.concat(parseEventsProps(attrChanges[group][k][grp], dom).split(','));
+              });
+              Object.keys(attrChanges[group][k].$deleted).forEach((evt) => {
+                dom.removeEventListener(evt, attrChanges[group][k].$deleted[evt]);
+              });
+              return evtNames.filter(v => !!v).join();
+            default: 
+              if(attrChanges[group][k].old && attrChanges[group][k].new) {
+                return attrChanges[group][k].new;
+              }else {
+                return attrChanges[group][k];
+              }
+          }
+        })(key);
+        dom.setAttribute(key, attrVal);
+      });
+    });
+    Object.keys(attrChanges.$deleted).forEach(key => {
+      let attr = ((k) => {
+        switch (k) {
+          case 'events': 
+            dom.removeEventListener(k, attrChanges.$deleted[k]); 
+          return k;
+          default: return k;
+        }
+      })(key);
+      dom.removeAttribute(attr);
+    });
   }
 
   /**
@@ -448,6 +642,7 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
+    window._debug && console.time('update');
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -456,8 +651,15 @@ class Component {
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
+    if(typeof this.componentWillUpdate === 'function') {
+      this.componentWillUpdate(vnodeNow.attributes);
+    }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext); 
-    this.vnode = vnodeNow;
+    if(typeof this.componentDidUpdate === 'function') {
+      this.componentDidUpdate(this.vnode.attributes);
+    }
+    window._debug && console.timeEnd('update');
+    return this.vnode = vnodeNow;
   }
 
   /** 
@@ -498,6 +700,18 @@ class Component {
   shouldComponentUpdate(nextProps) {
     return true;
   }
+  
+  /** 
+   * Lifecycle event - fires before the component update on parent DOM.
+   * @param {*} nextProps set of props that was there before update that component.
+   */
+  componentWillUpdate(nextProps){}
+  
+  /** 
+   * Lifecycle event - fires after the component update on parent DOM.
+   * @param {*} prevProps set of props that was there before update that component.
+   */
+  componentDidUpdate(prevProps){}
 
   /** 
    * Lifecycle event - fires before the component unmounted from parent DOM 

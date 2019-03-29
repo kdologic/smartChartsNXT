@@ -1,6 +1,5 @@
 "use strict";
 
-import Geom from './../core/geom.core';
 import UiCore from './../core/ui.core';
 import { Component } from "./../viewEngin/pview";
 import eventEmitter from './../core/eventEmitter';
@@ -8,7 +7,6 @@ import eventEmitter from './../core/eventEmitter';
 /**
  * horizontalScroller.js
  * @createdOn:14-Jul-2017
- * @version:2.0.0
  * @author:SmartChartsNXT
  * @description: This components will create a Horizontal Scroll area for the chart. Where where user can drag right or left handler 
  * to adjust the window area. 
@@ -23,7 +21,7 @@ import eventEmitter from './../core/eventEmitter';
   }
 
  * Supported events - 
- hScroll : fire when user perform scrolling. 
+ * hScroll : fire when user perform scrolling. 
 
  */
 
@@ -33,87 +31,117 @@ class HorizontalScroller extends Component {
     this.selectedHandler = undefined;
     this.emitter = eventEmitter.getInstance(this.context.runId); 
     let offset = this.calcOffset(props); 
+
     this.state = {
       sliderLeft: "",
       sliderLeftSel: "",
       sliderLeftSelInner: "",
       leftOffset: offset.leftOffset,
+      leftOffsetPercent: offset.leftOffsetPercent,
       scrollRight: this.props.width,
       sliderRight: "",
       sliderRightSel: "",
       sliderRightSelInner: "",
       rightOffset: offset.rightOffset,
+      rightOffsetPercent: offset.rightOffsetPercent,
       windowWidth: offset.windowWidth,
       leftHandlerColor: '#fff',
-      rightHandlerColor: '#fff'
+      rightHandlerColor: '#fff',
+      sliderWindowOpacity: 0.2,
+      handlerFocused: null,
+      isGrabbed: false
     };
     
     this.slider = {}; 
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onHoverInHandler = this.onHoverInHandler.bind(this);
+    this.onLeaveInHandler = this.onLeaveInHandler.bind(this);
+    this.onOffsetClick = this.onOffsetClick.bind(this);
+    this.onScrollMove = this.onScrollMove.bind(this);
+    this.onScrollEnd = this.onScrollEnd.bind(this);
+    this.onKeyMove = this.onKeyMove.bind(this);
+    this.onHoverInSliderWindow = this.onHoverInSliderWindow.bind(this);
+    this.onLeaveSliderWindow = this.onLeaveSliderWindow.bind(this);
+    this.onScrollReset = this.onScrollReset.bind(this);
   }
 
   propsWillReceive(nextProps) {
     let widthChangePercent = ((nextProps.width - this.props.width)/this.props.width)*100;
-    this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
-    this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
+    if(widthChangePercent) {
+      this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
+      this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
+    }
+  }
+
+  componentDidMount() {
+    this.emitter.on('onScrollReset', this.onScrollReset);
+  }
+
+  componentWillUnmount() {
+    this.emitter.removeListener('onScrollReset', this.onScrollReset); 
+    this.onScrollEnd();
   }
 
   render() {
     return (
-      <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
+      <g class="sc-horizontal-scroll-cont" transform={`translate(${this.props.posX},${this.props.posY})`}>
+        <rect class="sc-slider-bg" x={0} y={0} width={this.props.width} height={this.props.height} fill="#000" fill-opacity="0.04" />
         { this.props.opts.chartInside && 
           this.props.extChildren
         }
-        <path class='sc-hScroller-upper-path' stroke='#333' fill='none' d={this.getUpperBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-        <path class='sc-hScroller-lower-path' stroke='#333' fill='none' d={this.getLowerBorderPath()} shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
+          fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
           events= {{
-            mousedown: this.onMouseDown.bind(this),
-            touchstart: this.onMouseDown.bind(this)
+            mousedown: this.onMouseDown,
+            touchstart: this.onMouseDown,
+            mouseenter: this.onHoverInSliderWindow,
+            mouseleave: this.onLeaveSliderWindow,
+            focusin: this.onHoverInSliderWindow,
+            focusout: this.onLeaveSliderWindow,
+            keydown: this.onKeyMove
           }}> 
         </SliderWindow>
-        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
+
+        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  offsetPercent={this.state.leftOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
+          grabbed={this.state.isGrabbed}
           events= {{
             handlerEvent: {
-              mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this),
-              mouseenter: this.onHoverInHandler.bind(this),
-              mouseleave: this.onLeaveInHandler.bind(this),
-              focusin: this.onHoverInHandler.bind(this),
-              focusout: this.onLeaveInHandler.bind(this)
+              mousedown: this.onMouseDown,
+              touchstart: this.onMouseDown,
+              mouseenter: this.onHoverInHandler,
+              mouseleave: this.onLeaveInHandler,
+              focusin: this.onHoverInHandler,
+              focusout: this.onLeaveInHandler,
+              keydown: this.onKeyMove
             },
             offsetEvent: {
-              click: this.onOffsetClick.bind(this)
+              click: this.onOffsetClick
             }
           }}> 
         </SliderLeftHandle>
-        <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  
+        
+        <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth} offsetPercent={this.state.rightOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
+          grabbed={this.state.isGrabbed}
           events= {{
             handlerEvent: {
-              mousedown: this.onMouseDown.bind(this),
-              touchstart: this.onMouseDown.bind(this),
-              mouseenter: this.onHoverInHandler.bind(this),
-              mouseleave: this.onLeaveInHandler.bind(this),
-              focusin: this.onHoverInHandler.bind(this),
-              focusout: this.onLeaveInHandler.bind(this)
+              mousedown: this.onMouseDown,
+              touchstart: this.onMouseDown,
+              mouseenter: this.onHoverInHandler,
+              mouseleave: this.onLeaveInHandler,
+              focusin: this.onHoverInHandler,
+              focusout: this.onLeaveInHandler,
+              keydown: this.onKeyMove
             },
             offsetEvent: {
-              click: this.onOffsetClick.bind(this)
+              click: this.onOffsetClick
             }
           }}> 
         </SliderRightHandle>
+
         { this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: -webkit-grabbing; cursor: grabbing;"
-            events={{
-              mousemove: this.onScrollMove.bind(this),
-              touchmove: this.onScrollMove.bind(this),
-              mouseup: this.onScrollEnd.bind(this),
-              touchend: this.onScrollEnd.bind(this),
-              mouseout: this.onScrollEnd.bind(this),
-              mouseleave: this.onScrollEnd.bind(this)
-            }}
-          />
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style="cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;" />
         }
       </g>
     );
@@ -137,35 +165,33 @@ class HorizontalScroller extends Component {
     let leftOffset = (props.leftOffset * props.width / 100) || 0;
     let rightOffset = (props.rightOffset * props.width / 100) || 0;
     let windowWidth = rightOffset - leftOffset;
-    return { leftOffset, rightOffset, windowWidth };
+    return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset/props.width*100, rightOffsetPercent: rightOffset/props.width*100 };
   }
 
   onMouseDown(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    switch (e.target.classList.value) {
-      case 'sc-slider-left-sel' :
-        this.selectedHandler = 'left';
-        break;
-      case 'sc-slider-right-sel' :
-        this.selectedHandler = 'right';
-        break;
-      case 'sc-hScroll-window' :
-      case 'sc-slider-left-offset' :
-      case 'sc-slider-right-offset' :
-        this.selectedHandler = 'window';
-        break;
+    let classList = e.target.classList.value.split(" ");
+    if(classList.includes('sc-slider-left-sel')) {
+      this.selectedHandler = 'left';
+    }else if(classList.includes('sc-slider-right-sel')) {
+      this.selectedHandler = 'right';
+    }else if(classList.includes('sc-hScroll-window') || classList.includes('sc-slider-left-offset') || classList.includes('sc-slider-right-offset')) {
+      this.selectedHandler = 'window';
     }
+    
     this.mouseDownPos = mousePos;
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
-    this.update(); 
+    this.setState({isGrabbed: true}); 
+
+    window.addEventListener('mousemove', this.onScrollMove, false);
+    window.addEventListener('touchmove', this.onScrollMove, false);
   }
 
   onScrollMove(e) {
     if(this.selectedHandler) {
       let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
-      
       switch (this.selectedHandler) {
         case 'left':
           lOffset = this.lOffset - (this.mouseDownPos.x - mousePosNow.x);
@@ -210,20 +236,28 @@ class HorizontalScroller extends Component {
 
       this.state.leftOffset = lOffset;
       this.state.windowWidth = winWidth;
-      this.sliderWindow.setState({posX:this.state.leftOffset, width: this.state.windowWidth});
-      this.slider.left.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
-      this.slider.right.setState({leftOffset:this.state.leftOffset, windowWidth: this.state.windowWidth});
+      this.state.leftOffsetPercent = this.state.leftOffset/this.props.width*100;
+      this.state.rightOffsetPercent = ((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100;
       this.emitter.emit('hScroll', {
-        leftOffset: ((this.state.leftOffset/this.props.width)*100).toFixed(2),
-        rightOffset: (((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100).toFixed(2),
-        windowWidth: ((this.state.windowWidth/this.props.width)*100).toFixed(2)
+        leftOffset: this.state.leftOffsetPercent,
+        rightOffset: this.state.rightOffsetPercent,
+        windowWidth: ((this.state.windowWidth/this.props.width)*100)
       });
     }
+
+    window.addEventListener('mouseup', this.onScrollEnd, false);
+    window.addEventListener('touchend', this.onScrollEnd, false);
   }
 
   onScrollEnd(e) {
     this.selectedHandler = undefined; 
-    this.update(); 
+    this.setState({isGrabbed: false});
+    
+    window.removeEventListener('mousemove', this.onScrollMove);
+    window.removeEventListener('mouseup', this.onScrollEnd); 
+    window.removeEventListener('touchmove', this.onScrollMove);
+    window.removeEventListener('touchend', this.onScrollEnd); 
+
   }
 
   onOffsetClick(e) {
@@ -235,18 +269,66 @@ class HorizontalScroller extends Component {
 
   onHoverInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#ddd';
+      this.setState({leftHandlerColor:'#999', handlerFocused: 'left'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#ddd';
+      this.setState({rightHandlerColor:'#999', handlerFocused: 'right'});
     }
   }
 
   onLeaveInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.state.leftHandlerColor = e.target.querySelector('.sc-slider-left-sel').style['fill'] = '#fff';
+      this.setState({'leftHandlerColor':'#fff'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.state.rightHandlerColor = e.target.querySelector('.sc-slider-right-sel').style['fill'] = '#fff';
+      this.setState({'rightHandlerColor':'#fff'});
     }
+  }
+
+  onHoverInSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.5, handlerFocused: 'window'});
+  }
+
+  onLeaveSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.2});
+  }
+
+  onKeyMove(e) {
+    let event = {
+      clientX: this.state.leftOffset, 
+      clientY: 0
+    };
+    switch(this.state.handlerFocused) {
+      case 'left': 
+        event.target = this.ref.node.querySelector('.sc-slider-left-sel');
+        break;
+      case 'right': 
+        event.target = this.ref.node.querySelector('.sc-slider-right-sel');
+        break;
+      case 'window': 
+        event.target = this.ref.node.querySelector('.sc-hScroll-window');
+        break; 
+    }
+
+    // left arrow pressed
+    if(e.keyCode == 37) { 
+      this.onMouseDown(event);
+      event.clientX = this.state.leftOffset - 10;
+    // right arrow pressed
+    }else if(e.keyCode == 39) { 
+      this.onMouseDown(event);
+      event.clientX = this.state.leftOffset + 10;
+    }
+    this.onScrollMove(event);
+    this.onScrollEnd(event);
+  }
+
+  onScrollReset(e) {
+    this.setState({
+      leftOffset: 0,
+      leftOffsetPercent: 0,
+      rightOffset: this.props.width,
+      rightOffsetPercent: 100,
+      windowWidth: this.props.width
+    });
   }
 }
 
@@ -254,14 +336,10 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.state.events['mouseenter'] = this.onHover.bind(this);
-    this.state.events['mouseleave'] = this.onLeave.bind(this);
   }
 
   propsWillReceive(nextProps) {
-    this.state = {...this.state, ...nextProps};
-    this.state.events['mouseenter'] = this.onHover.bind(this);
-    this.state.events['mouseleave'] = this.onLeave.bind(this);
+    this.state = Object.assign({}, this.state, nextProps);
   }
 
   componentWillMount() {
@@ -275,19 +353,12 @@ class SliderWindow extends Component {
   render() {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
-        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'rgb(102,133,194)'  fill-opacity='0.2' storke='none' pointer-events='all' 
-        style="transition: fill-opacity 0.3s linear; cursor: -webkit-grab; cursor: grab;" events={this.state.events} />
+        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'red' storke='none' pointer-events='all' tabindex='0'
+          fill-opacity={this.props.fillOpacity} aria-label="Slider Window (Use arrow to move)" style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events}>
+        </rect>
         <title> Slider Window (Grab to move) </title>
       </g>
     );
-  }
-
-  onHover(e) {
-    this.ref.node.querySelector('.sc-hScroll-window').style['fill-opacity'] = 0.5;
-  }
-
-  onLeave(e) {
-    this.ref.node.querySelector('.sc-hScroll-window').style['fill-opacity'] = 0.2;
   }
 }
 
@@ -316,7 +387,7 @@ class SliderLeftHandle extends Component {
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-left" height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
-              <feOffset dx="-1" dy="0" result="offsetblur"></feOffset>
+              <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
                 <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
@@ -326,14 +397,13 @@ class SliderLeftHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} tabindex="0">
+        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Left Slider Handle </title>
-          <path class='sc-slider-left-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-left)`} d={this.state.sliderLeftSel} pointer-events='all' stroke-width='0' opacity='1'></path>
+          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-left-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-          <path class='sc-slider-left' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderLeft}  pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );
@@ -341,15 +411,13 @@ class SliderLeftHandle extends Component {
 
   calcSliderPaths() {
     let innerBarLeft = [
-      "M", (- 5), (this.props.height/2) - 5,
-      "L", (- 5), (this.props.height/2) + 5,
-      "M", (- 7), (this.props.height/2) - 5,
-      "L", (- 7), (this.props.height/2) + 5
+      "M",-2, (this.props.height/2) - 5,
+      "L",-2, (this.props.height/2) + 5,
+      "M", 2, (this.props.height/2) - 5,
+      "L", 2, (this.props.height/2) + 5
     ];
 
     this.state = {...this.state, 
-      sliderLeft: ['M', 0, 0, 'L', 0, this.props.height].join(' '),
-      sliderLeftSel: Geom.describeEllipticalArc(0, (this.props.height/2), 15, 15, 180, 360, 0).d,
       sliderLeftSelInner: innerBarLeft.join(' ')
     };
   }
@@ -379,8 +447,8 @@ class SliderRightHandle extends Component {
       <g class='sc-slider-right-handle' transform={`translate(${this.state.leftOffset + this.state.windowWidth},0)`} >
         <defs>
           <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-right" height="130%" width="130%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"></feGaussianBlur>
-              <feOffset dx="1" dy="" result="offsetblur"></feOffset>
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
+              <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
                 <feFuncA type="linear" slope="0.7"></feFuncA>
               </feComponentTransfer>
@@ -390,14 +458,13 @@ class SliderRightHandle extends Component {
               </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' stroke-width='0.1' stroke='#717171' >
+        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} tabindex="0">
+        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Right Slider Handle </title>
-          <path class='sc-slider-right-sel' stroke='rgb(178, 177, 182)' fill={this.props.handlerColor} filter={`url(#slider-dropshadow-right)`} d={this.state.sliderRightSel} stroke-width='0' opacity='1'></path>
+          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
-          <path class='sc-slider-right' stroke='rgb(178, 177, 182)' fill='none' d={this.state.sliderRight} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );
@@ -405,15 +472,13 @@ class SliderRightHandle extends Component {
 
   calcSliderPaths() {
     let innerBarRight = [
-      "M", 4, (this.props.height/2) - 5,
-      "L", 4, (this.props.height/2) + 5,
-      "M", 6, (this.props.height/2) - 5,
-      "L", 6, (this.props.height/2) + 5
+      "M",-2, (this.props.height/2) - 5,
+      "L",-2, (this.props.height/2) + 5,
+      "M", 2, (this.props.height/2) - 5,
+      "L", 2, (this.props.height/2) + 5
     ];
 
     this.state = {...this.state, 
-      sliderRight: ['M', 0, 0, 'L', 0, this.props.height].join(' '),
-      sliderRightSel: Geom.describeEllipticalArc(0, (this.props.height/2), 15, 15, 180, 360, 1).d, 
       sliderRightSelInner: innerBarRight.join(' '),
       rightOffset: Math.abs(this.props.width - (this.state.leftOffset + this.state.windowWidth))
     };

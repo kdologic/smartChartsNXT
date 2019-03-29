@@ -5,8 +5,9 @@
 import { mountTo } from "./../../pview";
 
 const modules = {
-  ClickerApp: require("./clickerApp").default,
-  RenderingTestApp: require("./renderingTestApp").default
+  AnimationTestApp: require("./animationTestApp").default,
+  RenderingTestApp: require("./renderingTestApp").default,
+  AttrUpdateApp: require("./attrUpdateApp").default
 };
 
 window.loadModule = function(moduleName, targetNode) {

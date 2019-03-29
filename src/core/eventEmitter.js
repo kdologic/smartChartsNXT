@@ -4,7 +4,6 @@
  * eventEmitter.js
  * @createdOn: 14-Mar-2018
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:This is singleTone class for event emitter. For propagate events between components. 
  */
 

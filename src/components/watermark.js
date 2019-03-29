@@ -1,42 +1,90 @@
-/**
- * watermark.js
- * @createdOn: 05-Jan-2018
- * @author: SmartChartsNXT
- * @version: 2.0.0
- * @description:This is a component class will create watermark area. 
- */ 
-
 "use strict";
 
 import { Component } from "./../viewEngin/pview";
 import UiCore from './../core/ui.core';
 import defaultConfig from "./../settings/config";
 
+/**
+ * watermark.js
+ * @createdOn: 05-Jan-2018
+ * @author: SmartChartsNXT
+ * @description:This is a component class will create watermark area. 
+ * @extends: Component
+ */ 
+
 class Watermark extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      color: defaultConfig.theme.fontColorMedium,
+      linkIconX: 0,
+      linkIconY: -7,
+      textWidth: 0, 
+      mouseEnter: false
+    };
+
+    this.onClick = this.onClick.bind(this);
+    this.onHover = this.onHover.bind(this); 
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+  }
+
+  componentDidMount() {
+    let textWidth = this.ref.node.querySelector('.watermark-text').getComputedTextLength();
+    if(this.state.textWidth !== textWidth){
+      this.setState({
+        linkIconX: textWidth + 5,
+        textWidth
+      });
+    }
   }
 
   render() {
     return (
-      <g class='smartChartsNXT-watermark'>
+      <g class='sc-watermark' transform={`translate(${this.props.posX},${this.props.posY})`}>
+        <title>Watermark: Redirect to website {this.props.link}</title> 
         <style>
           {this.getStyle()}
         </style> 
-        <text fill='#717171' text-rendering='geometricPrecision' style='cursor: pointer;' 
-        events={{click : () => {window.open(this.props.link);}}}>
-          <tspan text-anchor='start' class='watermark-text' x={this.props.posX} y={this.props.posY} >{this.props.extChildren}</tspan>
-        </text>
+        <g class="sc-watermark-link" stroke={this.state.color} fill={this.state.color} style='cursor: pointer;' tabindex="0"
+          events={{
+            click : this.onClick,
+            mouseenter: this.onHover,
+            mouseleave: this.onMouseLeave,
+            focusin: this.onHover,
+            focusout: this.onMouseLeave
+          }}>
+          <rect x={0} y={-8} width={this.state.textWidth + 15} height={10} pointer-events="all" stroke="none" fill="none" fill-opacity="0"/>
+          <text x={0} y={0} text-rendering='geometricPrecision'>
+            <tspan text-anchor='start' class='watermark-text' >{this.props.extChildren}</tspan>
+          </text>
+          { this.state.mouseEnter &&
+            <line x1={0} y1={2} x2={this.state.textWidth + 15} y2={2} fill="none" stroke={this.state.color} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
+          }
+          <g transform={`translate(${this.state.linkIconX},${this.state.linkIconY}) scale(0.3)`} stroke="none" fill="#000">
+            <path d="M22 14.5v5c0 2.484-2.016 4.5-4.5 4.5h-13A4.502 4.502 0 0 1 0 19.5v-13C0 4.016 2.016 2 4.5 2h11c.281 0 .5.219.5.5v1c0 .281-.219.5-.5.5h-11A2.507 2.507 0 0 0 2 6.5v13C2 20.875 3.125 22 4.5 22h13c1.375 0 2.5-1.125 2.5-2.5v-5c0-.281.219-.5.5-.5h1c.281 0 .5.219.5.5zM28 1v8c0 .547-.453 1-1 1a.99.99 0 0 1-.703-.297l-2.75-2.75L13.36 17.14c-.094.094-.234.156-.359.156s-.266-.063-.359-.156l-1.781-1.781c-.094-.094-.156-.234-.156-.359s.063-.266.156-.359L21.048 4.454l-2.75-2.75a.996.996 0 0 1-.297-.703c0-.547.453-1 1-1h8c.547 0 1 .453 1 1z"/>
+          </g>
+        </g>
       </g>
     );
   }
 
+  onClick(e) {
+    window.open(this.props.link, '_blank');
+  }
+
+  onHover(e) {
+    this.setState({mouseEnter: true, color: "blue"});
+  }
+
+  onMouseLeave(e) {
+    this.setState({mouseEnter: false, color: defaultConfig.theme.fontColorMedium});
+  }
+
   getStyle() {
     return (`
-      .smartChartsNXT-watermark .watermark-text {
+      .sc-watermark .watermark-text {
         font-family: ${defaultConfig.theme.fontFamily};
         font-size: ${UiCore.getScaledFontSize(this.props.svgWidth, 20, 10)};
-        fill: ${defaultConfig.theme.fontColorMedium};
         stroke: none;
         stroke-width: 0;
       }

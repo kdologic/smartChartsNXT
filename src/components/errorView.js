@@ -1,13 +1,15 @@
+"use strict";
+
+import {Component} from "./../viewEngin/pview";
+import UiCore from './../core/ui.core';
+
+
 /**
  * errorView.js
- * @version:1.0.0
  * @createdOn:28-Dec-2017
  * @author:SmartChartsNXT
  * @description: This components will show error screen. 
  */ 
-
-import {Component} from "./../viewEngin/pview";
-import UiCore from './../core/ui.core';
 
 class ErrorView extends Component {
   constructor(props) {

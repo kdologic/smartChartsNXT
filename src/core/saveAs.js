@@ -1,7 +1,8 @@
+"use strict";
+
 /** 
  * saveAs.js
  * @createdOn:02-Feb-2018
- * @version:2.0.0
  * @author:SmartChartsNXT
  * @description:This will convert HTML/SVG into downloadable image or PDF or print the Chart. 
  * 
@@ -11,8 +12,6 @@
  *  srcElem:// element ID of root 
  * }
  */
-
-"use strict";
 
 class SaveAs {
 

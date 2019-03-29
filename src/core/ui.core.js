@@ -4,7 +4,6 @@
  * ui.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
  */
 
@@ -14,14 +13,14 @@ class UiCore {
   /**
    * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element. 
    * @param {String} shadowId Element ID of dropshadow Component.
-   * @returns Virtual node of drop shadow component. 
+   * @returns {Object} Virtual node of drop shadow component. 
    */
-  dropShadow(shadowId) {
+  dropShadow(shadowId, offsetX, offsetY) {
     return (
       <defs>
         <filter xmlns="http://www.w3.org/2000/svg" id={shadowId} height="130%">
           <feGaussianBlur in="SourceAlpha" stdDeviation="1"/> 
-          <feOffset dx="4" dy="4" result="offsetblur"/>
+          <feOffset dx={offsetX || 4} dy={offsetY || 4} result="offsetblur"/>
           <feComponentTransfer>
             <feFuncA type="linear" slope="0.2"/>
           </feComponentTransfer>
@@ -35,12 +34,12 @@ class UiCore {
   }
 
   /** Create radial gradient
-   * @param {string} gradId - identifire of this gradient
-   * @param {number} cx - center x 
-   * @param {number} cy - center y
-   * @param {number} fx - offset x
-   * @param {number} fy - offset y
-   * @param {number} r -  radius
+   * @param {string} gradId - Identifire of this gradient.
+   * @param {number} cx - Center x.
+   * @param {number} cy - Center y.
+   * @param {number} fx - Offset x.
+   * @param {number} fy - Offset y.
+   * @param {number} r -  Radius
    * @param {Array} gradArr - Array of number or object. 
    * Example --
    * gradArr = [0.1, -0.06, 0.9] or 
@@ -83,27 +82,27 @@ class UiCore {
   }
 
   /** Returns true if it is a touch device 
-   * @return {boolean}
+   * @return {boolean} Returns 'true' for touch device otherwise return 'false'.
   */
   isTouchDevice() {
     return "ontouchstart" in document.documentElement;
   }
 
   /**
-   * Convert Window screen coordinate into SVG point coordinate in global SVG space
-   * @param {String} targetElem SVG element in which point coordinate will be calculated
-   * @param {*} evt Ponter event related to screen like mouse or touch point
+   * Convert Window screen coordinate into SVG point coordinate in global SVG space.
+   * @param {String} targetElem SVG element in which point coordinate will be calculated.
+   * @param {Object} evt Ponter event related to screen like mouse or touch point.
+   * @return {Point} Returns a point which transform into SVG cordinate system. 
    */
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === "string") {
-      targetElem = document.querySelector("#" + targetElem + " svg");
+      targetElem = document.querySelector("#" + targetElem + " .smartcharts-nxt");
     }
     let pt = targetElem.createSVGPoint();
-    pt.x = evt.clientX || evt.touches[0].clientX;
-    pt.y = evt.clientY || evt.touches[0].clientY;
+    pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
+    pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches[0] ? evt.touches[0].clientY : 0;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
   } 
-
 
   /**
    * Calculate interval value and also interval count for a given range. 

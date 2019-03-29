@@ -1,14 +1,12 @@
+"use strict";
+
 /**
  * transformer.js
  * @createdOn: 31-July-2017
  * @author: SmartChartsNXT
- * @version: 2.0.0
  * @description:This class will generate css transformation matrix. 
  * Will merge multiple transform operation (like rotate, skes, translate etc.) into a single transformation matrix. 
  */
-
-
-"use strict";
 
 class Transformer {
   constructor() {}
