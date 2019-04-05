@@ -27,7 +27,7 @@ class Button extends Component {
         <Style>
           {{
             [".btn." + this.btnUID + " rect:hover"] : {
-              "fill":this.props.borderColor
+              "fill":this.props.hoverColor
             }
           }}
         </Style>

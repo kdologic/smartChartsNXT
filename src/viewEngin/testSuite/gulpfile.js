@@ -31,7 +31,7 @@ function buildTask() {
 }
 
 function watchTask() {
-  return gulp.watch(['./js/**', './../../viewEngin/*.js'], ['build']);
+  return gulp.watch(['./../../**/*.js','./js/**', './../../viewEngin/*.js', '!./../../**/{build,build/**}'], ['build']);
 }
 
 gulp.task('build', buildTask);
