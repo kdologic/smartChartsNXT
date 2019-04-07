@@ -395,7 +395,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
-          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true}
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animate={true}
           getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
@@ -417,14 +417,14 @@ class AreaChart extends Component {
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='0'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false}
           getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
         </AreaFill>
         <AreaFill dataSet={series} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={0} posY={5} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='1'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false}
           clip={{
             x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100, 
             width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollRightOffset/100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100

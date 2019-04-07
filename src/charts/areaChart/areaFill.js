@@ -6,7 +6,8 @@ import Geom from "./../../core/geom.core";
 import UiCore from "./../../core/ui.core";
 import UtilCore from "./../../core/util.core";
 import DataPoints from "./../../components/dataPoints";
-import eventEmitter from './../../core/eventEmitter';
+import eventEmitter from "./../../core/eventEmitter";
+import Easing from "./../../plugIns/easing";
 
 /**
  * areaFill.js
@@ -31,7 +32,8 @@ class AreaFill extends Component{
       pointSet: [], 
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
-      opacity: this.props.opacity || 1
+      opacity: this.props.opacity || 1,
+      animInst:[]
     };
     this.state.clip = Object.assign({
       x: 0,
@@ -56,6 +58,9 @@ class AreaFill extends Component{
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
+    if(this.props.animate) {
+      this.playInitialAnimations(); 
+    }
   }
 
   componentWillUnmount() {
@@ -74,6 +79,7 @@ class AreaFill extends Component{
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+    this.stopAllAnimations(); 
   }
 
   render() {
@@ -198,6 +204,32 @@ class AreaFill extends Component{
     if(this.props.instanceId === e.instanceId && e.strokeOpacity) {
       this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1}); 
     }
+  }
+
+  playInitialAnimations() {
+    let fromPath = this.linePath.map((v,i) => {
+      if((i+1) % 3 === 0) {
+        return this.props.height;
+      }
+      return v;
+    });
+    let areaFromPath = this.getAreaPath(fromPath.slice()).map((v,i) => {
+      if((i+1) % 3 === 0) {
+        return this.props.height;
+      }
+      return v;
+    });
+    let linePath = this.ref.node.querySelector(`.sc-series-line-path-${this.props.index}`);
+    let areaPath = this.ref.node.querySelector(`.sc-series-area-path-${this.props.index}`);
+    let lAnim = linePath.morphFrom(2000,fromPath.join(' '), Easing.easeOutElastic, () => console.log('animation line done'));
+    let aAnim = areaPath.morphFrom(2000,areaFromPath.join(' '), Easing.easeOutElastic, () => console.log('animation area done'));
+    this.state.animInst.push(lAnim, aAnim);
+  }
+
+  stopAllAnimations() {
+    this.state.animInst.forEach((inst) => {
+      inst.stop(); 
+    });
   }
 
 }
