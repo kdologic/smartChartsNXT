@@ -33,7 +33,8 @@ class AreaFill extends Component{
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
       opacity: this.props.opacity || 1,
-      animInst:[]
+      animInst:[],
+      isAnimationPlaying: false
     };
     this.state.clip = Object.assign({
       x: 0,
@@ -46,7 +47,8 @@ class AreaFill extends Component{
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this); 
     this.prepareData(this.props); 
-    this.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
+    this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
+    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
   }
   
   componentWillMount() {
@@ -72,7 +74,8 @@ class AreaFill extends Component{
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
-    this.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
@@ -92,10 +95,10 @@ class AreaFill extends Component{
         </defs>
         {this.props.gradient && this.createGradient(this.gradId)}
         <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor} 
-          d={this.getAreaPath(this.linePath.slice()).join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
+          d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
-        {this.props.dataPoints &&
+        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
+        {this.props.dataPoints && !this.state.isAnimationPlaying &&
           <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} onRef={(ref) => {this.subComp.dataPoints = ref;}} /> 
         }
       </g>
@@ -164,7 +167,7 @@ class AreaFill extends Component{
   }
 
   interactiveMouseMove(e) {
-    if(!this.props.dataPoints) {
+    if(!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
@@ -195,7 +198,7 @@ class AreaFill extends Component{
   }
 
   interactiveMouseLeave(e) {
-    if(this.props.dataPoints) {
+    if(this.props.dataPoints && !this.state.isAnimationPlaying) {
       this.subComp.dataPoints.doHighlight(false);
     }
   }
@@ -207,28 +210,54 @@ class AreaFill extends Component{
   }
 
   playInitialAnimations() {
-    let fromPath = this.linePath.map((v,i) => {
-      if((i+1) % 3 === 0) {
-        return this.props.height;
-      }
-      return v;
+    this.setState({
+      isAnimationPlaying: true
     });
-    let areaFromPath = this.getAreaPath(fromPath.slice()).map((v,i) => {
-      if((i+1) % 3 === 0) {
-        return this.props.height;
-      }
-      return v;
-    });
+    let fromPath = [];
+    if (this.props.spline) {
+      fromPath = this.state.linePath.map((p) => {
+        if (typeof p === 'string' && p.indexOf('C') !== -1) {
+          let pSeg = p.split(' ');
+          for (let i = 2; i < pSeg.length; i += 2) {
+            pSeg[i] = this.props.height;
+          }
+          return pSeg.join(' ');
+        }
+        return p;
+      });
+    } else {
+      fromPath = this.state.linePath.map((v, i) => {
+        if ((i + 1) % 3 === 0) {
+          return this.props.height;
+        }
+        return v;
+      });
+    }
+    let areaFromPath = this.getAreaPath(fromPath.slice());
     let linePath = this.ref.node.querySelector(`.sc-series-line-path-${this.props.index}`);
     let areaPath = this.ref.node.querySelector(`.sc-series-area-path-${this.props.index}`);
-    let lAnim = linePath.morphFrom(2000,fromPath.join(' '), Easing.easeOutElastic, () => console.log('animation line done'));
-    let aAnim = areaPath.morphFrom(2000,areaFromPath.join(' '), Easing.easeOutElastic, () => console.log('animation area done'));
+    let lAnim = linePath.morphFrom(1000, fromPath.join(' '), Easing.easeOutElastic, () => {
+      this.animationDone();
+    });
+    let aAnim = areaPath.morphFrom(1000, areaFromPath.join(' '), Easing.easeOutElastic, () => {
+      this.animationDone();
+    });
     this.state.animInst.push(lAnim, aAnim);
+  }
+
+  animationDone() {
+    let animPlaying = this.state.animInst.filter((anim) => anim.isPlaying);
+    if (animPlaying instanceof Array && animPlaying.length === 0) {
+      this.setState({
+        isAnimationPlaying: false
+      });
+      this.state.animInst = []; 
+    }
   }
 
   stopAllAnimations() {
     this.state.animInst.forEach((inst) => {
-      inst.stop(); 
+      inst.stop();
     });
   }
 
