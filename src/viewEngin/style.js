@@ -18,6 +18,7 @@ class Style extends Component {
   render() {
     return (
       <style>
+        {this.props.src && this.jsonToCss(this.props.src)}
         {this.props.extChildren && this.props.extChildren.length && this.jsonToCss(this.props.extChildren[0])}
       </style>
     );

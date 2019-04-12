@@ -1,11 +1,12 @@
 "use strict";
 
 import Point from "./../core/point";
-import UtilCore from './../core/util.core';
+import UtilCore from "./../core/util.core";
 import { Component } from "./../viewEngin/pview";
 import defaultConfig from "./../settings/config";
-import Watermark from './../components/watermark'; 
-import Menu from './../components/menu'; 
+import CommonStyles from "./../styles/commonStyles";
+import Watermark from "./../components/watermark"; 
+import Menu from "./../components/menu"; 
 
 /**
  * baseChart.js
@@ -89,7 +90,7 @@ class BaseChart extends Component {
         id={this.getChartId()}
         class="smartcharts-nxt"
         style={{
-          background: this.CHART_OPTIONS.bgColor || 'none',
+          background: this.CHART_OPTIONS.bgColor || '#fff',
           MozTapHighlightColor: 'rgba(0, 0, 0, 0)',
           WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
           WebkitUserSelect: 'none',
@@ -99,17 +100,21 @@ class BaseChart extends Component {
           OUserSelect: 'none',
           UserSelect: 'none'
         }} >
-
-        {this.CHART_OPTIONS.canvasBorder &&
-        <g>
+        
+        <CommonStyles></CommonStyles>
+        
+        <g class="sc-canvas-border-container">
           <rect x='1' y='1' class="sc-canvas-border" vector-effect='non-scaling-stroke'
             width={this.CHART_OPTIONS.width - 2}
             height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
-            fill-opacity='0.001'
-            style={{ fill: defaultConfig.theme.bgColorLight, strokeWidth: 1, stroke: defaultConfig.theme.fontColorMedium, pointerEvents: 'none'}}
+            fill-opacity={1}
+            fill={'transparent'}
+            strokeWidth={1}
+            stroke={this.CHART_OPTIONS.canvasBorder ? defaultConfig.theme.fontColorMedium : 'none'}
+            style={{pointerEvents: 'none'}}
           />
-        </g>}
+        </g>
 
         {this.CHART_OPTIONS.watermark !== false && 
           <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link="http://www.smartcharts.cf">Powered by SmartChartsNXT</Watermark>

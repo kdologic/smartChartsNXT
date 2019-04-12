@@ -13,7 +13,7 @@ import eventEmitter from './../core/eventEmitter';
  * @extends Component
  * 
  * Accepted config -
- "horizontalScroller": {
+ * "horizontalScroller": {
     "enable": true,
     "width": 200,
     "height": 20,
@@ -47,21 +47,25 @@ class HorizontalScroller extends Component {
       windowWidth: offset.windowWidth,
       leftHandlerColor: '#fff',
       rightHandlerColor: '#fff',
+      leftInnerBarColor: '#5a5a5a',
+      rightInnerBarColor: '#5a5a5a',
       sliderWindowOpacity: 0.2,
-      handlerFocused: null,
-      isGrabbed: false
+      handlerFocused: null
     };
     
-    this.slider = {}; 
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onHoverInHandler = this.onHoverInHandler.bind(this);
     this.onLeaveInHandler = this.onLeaveInHandler.bind(this);
+    this.onFocusInHandler = this.onFocusInHandler.bind(this); 
+    this.onFocusOutHandler = this.onFocusOutHandler.bind(this);
     this.onOffsetClick = this.onOffsetClick.bind(this);
     this.onScrollMove = this.onScrollMove.bind(this);
     this.onScrollEnd = this.onScrollEnd.bind(this);
     this.onKeyMove = this.onKeyMove.bind(this);
     this.onHoverInSliderWindow = this.onHoverInSliderWindow.bind(this);
     this.onLeaveSliderWindow = this.onLeaveSliderWindow.bind(this);
+    this.onFocusInSliderWindow = this.onFocusInSliderWindow.bind(this);
+    this.onFocusOutSliderWindow = this.onFocusOutSliderWindow.bind(this);
     this.onScrollReset = this.onScrollReset.bind(this);
   }
 
@@ -89,30 +93,30 @@ class HorizontalScroller extends Component {
         { this.props.opts.chartInside && 
           this.props.extChildren
         }
-        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} onRef={obj => this.sliderWindow = obj}
-          fillOpacity={this.state.sliderWindowOpacity} grabbed={this.state.isGrabbed}
+        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height}
+          fillOpacity={this.state.sliderWindowOpacity} focusedIn={this.state.handlerFocused === 'window'}
           events= {{
             mousedown: this.onMouseDown,
             touchstart: this.onMouseDown,
             mouseenter: this.onHoverInSliderWindow,
             mouseleave: this.onLeaveSliderWindow,
-            focusin: this.onHoverInSliderWindow,
-            focusout: this.onLeaveSliderWindow,
+            focusin: this.onFocusInSliderWindow,
+            focusout: this.onFocusOutSliderWindow,
             keydown: this.onKeyMove
           }}> 
         </SliderWindow>
 
         <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  offsetPercent={this.state.leftOffsetPercent}
-          width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} onRef={(obj)=>{this.slider.left = obj;}}
-          grabbed={this.state.isGrabbed}
+          width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} innerBarColor={this.state.leftInnerBarColor}
+          focusedIn={this.state.handlerFocused === 'left'}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown,
               touchstart: this.onMouseDown,
               mouseenter: this.onHoverInHandler,
               mouseleave: this.onLeaveInHandler,
-              focusin: this.onHoverInHandler,
-              focusout: this.onLeaveInHandler,
+              focusin: this.onFocusInHandler,
+              focusout: this.onFocusOutHandler,
               keydown: this.onKeyMove
             },
             offsetEvent: {
@@ -122,16 +126,16 @@ class HorizontalScroller extends Component {
         </SliderLeftHandle>
         
         <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth} offsetPercent={this.state.rightOffsetPercent}
-          width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} onRef={(obj)=>{this.slider.right = obj;}}
-          grabbed={this.state.isGrabbed}
+          width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} innerBarColor={this.state.rightInnerBarColor}
+          focusedIn={this.state.handlerFocused === 'right'}
           events= {{
             handlerEvent: {
               mousedown: this.onMouseDown,
               touchstart: this.onMouseDown,
               mouseenter: this.onHoverInHandler,
               mouseleave: this.onLeaveInHandler,
-              focusin: this.onHoverInHandler,
-              focusout: this.onLeaveInHandler,
+              focusin: this.onFocusInHandler,
+              focusout: this.onFocusOutHandler,
               keydown: this.onKeyMove
             },
             offsetEvent: {
@@ -182,7 +186,6 @@ class HorizontalScroller extends Component {
     this.mouseDownPos = mousePos;
     this.winWidth = this.state.windowWidth; 
     this.lOffset = this.state.leftOffset; 
-    this.setState({isGrabbed: true}); 
 
     window.addEventListener('mousemove', this.onScrollMove, false);
     window.addEventListener('touchmove', this.onScrollMove, false);
@@ -251,13 +254,11 @@ class HorizontalScroller extends Component {
 
   onScrollEnd(e) {
     this.selectedHandler = undefined; 
-    this.setState({isGrabbed: false});
-    
+    this.update(); 
     window.removeEventListener('mousemove', this.onScrollMove);
     window.removeEventListener('mouseup', this.onScrollEnd); 
     window.removeEventListener('touchmove', this.onScrollMove);
     window.removeEventListener('touchend', this.onScrollEnd); 
-
   }
 
   onOffsetClick(e) {
@@ -269,26 +270,50 @@ class HorizontalScroller extends Component {
 
   onHoverInHandler(e) {
     if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.setState({leftHandlerColor:'#999', handlerFocused: 'left'});
+      this.setState({leftHandlerColor:'#333', leftInnerBarColor:'#fff'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.setState({rightHandlerColor:'#999', handlerFocused: 'right'});
+      this.setState({rightHandlerColor:'#333', rightInnerBarColor:'#fff'});
     }
   }
 
   onLeaveInHandler(e) {
-    if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.setState({'leftHandlerColor':'#fff'});
+    if(e.target.querySelector('.sc-slider-left-sel') && this.state.handlerFocused !== 'left') {
+      this.setState({'leftHandlerColor':'#fff', leftInnerBarColor:'#5a5a5a'});
+    }else if(e.target.querySelector('.sc-slider-right-sel') && this.state.handlerFocused !== 'right') {
+      this.setState({'rightHandlerColor':'#fff', rightInnerBarColor:'#5a5a5a'});
+    }
+  }
+
+  onFocusInHandler(e) {
+    if(e.target.querySelector('.sc-slider-left-sel') ) {
+      this.setState({leftHandlerColor:'#333', leftInnerBarColor:'#fff', handlerFocused: 'left'});
     }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.setState({'rightHandlerColor':'#fff'});
+      this.setState({rightHandlerColor:'#333', rightInnerBarColor:'#fff', handlerFocused: 'right'});
+    }
+  }
+
+  onFocusOutHandler(e) {
+    if(e.target.querySelector('.sc-slider-left-sel')) {
+      this.setState({'leftHandlerColor':'#fff', leftInnerBarColor:'#5a5a5a',handlerFocused: null});
+    }else if(e.target.querySelector('.sc-slider-right-sel')) {
+      this.setState({'rightHandlerColor':'#fff', rightInnerBarColor:'#5a5a5a', handlerFocused: null});
     }
   }
 
   onHoverInSliderWindow(e) {
-    this.setState({'sliderWindowOpacity': 0.5, handlerFocused: 'window'});
+    this.setState({'sliderWindowOpacity': 0.5});
   }
 
   onLeaveSliderWindow(e) {
     this.setState({'sliderWindowOpacity': 0.2});
+  }
+
+  onFocusInSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.5, handlerFocused: 'window'});
+  }
+
+  onFocusOutSliderWindow(e) {
+    this.setState({'sliderWindowOpacity': 0.2, handlerFocused: null});
   }
 
   onKeyMove(e) {
@@ -357,6 +382,7 @@ class SliderWindow extends Component {
           fill-opacity={this.props.fillOpacity} aria-label="Slider Window (Use arrow to move)" style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events}>
         </rect>
         <title> Slider Window (Grab to move) </title>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={0} y={0} rx={5} ry={5} width={this.props.width} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
       </g>
     );
   }
@@ -400,10 +426,11 @@ class SliderLeftHandle extends Component {
         <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
         <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Left Slider Handle </title>
           <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
-          <path class='sc-slider-left-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
+          <path class='sc-slider-left-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );
@@ -461,10 +488,11 @@ class SliderRightHandle extends Component {
         <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Right Slider Handle </title>
           <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
-          <path class='sc-slider-right-sel-inner' stroke='#5a5a5a' fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
+          <path class='sc-slider-right-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
     );

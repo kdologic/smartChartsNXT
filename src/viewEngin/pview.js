@@ -642,7 +642,12 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
-    window._debug && console.time('update');
+    let compName;
+    if(window._debug) {
+      compName = this.__proto__.constructor.name;
+      console.time(compName+' update');
+    }
+    
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -658,7 +663,11 @@ class Component {
     if(typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.vnode.attributes);
     }
-    window._debug && console.timeEnd('update');
+
+    if(window._debug) {
+      console.timeEnd(compName+' update');
+    }
+
     return this.vnode = vnodeNow;
   }
 

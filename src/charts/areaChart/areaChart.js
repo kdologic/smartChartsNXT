@@ -6,6 +6,7 @@ import defaultConfig from "./../../settings/config";
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
+import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Grid from './../../components/grid';
@@ -301,9 +302,7 @@ class AreaChart extends Component {
   render() {
     return (
       <g>
-        <style>
-          {this.getStyle()}
-        </style> 
+        <Style src={this.getStyle()}></Style> 
         <g>
           <Draggable>
             <text class='txt-title-grp' text-rendering='geometricPrecision'>
@@ -616,27 +615,27 @@ class AreaChart extends Component {
   }
 
   getStyle() {
-    return (`
-      *{
-        outline:none;
+    return ({
+      "*": {
+        "outline":"none"
+      },
+      ".txt-title-grp .txt-title": {
+        "font-family": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25),
+        "fill":(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark,
+        "stroke": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'
+      },
+      ".txt-title-grp .txt-subtitle": {
+        "font-family": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18),
+        "fill": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark,
+        "stroke": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'
+      },
+      ".vertical-axis-title, .horizontal-axis-title": {
+        "font-family": defaultConfig.theme.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)
       }
-      .txt-title-grp .txt-title {
-        font-family: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)};
-        fill: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark};
-        stroke: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'};
-      }
-      .txt-title-grp .txt-subtitle {
-        font-family: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)};
-        fill: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark};
-        stroke: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'};
-      }
-      .vertical-axis-title, .horizontal-axis-title {
-        font-family: ${defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)};
-      }
-    `);
+    });
   }
 }
 
