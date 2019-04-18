@@ -137,7 +137,7 @@ class AreaFill extends Component{
       point.index = i; 
       return point; 
     });
-    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.getBezierSplines(this.state.pointSet));
+    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.catmullRomFitting(this.state.pointSet, 0.1));
     path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
     return path; 
   }

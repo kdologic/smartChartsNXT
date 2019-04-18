@@ -216,120 +216,88 @@ class GeomCore {
     return result;
   } /*End checkLineIntersection()*/
 
-  /* 
-   * @param {Point} pointSet 
-   * @return {object []} Bézier curve path
-   */
-  getBezierSplines(pointSet) {
-    /*grab (x,y) coordinates of the control points*/
-    let x = [];
-    let y = [];
-    let curvedPath = [];
-
-    /*use parseInt to convert string to let*/
-    for (let i = 0; i < pointSet.length; i++) {
-      x[i] = parseInt(pointSet[i].x);
-      y[i] = parseInt(pointSet[i].y);
-    }
-
-    let cp = this.getCurveControlPoints(pointSet);
-    /*updates path settings, the browser will draw the new spline*/
-    for (let i = 0; i < pointSet.length - 1; i++) {
-      curvedPath.push(path(x[i], y[i], cp.p1[i].x, cp.p1[i].y, cp.p2[i].x, cp.p2[i].y, x[i + 1], y[i + 1]));
-    }
-
-    function path(x1, y1, px1, py1, px2, py2, x2, y2) {
-      return "C " + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
-    }
-
-    return curvedPath;
-  }
-
-  getCurveControlPoints(knots) {
-    let firstControlPoints = [];
-    let secondControlPoints = [];
-    if (knots === null) {
-      throw new Error("null argument");
-    }
-    let n = knots.length - 1;
-    if (n < 1) {
-      throw new Error("At least two knot points required");
-    }
-    if (n === 1) { // Special case: Bezier curve should be a straight line.
-      firstControlPoints = [new Point()]; //:: 3P1 = 2P0 + P3 ::
-      firstControlPoints[0].x = (2 * knots[0].x + knots[1].x) / 3;
-      firstControlPoints[0].y = (2 * knots[0].y + knots[1].y) / 3;
-
-      secondControlPoints = [new Point()]; // :: P2 = 2P1 – P0 ::
-      secondControlPoints[0].x = 2 * firstControlPoints[0].x - knots[0].x;
-      secondControlPoints[0].y = 2 * firstControlPoints[0].y - knots[0].y;
-      return {
-        p1: firstControlPoints,
-        p2: secondControlPoints
-      };
-    }
-
-    // Calculate first Bezier control points
-    // Right hand side vector
-    let rhs = [];
-
-    // Set right hand side x values
-    for (let i = 1; i < n - 1; ++i) {
-      rhs[i] = 4 * knots[i].x + 2 * knots[i + 1].x;
-    }
-    rhs[0] = knots[0].x + 2 * knots[1].x;
-    rhs[n - 1] = (8 * knots[n - 1].x + knots[n].x) / 2.0;
-
-    // Get first control points x-values
-    let x = this.getFirstControlPoints(rhs);
-
-    // Set right hand side y values
-    for (let i = 1; i < n - 1; ++i) {
-      rhs[i] = 4 * knots[i].y + 2 * knots[i + 1].y;
-    }
-    rhs[0] = knots[0].y + 2 * knots[1].y;
-    rhs[n - 1] = (8 * knots[n - 1].y + knots[n].y) / 2.0;
-
-    // Get first control points y-values
-    let y = this.getFirstControlPoints(rhs);
-
-    // Fill output arrays.
-    firstControlPoints = [];
-    secondControlPoints = [];
-    for (let i = 0; i < n; ++i) {
-      firstControlPoints[i] = new Point(x[i], y[i]);
-      if (i < n - 1) {
-        secondControlPoints[i] = new Point(2 * knots[i + 1].x - x[i + 1], 2 * knots[i + 1].y - y[i + 1]);
-      } else {
-        secondControlPoints[i] = new Point((knots[n].x + x[n - 1]) / 2, (knots[n].y + y[n - 1]) / 2);
-      }
-    }
-    return {
-      p1: firstControlPoints,
-      p2: secondControlPoints
-    };
-  }
-
   /**
-   * Solves a tridiagonal system for one of coordinates (x or y) of first Bezier control points.
-   * @param {*} rhs 
+   * https://gist.github.com/nicholaswmin/c2661eb11cad5671d816
+   * Interpolates a Catmull-Rom Spline through a series of x/y points
+   * Converts the CR Spline to Cubic Beziers for use with SVG items
+   * 
+   * If 'alpha' is 0.5 then the 'Centripetal' variant is used
+   * If 'alpha' is 1 then the 'Chordal' variant is used
+   *
+   * 
+   * @param  {Array} data - Array of points, each point in object literal holding x/y values
+   * @return {String} d - SVG string with cubic bezier curves representing the Catmull-Rom Spline
    */
-  getFirstControlPoints(rhs) {
-    let n = rhs.length;
-    let x = []; // Solution vector.
-    let tmp = []; // Temp workspace.
+  catmullRomFitting(data,alpha) {
+    if (alpha == 0 || alpha === undefined) {
+      return false;
+    } else {
+      let p0, p1, p2, p3, bp1, bp2, d1, d2, d3, A, B, N, M;
+      let d3powA, d2powA, d3pow2A, d2pow2A, d1pow2A, d1powA;
+      let d = [Math.round(data[0].x), Math.round(data[0].y)];
 
-    let b = 2.0;
-    x[0] = rhs[0] / b;
-    for (let i = 1; i < n; i++) { // Decomposition and forward substitution.
-      tmp[i] = 1 / b;
-      b = (i < n - 1 ? 4.0 : 3.5) - tmp[i];
-      x[i] = (rhs[i] - x[i - 1]) / b;
+      let length = data.length;
+      for (let i = 0; i < length - 1; i++) {
+
+        p0 = i == 0 ? data[0] : data[i - 1];
+        p1 = data[i];
+        p2 = data[i + 1];
+        p3 = i + 2 < length ? data[i + 2] : p2;
+
+        d1 = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
+        d2 = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+        d3 = Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.y - p3.y, 2));
+
+        // Catmull-Rom to Cubic Bezier conversion matrix
+
+        // A = 2d1^2a + 3d1^a * d2^a + d3^2a
+        // B = 2d3^2a + 3d3^a * d2^a + d2^2a
+
+        // [   0             1            0          0          ]
+        // [   -d2^2a /N     A/N          d1^2a /N   0          ]
+        // [   0             d3^2a /M     B/M        -d2^2a /M  ]
+        // [   0             0            1          0          ]
+
+        d3powA = Math.pow(d3, alpha);
+        d3pow2A = Math.pow(d3, 2 * alpha);
+        d2powA = Math.pow(d2, alpha);
+        d2pow2A = Math.pow(d2, 2 * alpha);
+        d1powA = Math.pow(d1, alpha);
+        d1pow2A = Math.pow(d1, 2 * alpha);
+
+        A = 2 * d1pow2A + 3 * d1powA * d2powA + d2pow2A;
+        B = 2 * d3pow2A + 3 * d3powA * d2powA + d2pow2A;
+        N = 3 * d1powA * (d1powA + d2powA);
+        if (N > 0) {
+          N = 1 / N;
+        }
+        M = 3 * d3powA * (d3powA + d2powA);
+        if (M > 0) {
+          M = 1 / M;
+        }
+
+        bp1 = {
+          x: (-d2pow2A * p0.x + A * p1.x + d1pow2A * p2.x) * N,
+          y: (-d2pow2A * p0.y + A * p1.y + d1pow2A * p2.y) * N
+        };
+
+        bp2 = {
+          x: (d3pow2A * p1.x + B * p2.x - d2pow2A * p3.x) * M,
+          y: (d3pow2A * p1.y + B * p2.y - d2pow2A * p3.y) * M
+        };
+
+        if (bp1.x == 0 && bp1.y == 0) {
+          bp1 = p1;
+        }
+        if (bp2.x == 0 && bp2.y == 0) {
+          bp2 = p2;
+        }
+
+        d.push('C ' + bp1.x + ' ' + bp1.y + ' ' + bp2.x + ' ' + bp2.y + ' ' + p2.x + ' ' + p2.y);
+      }
+
+      return d;
     }
-    for (let i = 1; i < n; i++) {
-      x[n - i - 1] -= tmp[n - i] * x[n - i]; // Backsubstitution.
-    }
-    return x;
   }
 
 }

@@ -316,9 +316,9 @@ class Component {
     let properties = this.arrayUnique(Object.keys(obj1).concat(Object.keys(obj2)));
     for (let key = 0; key < properties.length; key++) {
       let p = properties[key];
-      if (!obj1[p]) {
+      if (obj1[p] === undefined || obj1[p] === null) {
         diff.$added[p] = obj2[p];
-      } else if (!obj2[p]) {
+      } else if (obj2[p] === undefined || obj2[p] === null) {
         diff.$deleted[p] = obj1[p];
       } else {
         if(ignoreList.indexOf(p) >= 0) {
@@ -590,7 +590,7 @@ class Component {
   _updateAttr(dom, attrChanges) {
     let groups = ['$added','$updated','$object'];
     groups.forEach((group) => {
-      Object.keys(attrChanges[group]).forEach(key => {
+      Object.keys(attrChanges[group]).forEach((key) => {
         let attrVal = ((k) => {
           switch (k) {
             case 'style': 
@@ -614,7 +614,7 @@ class Component {
               });
               return evtNames.filter(v => !!v).join();
             default: 
-              if(attrChanges[group][k].old && attrChanges[group][k].new) {
+              if(attrChanges[group][k].old !== undefined && attrChanges[group][k].new !== undefined) {
                 return attrChanges[group][k].new;
               }else {
                 return attrChanges[group][k];
@@ -714,13 +714,13 @@ class Component {
    * Lifecycle event - fires before the component update on parent DOM.
    * @param {*} nextProps set of props that was there before update that component.
    */
-  componentWillUpdate(nextProps){}
+  componentWillUpdate(nextProps) {}
   
   /** 
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {*} prevProps set of props that was there before update that component.
    */
-  componentDidUpdate(prevProps){}
+  componentDidUpdate(prevProps) {}
 
   /** 
    * Lifecycle event - fires before the component unmounted from parent DOM 
