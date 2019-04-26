@@ -90,4 +90,4 @@ class ZoomOutBox extends Component {
   }
 }
 
-module.exports = ZoomOutBox;
+export default ZoomOutBox;

@@ -123,7 +123,7 @@ class Tooltip extends Component {
     }
 
     createTooltipContent(line1, line2) {
-      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+";font-family:"+this.config.fontFamily+";'>";
+      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+"px;font-family:"+this.config.fontFamily+";'>";
       strContents += "<tr><td>" + line1 + "</td></tr>";
       if (line2) {
         strContents += "<tr><td><b>" + line2 + "</b></td></tr>";

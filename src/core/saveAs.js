@@ -57,12 +57,23 @@ class SaveAs {
     return svgString; 
   }
 
+  setDPI(canvas, dpi) {
+    canvas.style.width = canvas.style.width || canvas.width + 'px';
+    canvas.style.height = canvas.style.height || canvas.height + 'px';
+    let scaleFactor = dpi / 96;
+    canvas.width = Math.ceil(canvas.width * scaleFactor);
+    canvas.height = Math.ceil(canvas.height * scaleFactor);
+    let ctx = canvas.getContext('2d');
+    ctx.scale(scaleFactor, scaleFactor);
+    return ctx; 
+  }
+
   doConvert(opts) {
     let svgString = this.serialize(document.querySelector(opts.srcElem), opts.type);
     let img = new Image();
     img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgString)));
     
-    img.onload = function () {
+    img.onload = () => {
       let today = new Date();
       let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
       let canvas;
@@ -72,7 +83,7 @@ class SaveAs {
         canvas = document.createElement("canvas");
         canvas.width = opts.width;
         canvas.height = opts.height;
-        let ctx = canvas.getContext("2d");
+        let ctx = this.setDPI(canvas, 300);
         ctx.drawImage(img, 0, 0, opts.width, opts.height);
       }
 

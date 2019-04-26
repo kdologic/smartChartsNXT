@@ -3,6 +3,7 @@
 import UiCore from './../core/ui.core';
 import { Component } from "./../viewEngin/pview";
 import eventEmitter from './../core/eventEmitter';
+import utilCore from '../core/util.core';
 
 /**
  * horizontalScroller.js
@@ -361,6 +362,7 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+    this.titleId = utilCore.getRandomID(); 
   }
 
   propsWillReceive(nextProps) {
@@ -378,11 +380,11 @@ class SliderWindow extends Component {
   render() {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
-        <rect class='sc-hScroll-window' x={0} y={0} width={this.state.width} height={this.state.height} fill= 'red' storke='none' pointer-events='all' tabindex='0'
-          fill-opacity={this.props.fillOpacity} aria-label="Slider Window (Use arrow to move)" style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events}>
+        <rect class='sc-hScroll-window' aria-labelledby={this.titleId} x={0} y={0} width={this.state.width} height={this.state.height} fill='red' storke='none' stroke-width="1" pointer-events='all' tabindex='0'
+          fill-opacity={this.props.fillOpacity} style="transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;" events={this.state.events}>
         </rect>
-        <title> Slider Window (Grab to move) </title>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={0} y={0} rx={5} ry={5} width={this.props.width} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
+        <title id={this.titleId}> Slider Window (use arrow left or right to slide) </title>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={0} y={0} rx={5} ry={5} width={this.props.width} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
       </g>
     );
   }
@@ -392,6 +394,7 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+    this.titleId = utilCore.getRandomID(); 
   }
 
   propsWillReceive(nextProps) {
@@ -426,9 +429,9 @@ class SliderLeftHandle extends Component {
         <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
-          <title> Left Slider Handle </title>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke="none" fill='none' stroke-width='1' />
+        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
+          <title id={this.titleId}> Left Slider Handle (use arrow key left or right to slide) </title>
           <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-left-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
@@ -454,6 +457,7 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
+    this.titleId = utilCore.getRandomID(); 
   }
 
   propsWillReceive(nextProps) {
@@ -488,8 +492,8 @@ class SliderRightHandle extends Component {
         <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='0' />
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
+        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
+        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Right Slider Handle </title>
           <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
           <path class='sc-slider-right-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>

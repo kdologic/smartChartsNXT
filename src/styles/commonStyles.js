@@ -23,8 +23,10 @@ class CommonStyles extends Component{
         <Style>
           {{
             ".smartcharts-nxt .focus-in" : {
-              "stroke": "blue",
-              "stroke-width": 1
+              "stroke": "#9c27b0"
+            },
+            ".smartcharts-nxt .do-focus-highlight:focus" : {
+              "stroke": "#9c27b0"
             }
           }}
         </Style>

@@ -8,8 +8,9 @@
  */
 
 export default function() {
-  let self = this; 
   return {
+    name: "Area Chart",
+    type: "AreaChart",
     minWidth: 250,
     minHeight: 400
   };

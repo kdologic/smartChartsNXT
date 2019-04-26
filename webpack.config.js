@@ -35,8 +35,9 @@ module.exports = {
           presets: [
             ['@babel/preset-env', {
               "useBuiltIns": 'entry',
+              "debug": true,
               "targets": {
-                "browsers": ["last 2 versions", "> 1%", "safari > 8", "not ie < 11", "not dead"]
+                "browsers": ["last 2 versions", "> 1%", "safari > 8", "ie 11", "not dead"]
               }
             }]
           ]

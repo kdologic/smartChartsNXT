@@ -2,6 +2,7 @@
 
 import { Component } from "./../viewEngin/pview";
 import UiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 import defaultConfig from "./../settings/config";
 
 /**
@@ -23,6 +24,7 @@ class Watermark extends Component {
       mouseEnter: false
     };
 
+    this.titleId = UtilCore.getRandomID();
     this.onClick = this.onClick.bind(this);
     this.onHover = this.onHover.bind(this); 
     this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -41,11 +43,11 @@ class Watermark extends Component {
   render() {
     return (
       <g class='sc-watermark' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <title>Watermark: Redirect to website {this.props.link}</title> 
+        <title id={this.titleId}>Watermark: Redirect to website {this.props.link}</title> 
         <style>
           {this.getStyle()}
         </style> 
-        <g class="sc-watermark-link" stroke={this.state.color} fill={this.state.color} style='cursor: pointer;' tabindex="0"
+        <g class="sc-watermark-link" role='link' stroke={this.state.color} fill={this.state.color} style='cursor: pointer;' tabindex="0" arial-labelledby={this.titleId}
           events={{
             click : this.onClick,
             mouseenter: this.onHover,
@@ -84,7 +86,7 @@ class Watermark extends Component {
     return (`
       .sc-watermark .watermark-text {
         font-family: ${defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.props.svgWidth, 20, 10)};
+        font-size: ${UiCore.getScaledFontSize(this.props.svgWidth, 20, 10)+'px'};
         stroke: none;
         stroke-width: 0;
       }
