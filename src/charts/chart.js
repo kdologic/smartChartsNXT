@@ -3,8 +3,10 @@
 import { mountTo } from "./../viewEngin/pview";
 import BaseChart from './../base/baseChart';
 import UtilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
 import eventEmitter from './../core/eventEmitter';
 import Error from "./../components/errorView"; 
+import fontLato from "./../styles/font-lato.css";
 
 /**
  * chart.js
@@ -20,6 +22,7 @@ class Chart {
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode = document.querySelector("#" + opts.targetElem);
       this.targetNode.setAttribute("runId", this.runId);
+      UiCore.prependStyle(document.querySelector('head'), fontLato);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false); 
       _debug && console.debug(this.core);

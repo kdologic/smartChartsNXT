@@ -5,8 +5,6 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV == "production" ? true : false; 
 
-console.log(process.env.NODE_ENV,isProduction);
-
 module.exports = {
   mode: process.env.NODE_ENV,
   devtool: !isProduction ? 'eval' : undefined,
@@ -43,6 +41,9 @@ module.exports = {
           ]
         }
       }
+    },{
+      test: /\.css$/,
+      use: [{ loader: 'to-string-loader' }, { loader: 'css-loader' }]
     }]
   },
   optimization: {

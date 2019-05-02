@@ -31,13 +31,15 @@ class Watermark extends Component {
   }
 
   componentDidMount() {
-    let textWidth = this.ref.node.querySelector('.watermark-text').getComputedTextLength();
-    if(this.state.textWidth !== textWidth){
-      this.setState({
-        linkIconX: textWidth + 5,
-        textWidth
-      });
-    }
+    setTimeout(() => {
+      let textWidth = this.ref.node.querySelector('.watermark-text').getComputedTextLength();
+      if(this.state.textWidth !== textWidth) {
+        this.setState({
+          linkIconX: textWidth + 5,
+          textWidth
+        });
+      }
+    },0);
   }
 
   render() {

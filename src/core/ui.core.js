@@ -47,7 +47,7 @@ class UiCore {
    * (-) negative indicates darker shades
    * 
   */
-  radialShadow(gradId, cx, cy, fx, fy, r, gradArr) {
+  radialGradient(gradId, cx, cy, fx, fy, r, gradArr) {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits="userSpaceOnUse">
@@ -156,6 +156,16 @@ class UiCore {
         }
       }
     }
+  }
+/**
+ * 
+ * @param {Object} parentNode DOM node where style will be prepend
+ * @param {String} styleStr String of CSS text
+ * @param {String} position Optional. in which position will add this style. Default: 'afterbegin' 
+ * Values: 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend' 
+ */
+  prependStyle(parentNode, styleStr, position='afterbegin') {
+    parentNode.insertAdjacentHTML(position, "<style>"+styleStr+"</style>");
   }
 
 }

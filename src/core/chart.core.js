@@ -1,6 +1,5 @@
 "use strict";
 
-import WebFonts from "./../plugIns/webFontsLoader";
 import Morphing from "./../plugIns/morph";
 import Chart from './../charts/chart';
 
@@ -16,35 +15,30 @@ const PRE_LOADER_IMG = "<svg width='135' height='140' viewBox='0 0 135 140' xmln
 
  class Core {
   constructor() {
-    this.nameSpaceReadyStatus = false;
+    this.nameSpaceReadyStatus = true;
     this.Chart = Chart;
-    this.initCore();
   }
 
-  initCore() {
-    this.addFont((event) => {
-      this.nameSpaceReadyStatus = true;
-    });
-  } 
 
-  addFont(cb) {
-    WebFonts.load({
-      google: {
-        families: ['Lato:400,700']
-      },
-      /* Called when all of the web fonts have either finished loading or failed to load, as long as at least one loaded successfully. */
-      active: function () {
-        if (typeof cb === "function") {
-          cb();
-        }
-      },
-      inactive: function () {
-        if (typeof cb === "function") {
-          cb();
-        }
-      }
-    });
-  } 
+  /** since we add static base64 font in commonStyle area so ignore dynamic font loading now */
+  // addFont(cb) {
+  //   WebFonts.load({
+  //     google: {
+  //       families: ['Lato:400']
+  //     },
+  //     /* Called when all of the web fonts have either finished loading or failed to load, as long as at least one loaded successfully. */
+  //     active: function () {
+  //       if (typeof cb === "function") {
+  //         cb();
+  //       }
+  //     },
+  //     inactive: function () {
+  //       if (typeof cb === "function") {
+  //         cb();
+  //       }
+  //     }
+  //   });
+  // } 
 
   ready(successBack) {
     /* strat polling for the ready state*/

@@ -37,13 +37,13 @@ class Menu extends Component {
         label: "Save As JPG",
         hotKey: 8,
         bottomLine: true,
-        type: 'jpeg',
+        type: 'jpg',
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'jpeg');
+            this.onMenuSelect.call(this, e, 'jpg');
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'jpeg');
+            this.onMenuSelect.call(this, e, 'jpg');
           }
         }
       }, {
@@ -218,8 +218,6 @@ class Menu extends Component {
     );
   }
 
-  
-
   onMenuSelect(e, type) {
     if(e.type == 'keydown') {
       if(e.which == 9) {
@@ -230,7 +228,8 @@ class Menu extends Component {
         return;
       }
     }
-    let eventOpts = {width: this.props.svgWidth, height: this.props.svgHeight, srcElem: this.props.rootNode};
+    
+    let eventOpts = {emitter: this.emitter, width: this.props.svgWidth, height: this.props.svgHeight, srcElem: this.props.rootNode};
      
     if(type === 'pdf') {
       this.setState({showLoader:true});
@@ -240,6 +239,7 @@ class Menu extends Component {
     }else {
       this.hideMenuItems(e);
     }
+
     saveAs[type].call(saveAs, eventOpts); 
   }
 

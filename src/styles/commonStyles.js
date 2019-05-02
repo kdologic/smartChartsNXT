@@ -1,8 +1,8 @@
 "use strict";
 
-
 import { Component } from "./../viewEngin/pview";
 import Style from "./../viewEngin/style";
+import fontLato from "./font-lato.css";
 
 /**
  * commonStyles.js
@@ -20,6 +20,7 @@ class CommonStyles extends Component{
   render() {
     return (
       <g class="sc-common-styles">
+        <style>{fontLato}</style>
         <Style>
           {{
             ".smartcharts-nxt .focus-in" : {
@@ -27,12 +28,15 @@ class CommonStyles extends Component{
             },
             ".smartcharts-nxt .do-focus-highlight:focus" : {
               "stroke": "#9c27b0"
+            },
+            ".smartcharts-nxt .sc-hide": {
+              "display": "none"
             }
           }}
         </Style>
       </g>
     );
   }
-}
+ }
 
 export default CommonStyles; 

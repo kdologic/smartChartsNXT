@@ -32,6 +32,8 @@ class ZoomOutBox extends Component {
     this.onKeyPress = this.onKeyPress.bind(this);
     this.onFocusIn = this.onFocusIn.bind(this);
     this.onFocusOut = this.onFocusOut.bind(this);
+    this.hideIcon = this.hideIcon.bind(this);
+    this.showIcon = this.showIcon.bind(this); 
   }
 
   propsWillReceive(nextProps) {
@@ -41,6 +43,20 @@ class ZoomOutBox extends Component {
       zoomHandStart: Geom.polarToCartesian(nextProps.width/2, nextProps.height/2, 10, 135),
       zoomHandEnd: Geom.polarToCartesian(nextProps.width/2, nextProps.height/2, 20, 135)
     });
+  }
+
+  componentDidMount() {
+    this.emitter.on('beforePrint', this.hideIcon);
+    this.emitter.on('afterPrint', this.showIcon);
+    this.emitter.on('beforeSave', this.hideIcon);
+    this.emitter.on('afterSave', this.showIcon);
+  }
+
+  componentWillUnmount() {
+    this.emitter.removeListener('beforePrint', this.hideIcon);
+    this.emitter.removeListener('afterPrint', this.showIcon);
+    this.emitter.removeListener('beforeSave', this.hideIcon);
+    this.emitter.removeListener('afterSave', this.showIcon);
   }
 
   render() {
@@ -87,6 +103,14 @@ class ZoomOutBox extends Component {
     if(e.which === 13 || e.which === 32) {
       this.emitter.emit('onZoomout');
     }
+  }
+
+  hideIcon() {
+    this.ref.node.classList.add('sc-hide');
+  }
+
+  showIcon() {
+    this.ref.node.classList.remove('sc-hide');
   }
 }
 

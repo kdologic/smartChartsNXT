@@ -1,9 +1,9 @@
 "use strict";
 
-import UiCore from './../core/ui.core';
 import { Component } from "./../viewEngin/pview";
 import eventEmitter from './../core/eventEmitter';
-import utilCore from '../core/util.core';
+import UtilCore from '../core/util.core';
+import UiCore from './../core/ui.core';
 
 /**
  * horizontalScroller.js
@@ -362,7 +362,7 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.titleId = utilCore.getRandomID(); 
+    this.titleId = UtilCore.getRandomID(); 
   }
 
   propsWillReceive(nextProps) {
@@ -394,7 +394,8 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.titleId = utilCore.getRandomID(); 
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -414,7 +415,7 @@ class SliderLeftHandle extends Component {
     return (
       <g class='sc-slider-left-handle' transform={`translate(${this.state.leftOffset},0)`} >
         <defs>
-          <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-left" height="130%" width="130%">
+          <filter xmlns="http://www.w3.org/2000/svg" id={this.gradId} height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
               <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
@@ -432,7 +433,7 @@ class SliderLeftHandle extends Component {
         <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke="none" fill='none' stroke-width='1' />
         <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title id={this.titleId}> Left Slider Handle (use arrow key left or right to slide) </title>
-          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
+          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-left-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
@@ -457,7 +458,8 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = {...this.props};
-    this.titleId = utilCore.getRandomID(); 
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -477,7 +479,7 @@ class SliderRightHandle extends Component {
     return (
       <g class='sc-slider-right-handle' transform={`translate(${this.state.leftOffset + this.state.windowWidth},0)`} >
         <defs>
-          <filter xmlns="http://www.w3.org/2000/svg" id="slider-dropshadow-right" height="130%" width="130%">
+          <filter xmlns="http://www.w3.org/2000/svg" id={this.gradId} height="130%" width="130%">
               <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
               <feOffset dx="0" dy="1" result="offsetblur"></feOffset>
               <feComponentTransfer>
@@ -495,7 +497,7 @@ class SliderRightHandle extends Component {
         <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
         <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
           <title> Right Slider Handle </title>
-          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#slider-dropshadow-left)`}></circle>
+          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-right-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>

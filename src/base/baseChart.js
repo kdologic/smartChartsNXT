@@ -8,7 +8,6 @@ import defaultConfig from "./../settings/config";
 import CommonStyles from "./../styles/commonStyles";
 import Watermark from "./../components/watermark"; 
 import Menu from "./../components/menu"; 
-import utilCore from "./../core/util.core";
 
 /**
  * baseChart.js
@@ -22,17 +21,18 @@ const CHART_MODULES = {
     AreaChart: {
       config: require("./../charts/areaChart/config").default,
       chart: require("./../charts/areaChart/areaChart").default
-    },
+    }
+    //,
     // LineChart: require("./../charts/lineChart/lineChart"),
     // StepChart: require("./../charts/stepChart/stepChart"),
-    PieChart: {
-      config: require("./../charts/pieChart/config").default,
-      chart: require("./../charts/pieChart/pieChart").default
-    },
-    DonutChart: {
-      config: require("./../charts/donutChart/config").default,
-      chart: require("./../charts/donutChart/donutChart").default
-    }
+    // PieChart: {
+    //   config: require("./../charts/pieChart/config").default,
+    //   chart: require("./../charts/pieChart/pieChart").default
+    // },
+    // DonutChart: {
+    //   config: require("./../charts/donutChart/config").default,
+    //   chart: require("./../charts/donutChart/donutChart").default
+    // }
     // ColumnChart: require("./../charts/columnChart/columnChart")
 };
 
@@ -56,11 +56,13 @@ class BaseChart extends Component {
         menuExpanded: false,
         menuIconFocused: false
       };
-      this.titleId = utilCore.getRandomID();
-      this.descId = utilCore.getRandomID();
-      this.blurFilterId = utilCore.getRandomID();
+      this.titleId = UtilCore.getRandomID();
+      this.descId = UtilCore.getRandomID();
+      this.blurFilterId = UtilCore.getRandomID();
+      this.menuIconGradId = UtilCore.getRandomID(); 
+
       this.loadConfig(CHART_MODULES[this.chartType].config.call(this)); 
-      this.initCanvasSize(this.state.width, this.state.height); 
+      this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
       ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
       throw ex;
@@ -72,6 +74,8 @@ class BaseChart extends Component {
     this.onMenuIconMouseOut = this.onMenuIconMouseOut.bind(this);
     this.showMenuPopup = this.showMenuPopup.bind(this);
     this.hideMenuPopup = this.hideMenuPopup.bind(this);
+    this.showMenuIcon = this.showMenuIcon.bind(this);
+    this.hideMenuIcon = this.hideMenuIcon.bind(this);
   }
 
   passContext() {
@@ -97,10 +101,18 @@ class BaseChart extends Component {
 
   componentDidMount() {
     this.emitter.on("menuClosed", this.hideMenuPopup);
+    this.emitter.on('beforePrint', this.hideMenuIcon);
+    this.emitter.on('afterPrint', this.showMenuIcon);
+    this.emitter.on('beforeSave', this.hideMenuIcon);
+    this.emitter.on('afterSave', this.showMenuIcon);
   }
 
   componentWillUnmount() {
     this.emitter.removeListener("menuClosed", this.hideMenuPopup);
+    this.emitter.removeListener('beforePrint', this.hideMenuIcon);
+    this.emitter.removeListener('afterPrint', this.showMenuIcon);
+    this.emitter.removeListener('beforeSave', this.hideMenuIcon);
+    this.emitter.removeListener('afterSave', this.showMenuIcon);
   }
   
   render() {
@@ -118,7 +130,7 @@ class BaseChart extends Component {
         aria-labelledby={this.titleId}
         aria-describedby={this.descId}
         style={{
-          background: this.CHART_OPTIONS.bgColor || '#fff',
+          background: 'transparent',
           MozTapHighlightColor: 'rgba(0, 0, 0, 0)',
           WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
           WebkitUserSelect: 'none',
@@ -131,16 +143,16 @@ class BaseChart extends Component {
 
         <title id={this.titleId}>{(this.CHART_OPTIONS.title||"")+" "+(this.CHART_OPTIONS.subtitle||"")} </title>
         <desc id={this.descId}>{(this.CHART_OPTIONS.description||this.CHART_DATA.chartName)+" -created using SmartChartsNXT chart library."}</desc>
-
-        <CommonStyles></CommonStyles>
         
+        <CommonStyles></CommonStyles>
+
         <g class="sc-canvas-border-container">
           <rect x='1' y='1' class="sc-canvas-border" vector-effect='non-scaling-stroke'
             width={this.CHART_OPTIONS.width - 2}
             height={this.CHART_OPTIONS.height - 2}
             shape-rendering='optimizeSpeed'
             fill-opacity={1}
-            fill={'transparent'}
+            fill={this.CHART_OPTIONS.bgColor || "#fff"}
             strokeWidth={1}
             stroke={this.CHART_OPTIONS.canvasBorder ? defaultConfig.theme.fontColorDark : 'none'}
             style={{pointerEvents: 'none'}}
@@ -186,7 +198,7 @@ class BaseChart extends Component {
         <style>
           {`
             .sc-menu-icon-bg {
-              fill-opacity: 0.1;
+              fill-opacity: 1;
               stroke-opacity: 1;
               transform: scale(1);
               transition-duration: .15s;
@@ -195,7 +207,8 @@ class BaseChart extends Component {
               cursor:pointer;
             }
             .sc-menu-icon-bg:hover, .sc-menu-icon-bg:focus {
-              fill-opacity: 0.7;
+              fill-opacity: 1;
+              fill: #000;
               transform: scale(1.5);
             }
             .sc-menu-icon-bg:hover .inner-dot {
@@ -208,8 +221,22 @@ class BaseChart extends Component {
             }
           `}
         </style>
-        <circle  class="sc-menu-icon-bg do-focus-highlight" cx="0" cy ="0" r="34" fill="#000" stroke-width='1' pointer-events='all' tabindex="0"
+        <defs>
+          <filter xmlns="http://www.w3.org/2000/svg" id={this.menuIconGradId} height="130%" width="130%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="1"></feGaussianBlur>
+              <feOffset dx="-1" dy="1" result="offsetblur"></feOffset>
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.7"></feFuncA>
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+          </filter>
+        </defs>
+        <circle class="sc-menu-icon-bg do-focus-highlight" cx="0" cy ="0" r="34" fill="#fff" stroke-width='1' pointer-events='all' tabindex="0"
           role="button" aria-label="chart options" aria-haspopup="true" aria-expanded={this.state.menuExpanded} aria-controls="#id of menu list items"
+          filter={`url(#${this.menuIconGradId})`}
           events={{
             click: this.showMenuPopup,
             keypress: this.showMenuPopup,
@@ -264,6 +291,14 @@ class BaseChart extends Component {
 
   getMenuIconWidth() {
     return this.CHART_DATA.svgWidth < 500 ? 3 : this.state.menuIconWidth - (2 * this.state.menuIconPadding); 
+  }
+
+  hideMenuIcon() {
+    this.ref.node.querySelector('.sc-menu-icon').classList.add('sc-hide');
+  }
+
+  showMenuIcon() {
+    this.ref.node.querySelector('.sc-menu-icon').classList.remove('sc-hide');
   }
 }
 
