@@ -130,6 +130,7 @@ class BaseChart extends Component {
         aria-labelledby={this.titleId}
         aria-describedby={this.descId}
         style={{
+          fontFamily: defaultConfig.theme.fontFamily,
           background: 'transparent',
           MozTapHighlightColor: 'rgba(0, 0, 0, 0)',
           WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
@@ -141,7 +142,7 @@ class BaseChart extends Component {
           UserSelect: 'none'
         }} >
 
-        <title id={this.titleId}>{(this.CHART_OPTIONS.title||"")+" "+(this.CHART_OPTIONS.subtitle||"")} </title>
+        <text class='sc-title' id={this.titleId} style="display:none;">{(this.CHART_OPTIONS.title||"")+" "+(this.CHART_OPTIONS.subtitle||"")}</text>
         <desc id={this.descId}>{(this.CHART_OPTIONS.description||this.CHART_DATA.chartName)+" -created using SmartChartsNXT chart library."}</desc>
         
         <CommonStyles></CommonStyles>

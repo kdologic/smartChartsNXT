@@ -1,9 +1,9 @@
 "use strict";
 
+import UiCore from './../core/ui.core';
+import fontLato from "./../styles/font-lato.css";
 import Morphing from "./../plugIns/morph";
 import Chart from './../charts/chart';
-
-const PRE_LOADER_IMG = "<svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'> <rect y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='30' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='60' width='15' height='140' rx='6'> <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='90' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect> <rect x='120' y='10' width='15' height='120' rx='6'> <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> </rect></svg>";
 
 /**
  * chart.core.js
@@ -15,8 +15,26 @@ const PRE_LOADER_IMG = "<svg width='135' height='140' viewBox='0 0 135 140' xmln
 
  class Core {
   constructor() {
-    this.nameSpaceReadyStatus = true;
+    this.nameSpaceReadyStatus = false;
     this.Chart = Chart;
+    this.loadFont();
+  }
+
+  loadFont() {
+    UiCore.prependStyle(document.querySelector('head'), fontLato);
+    let intervalId = setInterval(() => {
+      if(document.body) {
+        clearInterval(intervalId);
+        document.body.insertAdjacentHTML('beforeend','<p id="sc-temp-font-loader" aria-hidden="true" style="visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;">Loading...</p>');
+        setTimeout(() => {
+          this.nameSpaceReadyStatus = true;
+          setTimeout(() => {
+            let fLoader = document.getElementById('sc-temp-font-loader');
+            fLoader.parentNode.removeChild(fLoader);
+          },1000 );
+        });
+      }
+    }, 10);
   }
 
 

@@ -23,6 +23,9 @@ class CommonStyles extends Component{
         <style>{fontLato}</style>
         <Style>
           {{
+            "*": {
+              "outline":"none"
+            },
             ".smartcharts-nxt .focus-in" : {
               "stroke": "#9c27b0"
             },

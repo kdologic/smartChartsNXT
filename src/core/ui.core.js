@@ -112,7 +112,7 @@ class UiCore {
    */
 
   calcIntervalByMinMax(minVal, maxVal, zeroBase) {
-    let arrWeight = [0.1, 0.2, 0.5];
+    let arrWeight = [0.01, 0.02, 0.05];
     let weightDecimalLevel = 1; 
     let minIntvCount = 6;
     let maxIntvCount = 12;
@@ -142,7 +142,7 @@ class UiCore {
           if (minVal < 0) {
             tMinVal -= (2*tInt);
             intv += 2;
-          }else if(tMinVal == Math.floor(minVal)) {
+          }else if(Math.floor(tMinVal) == Math.floor(minVal)) {
             tMinVal -= tInt; 
             intv++;
           }

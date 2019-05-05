@@ -9,6 +9,7 @@ import eventEmitter from './../../core/eventEmitter';
 import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
+import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
 import PointerCrosshair from './../../components/pointerCrosshair';
 import AreaFill from './areaFill'; 
@@ -52,8 +53,8 @@ class AreaChart extends Component {
 
       this.CHART_OPTIONS = UtilCore.extends({
         dataSet: {
-          xAxis: {label: 'x-axis'},
-          yAxis: {label: 'y-axis'}
+          xAxis: {title: 'Axis-X'},
+          yAxis: {title: 'Axis-Y'}
         },
         horizontalScroller: {
           enable: true,
@@ -332,14 +333,14 @@ class AreaChart extends Component {
           }} >
         </HorizontalLabels>   
 
-        <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
-          <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
-        </text>
+        <TextBox class="sc-vertical-axis-title" posX={20} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
+          transform={`rotate(${-90})`} background="#fff" fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10}
+          stroke="none" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
 
-        <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="25" stroke-linejoin="round" paint-order="stroke">
-          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
-        </text>
-        
+        <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}
+          background="#fff" fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10}
+          stroke="none" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
+
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
           opts={this.CHART_OPTIONS.pointerCrosshair || {}}> 
@@ -631,8 +632,7 @@ class AreaChart extends Component {
         "fill": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark,
         "stroke": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'
       },
-      ".vertical-axis-title, .horizontal-axis-title": {
-        "font-family": defaultConfig.theme.fontFamily,
+      ".sc-vertical-axis-title, .sc-horizontal-axis-title": {
         "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
       }
     });
