@@ -53,8 +53,8 @@ class AreaChart extends Component {
 
       this.CHART_OPTIONS = UtilCore.extends({
         dataSet: {
-          xAxis: {title: 'Axis-X'},
-          yAxis: {title: 'Axis-Y'}
+          xAxis: {title: 'Label-axis'},
+          yAxis: {title: 'Value-axis'}
         },
         horizontalScroller: {
           enable: true,
@@ -313,9 +313,9 @@ class AreaChart extends Component {
           </Draggable>
         </g>
         
-        <Grid posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+        <Grid opts={this.CHART_OPTIONS.grid || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} 
-          gridCount={this.state.hGridCount} gridHeight={this.state.gridHeight}>
+          vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid> 
 
         <VerticalLabels  opts={this.state.cs.dataSet.yAxis || {}}
@@ -334,12 +334,12 @@ class AreaChart extends Component {
         </HorizontalLabels>   
 
         <TextBox class="sc-vertical-axis-title" posX={20} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
-          transform={`rotate(${-90})`} background="#fff" fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10}
-          stroke="none" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
+          transform={`rotate(${-90})`} background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
 
         <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}
-          background="#fff" fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10}
-          stroke="none" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
+          background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
 
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}

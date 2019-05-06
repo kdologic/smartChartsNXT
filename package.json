@@ -45,6 +45,7 @@
     "gulp-replace": "^0.5.4",
     "gulp-uglify-es": "^1.0.4",
     "gulp-util": "~2.2.x",
+    "natives": "^1.1.6",
     "style-loader": "^0.23.1",
     "to-string-loader": "^1.1.5",
     "uglifyjs-webpack-plugin": "^2.0.1",

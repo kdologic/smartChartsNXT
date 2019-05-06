@@ -30,6 +30,9 @@ import dateFormat from "dateformat";
       "fontSize": 14,
       "fontFamily": "Lato"
     }
+
+ * Fire events - 
+ * onHorizontalLabelRender : fire when horizontal labels draws. 
  */
 
 class HorizontalLabels extends Component{
@@ -104,6 +107,11 @@ class HorizontalLabels extends Component{
 
   render() {
     this.setIntervalLength();
+    this.emitter.emit('onHorizontalLabelsRender', {
+      intervalLen: this.state.intervalLen, 
+      values: this.state.categories,
+      count: this.state.categories.length
+    });
     return (
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         <defs>
