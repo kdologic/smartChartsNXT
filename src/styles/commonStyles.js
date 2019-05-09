@@ -3,6 +3,7 @@
 import { Component } from "./../viewEngin/pview";
 import Style from "./../viewEngin/style";
 import fontLato from "./font-lato.css";
+import defaultConfig from "./../settings/config";
 
 /**
  * commonStyles.js
@@ -27,10 +28,10 @@ class CommonStyles extends Component{
               "outline":"none"
             },
             ".smartcharts-nxt .focus-in" : {
-              "stroke": "#9c27b0"
+              "stroke": defaultConfig.theme.fontColorHighlight
             },
             ".smartcharts-nxt .do-focus-highlight:focus" : {
-              "stroke": "#9c27b0"
+              "stroke": defaultConfig.theme.fontColorHighlight
             },
             ".smartcharts-nxt .sc-hide": {
               "display": "none"

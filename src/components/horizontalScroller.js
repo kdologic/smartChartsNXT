@@ -431,7 +431,7 @@ class SliderLeftHandle extends Component {
           <title> Click to move window here  </title>
         </rect>
         <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke="none" fill='none' stroke-width='1' />
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
+        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent)} tabindex="0">
           <title id={this.titleId}> Left Slider Handle (use arrow key left or right to slide) </title>
           <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-left-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
@@ -495,8 +495,8 @@ class SliderRightHandle extends Component {
           <title> Click to move window here  </title>
         </rect>
         <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent) + '%'} tabindex="0">
-          <title> Right Slider Handle </title>
+        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role="slider" aria-labelledby={this.titleId} aria-orientation="horizontal" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(this.state.offsetPercent)} tabindex="0">
+          <title id={this.titleId}> Right Slider Handle </title>
           <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke="none" filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-right-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>

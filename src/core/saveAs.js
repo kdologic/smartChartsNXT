@@ -79,6 +79,7 @@ class SaveAs {
 
   doConvert(opts) {
     let svgString = this.serialize(document.querySelector(opts.srcElem));
+    svgString = this.normalizeCSS(svgString);
     if (opts.type === "print") {
       let iframe = document.createElement("iframe");
       iframe.name = "chartFrame";
@@ -88,7 +89,24 @@ class SaveAs {
       iframe.frameBorder = 0;
 
       iframe.onload = () => {
-        iframe.contentDocument.querySelector('body').innerHTML = svgString;
+        let frameDoc = iframe.contentDocument; 
+        frameDoc.getElementsByTagName('body')[0].innerHTML = svgString;
+        if(opts.width > opts.height) {
+          let css = '@page { size: landscape; }',
+          frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0],
+          style = frameDoc.createElement('style');
+
+          style.type = 'text/css';
+          style.media = 'print';
+
+          if (style.styleSheet){
+            style.styleSheet.cssText = css;
+          } else {
+            style.appendChild(frameDoc.createTextNode(css));
+          }
+          frameHead.appendChild(style);
+        }
+        
         window.frames["chartFrame"].focus();
         window.frames["chartFrame"].print();
         iframe.parentNode.removeChild(iframe);
@@ -99,6 +117,7 @@ class SaveAs {
       document.body.appendChild(iframe);
     } else {
       let img = new Image();
+      img.crossOrigin = "Anonymous";
       img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgString)));
       img.onload = () => {
         let today = new Date();
@@ -110,28 +129,34 @@ class SaveAs {
           canvas = document.createElement("canvas");
           canvas.width = opts.width;
           canvas.height = opts.height;
-          let ctx = this.setDPI(canvas, 96);
+          let ctx = this.setDPI(canvas, 1.5*96);
           ctx.drawImage(img, 0, 0, opts.width, opts.height);
-          document.body.appendChild(canvas);
         }
   
         if (opts.type === "pdf") {
+          if(opts.emitter && typeof opts.emitter.emit === 'function') {
+            opts.emitter.emit('showLoader');
+          }
           let head = document.getElementsByTagName("head")[0];
           let pdfLib = document.createElement("script");
           pdfLib.type = "text/javascript";
-          pdfLib.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.2.61/jspdf.min.js";
+          pdfLib.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js";
           pdfLib.onload = function () {
             let imgAsURL = canvas.toDataURL("image/jpeg");
-            let doc = new jsPDF("l", "pt", "a4");
-            doc.addImage(imgAsURL, 'JPEG', 0, 0);
+            let orientation = opts.width >  opts.height ? "landscape" : "portrait"; 
+            let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
+            doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
             doc.output('save', 'smartChartsNXT_' + today.toISOString().split(".")[0].replace("T", "_") + "." + opts.type);
             if(opts.emitter && typeof opts.emitter.emit === 'function') {
               opts.emitter.emit('afterSave', {type: opts.type});
             }
+            if(opts.emitter && typeof opts.emitter.emit === 'function') {
+              opts.emitter.emit('hideLoader');
+            }
           };
           head.appendChild(pdfLib);
         }else {
-          let imgAsURL = (opts.type === "svg") ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgString) : canvas.toDataURL("image/" + opts.type);
+          let imgAsURL = (opts.type === "svg") ? "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>'+svgString) : canvas.toDataURL("image/" + opts.type);
           let link = document.createElement("a");
           link.href = imgAsURL;
           link.download = "smartChartsNXT_" + today.toISOString().split(".")[0].replace("T", "_") + "." + opts.type;
@@ -144,6 +169,10 @@ class SaveAs {
         }
       };
     }
+  }
+
+  normalizeCSS(strSVG) {
+    return strSVG.replace(/cursor:(.*?);/gi, 'cursor:auto;');
   }
 }
 

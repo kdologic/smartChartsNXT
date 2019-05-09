@@ -21,7 +21,7 @@ class Watermark extends Component {
       linkIconX: 0,
       linkIconY: -7,
       textWidth: 0, 
-      mouseEnter: false
+      highlight: false
     };
 
     this.titleId = UtilCore.getRandomID();
@@ -43,7 +43,7 @@ class Watermark extends Component {
   render() {
     return (
       <g class='sc-watermark' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <title id={this.titleId}>Watermark: Redirect to website {this.props.link}</title> 
+        <title id={this.titleId}>{this.props.title}</title> 
         <style>
           {this.getStyle()}
         </style> 
@@ -59,11 +59,11 @@ class Watermark extends Component {
           <text x={0} y={0} text-rendering='geometricPrecision'>
             <tspan text-anchor='start' class='watermark-text' >{this.props.extChildren}</tspan>
           </text>
-          { this.state.mouseEnter &&
+          { this.state.highlight &&
             <line x1={0} y1={2} x2={this.state.textWidth + 15} y2={2} fill="none" stroke={this.state.color} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
           }
           <g transform={`translate(${this.state.linkIconX},${this.state.linkIconY}) scale(0.3)`} stroke="none" fill="#000">
-            <path d="M22 14.5v5c0 2.484-2.016 4.5-4.5 4.5h-13A4.502 4.502 0 0 1 0 19.5v-13C0 4.016 2.016 2 4.5 2h11c.281 0 .5.219.5.5v1c0 .281-.219.5-.5.5h-11A2.507 2.507 0 0 0 2 6.5v13C2 20.875 3.125 22 4.5 22h13c1.375 0 2.5-1.125 2.5-2.5v-5c0-.281.219-.5.5-.5h1c.281 0 .5.219.5.5zM28 1v8c0 .547-.453 1-1 1a.99.99 0 0 1-.703-.297l-2.75-2.75L13.36 17.14c-.094.094-.234.156-.359.156s-.266-.063-.359-.156l-1.781-1.781c-.094-.094-.156-.234-.156-.359s.063-.266.156-.359L21.048 4.454l-2.75-2.75a.996.996 0 0 1-.297-.703c0-.547.453-1 1-1h8c.547 0 1 .453 1 1z"/>
+            <path class='sc-redirect-icon' d="M22 14.5v5c0 2.484-2.016 4.5-4.5 4.5h-13A4.502 4.502 0 0 1 0 19.5v-13C0 4.016 2.016 2 4.5 2h11c.281 0 .5.219.5.5v1c0 .281-.219.5-.5.5h-11A2.507 2.507 0 0 0 2 6.5v13C2 20.875 3.125 22 4.5 22h13c1.375 0 2.5-1.125 2.5-2.5v-5c0-.281.219-.5.5-.5h1c.281 0 .5.219.5.5zM28 1v8c0 .547-.453 1-1 1a.99.99 0 0 1-.703-.297l-2.75-2.75L13.36 17.14c-.094.094-.234.156-.359.156s-.266-.063-.359-.156l-1.781-1.781c-.094-.094-.156-.234-.156-.359s.063-.266.156-.359L21.048 4.454l-2.75-2.75a.996.996 0 0 1-.297-.703c0-.547.453-1 1-1h8c.547 0 1 .453 1 1z"/>
           </g>
         </g>
       </g>
@@ -75,11 +75,11 @@ class Watermark extends Component {
   }
 
   onHover(e) {
-    this.setState({mouseEnter: true, color: "blue"});
+    this.setState({highlight: true, color: defaultConfig.theme.fontColorHighlight});
   }
 
   onMouseLeave(e) {
-    this.setState({mouseEnter: false, color: defaultConfig.theme.fontColorMedium});
+    this.setState({highlight: false, color: defaultConfig.theme.fontColorMedium});
   }
 
   getStyle() {
