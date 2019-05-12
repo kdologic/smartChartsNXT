@@ -91,9 +91,7 @@ class HorizontalScroller extends Component {
     return (
       <g class="sc-horizontal-scroll-cont" transform={`translate(${this.props.posX},${this.props.posY})`}>
         <rect class="sc-slider-bg" x={0} y={0} width={this.props.width} height={this.props.height} fill="#000" fill-opacity="0.04" />
-        { this.props.opts.chartInside && 
-          this.props.extChildren
-        }
+        { this.props.extChildren }
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height}
           fillOpacity={this.state.sliderWindowOpacity} focusedIn={this.state.handlerFocused === 'window'}
           events= {{

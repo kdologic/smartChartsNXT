@@ -416,16 +416,19 @@ class Component {
     if(typeof newVNode.nodeName === 'object') {
       newVNode.attributes.extChildren = newVNode.children;
       let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes);
+
+      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
+        ref.self.propsWillReceive.call(ref.self, newProps);
+        ref.self.props = newProps; 
+      }
+      
       if(ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if(!shouldUpdate) {
           return false;
         }
       }
-      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
-        ref.self.propsWillReceive.call(ref.self, newProps);
-        ref.self.props = newProps; 
-      }
+      
 
       if(ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
         ref.self.componentWillUpdate.call(ref.self, newProps);

@@ -56,8 +56,8 @@ class Watermark extends Component {
             focusout: this.onMouseLeave
           }}>
           <rect x={0} y={-8} width={this.state.textWidth + 15} height={10} pointer-events="all" stroke="none" fill="none" fill-opacity="0"/>
-          <text x={0} y={0} text-rendering='geometricPrecision'>
-            <tspan text-anchor='start' class='watermark-text' >{this.props.extChildren}</tspan>
+          <text  class='watermark-text' x={0} y={0} text-rendering='geometricPrecision'>
+            <tspan text-anchor='start'>{this.props.extChildren}</tspan>
           </text>
           { this.state.highlight &&
             <line x1={0} y1={2} x2={this.state.textWidth + 15} y2={2} fill="none" stroke={this.state.color} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
