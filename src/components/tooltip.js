@@ -64,8 +64,8 @@ class Tooltip extends Component {
         strokeColor: 'rgb(124, 181, 236)', 
         opacity: 0
       };
-      this.updateTipBind = this.updateTip.bind(this);
-      this.hideTipBind = this.hide.bind(this); 
+      this.updateTip = this.updateTip.bind(this);
+      this.hide = this.hide.bind(this); 
     }
 
     componentWillMount() {
@@ -74,8 +74,8 @@ class Tooltip extends Component {
     
     componentDidMount() {
       typeof this.props.onRef === 'function' && this.props.onRef(this);
-      this.emitter.on('updateTooltip', this.updateTipBind);
-      this.emitter.on('hideTooltip', this.hideTipBind);
+      this.emitter.on('updateTooltip', this.updateTip);
+      this.emitter.on('hideTooltip', this.hide);
     }
 
     componentDidUpdate(prevProps) {
@@ -84,8 +84,8 @@ class Tooltip extends Component {
     }
 
     componentWillUnmount() {
-      this.emitter.removeListener('updateTooltip', this.updateTipBind);
-      this.emitter.removeListener('hideTooltip', this.hideTipBind);
+      this.emitter.removeListener('updateTooltip', this.updateTip);
+      this.emitter.removeListener('hideTooltip', this.hide);
     }
 
     render() {
