@@ -64,8 +64,8 @@ class Tooltip extends Component {
         strokeColor: 'rgb(124, 181, 236)', 
         opacity: 0
       };
-      this.updateTipBind = this.updateTip.bind(this);
-      this.hideTipBind = this.hide.bind(this); 
+      this.updateTip = this.updateTip.bind(this);
+      this.hide = this.hide.bind(this); 
     }
 
     componentWillMount() {
@@ -74,8 +74,8 @@ class Tooltip extends Component {
     
     componentDidMount() {
       typeof this.props.onRef === 'function' && this.props.onRef(this);
-      this.emitter.on('updateTooltip', this.updateTipBind);
-      this.emitter.on('hideTooltip', this.hideTipBind);
+      this.emitter.on('updateTooltip', this.updateTip);
+      this.emitter.on('hideTooltip', this.hide);
     }
 
     componentDidUpdate(prevProps) {
@@ -84,8 +84,8 @@ class Tooltip extends Component {
     }
 
     componentWillUnmount() {
-      this.emitter.removeListener('updateTooltip', this.updateTipBind);
-      this.emitter.removeListener('hideTooltip', this.hideTipBind);
+      this.emitter.removeListener('updateTooltip', this.updateTip);
+      this.emitter.removeListener('hideTooltip', this.hide);
     }
 
     render() {
@@ -123,7 +123,7 @@ class Tooltip extends Component {
     }
 
     createTooltipContent(line1, line2) {
-      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+";font-family:"+this.config.fontFamily+";'>";
+      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+"px;font-family:"+this.config.fontFamily+";'>";
       strContents += "<tr><td>" + line1 + "</td></tr>";
       if (line2) {
         strContents += "<tr><td><b>" + line2 + "</b></td></tr>";

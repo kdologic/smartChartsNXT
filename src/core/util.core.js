@@ -199,14 +199,14 @@ class UtilCore {
   }
 
   /**
-   * Generate a 9 character (xxxx-xxxx) unique random ID (Uniqueness was tested upto 10,000 ids).
+   * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested upto 10,000 ids).
    * @return {string} Returns a unique string.
    */
   getRandomID() {
     let chr4 = () => {
       return Math.random().toString(16).slice(-4);
     };
-    return chr4() + '-' + chr4();
+    return chr4() + '-' + chr4()+ '-' + chr4();
   }
     
 }

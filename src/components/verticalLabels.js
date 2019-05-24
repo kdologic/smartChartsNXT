@@ -23,6 +23,8 @@ import { Component } from "./../viewEngin/pview";
       "fontSize": 20,
       "fontFamily": "Lato"
     }
+ * Fires events - 
+ * onVerticalLabelRender : fire when horizontal labels draws 
  */
 class VerticalLabels extends Component{
 
@@ -35,6 +37,7 @@ class VerticalLabels extends Component{
       fontSize: this.config.fontSize
     };
     this.valueSet = []; 
+    this.zeroBaseIndex = -1;
     this.minLabelVal = this.props.minVal; 
     this.maxLabelVal = this.props.maxVal;
     this.onMouseEnter = this.onMouseEnter.bind(this);
@@ -75,11 +78,17 @@ class VerticalLabels extends Component{
   }
 
   render() {
+    let labels = this.getLabels(); 
+    this.emitter.emit('onVerticalLabelsRender', {
+      intervalLen: this.props.intervalLen, 
+      intervarValue: this.props.valueInterval,
+      zeroBaseIndex: this.zeroBaseIndex,
+      values: this.valueSet,
+      count: this.props.labelCount
+    });
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        {
-          this.getLabels()
-        }
+        { labels }
         <Ticks posX={5} posY={0} span={this.props.opts.tickSpan || 5} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
       </g>
     );
@@ -87,10 +96,15 @@ class VerticalLabels extends Component{
 
   getLabels() {
     let labels = []; 
+    this.zeroBaseIndex = -1;
     for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
-      this.maxLabelVal = this.formatTextValue(this.minLabelVal + (i++ * this.props.valueInterval));
+      let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
+      this.maxLabelVal = this.formatTextValue(labelVal);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount)); 
       this.valueSet.unshift(this.maxLabelVal);
+      if(labelVal === 0) {
+        this.zeroBaseIndex = lCount;
+      }
     }
     return labels;
   }

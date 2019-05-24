@@ -24,6 +24,7 @@ import Easing from "./easing";
    * @param {function} callback A function to call once the morphing is complete, called once per matched element.
    */
   window.SVGPathElement.prototype.morphFrom = function(duration=400, fromPath, easing, callback) {
+    let self = this; 
     fromPath = _createPathElement(fromPath);
     let fromPathPoints = fromPath.pathSegList;
     let toPathPoints = this.pathSegList;
@@ -37,17 +38,26 @@ import Easing from "./easing";
     if (_validateMorphing(fromPathPoints, toPathPoints)) {
       this.frameId = _letsAnimate(duration, easing, (pos) => {
         _morphPathFrom(fromPath, this, diffPoints, pos);
-      }, callback);
+      }, () => {
+        animObj.isPlaying = false; 
+        if(typeof callback == 'function') {
+          callback();
+        }
+      });
     }else {
       console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
       this.setAttribute('d', toPathClone.getAttribute('d'));
     }
 
-    return {
-      stop: () => {
-        cancelAnimationFrame(this.frameId.id);
+    let animObj = {
+      isPlaying: true,
+      stop: function() {
+        this.isPlaying = false; 
+        cancelAnimationFrame(self.frameId.id);
       }
     };
+
+    return animObj; 
   };
 
   /**
@@ -58,6 +68,7 @@ import Easing from "./easing";
    * @param {function} callback A function to call once the morphing is complete, called once per matched element.
    */
   window.SVGPathElement.prototype.morphTo = function (duration=400, toPath, easing, callback) {
+    let self = this; 
     toPath = _createPathElement(toPath);
     let fromPathPoints = this.pathSegList;
     let toPathPoints = toPath.pathSegList;
@@ -72,17 +83,26 @@ import Easing from "./easing";
     if (_validateMorphing(fromPathPoints, toPathPoints)) {
       this.frameId = _letsAnimate(duration, easing, (pos) => {
           _morphPathTo(this, toPath, fromPathClone, diffPoints, pos);
-      }, callback);
+      }, () => {
+        animObj.isPlaying = false; 
+        if(typeof callback == 'function') {
+          callback();
+        }
+      });
     } else {
       console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
       this.setAttribute('d', fromPathClone.getAttribute('d'));
     }
 
-    return {
-      stop: () => {
-        cancelAnimationFrame(this.frameId.id);
+    let animObj = {
+      isPlaying: true,
+      stop: function() {
+        this.isPlaying = false; 
+        cancelAnimationFrame(self.frameId.id);
       }
     };
+
+    return animObj;
   };
 
   function _equalizePaths(fromPathPoints, toPathPoints) {

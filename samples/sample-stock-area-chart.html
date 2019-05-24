@@ -1,9 +1,9 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
-    var _debug = true;
+    var _debug = false;
     async function getStock(stockId) {
       var data = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockId}&interval=5min&apikey=NSQWJINYQ9CB6GR3`
@@ -12,14 +12,15 @@
     }
 
     window.onload = function () {
+      var dataSet;
       //^BSESN, RCOM.NS, GRAPHITE.NS
       getStock('RCOM.NS').then(data => {
-        console.log(data);
-        var dataSet = prepareData(data);
+        dataSet = prepareData(data);
+        displayChart('RCom', dataSet);
+      }).catch(ex => {
+        dataSet = prepareData(getStaticData());
         displayChart('RCom', dataSet);
       });
-      //var dataSet = prepareData(getStaticData());
-      displayChart('RCom', dataSet);
     };
 
     function prepareData(data) {
@@ -36,6 +37,7 @@
 
 
     function displayChart(seriesName, dataSet) {
+      console.log(dataSet);
       SmartChartsNXT.ready(function () {
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
@@ -882,9 +884,9 @@
   </script>
 </head>
 
-<body style='overflow:hidden;'>
+<body>
   <div>
-    <div id='chartContainer' style="width:100%; height:100%;">
+    <div id='chartContainer' style="width:100%; height:600px;">
     </div>
   </div>
 </body>

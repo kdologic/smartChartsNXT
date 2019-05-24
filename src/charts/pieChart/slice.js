@@ -84,7 +84,7 @@ class Slice extends Component {
           }} 
         />
         {
-          UiCore.radialShadow(`grad-slice${this.props.index}`, this.props.cx, this.props.cy, this.props.cx, this.props.cy, this.props.width, this.props.gradient)
+          UiCore.radialGradient(`grad-slice${this.props.index}`, this.props.cx, this.props.cy, this.props.cx, this.props.cy, this.props.width, this.props.gradient)
         }
         <path class={`slice-${this.props.index} gradient-arc-slice-${this.props.index}`} 
           d={this.getArcPath()} transform={this.state.arcTransform} 

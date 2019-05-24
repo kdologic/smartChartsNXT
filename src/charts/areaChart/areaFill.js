@@ -6,7 +6,8 @@ import Geom from "./../../core/geom.core";
 import UiCore from "./../../core/ui.core";
 import UtilCore from "./../../core/util.core";
 import DataPoints from "./../../components/dataPoints";
-import eventEmitter from './../../core/eventEmitter';
+import eventEmitter from "./../../core/eventEmitter";
+import Easing from "./../../plugIns/easing";
 
 /**
  * areaFill.js
@@ -31,7 +32,9 @@ class AreaFill extends Component{
       pointSet: [], 
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
-      opacity: this.props.opacity || 1
+      opacity: this.props.opacity || 1,
+      animInst:[],
+      isAnimationPlaying: false
     };
     this.state.clip = Object.assign({
       x: 0,
@@ -39,12 +42,19 @@ class AreaFill extends Component{
       width: this.props.width,
       height: this.props.height
     }, this.props.clip);
+    this.boostThreshold = 1000;
+    this.perfThreshold = 300;
     this.subComp = {}; 
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this); 
     this.prepareData(this.props); 
-    this.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
+    this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
+    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
+  }
+
+  shouldComponentUpdate() {
+    return this.props.shouldRender;
   }
   
   componentWillMount() {
@@ -56,6 +66,9 @@ class AreaFill extends Component{
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
+    if(this.props.animate && this.state.pointSet.length < this.perfThreshold) {
+      this.playInitialAnimations(); 
+    }
   }
 
   componentWillUnmount() {
@@ -67,30 +80,38 @@ class AreaFill extends Component{
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
-    this.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+    this.stopAllAnimations(); 
   }
 
   render() {
     return (
-      <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} >
-        <defs>
-          <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
-          </clipPath>
-        </defs>
-        {this.props.gradient && this.createGradient(this.gradId)}
+      <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`} >
+        {this.props.clipId === undefined &&
+          <defs>
+            <clipPath id={this.clipPathId}>
+              <rect x={this.state.clip.x} y={this.state.clip.y} width={this.state.clip.width} height={this.state.clip.height} />
+            </clipPath>
+          </defs>
+        }
+        {this.props.gradient && 
+          this.createGradient(this.gradId)
+        }
         <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor} 
-          d={this.getAreaPath(this.linePath.slice()).join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
+          d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
         </path> 
-        <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
-        {this.props.dataPoints &&
-          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} onRef={(ref) => {this.subComp.dataPoints = ref;}} /> 
+        {this.props.lineStrokeWidth && 
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
+        }
+        {this.props.dataPoints && !this.state.isAnimationPlaying && 
+          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} /> 
         }
       </g>
     );
@@ -128,7 +149,7 @@ class AreaFill extends Component{
       point.index = i; 
       return point; 
     });
-    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.getBezierSplines(this.state.pointSet));
+    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.catmullRomFitting(this.state.pointSet, 0.1));
     path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
     return path; 
   }
@@ -145,9 +166,7 @@ class AreaFill extends Component{
   }
   
   prepareData(props) {
-    this.state.valueSet = props.dataSet.data.map((data) => {
-      return data.value;
-    });
+    this.state.valueSet = props.dataSet;
     this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen-1 || 2);
     this.state.scaleY = props.height / (props.maxVal-props.minVal); 
     this.state.baseLine = props.maxVal * this.state.scaleY; 
@@ -158,7 +177,7 @@ class AreaFill extends Component{
   }
 
   interactiveMouseMove(e) {
-    if(!this.props.dataPoints) {
+    if(!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
@@ -168,29 +187,32 @@ class AreaFill extends Component{
     if(this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
     }
-    if(pointSet.length && this.props.posX + pointSet[pointSet.length-1].x > this.state.clip.x+this.state.clip.width) {
+    if(pointSet.length && +pointSet[pointSet.length-1].x.toFixed(3) > +(this.state.clip.x+this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length-1);
     }
     let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 
-    this.subComp.dataPoints.doHighlight(false);
+    this.emitter.emit("normalizeAllPointMarker");
     if(nearPoint.dist < (this.state.scaleX / 2)) {
-      this.subComp.dataPoints.doHighlight(nearPoint.index); 
       e.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
         y: (this.props.posY + nearPoint.y),
+        relX: nearPoint.x,
+        relY: nearPoint.y,
         dist: nearPoint.dist,
         pointIndex: nearPoint.index,
         seriesIndex: this.props.index
       };
     } else {
-      e.highlightedPoint = null; 
+      e.highlightedPoint = {
+        pointIndex: null
+      };
     }
-    this.emitter.emit("pointHighlighted", e);
+    this.emitter.emit("highlightPointMarker", e);
   }
 
   interactiveMouseLeave(e) {
-    if(this.props.dataPoints) {
-      this.subComp.dataPoints.doHighlight(false);
+    if(this.props.dataPoints && !this.state.isAnimationPlaying) {
+      this.emitter.emit("normalizeAllPointMarker");
     }
   }
 
@@ -198,6 +220,58 @@ class AreaFill extends Component{
     if(this.props.instanceId === e.instanceId && e.strokeOpacity) {
       this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1}); 
     }
+  }
+
+  playInitialAnimations() {
+    this.setState({
+      isAnimationPlaying: true
+    });
+    let fromPath = [];
+    if (this.props.spline) {
+      fromPath = this.state.linePath.map((p) => {
+        if (typeof p === 'string' && p.indexOf('C') !== -1) {
+          let pSeg = p.split(' ');
+          for (let i = 2; i < pSeg.length; i += 2) {
+            pSeg[i] = this.props.height;
+          }
+          return pSeg.join(' ');
+        }
+        return p;
+      });
+    } else {
+      fromPath = this.state.linePath.map((v, i) => {
+        if ((i + 1) % 3 === 0) {
+          return this.props.height;
+        }
+        return v;
+      });
+    }
+    let areaFromPath = this.getAreaPath(fromPath.slice());
+    let linePath = this.ref.node.querySelector(`.sc-series-line-path-${this.props.index}`);
+    let areaPath = this.ref.node.querySelector(`.sc-series-area-path-${this.props.index}`);
+    let lAnim = linePath.morphFrom(1000, fromPath.join(' '), Easing.easeOutElastic, () => {
+      this.animationDone();
+    });
+    let aAnim = areaPath.morphFrom(1000, areaFromPath.join(' '), Easing.easeOutElastic, () => {
+      this.animationDone();
+    });
+    this.state.animInst.push(lAnim, aAnim);
+  }
+
+  animationDone() {
+    let animPlaying = this.state.animInst.filter((anim) => anim.isPlaying);
+    if (animPlaying instanceof Array && animPlaying.length === 0) {
+      this.setState({
+        isAnimationPlaying: false
+      });
+      this.state.animInst = []; 
+    }
+  }
+
+  stopAllAnimations() {
+    this.state.animInst.forEach((inst) => {
+      inst.stop();
+    });
   }
 
 }

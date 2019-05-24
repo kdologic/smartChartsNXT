@@ -1,6 +1,7 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
+  <title>Example of Multi Series Area Chart</title>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
     var _debug = false; 
@@ -22,23 +23,24 @@
       SmartChartsNXT.ready(function () {
         var areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
-          "title": "Multi Series Chart",
-          "subtitle": "Area Chart",
+          "title": "Multi Series Area Chart",
+          "subtitle": "Sales report of company XYZ",
+          "description": "A javascript area chart that visualize the data of sales",
           "targetElem": "chartContainer",
           "titleStyle": {
             "fillColor":"#717171",
             "borderColor":"none",
             "fontFamily": "Lato",
-            "maxFontSize": "25"
+            "maxFontSize": 25
           },
           "subtitleStyle": {
             "fillColor":"#717171",
             "borderColor":"none",
             "fontFamily": "Lato",
-            "maxFontSize": "18"
+            "maxFontSize": 12
           },
-          "canvasBorder": true,
-          "bgColor": "none",
+          "canvasBorder": false,
+          "bgColor": "#f7fdf7", //[default: white]
           // "gridBox": {  // : TODO
           //   "vertical": {
           //     "style": "dashed", //[dashed | solid]
@@ -54,7 +56,7 @@
           //     "lineWidth": 1,
           //     "opacity": 1
           //   },
-          //  "backgroundColor: '#555',
+          //  "backgroundColor": '#555',
           //  "backgroundGradient": true
           // },
           "pointerCrosshair": {
@@ -66,8 +68,8 @@
               "opacity": 1
             },
             "horizontal": {
-              "style": "dashed",  
-              "spread" : "none",
+              "style": "dashed",  // [dashed | solid]
+              "spread" : "none", // [full | inPoint | none]
               "color": "#000",
               "lineWidth": 1,
               "opacity": 1
@@ -144,40 +146,40 @@
                 "name": 'Raphael',
                 "areaOpacity": 0.3,
                 "spline": true,
-                "data": //generateData(10, 50, 200) 
-                [
-                  {label:1, value:1000},{label:2, value:-1000},{label:3, value:1000},{label:4, value:-1000},{label:5, value:1000},{label:7, value:-1000}, {label:6, value:2000}
-                ] 
+                "data": generateData(10, 50, 100) 
+                // [
+                //   {label:1, value:1000},{label:2, value:-1000},{label:3, value:1000},{label:4, value:-1000},{label:5, value:1000},{label:7, value:-1000}, {label:6, value:2000}
+                // ] 
               },
               {
                 "lineWidth": 1.5,
                 "bgColor": "#ff7f0e",
                 "marker": true,
                 "markerRadius": 6,
-                "spline": true,
+                "spline": false,
                 "gradient": true,
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Willson',
                 //"visible": false,
-                "data": //generateData(5, 20, 200)
-                [
-                  {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1220}, {label:6, value:1400}
-                ] 
+                "data": generateData(5, 20, 100)
+                // [
+                //   {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1420}, {label:6, value:1100}, {label:7, value:400}
+                // ] 
               },
-              // {
-              //   "lineWidth": 1.5,
-              //   "bgColor": "#f4df0e",
-              //   "marker": true,
-              //   "markerRadius": 6,
-              //   "spline": false,
-              //   "gradient": true,
-              //   "areaOpacity": 0.5,
-              //   "lineOpacity": 1,
-              //   "name": 'Clara',
-              //   //"visible": false,
-              //   "data": generateData(5, 20, 10)
-              // }
+              {
+                "lineWidth": 1.5,
+                "bgColor": "#f4df0e",
+                "marker": true,
+                "markerRadius": 6,
+                "spline": false,
+                "gradient": true,
+                "areaOpacity": 0.5,
+                "lineOpacity": 1,
+                "name": 'Clara',
+                //"visible": false,
+                "data": generateData(5, 20, 10)
+              }
             ]
           },
           // events: {
@@ -208,20 +210,24 @@
           // },
           zoomWindow: {
             "leftIndex": 2,
-            "rightIndex": 50
+            "rightIndex": 6
           }
         });
 
         /** add event listner on Horizontal scroll **/
         //areaChart.events.on('hScroll', function(e) {console.log(e)});
+        // areaChart.events.on('beforeSave', () => {console.log('before save!');});
+        // areaChart.events.on('afterSave', () => {console.log('after save!');});
+        // areaChart.events.on('beforePrint', () => {console.log('before print!');});
+        // areaChart.events.on('afterPrint', () => {console.log('after print!');});
       });
     };
   </script>
 </head>
-
-<body style='overflow:hidden;'>
+<!-- overflow:hidden; -->
+<body style='background: bisque;'>
   <div>
-    <div id='chartContainer' style="width:100%; height:100%;">
+    <div id='chartContainer' style="width:100%; height:600px;">
     </div>
   </div>
 </body>

@@ -2,12 +2,15 @@
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
+import crossfilter from './../../plugIns/crossfilter.min.js';
 import defaultConfig from "./../../settings/config";
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
+import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
+import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
 import PointerCrosshair from './../../components/pointerCrosshair';
 import AreaFill from './areaFill'; 
@@ -51,8 +54,8 @@ class AreaChart extends Component {
 
       this.CHART_OPTIONS = UtilCore.extends({
         dataSet: {
-          xAxis: {label: 'x-axis'},
-          yAxis: {label: 'y-axis'}
+          xAxis: {title: 'Label-axis'},
+          yAxis: {title: 'Value-axis'}
         },
         horizontalScroller: {
           enable: true,
@@ -61,6 +64,15 @@ class AreaChart extends Component {
         }
       }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
+
+      for(let i=0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+        for(let j=0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
+          this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
+        }
+        this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
+        this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return i;});
+        this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return d.value;});
+      }
       
       this.state = {
         _maxSeriesLen: 0,
@@ -134,7 +146,8 @@ class AreaChart extends Component {
         clipLeftOffset: 0,
         clipRightOffset: 100,
         offsetLeftChange: 0,
-        offsetRightChange: 0
+        offsetRightChange: 0,
+        shouldFSRender: this.props.resizeComponent
       }; 
 
       this.legendBoxType = this.props.chartOptions.legends ? this.props.chartOptions.legends.alignment : 'horizontal';
@@ -145,7 +158,7 @@ class AreaChart extends Component {
       this.eventStream = {}; 
       this.emitter = eventEmitter.getInstance(this.context.runId); 
       this.onHScroll = this.onHScroll.bind(this); 
-      this.onPointHighlighted = this.onPointHighlighted.bind(this);
+      this.onHighlightPointMarker = this.onHighlightPointMarker.bind(this);
       this.onMouseLeave = this.onMouseLeave.bind(this);
       this.updateLabelTip = this.updateLabelTip.bind(this);
       this.hideTip = this.hideTip.bind(this);
@@ -216,7 +229,7 @@ class AreaChart extends Component {
     let minSet = [];
     let categories = [];
     let dataFor = isFS ? 'fs' : 'cs';  
-    let dataSet = JSON.parse(JSON.stringify(this.CHART_OPTIONS.dataSet));
+    let dataSet = this.copyDataset(this.CHART_OPTIONS.dataSet);
     if(!isFS) {
       for(let i = 0;i < this.CHART_OPTIONS.dataSet.series.length;i++) {
         if(!dataSet.series[i].data.length) {
@@ -224,24 +237,28 @@ class AreaChart extends Component {
         }else if(!dataSet.series[i].visible) {
           dataSet.series[i].data = [];
         }else {
-          dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].data.slice(this.state.windowLeftIndex, this.state.windowRightIndex + 1);
+          dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].dataDimIndex.bottom(this.state.windowRightIndex - this.state.windowLeftIndex + 1, this.state.windowLeftIndex);
         }
       }
     }
     for (let i = 0; i < dataSet.series.length; i++) {
-      let arrData = [];
-      for (let j = 0; j < dataSet.series[i].data.length; j++) {
-        arrData.push(dataSet.series[i].data[j].value);
+      let data = dataSet.series[i].data;
+      let minVal = 0;
+      let maxVal = 0;
+      dataSet.series[i].valueSet = []; 
+      for (let j = 0, len=data.length; j < len; j++) {
+        let v = data[j].value;
+        minVal = (v < minVal) ? v : minVal;
+        maxVal = (v > maxVal) ? v : maxVal;
         if (j > categories.length - 1) {
-          categories.push(dataSet.series[i].data[j].label);
+          categories.push(data[j].label);
         }
+        dataSet.series[i].valueSet.push(v);
       }
-      let maxVal = arrData.length ? Math.max(...arrData) : 0;
-      let minVal = arrData.length ? Math.min(...arrData) : 0;
       maxSet.push(maxVal);
       minSet.push(minVal);
       dataSet.series[i].color = dataSet.series[i].color || UtilCore.getColor(i);
-      dataSet.series[i].index = i; 
+      dataSet.series[i].index = i;
     }
     this.state[dataFor].dataSet = dataSet; 
     this.state[dataFor].dataSet.xAxis.categories = categories; 
@@ -251,6 +268,29 @@ class AreaChart extends Component {
     ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].yInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 
+
+  copyDataset(dataSet) {
+    let data = {}; 
+    for(let key in dataSet) {
+      if(key === "series") {
+        data[key] = []; 
+        for(let i=0; i < dataSet[key].length; i++) {
+          let series = dataSet[key][i], s = {};
+          for(let skey in series) {
+            if(skey === 'data') {
+              s[skey] = series.dataDimIndex.bottom(Infinity);
+            }else if(['turboData', 'dataDimIndex','dataDimValue'].indexOf(skey) === -1){
+              s[skey] = JSON.parse(JSON.stringify(series[skey])); 
+            }
+          }
+          data[key].push(s);
+        }
+      }else {
+        data[key] = JSON.parse(JSON.stringify(dataSet[key])); 
+      }
+    }
+    return data; 
+  }
 
   calcOffsetChanges() {
     let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
@@ -267,12 +307,13 @@ class AreaChart extends Component {
     this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
+    this.state.shouldFSRender = nextProps.resizeComponent;
     this.init(); 
   }
 
   componentDidMount() {
     this.emitter.on('hScroll', this.onHScroll);
-    this.emitter.on('pointHighlighted', this.onPointHighlighted);
+    this.emitter.on('highlightPointMarker', this.onHighlightPointMarker);
     this.emitter.on('interactiveMouseLeave', this.onMouseLeave);
     this.emitter.on('vLabelEnter', this.updateLabelTip);
     this.emitter.on('vLabelExit', this.hideTip);
@@ -282,11 +323,16 @@ class AreaChart extends Component {
     this.emitter.on('legendHovered', this.onLegendHover);
     this.emitter.on('legendLeaved', this.onLegendLeave);
     this.emitter.on('onZoomout', this.onZoomout);
+    this.state.shouldFSRender = false;
+  }
+
+  componentDidUpdate() {
+    this.state.shouldFSRender = false;
   }
 
   componentWillUnmount() {
     this.emitter.removeListener('hScroll', this.onHScroll); 
-    this.emitter.removeListener('pointHighlighted', this.onPointHighlighted); 
+    this.emitter.removeListener('highlightPointMarker', this.onHighlightPointMarker); 
     this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeave);
     this.emitter.removeListener('vLabelEnter', this.updateLabelTip);
     this.emitter.removeListener('vLabelExit', this.hideTip);
@@ -301,9 +347,7 @@ class AreaChart extends Component {
   render() {
     return (
       <g>
-        <style>
-          {this.getStyle()}
-        </style> 
+        <Style src={this.getStyle()}></Style> 
         <g>
           <Draggable>
             <text class='txt-title-grp' text-rendering='geometricPrecision'>
@@ -313,9 +357,9 @@ class AreaChart extends Component {
           </Draggable>
         </g>
         
-        <Grid posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
+        <Grid opts={this.CHART_OPTIONS.grid || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} 
-          gridCount={this.state.hGridCount} gridHeight={this.state.gridHeight}>
+          vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid> 
 
         <VerticalLabels  opts={this.state.cs.dataSet.yAxis || {}}
@@ -333,14 +377,14 @@ class AreaChart extends Component {
           }} >
         </HorizontalLabels>   
 
-        <text class='vertical-axis-title' fill={defaultConfig.theme.fontColorDark} transform={`rotate(${-90},${20},${(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))})`} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="10" stroke-linejoin="round" paint-order="stroke">
-          <tspan x={20} y={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}>{this.CHART_OPTIONS.dataSet.yAxis.title}</tspan>
-        </text>
+        <TextBox class="sc-vertical-axis-title" posX={20} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
+          transform={`rotate(${-90})`} background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
 
-        <text class='horizontal-axis-title' fill={defaultConfig.theme.fontColorDark} text-rendering='geometricPrecision' text-anchor='middle' font-weight="bold" stroke="white" stroke-width="25" stroke-linejoin="round" paint-order="stroke">
-          <tspan x={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} y={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}>{this.CHART_OPTIONS.dataSet.xAxis.title}</tspan>
-        </text>
-        
+        <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}
+          background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
+
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
           opts={this.CHART_OPTIONS.pointerCrosshair || {}}> 
@@ -367,11 +411,14 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
         </InteractivePlane>
 
+        { this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside && 
+          this.drawHScrollSeries(this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight+2)
+        }
+
         { this.CHART_OPTIONS.horizontalScroller.enable &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight} 
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}> 
-            {this.drawHScrollSeries()}
           </HorizontalScroller>
         }
 
@@ -391,11 +438,11 @@ class AreaChart extends Component {
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
-        <AreaFill dataSet={series} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
+        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
-          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true}
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animate={true} shouldRender={true}
           getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
@@ -409,27 +456,34 @@ class AreaChart extends Component {
     });
   }
 
-  drawHScrollSeries() {
+  drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
+      let clipId = 'clip-fs-'+ series.index; 
+      let clip = {
+        x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100, 
+        width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollRightOffset/100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100
+      };
       return (
       <g class='sc-fs-chart-area-container'>
-        <AreaFill dataSet={series} index={series.index} instanceId={'fs-'+ series.index}  posX={0} posY={5} paddingX={0} 
+        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='0'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
+          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
           getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
         </AreaFill>
-        <AreaFill dataSet={series} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={0} posY={5} paddingX={0} 
+        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth="0" areaStrokeWidth='1'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false}
-          clip={{
-            x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100, 
-            width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollRightOffset/100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)*this.state.hScrollLeftOffset/100
-            }}>
+          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
+          clipId={clipId}>
         </AreaFill>
+        <defs>
+          <clipPath id={clipId}>
+            <rect x={clip.x} y={0} width={clip.width} height={this.CHART_OPTIONS.horizontalScroller.height} />
+          </clipPath>
+        </defs>
       </g>
       );
     });
@@ -511,7 +565,7 @@ class AreaChart extends Component {
     return hPoint; 
   }
 
-  onPointHighlighted(e) {
+  onHighlightPointMarker(e) {
     if(!this.eventStream[e.timeStamp] ) {
       this.eventStream[e.timeStamp] = [e]; 
     } else {
@@ -520,12 +574,12 @@ class AreaChart extends Component {
     //consume events when all events are received
     if(this.eventStream[e.timeStamp].length === this.state.cs.dataSet.series.filter(s => s.data.length > 0).length) {
       for(let evt of this.eventStream[e.timeStamp]) {
-        if(evt.highlightedPoint === null) {
+        if(!evt.highlightedPoint || evt.highlightedPoint.pointIndex === null) {
           continue; 
         }
         this.pointData.push(this.consumeEvents(evt));
       }
-      if(this.pointData.length && !this.prevOriginPoint || (this.originPoint && this.originPoint.x !== this.prevOriginPoint.x && this.originPoint.y !== this.prevOriginPoint.y)) {
+      if(this.pointData.length && !this.prevOriginPoint || (this.originPoint && (this.originPoint.x !== this.prevOriginPoint.x || this.originPoint.y !== this.prevOriginPoint.y))) {
         this.updateDataTooltip(this.originPoint, this.pointData);
         this.updateCrosshair(this.pointData);
       }
@@ -616,27 +670,26 @@ class AreaChart extends Component {
   }
 
   getStyle() {
-    return (`
-      *{
-        outline:none;
+    return ({
+      "*": {
+        "outline":"none"
+      },
+      ".txt-title-grp .txt-title": {
+        "font-family": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)+'px',
+        "fill":(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark,
+        "stroke": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'
+      },
+      ".txt-title-grp .txt-subtitle": {
+        "font-family": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)+'px',
+        "fill": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark,
+        "stroke": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'
+      },
+      ".sc-vertical-axis-title, .sc-horizontal-axis-title": {
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
       }
-      .txt-title-grp .txt-title {
-        font-family: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)};
-        fill: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark};
-        stroke: ${(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'};
-      }
-      .txt-title-grp .txt-subtitle {
-        font-family: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)};
-        fill: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark};
-        stroke: ${(this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'};
-      }
-      .vertical-axis-title, .horizontal-axis-title {
-        font-family: ${defaultConfig.theme.fontFamily};
-        font-size: ${UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)};
-      }
-    `);
+    });
   }
 }
 

@@ -316,9 +316,9 @@ class Component {
     let properties = this.arrayUnique(Object.keys(obj1).concat(Object.keys(obj2)));
     for (let key = 0; key < properties.length; key++) {
       let p = properties[key];
-      if (!obj1[p]) {
+      if (obj1[p] === undefined || obj1[p] === null) {
         diff.$added[p] = obj2[p];
-      } else if (!obj2[p]) {
+      } else if (obj2[p] === undefined || obj2[p] === null) {
         diff.$deleted[p] = obj1[p];
       } else {
         if(ignoreList.indexOf(p) >= 0) {
@@ -416,16 +416,19 @@ class Component {
     if(typeof newVNode.nodeName === 'object') {
       newVNode.attributes.extChildren = newVNode.children;
       let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes);
+
+      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
+        ref.self.propsWillReceive.call(ref.self, newProps);
+        ref.self.props = newProps; 
+      }
+      
       if(ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if(!shouldUpdate) {
           return false;
         }
       }
-      if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
-        ref.self.propsWillReceive.call(ref.self, newProps);
-        ref.self.props = newProps; 
-      }
+      
 
       if(ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
         ref.self.componentWillUpdate.call(ref.self, newProps);
@@ -590,7 +593,7 @@ class Component {
   _updateAttr(dom, attrChanges) {
     let groups = ['$added','$updated','$object'];
     groups.forEach((group) => {
-      Object.keys(attrChanges[group]).forEach(key => {
+      Object.keys(attrChanges[group]).forEach((key) => {
         let attrVal = ((k) => {
           switch (k) {
             case 'style': 
@@ -614,7 +617,7 @@ class Component {
               });
               return evtNames.filter(v => !!v).join();
             default: 
-              if(attrChanges[group][k].old && attrChanges[group][k].new) {
+              if(attrChanges[group][k].old !== undefined && attrChanges[group][k].new !== undefined) {
                 return attrChanges[group][k].new;
               }else {
                 return attrChanges[group][k];
@@ -642,7 +645,12 @@ class Component {
    * @returns {Object} Component type object
    */
   update() {
-    window._debug && console.time('update');
+    let compName;
+    if(window._debug) {
+      compName = this.__proto__.constructor.name;
+      console.time(compName+' update');
+    }
+    
     if(!this.shouldComponentUpdate(this.props)) {
       return false;
     }
@@ -658,7 +666,11 @@ class Component {
     if(typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.vnode.attributes);
     }
-    window._debug && console.timeEnd('update');
+
+    if(window._debug) {
+      console.timeEnd(compName+' update');
+    }
+
     return this.vnode = vnodeNow;
   }
 
@@ -705,13 +717,13 @@ class Component {
    * Lifecycle event - fires before the component update on parent DOM.
    * @param {*} nextProps set of props that was there before update that component.
    */
-  componentWillUpdate(nextProps){}
+  componentWillUpdate(nextProps) {}
   
   /** 
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {*} prevProps set of props that was there before update that component.
    */
-  componentDidUpdate(prevProps){}
+  componentDidUpdate(prevProps) {}
 
   /** 
    * Lifecycle event - fires before the component unmounted from parent DOM 

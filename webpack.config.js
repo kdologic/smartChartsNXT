@@ -5,11 +5,9 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV == "production" ? true : false; 
 
-console.log(process.env.NODE_ENV,isProduction);
-
 module.exports = {
-  mode: process.env.NODE_ENV,
-  devtool: !isProduction ? 'eval' : undefined,
+  mode: "production",
+  devtool: undefined,
   plugins: [
     new BundleAnalyzerPlugin()
   ],
@@ -32,16 +30,20 @@ module.exports = {
               "pragma": "__h__"
             }] // change default pragma React.createElement into __h__
           ],
-          presets: [
+          presets: [ (isProduction ? 
             ['@babel/preset-env', {
               "useBuiltIns": 'entry',
+              "debug": true,
               "targets": {
-                "browsers": ["last 2 versions", "> 1%", "safari > 8", "not ie < 11", "not dead"]
+                "browsers": ["last 2 versions", "> 1%", "safari > 8", "ie 11", "not dead"]
               }
-            }]
+            }] : [{}])
           ]
         }
       }
+    },{
+      test: /\.css$/,
+      use: [{ loader: 'to-string-loader' }, { loader: 'css-loader' }]
     }]
   },
   optimization: {

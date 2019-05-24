@@ -10,11 +10,11 @@
 
 export default {
   theme: {
-    fontFamily: "Lato",
+    fontFamily: "'Lato', sans-serif",
     fontColorLight: "#fff",
     fontColorMedium: "#848484",
     fontColorDark: "#000",
-    fontColorHighlight: "#03a9f4",
+    fontColorHighlight: "#9c27b0",
     fontSizeSmall: 9,
     fontSizeMedium: 14,
     fontSizeLarge: 18,
