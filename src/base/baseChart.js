@@ -55,7 +55,8 @@ class BaseChart extends Component {
         menuIconPadding: -35,
         menuIconWidth: 10,
         menuExpanded: false,
-        menuIconFocused: false
+        menuIconFocused: false,
+        resizeComponent: false
       };
       this.titleId = UtilCore.getRandomID();
       this.descId = UtilCore.getRandomID();
@@ -79,6 +80,7 @@ class BaseChart extends Component {
     this.hideBeforeSave = this.hideBeforeSave.bind(this);
     this.onShowLoader = this.onShowLoader.bind(this);
     this.onHideLoader = this.onHideLoader.bind(this); 
+    this.onResizeComponent = this.onResizeComponent.bind(this);
   }
 
   passContext() {
@@ -110,6 +112,7 @@ class BaseChart extends Component {
     this.emitter.on('afterSave', this.showAfterSave);
     this.emitter.on('showLoader', this.onShowLoader);
     this.emitter.on('hideLoader', this.onHideLoader);
+    this.emitter.on('resize', this.onResizeComponent);
   }
 
   componentWillUnmount() {
@@ -120,6 +123,11 @@ class BaseChart extends Component {
     this.emitter.removeListener('afterSave', this.showAfterSave);
     this.emitter.removeListener('showLoader', this.onShowLoader);
     this.emitter.removeListener('hideLoader', this.onHideLoader);
+    this.emitter.removeListener('resize', this.onResizeComponent);
+  }
+
+  componentDidUpdate() {
+    this.state.resizeComponent = false;
   }
   
   render() {
@@ -176,7 +184,7 @@ class BaseChart extends Component {
         }
         
         <g id={`${this.getChartId()}_cont`}>
-          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} ></Chart>
+          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
         </g>
 
         {this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
@@ -319,6 +327,10 @@ class BaseChart extends Component {
         this.ref.node.querySelector(elem).classList.remove('sc-hide');
       } 
     }
+  }
+
+  onResizeComponent(e) {
+    this.setState({resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight});
   }
 
   onShowLoader(e) {

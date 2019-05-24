@@ -2,6 +2,7 @@
 
 import Point from "./../../core/point";
 import { Component } from "./../../viewEngin/pview";
+import crossfilter from './../../plugIns/crossfilter.min.js';
 import defaultConfig from "./../../settings/config";
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
@@ -63,6 +64,15 @@ class AreaChart extends Component {
         }
       }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
+
+      for(let i=0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+        for(let j=0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
+          this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
+        }
+        this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
+        this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return i;});
+        this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return d.value;});
+      }
       
       this.state = {
         _maxSeriesLen: 0,
@@ -136,7 +146,8 @@ class AreaChart extends Component {
         clipLeftOffset: 0,
         clipRightOffset: 100,
         offsetLeftChange: 0,
-        offsetRightChange: 0
+        offsetRightChange: 0,
+        shouldFSRender: this.props.resizeComponent
       }; 
 
       this.legendBoxType = this.props.chartOptions.legends ? this.props.chartOptions.legends.alignment : 'horizontal';
@@ -218,7 +229,7 @@ class AreaChart extends Component {
     let minSet = [];
     let categories = [];
     let dataFor = isFS ? 'fs' : 'cs';  
-    let dataSet = JSON.parse(JSON.stringify(this.CHART_OPTIONS.dataSet));
+    let dataSet = this.copyDataset(this.CHART_OPTIONS.dataSet);
     if(!isFS) {
       for(let i = 0;i < this.CHART_OPTIONS.dataSet.series.length;i++) {
         if(!dataSet.series[i].data.length) {
@@ -226,27 +237,28 @@ class AreaChart extends Component {
         }else if(!dataSet.series[i].visible) {
           dataSet.series[i].data = [];
         }else {
-          dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].data.slice(this.state.windowLeftIndex, this.state.windowRightIndex + 1);
+          dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].dataDimIndex.bottom(this.state.windowRightIndex - this.state.windowLeftIndex + 1, this.state.windowLeftIndex);
         }
       }
     }
     for (let i = 0; i < dataSet.series.length; i++) {
-      let arrData = [];
-      for (let j = 0; j < dataSet.series[i].data.length; j++) {
-        arrData.push(dataSet.series[i].data[j].value);
+      let data = dataSet.series[i].data;
+      let minVal = 0;
+      let maxVal = 0;
+      dataSet.series[i].valueSet = []; 
+      for (let j = 0, len=data.length; j < len; j++) {
+        let v = data[j].value;
+        minVal = (v < minVal) ? v : minVal;
+        maxVal = (v > maxVal) ? v : maxVal;
         if (j > categories.length - 1) {
-          categories.push(dataSet.series[i].data[j].label);
+          categories.push(data[j].label);
         }
+        dataSet.series[i].valueSet.push(v);
       }
-      let maxVal = arrData.length ? Math.max(...arrData) : 0;
-      let minVal = arrData.length ? Math.min(...arrData) : 0;
       maxSet.push(maxVal);
       minSet.push(minVal);
       dataSet.series[i].color = dataSet.series[i].color || UtilCore.getColor(i);
       dataSet.series[i].index = i;
-      dataSet.series[i].valueSet = dataSet.series[i].data.map((data) => {
-        return data.value;
-      });
     }
     this.state[dataFor].dataSet = dataSet; 
     this.state[dataFor].dataSet.xAxis.categories = categories; 
@@ -256,6 +268,29 @@ class AreaChart extends Component {
     ({iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount} = this.state[dataFor].yInterval);
     this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount)); 
   } 
+
+  copyDataset(dataSet) {
+    let data = {}; 
+    for(let key in dataSet) {
+      if(key === "series") {
+        data[key] = []; 
+        for(let i=0; i < dataSet[key].length; i++) {
+          let series = dataSet[key][i], s = {};
+          for(let skey in series) {
+            if(skey === 'data') {
+              s[skey] = series.dataDimIndex.bottom(Infinity);
+            }else if(['turboData', 'dataDimIndex','dataDimValue'].indexOf(skey) === -1){
+              s[skey] = JSON.parse(JSON.stringify(series[skey])); 
+            }
+          }
+          data[key].push(s);
+        }
+      }else {
+        data[key] = JSON.parse(JSON.stringify(dataSet[key])); 
+      }
+    }
+    return data; 
+  }
 
   calcOffsetChanges() {
     let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
@@ -272,6 +307,7 @@ class AreaChart extends Component {
     this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
+    this.state.shouldFSRender = nextProps.resizeComponent;
     this.init(); 
   }
 
@@ -287,6 +323,11 @@ class AreaChart extends Component {
     this.emitter.on('legendHovered', this.onLegendHover);
     this.emitter.on('legendLeaved', this.onLegendLeave);
     this.emitter.on('onZoomout', this.onZoomout);
+    this.state.shouldFSRender = false;
+  }
+
+  componentDidUpdate() {
+    this.state.shouldFSRender = false;
   }
 
   componentWillUnmount() {
@@ -371,16 +412,13 @@ class AreaChart extends Component {
         </InteractivePlane>
 
         { this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside && 
-          this.drawHScrollSeries(this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight)
+          this.drawHScrollSeries(this.CHART_DATA.marginLeft, this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight+2)
         }
 
         { this.CHART_OPTIONS.horizontalScroller.enable &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight} 
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}> 
-            {//this.CHART_OPTIONS.horizontalScroller.chartInside && 
-              //this.drawHScrollSeries()
-            }
           </HorizontalScroller>
         }
 
@@ -404,7 +442,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
-          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animate={true}
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animate={true} shouldRender={true}
           getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
@@ -430,15 +468,15 @@ class AreaChart extends Component {
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false}
+          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
           getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
         </AreaFill>
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
           clipId={clipId}>
         </AreaFill>
         <defs>

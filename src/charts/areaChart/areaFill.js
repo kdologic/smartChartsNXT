@@ -52,6 +52,10 @@ class AreaFill extends Component{
     this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
     this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
   }
+
+  shouldComponentUpdate() {
+    return this.props.shouldRender;
+  }
   
   componentWillMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
