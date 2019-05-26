@@ -280,7 +280,7 @@ class Component {
    * @param {*} newVNode 
    */
   _detectDiff(oldVNode, newVNode) {
-    if(typeof oldVNode === 'string' && typeof newVNode === 'string') {
+    if(typeof oldVNode !== 'object' && typeof newVNode !== 'object') {
       if(oldVNode !== newVNode){
         return {type: 'NODE_TEXT_DIFF'};
       }else {
@@ -527,7 +527,7 @@ class Component {
    */
   _updateTextNode(nodePos=0, newVNode, ref) {
     let newText = newVNode.children[nodePos];
-    if(typeof newText === 'string') {
+    if(typeof newText !== 'object') {
       ref.node.textContent = newText;
       ref.children[nodePos].node = ref.node.childNodes[nodePos];
     }
