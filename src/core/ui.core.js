@@ -7,6 +7,8 @@
  * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
  */
 
+import { mountTo } from "./../viewEngin/pview";
+
 class UiCore {
   constructor() {}
 
@@ -81,9 +83,28 @@ class UiCore {
     return fSize < maxSize ? fSize : maxSize;
   }
 
+  /**
+   * Get text width in svg pixel.
+   * @param {DOM} parentNode - Parent DOM node.
+   * @param {Object} textNode - JSX of text node. 
+   * @return Text width in Pixel
+   */
+  getComputedTextWidth(parentNode, textNode) {
+    let width = 0; 
+    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.style.visibility = "hidden"; 
+    parentNode.appendChild(g);
+    let textDOM = mountTo(textNode, g).node;
+    if(textDOM) {
+      width = textDOM.getBoundingClientRect().width;
+    }
+    g.parentNode.removeChild(g);
+    return width;
+  }
+
   /** Returns true if it is a touch device 
    * @return {boolean} Returns 'true' for touch device otherwise return 'false'.
-  */
+   */
   isTouchDevice() {
     return "ontouchstart" in document.documentElement;
   }
@@ -157,6 +178,27 @@ class UiCore {
       }
     }
   }
+
+  /**
+   * Format a text value base in Billion, Million, Thousand etc.
+   * @param {Number} value Input number to format.
+   * @returns String of formatted value.
+   */
+
+  formatTextValue(value) {
+    if (Math.abs(Number(value)) >= 1000000000000) {
+      return (Number(value) / 1000000000000).toFixed(2) + " T";
+    } else if (Math.abs(Number(value)) >= 1000000000) {
+      return (Number(value) / 1000000000).toFixed(2) + " B";
+    } else if (Math.abs(Number(value)) >= 1000000) {
+        return (Number(value) / 1000000).toFixed(2) + " M";
+    } else if (Math.abs(Number(value)) >= 1000) {
+        return (Number(value) / 1000).toFixed(2) + " K";
+    } else {
+        return Number(value).toFixed(2);
+    }
+  }
+
 /**
  * 
  * @param {Object} parentNode DOM node where style will be prepend

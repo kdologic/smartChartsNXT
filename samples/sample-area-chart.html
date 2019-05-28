@@ -64,7 +64,7 @@
             "maxFontSize": 12
           },
           "canvasBorder": false,
-          "bgColor": "#f7fdf7", //[default: white]
+          "bgColor": "#f7fdf7", // [default: white]
           // "gridBox": {  // : TODO
           //   "vertical": {
           //     "style": "dashed", //[dashed | solid]
@@ -85,18 +85,24 @@
           // },
           "pointerCrosshair": {
             "vertical": {
-              "style": "dashed",  // [dashed | solid]
-              "spread" : "full",  // [full | inPoint | none]
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
+              "style": "dashed",              // [default: dashed | solid]
+              "spread" : "full",              // [default: full | inPoint | none]
+              "lineColor": "#000",            // [default: #000]
+              "lineWidth": 1,                 // [default: 1]
+              "lineOpacity": 1,               // [default: 1]
+              "labelTextColor": "#fff",       // [default: #fff]
+              "labelBackgroundColor":"#000",  // [default: #000]
+              "labelOpacity": 1               // [default: 1]
             },
             "horizontal": {
-              "style": "dashed",  // [dashed | solid]
-              "spread" : "none", // [full | inPoint | none]
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
+              "style": "dashed",              // [default: dashed | solid]
+              "spread" : "none",              // [full | inPoint | default: none]
+              "lineColor": "#000",            // [default: #000]
+              "lineWidth": 1,                 // [default: 1]
+              "lineOpacity": 1,               // [default: 1]
+              "labelTextColor": "#fff",       // [default: #fff]
+              "labelBackgroundColor":"#000",  // [default: #000]
+              "labelOpacity": 1               // [default: 1]
             }
           },
           "legends":{

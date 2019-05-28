@@ -540,16 +540,21 @@ class AreaChart extends Component {
   consumeEvents(e) {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
     let point = series.data[e.highlightedPoint.pointIndex];
-    let formatedLabel = point.label;
+    let formattedLabel = point.label;
+    let formattedValue = UiCore.formatTextValue(point.value);
+    if(this.state.cs.dataSet.yAxis && this.state.cs.dataSet.yAxis.prefix) {
+      formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
+    }
     if(this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.parseAsDate) {
-      formatedLabel = dateFormat(formatedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
+      formatedLabel = dateFormat(formattedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
     }
     let hPoint = {
       x: e.highlightedPoint.x,
       y: e.highlightedPoint.y,
       label: point.label,
-      formattedLabel: formatedLabel,
+      formattedLabel: formattedLabel,
       value: point.value,
+      formattedValue: formattedValue,
       seriesName: series.name,
       seriesIndex: e.highlightedPoint.seriesIndex, 
       pointIndex: e.highlightedPoint.pointIndex,

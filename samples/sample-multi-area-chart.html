@@ -12,8 +12,8 @@
         newDate.setDate(newDate.getDate() + i);
         var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
         dataSet.push({
-          label: i+1, //newDate,//'k-'+(i+1),//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
-          value: (i % 4 === 0 ? -1 : 1 ) * datum
+          label: i+1 ,//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          value: (i % 4 === 0 ? -1 : 1 ) * datum * 1000
         });
       }
       return dataSet;
@@ -61,18 +61,24 @@
           // },
           "pointerCrosshair": {
             "vertical": {
-              "style": "dashed",  // [dashed | solid]
-              "spread" : "full",  // [full | inPoint | none]
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
+              "style": "dashed",              // [default: dashed | solid]
+              "spread" : "full",              // [default: full | inPoint | none]
+              "lineColor": "#000",            // [default: #000]
+              "lineWidth": 1,                 // [default: 1]
+              "lineOpacity": 1,               // [default: 1]
+              "labelTextColor": "#fff",       // [default: #fff]
+              "labelBackgroundColor":"#000",  // [default: #000]
+              "labelOpacity": 1               // [default: 1]
             },
             "horizontal": {
-              "style": "dashed",  // [dashed | solid]
-              "spread" : "none", // [full | inPoint | none]
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
+              "style": "dashed",              // [default: dashed | solid]
+              "spread" : "none",              // [full | inPoint | default: none]
+              "lineColor": "#000",            // [default: #000]
+              "lineWidth": 1,                 // [default: 1]
+              "lineOpacity": 1,               // [default: 1]
+              "labelTextColor": "#fff",       // [default: #fff]
+              "labelBackgroundColor":"#000",  // [default: #000]
+              "labelOpacity": 1               // [default: 1]
             }
           },
           "legends":{

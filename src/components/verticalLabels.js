@@ -1,9 +1,10 @@
 "use strict";
 
+import { Component } from "./../viewEngin/pview";
+import UiCore from './../core/ui.core';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from "./../settings/config";
 import Ticks from "./ticks";
-import { Component } from "./../viewEngin/pview";
 
 /**
  * verticalLabels.js
@@ -99,7 +100,7 @@ class VerticalLabels extends Component{
     this.zeroBaseIndex = -1;
     for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
       let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = this.formatTextValue(labelVal);
+      this.maxLabelVal = UiCore.formatTextValue(labelVal);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount)); 
       this.valueSet.unshift(this.maxLabelVal);
       if(labelVal === 0) {
@@ -121,16 +122,6 @@ class VerticalLabels extends Component{
         </tspan>
       </text>
     );
-  }
-
-  formatTextValue(value) {
-    if (Math.abs(Number(value)) >= 1000000) {
-        return (Number(value) / 1000000).toFixed(2) + " M";
-    } else if (Math.abs(Number(value)) >= 1000) {
-        return (Number(value) / 1000).toFixed(2) + " K";
-    } else {
-        return Number(value).toFixed(2);
-    }
   }
 
   onMouseEnter(e) {
