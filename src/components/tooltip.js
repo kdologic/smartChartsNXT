@@ -6,7 +6,6 @@ import eventEmitter from './../core/eventEmitter';
 import { Component } from "./../viewEngin/pview";
 import UtilCore from "./../core/util.core";
 import SpeechBox from './../components/speechBox'; 
-import TransitionGroup from './../viewEngin/transitionGroup'; 
 import Style from './../viewEngin/style'; 
 
 /**
@@ -17,24 +16,25 @@ import Style from './../viewEngin/style';
  * @extends Component. 
  * 
  * @config 
- * "tooltip": {
-      "content": function() {
-        return '<table>' +
-        '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
-        '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
-        '</table>';
-      },
-      "enabled": true, 
-      "color": "white",
-      "bgColor": "black",
-      "fontSize": "14", 
-      "fontFamily": "Lato", 
-      "xPadding": 10,
-      "yPadding": 10,
-      "borderColor": "pink",
-      "borderWidth": 1,
-      "opacity": 0.9
-    }
+ * ```js
+ "tooltip": {
+    "content": function() {
+      return '<table>' +
+      '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
+      '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
+      '</table>';
+    },
+    "enabled": true, 
+    "color": "white",
+    "bgColor": "black",
+    "fontSize": "14", 
+    "fontFamily": "Lato", 
+    "xPadding": 10,
+    "yPadding": 10,
+    "borderColor": "pink",
+    "borderWidth": 1,
+    "opacity": 0.9
+  }```
  */
 class Tooltip extends Component {
     constructor(props) {
@@ -96,18 +96,13 @@ class Tooltip extends Component {
         <g class='sc-tooltip-container' pointer-events='none'>
           <Style>
           {{
-            ".tooltip-transform-enter": {
-              transform: this.state.transformOld
-            },
-            ".tooltip-transform-enter.tooltip-transform-enter-active": {
-              transform: this.state.transformNew,
-              transition: "transform 0.3s ease-in-out"
+            ".tooltip-inst": {
+              transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)"
             }
           }}
           </Style>
-          <TransitionGroup transitionName='tooltip-transform' transitionEnterDelay='300' transitionExitDelay='0'>
             {this.state.opacity && 
-              <g instanceId='tooltip-inst' transform={this.state.transformNew.replace(/px/gi,'')}>
+              <g instanceId='tooltip-inst' class="tooltip-inst" transform={this.state.transformNew.replace(/px/gi,'')}>
                 <SpeechBox x={0} y={0} width={this.state.contentWidth} height={this.state.contentHeight} cpoint={this.state.cPoint }
                   bgColor={this.config.bgColor} opacity={this.config.opacity} shadow={true} strokeColor={this.state.strokeColor} strokeWidth={this.config.strokeWidth} > 
                 </SpeechBox> 
@@ -117,7 +112,6 @@ class Tooltip extends Component {
                 </g>
               </g>
             }
-          </TransitionGroup>
         </g>
       );
     }

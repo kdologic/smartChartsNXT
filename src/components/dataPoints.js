@@ -71,6 +71,9 @@ class DataPoints extends Component{
   }
 
   normalize(e) {
+    if(this.props.instanceId !== e.seriesIndex) {
+      return;
+    }
     if(this.props.opacity === 0) {
       this.setState({pointSet: []});
     }else {
@@ -88,7 +91,7 @@ class DataPoints extends Component{
 
   doHighlight(e) {
     let index = e.highlightedPoint.pointIndex;
-    if(index == undefined || index == null || isNaN(index)) {
+    if(index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
       return;
     }
     let fillOpacity = 1; 

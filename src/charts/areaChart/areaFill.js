@@ -111,7 +111,7 @@ class AreaFill extends Component{
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && 
-          <DataPoints pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} /> 
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} /> 
         }
       </g>
     );
@@ -191,7 +191,7 @@ class AreaFill extends Component{
       pointSet = pointSet.slice(0, pointSet.length-1);
     }
     let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 
-    this.emitter.emit("normalizeAllPointMarker");
+    this.emitter.emit("normalizeAllPointMarker", {seriesIndex: this.props.index});
     if(nearPoint.dist < (this.state.scaleX / 2)) {
       e.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
@@ -212,7 +212,7 @@ class AreaFill extends Component{
 
   interactiveMouseLeave(e) {
     if(this.props.dataPoints && !this.state.isAnimationPlaying) {
-      this.emitter.emit("normalizeAllPointMarker");
+      this.emitter.emit("normalizeAllPointMarker", {seriesIndex: this.props.index});
     }
   }
 
@@ -272,6 +272,10 @@ class AreaFill extends Component{
     this.state.animInst.forEach((inst) => {
       inst.stop();
     });
+    this.setState({
+      isAnimationPlaying: false
+    });
+    this.state.animInst = []; 
   }
 
 }
