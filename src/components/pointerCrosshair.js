@@ -115,13 +115,19 @@ class PointerCrosshair extends Component{
           {{
             ".sc-crosshair-group": {
               transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)"
+            },
+            ".sc-crosshair-group.sc-h-crosshair": {
+              transform: `translate(0, ${this.state.hy1}px)`
+            },
+            ".sc-crosshair-group.sc-v-crosshair": {
+              transform: `translate(${this.state.vx1}px,0)`
             }
           }}
         </Style>
         <g>
           {this.config.horizontal.spread !== 'none' && this.state.isHorizontalCrosshairVisible &&
-            <g class="sc-crosshair-group" transform={`translate(0, ${this.state.hy1})`}>
-              <line class='sc-h-crosshair' x1={this.state.hx1} y1={0} x2={this.state.hx2} y2={0} 
+            <g class="sc-crosshair-group sc-h-crosshair" transform={`translate(0, ${this.state.hy1})`}>
+              <line x1={this.state.hx1} y1={0} x2={this.state.hx2} y2={0} 
                 fill='none' stroke={this.config.horizontal.lineColor} stroke-width={this.config.horizontal.strokeWidth} opacity={this.config.horizontal.lineOpacity} stroke-dasharray={this.config.horizontal.dashArray} shape-rendering='optimizeSpeed'/>
               <SpeechBox x={this.state.hx1-this.state.horizontalLabelWidth-5} y={-this.state.horizontalLabelHeight/2} width={this.state.horizontalLabelWidth} height={this.state.horizontalLabelHeight} cpoint={new Point(this.state.hx1, 0)}
                 anchorBaseWidth={5} bgColor={this.config.horizontal.labelBackgroundColor} fillOpacity={this.config.horizontal.labelOpacity} shadow={true} strokeColor="none" strokeWidth={0} > 
@@ -132,8 +138,8 @@ class PointerCrosshair extends Component{
         </g>
         <g>
           {this.config.vertical.spread !== 'none' && this.state.isVerticalCrosshairVisible &&
-            <g class="sc-crosshair-group" transform={`translate(${this.state.vx1},0)`}>
-              <line class='sc-v-crosshair' x1={0} y1={this.state.vy1} x2={0} y2={this.state.vy2} 
+            <g class="sc-crosshair-group sc-v-crosshair" transform={`translate(${this.state.vx1},0)`}>
+              <line x1={0} y1={this.state.vy1} x2={0} y2={this.state.vy2} 
                 fill='none' stroke={this.config.vertical.lineColor} stroke-width={this.config.vertical.strokeWidth} opacity={this.config.vertical.lineOpacity} stroke-dasharray={this.config.vertical.dashArray} shape-rendering='optimizeSpeed'/> 
               <SpeechBox x={-(this.state.verticalLabelWidth/2)} y={this.state.vy2 + 5} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy2)}
                 anchorBaseWidth={5} bgColor={this.config.vertical.labelBackgroundColor} fillOpacity={this.config.vertical.labelOpacity} shadow={true} strokeColor="none" strokeWidth={0} > 

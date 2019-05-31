@@ -97,7 +97,8 @@ class Tooltip extends Component {
           <Style>
           {{
             ".tooltip-inst": {
-              transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)"
+              transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)",
+              transform:this.state.transformNew
             }
           }}
           </Style>

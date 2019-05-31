@@ -32,18 +32,16 @@ class AreaFill extends Component{
       pointSet: [], 
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
-      opacity: this.props.opacity || 1,
-      animInst:[],
-      isAnimationPlaying: false
+      opacity: this.props.opacity || 1
     };
+
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
       width: this.props.width,
       height: this.props.height
     }, this.props.clip);
-    this.boostThreshold = 1000;
-    this.perfThreshold = 300;
+    
     this.subComp = {}; 
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
@@ -66,9 +64,6 @@ class AreaFill extends Component{
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
-    if(this.props.animate && this.state.pointSet.length < this.perfThreshold) {
-      this.playInitialAnimations(); 
-    }
   }
 
   componentWillUnmount() {
@@ -88,12 +83,16 @@ class AreaFill extends Component{
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
-    this.stopAllAnimations(); 
   }
 
   render() {
     return (
-      <g class='sc-area-fill' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`} >
+      <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
+        <style>
+          {this.props.animate && 
+            this.getScaleKeyframe()
+          }
+        </style>
         {this.props.clipId === undefined &&
           <defs>
             <clipPath id={this.clipPathId}>
@@ -222,62 +221,31 @@ class AreaFill extends Component{
     }
   }
 
-  playInitialAnimations() {
-    this.setState({
-      isAnimationPlaying: true
-    });
-    let fromPath = [];
-    if (this.props.spline) {
-      fromPath = this.state.linePath.map((p) => {
-        if (typeof p === 'string' && p.indexOf('C') !== -1) {
-          let pSeg = p.split(' ');
-          for (let i = 2; i < pSeg.length; i += 2) {
-            pSeg[i] = this.props.height;
-          }
-          return pSeg.join(' ');
-        }
-        return p;
-      });
-    } else {
-      fromPath = this.state.linePath.map((v, i) => {
-        if ((i + 1) % 3 === 0) {
-          return this.props.height;
-        }
-        return v;
-      });
+  getScaleKeyframe() {
+    return (`
+      .sc-area-fill-${this.props.instanceId} {
+        transform: translate(${this.props.posX}px, ${this.props.posY}px);
+        animation: scale-easeOutElastic-${this.props.instanceId} 1.5s linear both;
+      }
+      ${this.generateAnimKeyframe(600, 100)}
+    `);
+  }
+
+  generateAnimKeyframe(duration, steps=10) {
+    let aStage = duration/steps; 
+    
+    let keyFrame = `@keyframes scale-easeOutElastic-${this.props.instanceId} {`;
+    for(let i=0; i<steps; i++) {
+      let stageNow = aStage*i; 
+      let scaleD = Easing.easeOutElastic(stageNow/duration).toFixed(2);
+      let frame = `${Math.round(100/steps*i)}% {
+        transform: translate(${this.props.posX}px, ${this.props.posY}px) translate(${this.props.width/2}px, ${this.props.height}px) scale(1, ${scaleD}) translate(${-this.props.width/2}px, ${-this.props.height}px);
+      }`;
+      keyFrame += frame; 
     }
-    let areaFromPath = this.getAreaPath(fromPath.slice());
-    let linePath = this.ref.node.querySelector(`.sc-series-line-path-${this.props.index}`);
-    let areaPath = this.ref.node.querySelector(`.sc-series-area-path-${this.props.index}`);
-    let lAnim = linePath.morphFrom(1000, fromPath.join(' '), Easing.easeOutElastic, () => {
-      this.animationDone();
-    });
-    let aAnim = areaPath.morphFrom(1000, areaFromPath.join(' '), Easing.easeOutElastic, () => {
-      this.animationDone();
-    });
-    this.state.animInst.push(lAnim, aAnim);
+    keyFrame += "}";
+    return keyFrame; 
   }
-
-  animationDone() {
-    let animPlaying = this.state.animInst.filter((anim) => anim.isPlaying);
-    if (animPlaying instanceof Array && animPlaying.length === 0) {
-      this.setState({
-        isAnimationPlaying: false
-      });
-      this.state.animInst = []; 
-    }
-  }
-
-  stopAllAnimations() {
-    this.state.animInst.forEach((inst) => {
-      inst.stop();
-    });
-    this.setState({
-      isAnimationPlaying: false
-    });
-    this.state.animInst = []; 
-  }
-
 }
 
 export default AreaFill;
