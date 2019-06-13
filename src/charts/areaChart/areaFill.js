@@ -89,7 +89,7 @@ class AreaFill extends Component{
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
         <style>
-          {this.props.animate && 
+          {this.props.animated && 
             this.getScaleKeyframe()
           }
         </style>

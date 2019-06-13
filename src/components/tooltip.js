@@ -42,28 +42,35 @@ class Tooltip extends Component {
       let padding = 0;
       this.emitter = eventEmitter.getInstance(this.context.runId);
       this.config = {
-        color: this.props.opts.color || defaultConfig.theme.fontColorDark,
+        textColor: this.props.opts.textColor || defaultConfig.theme.fontColorDark,
         bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
         fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
         xPadding: Number(this.props.opts.xPadding) || padding,
         yPadding: Number(this.props.opts.yPadding) || padding,
-        strokeWidth: this.props.opts.borderWidth || "2",
-        opacity:this.props.opts.opacity || "0.9"
+        strokeWidth: this.props.opts.borderWidth || 3,
+        opacity: this.props.opts.opacity || 0.9
       };
-      this.state = {
-        cPoint: new Point(0,0),
-        topLeft: new Point(0,0),
-        transformOld: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
-        transformNew: `translate(${this.props.svgWidth/2},${this.props.svgHeight/2})`,
-        tooltipContent: '', 
-        contentX: this.config.xPadding, 
-        contentY: this.config.yPadding, 
-        contentWidth: 0,
-        contentHeight: 0,
-        strokeColor: 'rgb(124, 181, 236)', 
-        opacity: 0
-      };
+
+      this.state = {}
+      this.instances = []; 
+
+      for (let i = 0; i < this.props.instanceCount; i++) {
+        this.instances.push({
+          tipId: UtilCore.getRandomID(),
+          cPoint: new Point(0, 0),
+          topLeft: new Point(0, 0),
+          transform: `translate(${this.props.svgWidth / 2},${this.props.svgHeight / 2})`,
+          tooltipContent: '',
+          contentX: this.config.xPadding,
+          contentY: this.config.yPadding,
+          contentWidth: 0,
+          contentHeight: 0,
+          strokeColor: 'rgb(124, 181, 236)',
+          opacity: 0
+        });
+      }
+
       this.updateTip = this.updateTip.bind(this);
       this.hide = this.hide.bind(this); 
     }
@@ -79,8 +86,11 @@ class Tooltip extends Component {
     }
 
     componentDidUpdate(prevProps) {
-      let node = this.ref.node.querySelector('.tooltip-content') ;  
-      node && (node.innerHTML = this.state.tooltipContent);
+      let nodeList = this.ref.node.querySelectorAll('.sc-tooltip-content');
+      Array.prototype.forEach.call(nodeList, (node) => {
+        let index = node.getAttribute('index');
+        node && (node.innerHTML = this.instances[index].tooltipContent);
+      });
     }
 
     componentWillUnmount() {
@@ -94,31 +104,47 @@ class Tooltip extends Component {
       }
       return (
         <g class='sc-tooltip-container' pointer-events='none'>
-          <Style>
-          {{
-            ".tooltip-inst": {
-              transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)",
-              transform:this.state.transformNew
-            }
-          }}
-          </Style>
-            {this.state.opacity && 
-              <g instanceId='tooltip-inst' class="tooltip-inst" transform={this.state.transformNew.replace(/px/gi,'')}>
-                <SpeechBox x={0} y={0} width={this.state.contentWidth} height={this.state.contentHeight} cpoint={this.state.cPoint }
-                  bgColor={this.config.bgColor} opacity={this.config.opacity} shadow={true} strokeColor={this.state.strokeColor} strokeWidth={this.config.strokeWidth} > 
-                </SpeechBox> 
-                <g class='text-tooltip-grp' font-family={this.config.fontFamily} >
-                  <foreignObject class='tooltip-content' innerHTML={this.state.tooltipContent} x={this.state.contentX} y={this.state.contentY} width={this.state.contentWidth} height={this.state.contentHeight}>
-                  </foreignObject>
-                </g>
-              </g>
-            }
+          {
+            this.getTooltipContainer()
+          }
         </g>
       );
     }
 
+    getTooltipContainer() {
+      let tipContainer = []; 
+      for (let i = 0; i < this.props.instanceCount; i++) {
+        if(!this.instances[i].opacity) {
+          continue;
+        }
+        tipContainer.push(<g instanceId={this.props.instanceId} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi,'')}>
+          <Style>
+            {{
+              ['.sc-tip-'+ this.instances[i].tipId]: {
+                transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)",
+                transform:this.instances[i].transform
+              },
+              ['.sc-tip-'+ this.instances[i].tipId +" .sc-tooltip-content"]: {
+                color: this.config.textColor,
+                fontSize: this.config.fontSize + "px", 
+                fontFamily: this.config.fontFamily
+              }
+            }}
+          </Style>
+          <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint }
+            bgColor={this.config.bgColor} opacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} > 
+          </SpeechBox> 
+          <g class='sc-text-tooltip-grp'>
+            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2*this.config.xPadding)} height={this.instances[i].contentHeight - (2*this.config.yPadding)} style="overflow: hidden;">
+            </foreignObject>
+          </g>
+        </g>);
+      }
+      return tipContainer; 
+    }
+
     createTooltipContent(line1, line2) {
-      let strContents = "<table style='color:"+this.config.color+";font-size:"+this.config.fontSize+"px;font-family:"+this.config.fontFamily+";'>";
+      let strContents = "<table style='color:"+this.config.textColor+";font-size:"+this.config.fontSize+"px;font-family:"+this.config.fontFamily+";'>";
       strContents += "<tr><td>" + line1 + "</td></tr>";
       if (line2) {
         strContents += "<tr><td><b>" + line2 + "</b></td></tr>";
@@ -128,73 +154,103 @@ class Tooltip extends Component {
     }
 
     updateTip(event) {
-      let {originPoint, pointData, line1, line2} = event;
-      let preAlign = !event.preAlign ? 'top' : event.preAlign;
-      let xPadding = this.config.xPadding; 
-      let yPadding = this.config.yPadding; 
-      let strContents = "";
-      let delta = 10; // is anchor height
-      let newState = {};
-
-      if(!pointData && !line1 && !line2) {
-        return; 
+      if(this.props.instanceId !== event.instanceId) {
+        return;
       }
-      let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.state.strokeColor;
 
-      if(pointData && this.props.opts && this.props.opts.content) {
-        if (typeof this.props.opts.content === 'function') {
-          line1 = this.props.opts.content.call(pointData); 
-          line2 = 'html'; 
-        }else if(typeof this.props.opts.content === 'string'){
-          let tooltipContent = this.props.opts.content.replace(/{{/g, "${").replace(/}}/g, "}");
-          line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
-          line2 = 'html'; 
+      let {originPoint, pointData, line1, line2} = event;
+      
+      for (let inst = 0; inst < this.props.instanceCount; inst++) {
+        let preAlign = !event.preAlign ? 'top' : event.preAlign;
+        let xPadding = this.config.xPadding; 
+        let yPadding = this.config.yPadding; 
+        let strContents = "";
+        let delta = 10; // is anchor height
+
+        if(!this.props.grouped && pointData instanceof Array && pointData[inst]) {
+          originPoint = new Point(pointData[inst].x, pointData[inst].y);
+        }
+
+        if(!pointData && !line1 && !line2) {
+          return; 
+        }
+        let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.instances[inst].strokeColor;
+
+        if (pointData && pointData[inst] && event.content) {
+          line1 = "";
+          if (typeof event.content === 'object') {
+            if (typeof event.content.header === 'function') {
+              line1 += event.content.header(pointData, inst, this.props.opts);
+            }
+            if (typeof event.content.body === 'function') {
+              line1 += '<table style="margin:5px;">';
+              if (this.props.grouped === true) {
+                for (let i = 0; i < pointData.length; i++) {
+                  line1 += event.content.body(pointData, i, this.props.opts);
+                }
+              } else {
+                line1 += event.content.body(pointData, inst, this.props.opts);
+              }
+              line1 += '</table>';
+            }
+            if (typeof event.content.footer === 'function') {
+              line1 += event.content.footer(pointData, inst, this.props.opts);
+            }
+            line2 = 'html';
+          } else if (typeof event.content === 'string') {
+            let tooltipContent = event.content.replace(/{{/g, "${").replace(/}}/g, "}");
+            line1 = UtilCore.assemble(tooltipContent, "point")(pointData);
+            line2 = 'html';
+          }
+        }
+
+        strContents = line2 === 'html' ? line1 : this.createTooltipContent(line1, line2);
+
+        let temp = document.createElement("div");
+        temp.innerHTML = strContents;
+        temp.style.display = "inline-block";
+        temp.style.fontFamily = this.config.fontFamily;
+        temp.style.visibility = 'hidden';
+        temp.style.position = 'absolute';
+        document.getElementsByTagName("body")[0].appendChild(temp);
+        let containBox = {
+          width: temp.getBoundingClientRect().width,
+          height: temp.getBoundingClientRect().height
+        };
+        temp && temp.parentNode.removeChild(temp);
+      
+        let txtWidth = containBox.width;
+        let lineHeight = containBox.height;
+        let width = txtWidth + (2 * xPadding);
+        let height = lineHeight + (2 * yPadding);
+        let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
+        let textPos = new Point(topLeft.x, topLeft.y);
+        
+
+        let newState = {
+          topLeft,
+          cPoint : new Point(cPoint.x - topLeft.x, cPoint.y - topLeft.y),
+          transform: `translate(${topLeft.x}px,${topLeft.y}px)`,
+          tooltipContent: strContents, 
+          contentWidth: width,
+          contentHeight: height,
+          strokeColor: strokeColor,
+          opacity:1
+        };
+
+        if(pointData) {
+          if(pointData[inst]) {
+            this.instances[inst] = Object.assign(this.instances[inst], newState);
+          }else {
+            this.instances[inst].opacity = 0;
+          }
+        }else {
+          this.hide(); 
+          this.instances[0] = Object.assign(this.instances[0], newState);
         }
       }
 
-      strContents = line2 === 'html' ? line1 : this.createTooltipContent(line1, line2);
-      let temp = document.createElement("div");
-      temp.innerHTML = strContents;
-      temp.style.display = "inline-block";
-      temp.style.fontFamily = this.config.fontFamily;
-      temp.style.visibility = 'hidden';
-      document.getElementsByTagName("body")[0].appendChild(temp);
-      let containBox = {
-        width: temp.offsetWidth,
-        height: temp.offsetHeight
-      };
-      temp && temp.parentNode.removeChild(temp);
-     
-      let txtWidth = containBox.width;
-      let lineHeight = containBox.height;
-      let width = txtWidth + (2 * xPadding);
-      let height = lineHeight + (2 * yPadding);
-      let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
-      let textPos = new Point(topLeft.x, topLeft.y);
-      
-      newState = {
-        tooltipContent: strContents, 
-        contentX: textPos.x, 
-        contentY: textPos.y, 
-        contentWidth: width,
-        contentHeight: height,
-        strokeColor: strokeColor,
-        opacity:1
-      };
-
-      if (this.state.transformNew !== `translate(${topLeft.x}px,${topLeft.y}px)`) {
-        this.setState({
-          topLeft,
-          cPoint : new Point(cPoint.x - topLeft.x, cPoint.y - topLeft.y),
-          transformOld: this.state.transformNew,
-          transformNew: `translate(${topLeft.x}px,${topLeft.y}px)`,
-          strokeColor: newState.strokeColor,
-          contentWidth: newState.contentWidth,
-          contentHeight: newState.contentHeight,
-          tooltipContent: newState.tooltipContent,
-          opacity: newState.opacity
-        });
-      }
+      this.update();
     }
 
     reAlign(alignment, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, loopCount) {
@@ -248,11 +304,17 @@ class Tooltip extends Component {
     }
 
     show() {
-      this.setState({opacity: 1});
+      this.instances.map((inst) => {
+        inst.opacity = 1;
+      });
+      this.update();
     }
 
     hide() {
-      this.setState({opacity: 0, transformOld: '', transformNew: ''});
+      this.instances.map((inst) => {
+        inst.opacity = 0;
+      });
+      this.update();
     }
 }
 

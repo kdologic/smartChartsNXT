@@ -12,7 +12,7 @@
         newDate.setDate(newDate.getDate() + i);
         var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
         dataSet.push({
-          label: i+1 ,//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
+          label: newDate.getTime(), //newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
           value: (i % 4 === 0 ? -1 : 1 ) * datum * 1000
         });
       }
@@ -93,24 +93,49 @@
             // "onLegendLeave": function() {console.log("onLeave-",this)}
           },
           "tooltip": {
-            "content": function() {
-              return '<table>' +
-                '<tbody>' +
-                  '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-                    '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
-                  '</tr>' +
-                    this.map(function(point) {
-                      return '<tr>' + 
-                          '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
-                            '<span style="background-color:' + point.seriesColor +'; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName + '</td>' +
-                          '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">'+ point.value + '</td>' +
-                        '</tr>';
-                    }).join('') +
-                '</tbody>' +
-              '</table>';
+            "enabled": true,                  // [default: true | false ]
+            "followPointer": false,           // TODO: [true | default: false ]
+            "grouped": true,                  // [default: true | false ]
+            "content": {
+              "header": function(pointSet, index, tipConfig) {
+                return (
+                  `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: 18px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;">
+                    ${pointSet[index].formattedLabel}
+                  </p>`
+                );
+              },
+              "body": function(pointSet, index, tipConfig) {
+                let point = pointSet[index];
+                return (
+                  `<tr  style="font-size: ${tipConfig.fontSize || 14}px; padding: 3px 6px; background-color: ${tipConfig.bgColor || "#fff"};color:${tipConfig.textColor || "#000"};">
+                    <td>
+                      <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
+                    </td>
+                    <td>${point.value}</td>
+                  </tr>`
+                );
+              },
+              "footer": function(pointSet, index, tipConfig) {
+                return (
+                  `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: 10px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;">
+                    Units are in \u20B9
+                  </p>`
+                );
+              }
             },
-            "xPadding": 3,
-            "yPadding": 3,
+            "headerTextColor": "greenyellow",
+            "headerBgColor": "#555",
+            "textColor": "yellow",
+            "bgColor": "green",
+            "footerTextColor": "greenyellow",
+            "footerBgColor": "#555",
+            "fontSize": "14", 
+            "fontFamily": "Lato", 
+            "xPadding": 0,
+            "yPadding": 0,
+            "borderColor": "pink",
+            "borderWidth": 1,                   // [default: 3 ]
+            "opacity": 0.9,
           },
           "horizontalScroller": {
             "enable": true,
@@ -121,9 +146,9 @@
             "xAxis": {
               "title": "Date",
               "prefix": "",
-              "parseAsDate": false,
+              "parseAsDate": true,
               "dateFormat": "dd mmm",
-              //"labelRotate": -45,
+              "labelRotate": -45,
               "intervalThreshold": 40,
               "tickOpacity": 1,
               "tickColor": '#222',
@@ -135,7 +160,7 @@
             },
             "yAxis": {
               "title": "Total Sales",
-              "prefix": "Rs. ",
+              "prefix": "\u20B9 ",
               "labelRotate": 0,
               "tickOpacity": 1,
               "tickColor": '#222',
@@ -152,7 +177,7 @@
                 "name": 'Raphael',
                 "areaOpacity": 0.3,
                 "spline": true,
-                "animate": true,      // [default: true | false ]
+                "animated": true,      // [default: true | false ]
                 "data": generateData(10, 50, 100) 
                 // [
                 //   {label:1, value:1000},{label:2, value:-1000},{label:3, value:1000},{label:4, value:-1000},{label:5, value:1000},{label:7, value:-1000}, {label:6, value:2000}
@@ -168,8 +193,8 @@
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Willson',
-                //"visible": false,
-                "animate": true,      // [default: true | false ]
+                "visible": true,        // [default: true | false ]
+                "animated": true,       // [default: true | false ]
                 "data": generateData(5, 20, 100)
                 // [
                 //   {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1420}, {label:6, value:1100}, {label:7, value:400}
@@ -185,8 +210,8 @@
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Clara',
-                //"visible": false,
-                "animate": true,      // [default: true | false ]
+                "visible": true,        // [default: true | false ]
+                "animated": true,       // [default: true | false ]
                 "data": generateData(5, 20, 10)
               }
             ]
@@ -224,7 +249,7 @@
         });
 
         /** add event listner on Horizontal scroll **/
-        //areaChart.events.on('hScroll', function(e) {console.log(e)});
+        // areaChart.events.on('hScroll', function(e) {console.log(e)});
         // areaChart.events.on('beforeSave', () => {console.log('before save!');});
         // areaChart.events.on('afterSave', () => {console.log('after save!');});
         // areaChart.events.on('beforePrint', () => {console.log('before print!');});

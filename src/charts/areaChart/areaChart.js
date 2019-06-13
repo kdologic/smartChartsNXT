@@ -61,6 +61,11 @@ class AreaChart extends Component {
           enable: true,
           height: 35,
           chartInside: true
+        },
+        tooltip: {
+          enabled: true,
+          followPointer: false,
+          grouped: true
         }
       }, this.props.chartOptions);
       this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
@@ -403,8 +408,21 @@ class AreaChart extends Component {
           </Draggable>
         }
 
-        <Tooltip opts={this.CHART_OPTIONS.tooltip || {}}
+        <Tooltip instanceId="marker-tooltip" instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length} 
+          opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
           svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
+        </Tooltip>
+
+        <Tooltip instanceId="label-tooltip" instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
+          opts={{
+            textColor: "#fff",
+            bgColor: "black",
+            fontSize: 14, 
+            xPadding: 5,
+            yPadding: 5,
+            borderColor: "none",
+            borderWidth: 0, 
+          }}>
         </Tooltip>
 
         <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} 
@@ -442,7 +460,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)} 
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
-          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animate={series.animate == undefined ? true : !!series.animate} shouldRender={true}
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true}
           getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
@@ -469,14 +487,14 @@ class AreaChart extends Component {
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
           getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
         </AreaFill>
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
-          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animate={false} shouldRender={this.state.shouldFSRender}
+          maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
           clipId={clipId}>
         </AreaFill>
         <defs>
@@ -530,6 +548,7 @@ class AreaChart extends Component {
 
   updateLabelTip(e) { 
     this.emitter.emit('updateTooltip', {
+      instanceId: 'label-tooltip',
       originPoint: UiCore.cursorPoint(this.context.rootContainerId, e), 
       pointData: undefined,
       line1: e.labelText,
@@ -546,7 +565,7 @@ class AreaChart extends Component {
       formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
     }
     if(this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.parseAsDate) {
-      formatedLabel = dateFormat(formattedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
+      formattedLabel = dateFormat(formattedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
     }
     let hPoint = {
       x: e.highlightedPoint.x,
@@ -611,30 +630,78 @@ class AreaChart extends Component {
   }
 
   updateDataTooltip(originPoint, pointData) {
-    if (this.CHART_OPTIONS.tooltip && this.CHART_OPTIONS.tooltip.content) {
-      this.emitter.emit('updateTooltip', {originPoint, pointData, line1: undefined, line2: undefined, preAlign: 'left'}); 
-    } 
-    else {
-      let row1 = this.getDefaultTooltipHTML.call(pointData); 
-      this.emitter.emit('updateTooltip', {originPoint, pointData, line1: row1, line2: 'html', preAlign: 'left'}); 
+    if (this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'object') {
+      this.emitter.emit('updateTooltip', {
+        instanceId: "marker-tooltip",
+        originPoint, 
+        pointData,
+        content: this.CHART_OPTIONS.tooltip.content,
+        line1: undefined, line2: undefined, preAlign: 'left'
+      }); 
+    }else {
+      this.emitter.emit('updateTooltip', {
+        instanceId: "marker-tooltip",
+        originPoint, 
+        pointData, 
+        content: {
+          header: this.getTooltipHeader,
+          body: this.getTooltipBody,
+          footer: this.getTooltipFooter
+        }, 
+        line1: undefined, line2: undefined, preAlign: 'left'
+      }); 
     }
   }
 
-  getDefaultTooltipHTML() {
-    return '<table>' +
-      '<tbody>' +
-        '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-          '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
-        '</tr>' +
-          this.map(function(point) {
-            return '<tr>' + 
-                '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
-                  '<span style="background-color:' + point.seriesColor +'; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName + '</td>' +
-                '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">'+ point.value + '</td>' +
-              '</tr>';
-          }).join('') +
-      '</tbody>' +
-    '</table>';
+  getTooltipHeader(pointSet, index, tipConfig) {
+    return (
+      `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;">
+        ${pointSet[index].formattedLabel}
+      </p>`
+    );
+  }
+
+  getTooltipBody(pointSet, index, tipConfig) {
+    let point = pointSet[index];
+    return (
+      `<tr  style="font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; background-color: ${tipConfig.bgColor || "#fff"};color:${tipConfig.textColor || "#000"};">
+        <td>
+          <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
+        </td>
+        <td>${point.value}</td>
+      </tr>`
+    );
+  }
+
+  getTooltipFooter(pointSet, index, tipConfig) {
+    return (
+      `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;">
+        Units are in \u20B9
+      </p>`
+    );
+  }
+
+  getDefaultTooltipHTML(pointSet, index) {
+    let tipConf = this.CHART_OPTIONS.tooltip || {}; 
+    return (
+      `<table>
+        <tbody>
+          <tr style="background-color:${tipConf.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConf.headerTextColor || "#fff"};">
+            <td colspan="2" style="padding: 2px 5px;">${pointSet[0].formattedLabel}</td>
+          </tr>` +
+            pointSet.map((point) => {
+              return (
+                `<tr  style="font-size: ${tipConf.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; background-color: ${tipConf.bgColor || "#fff"};color:${tipConf.textColor || "#000"}">
+                  <td>
+                    <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
+                  </td>
+                  <td>${point.value}</td>
+                </tr>`
+              );
+            }).join('') + `
+        </tbody>
+      </table>`
+    );
   }
 
   hideTip(e) {
