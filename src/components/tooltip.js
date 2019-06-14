@@ -127,15 +127,17 @@ class Tooltip extends Component {
               ['.sc-tip-'+ this.instances[i].tipId +" .sc-tooltip-content"]: {
                 color: this.config.textColor,
                 fontSize: this.config.fontSize + "px", 
-                fontFamily: this.config.fontFamily
+                fontFamily: this.config.fontFamily,
+                overflow: 'hidden',
+                opacity: this.config.opacity
               }
             }}
           </Style>
           <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint }
-            bgColor={this.config.bgColor} opacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} > 
+            bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} > 
           </SpeechBox> 
           <g class='sc-text-tooltip-grp'>
-            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2*this.config.xPadding)} height={this.instances[i].contentHeight - (2*this.config.yPadding)} style="overflow: hidden;">
+            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2*this.config.xPadding)} height={this.instances[i].contentHeight - (2*this.config.yPadding)} >
             </foreignObject>
           </g>
         </g>);
@@ -153,19 +155,44 @@ class Tooltip extends Component {
       return strContents; 
     }
 
+    *selectNextTipIndex(pointData) {
+      let mid = Math.floor(pointData.length / 2);
+      yield mid;
+      for (let inst = mid - 1; inst >= 0; inst--) {
+        yield inst;
+      }
+      for (let inst = mid + 1; inst < pointData.length; inst++) {
+        yield inst;
+      }
+    }
+
     updateTip(event) {
       if(this.props.instanceId !== event.instanceId) {
         return;
       }
 
       let {originPoint, pointData, line1, line2} = event;
-      
-      for (let inst = 0; inst < this.props.instanceCount; inst++) {
+      let tipIterator; 
+
+      if(!this.props.grouped && pointData instanceof Array) {
+        pointData.sort((a, b) => a.y - b.y);
+        tipIterator = this.selectNextTipIndex(pointData); 
+        this.instances.map((inst) => {
+          inst.opacity = 0;
+        });
+      }
+
+      for (let ic = 0; ic < this.props.instanceCount; ic++) {
         let preAlign = !event.preAlign ? 'top' : event.preAlign;
         let xPadding = this.config.xPadding; 
         let yPadding = this.config.yPadding; 
         let strContents = "";
         let delta = 10; // is anchor height
+        let inst; 
+
+        if(pointData instanceof Array) {
+          inst = this.props.grouped ? ic : tipIterator.next().value;
+        }
 
         if(!this.props.grouped && pointData instanceof Array && pointData[inst]) {
           originPoint = new Point(pointData[inst].x, pointData[inst].y);
@@ -174,7 +201,8 @@ class Tooltip extends Component {
         if(!pointData && !line1 && !line2) {
           return; 
         }
-        let strokeColor = this.props.opts.borderColor || (pointData && pointData.color) || this.instances[inst].strokeColor;
+
+        let strokeColor = this.props.opts.borderColor || (pointData && pointData[inst].seriesColor) || this.instances[inst].strokeColor;
 
         if (pointData && pointData[inst] && event.content) {
           line1 = "";
@@ -235,14 +263,44 @@ class Tooltip extends Component {
           contentWidth: width,
           contentHeight: height,
           strokeColor: strokeColor,
-          opacity:1
+          opacity:1,
         };
 
+        if(!this.props.grouped) {
+          this.instances.filter((v) => v.opacity).map((oldTip) => {
+            let count = 0; 
+            do {
+              count++;
+              var ol = this.isOverlapping({
+                X1: newState.topLeft.x,
+                Y1: newState.topLeft.y, 
+                X2: newState.topLeft.x + newState.contentWidth,
+                Y2: newState.topLeft.y + newState.contentHeight,
+              },{
+                X1: oldTip.topLeft.x,
+                Y1: oldTip.topLeft.y, 
+                X2: oldTip.topLeft.x + oldTip.contentWidth,
+                Y2: oldTip.topLeft.y + oldTip.contentHeight,
+              });
+              if(ol) {
+                if(newState.topLeft.y < oldTip.topLeft.y) {
+                  newState.topLeft.y -= 10;
+                }else {
+                  newState.topLeft.y += 10;
+                }
+              }
+            }while(ol && count < 100);
+          });
+  
+          newState.transform = `translate(${newState.topLeft.x}px,${newState.topLeft.y}px)`;
+          newState.cPoint = new Point(cPoint.x - newState.topLeft.x, cPoint.y - newState.topLeft.y);
+        }
+
         if(pointData) {
-          if(pointData[inst]) {
-            this.instances[inst] = Object.assign(this.instances[inst], newState);
+          if(pointData[ic]) {
+            this.instances[ic] = Object.assign(this.instances[ic], newState);
           }else {
-            this.instances[inst].opacity = 0;
+            this.instances[ic].opacity = 0;
           }
         }else {
           this.hide(); 
@@ -251,6 +309,10 @@ class Tooltip extends Component {
       }
 
       this.update();
+    }
+
+    isOverlapping(rectA, rectB) {
+      return (rectA.X1 < rectB.X2 && rectA.X2 > rectB.X1 && rectA.Y1 < rectB.Y2 && rectA.Y2 > rectB.Y1);
     }
 
     reAlign(alignment, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, loopCount) {

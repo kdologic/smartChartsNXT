@@ -635,7 +635,11 @@ class AreaChart extends Component {
         instanceId: "marker-tooltip",
         originPoint, 
         pointData,
-        content: this.CHART_OPTIONS.tooltip.content,
+        content: {
+          header: this.CHART_OPTIONS.tooltip.content.header || this.getTooltipHeader,
+          body: this.CHART_OPTIONS.tooltip.content.body || this.getTooltipBody,
+          footer: this.CHART_OPTIONS.tooltip.content.footer || this.getTooltipFooter
+        },
         line1: undefined, line2: undefined, preAlign: 'left'
       }); 
     }else {
@@ -655,7 +659,7 @@ class AreaChart extends Component {
 
   getTooltipHeader(pointSet, index, tipConfig) {
     return (
-      `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;">
+      `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;padding: 3px 5px;">
         ${pointSet[index].formattedLabel}
       </p>`
     );
@@ -674,34 +678,7 @@ class AreaChart extends Component {
   }
 
   getTooltipFooter(pointSet, index, tipConfig) {
-    return (
-      `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;">
-        Units are in \u20B9
-      </p>`
-    );
-  }
-
-  getDefaultTooltipHTML(pointSet, index) {
-    let tipConf = this.CHART_OPTIONS.tooltip || {}; 
-    return (
-      `<table>
-        <tbody>
-          <tr style="background-color:${tipConf.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConf.headerTextColor || "#fff"};">
-            <td colspan="2" style="padding: 2px 5px;">${pointSet[0].formattedLabel}</td>
-          </tr>` +
-            pointSet.map((point) => {
-              return (
-                `<tr  style="font-size: ${tipConf.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; background-color: ${tipConf.bgColor || "#fff"};color:${tipConf.textColor || "#000"}">
-                  <td>
-                    <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
-                  </td>
-                  <td>${point.value}</td>
-                </tr>`
-              );
-            }).join('') + `
-        </tbody>
-      </table>`
-    );
+    return "";
   }
 
   hideTip(e) {

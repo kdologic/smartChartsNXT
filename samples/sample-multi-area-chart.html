@@ -99,7 +99,7 @@
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
-                  `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: 18px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;">
+                  `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: 18px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;padding: 5px 5px;">
                     ${pointSet[index].formattedLabel}
                   </p>`
                 );
@@ -117,25 +117,25 @@
               },
               "footer": function(pointSet, index, tipConfig) {
                 return (
-                  `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: 10px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;">
+                  `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: 10px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;padding: 5px 5px;">
                     Units are in \u20B9
                   </p>`
                 );
               }
             },
-            "headerTextColor": "greenyellow",
-            "headerBgColor": "#555",
-            "textColor": "yellow",
-            "bgColor": "green",
-            "footerTextColor": "greenyellow",
-            "footerBgColor": "#555",
-            "fontSize": "14", 
-            "fontFamily": "Lato", 
-            "xPadding": 0,
-            "yPadding": 0,
-            "borderColor": "pink",
-            "borderWidth": 1,                   // [default: 3 ]
-            "opacity": 0.9,
+            "headerTextColor": "greenyellow",   // [ default: #fff ]
+            "headerBgColor": "#555",            // [ default: #555 ]
+            "textColor": "yellow",              // [ default: #000 ]
+            "bgColor": "green",                 // [ default: #fff ]
+            "footerTextColor": "greenyellow",   // [ default: #fff ]
+            "footerBgColor": "#555",            // [ default: #555 ]
+            "fontSize": "14",                   // [ default: 18 ]
+            "fontFamily": "Lato",               // [ default: Lato ]
+            "xPadding": 0,                      // [ default: 0 ] 
+            "yPadding": 0,                      // [ default: 0 ] 
+            "borderColor": "none",              // [ default: point.seriesColor ]
+            "borderWidth": 2,                   // [ default: 3 ]
+            "opacity": 0.9,                     // [ default: 0.9 ]
           },
           "horizontalScroller": {
             "enable": true,
