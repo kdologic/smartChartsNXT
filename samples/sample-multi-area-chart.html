@@ -93,8 +93,8 @@
             // "onLegendLeave": function() {console.log("onLeave-",this)}
           },
           "tooltip": {
-            "enabled": true,                  // [default: true | false ]
-            "followPointer": false,           // TODO: [true | default: false ]
+            "enable": true,                   // [default: true | false ]
+            "followPointer": false,           // [true | default: false ]
             "grouped": true,                  // [default: true | false ]
             "content": {
               "header": function(pointSet, index, tipConfig) {
@@ -107,7 +107,7 @@
               "body": function(pointSet, index, tipConfig) {
                 let point = pointSet[index];
                 return (
-                  `<tr  style="font-size: ${tipConfig.fontSize || 14}px; padding: 3px 6px; background-color: ${tipConfig.bgColor || "#fff"};color:${tipConfig.textColor || "#000"};">
+                  `<tr  style="font-size: ${tipConfig.fontSize || 14}px; padding: 3px 6px; color:${tipConfig.textColor || "#000"};">
                     <td>
                       <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
                     </td>
@@ -129,13 +129,13 @@
             "bgColor": "green",                 // [ default: #fff ]
             "footerTextColor": "greenyellow",   // [ default: #fff ]
             "footerBgColor": "#555",            // [ default: #555 ]
-            "fontSize": "14",                   // [ default: 18 ]
+            "fontSize": 14,                     // [ default: 14 ]
             "fontFamily": "Lato",               // [ default: Lato ]
             "xPadding": 0,                      // [ default: 0 ] 
             "yPadding": 0,                      // [ default: 0 ] 
             "borderColor": "none",              // [ default: point.seriesColor ]
             "borderWidth": 2,                   // [ default: 3 ]
-            "opacity": 0.9,                     // [ default: 0.9 ]
+            "opacity": 0.8,                     // [ default: 0.8 ]
           },
           "horizontalScroller": {
             "enable": true,

@@ -63,7 +63,7 @@ class AreaChart extends Component {
           chartInside: true
         },
         tooltip: {
-          enabled: true,
+          enable: true,
           followPointer: false,
           grouped: true
         }
@@ -408,10 +408,12 @@ class AreaChart extends Component {
           </Draggable>
         }
 
-        <Tooltip instanceId="marker-tooltip" instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length} 
-          opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
-          svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
-        </Tooltip>
+        {this.CHART_OPTIONS.tooltip.enable &&
+          <Tooltip instanceId="marker-tooltip" instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length} 
+            opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
+            svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
+          </Tooltip>
+        }
 
         <Tooltip instanceId="label-tooltip" instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
           opts={{
@@ -421,7 +423,7 @@ class AreaChart extends Component {
             xPadding: 5,
             yPadding: 5,
             borderColor: "none",
-            borderWidth: 0, 
+            borderWidth: 0
           }}>
         </Tooltip>
 
@@ -668,7 +670,7 @@ class AreaChart extends Component {
   getTooltipBody(pointSet, index, tipConfig) {
     let point = pointSet[index];
     return (
-      `<tr  style="font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; background-color: ${tipConfig.bgColor || "#fff"};color:${tipConfig.textColor || "#000"};">
+      `<tr  style="font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; color:${tipConfig.textColor || "#000"};">
         <td>
           <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
         </td>

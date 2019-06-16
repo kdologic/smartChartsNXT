@@ -5,6 +5,7 @@ import Point from "./../core/point";
 import eventEmitter from './../core/eventEmitter';
 import { Component } from "./../viewEngin/pview";
 import UtilCore from "./../core/util.core";
+import UiCore from "./../core/ui.core";
 import SpeechBox from './../components/speechBox'; 
 import Style from './../viewEngin/style'; 
 
@@ -14,27 +15,37 @@ import Style from './../viewEngin/style';
  * @author:SmartChartsNXT
  * @description: This components will create tooltip area for the chart. 
  * @extends Component. 
- * 
- * @config 
- * ```js
- "tooltip": {
-    "content": function() {
-      return '<table>' +
-      '<tr><td><b>'+this.label+'</b> has global usage </td></tr>' +
-      '<tr><td> of <b>'+this.value+'% </b>Worldwide.</td></tr>' +
-      '</table>';
+ * @config test
+ ```js
+"tooltip": {
+  "enable": true,                   // [default: true | false ]
+  "followPointer": false,           // [true | default: false ]
+  "grouped": true,                  // [default: true | false ]
+  "content": {
+    "header": function(pointSet, index, tipConfig) {
+      return (...);
     },
-    "enabled": true, 
-    "color": "white",
-    "bgColor": "black",
-    "fontSize": "14", 
-    "fontFamily": "Lato", 
-    "xPadding": 10,
-    "yPadding": 10,
-    "borderColor": "pink",
-    "borderWidth": 1,
-    "opacity": 0.9
-  }```
+    "body": function(pointSet, index, tipConfig) {
+      return (...);
+    },
+    "footer": function(pointSet, index, tipConfig) {
+      return (...);
+    }
+  },
+  "headerTextColor": "greenyellow",   // [ default: #fff ]
+  "headerBgColor": "#555",            // [ default: #555 ]
+  "textColor": "yellow",              // [ default: #000 ]
+  "bgColor": "green",                 // [ default: #fff ]
+  "footerTextColor": "greenyellow",   // [ default: #fff ]
+  "footerBgColor": "#555",            // [ default: #555 ]
+  "fontSize": 14,                     // [ default: 14 ]
+  "fontFamily": "Lato",               // [ default: Lato ]
+  "xPadding": 0,                      // [ default: 0 ] 
+  "yPadding": 0,                      // [ default: 0 ] 
+  "borderColor": "none",              // [ default: point.seriesColor ]
+  "borderWidth": 2,                   // [ default: 3 ]
+  "opacity": 0.8,                     // [ default: 0.8 ]
+} ```
  */
 class Tooltip extends Component {
     constructor(props) {
@@ -48,16 +59,18 @@ class Tooltip extends Component {
         fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
         xPadding: Number(this.props.opts.xPadding) || padding,
         yPadding: Number(this.props.opts.yPadding) || padding,
-        strokeWidth: this.props.opts.borderWidth || 3,
-        opacity: this.props.opts.opacity || 0.9
+        strokeWidth: typeof this.props.opts.borderWidth === "undefined" ? 3 : this.props.opts.borderWidth,
+        opacity: typeof this.props.opts.opacity === "undefined" ? 0.8 : this.props.opts.opacity,
+        followPointer: typeof this.props.opts.followPointer === "undefined" ? false : this.props.opts.followPointer
       };
 
-      this.state = {}
+      this.state = {};
       this.instances = []; 
 
       for (let i = 0; i < this.props.instanceCount; i++) {
         this.instances.push({
           tipId: UtilCore.getRandomID(),
+          originPoint: new Point(0, 0),
           cPoint: new Point(0, 0),
           topLeft: new Point(0, 0),
           transform: `translate(${this.props.svgWidth / 2},${this.props.svgHeight / 2})`,
@@ -72,7 +85,8 @@ class Tooltip extends Component {
       }
 
       this.updateTip = this.updateTip.bind(this);
-      this.hide = this.hide.bind(this); 
+      this.hide = this.hide.bind(this);
+      this.followMousePointer = this.followMousePointer.bind(this);
     }
 
     componentWillMount() {
@@ -83,6 +97,9 @@ class Tooltip extends Component {
       typeof this.props.onRef === 'function' && this.props.onRef(this);
       this.emitter.on('updateTooltip', this.updateTip);
       this.emitter.on('hideTooltip', this.hide);
+      if(this.props.grouped && this.config.followPointer) {
+        this.emitter.on('interactiveMouseMove', this.followMousePointer);
+      }
     }
 
     componentDidUpdate(prevProps) {
@@ -96,6 +113,9 @@ class Tooltip extends Component {
     componentWillUnmount() {
       this.emitter.removeListener('updateTooltip', this.updateTip);
       this.emitter.removeListener('hideTooltip', this.hide);
+      if(this.props.grouped && this.config.followPointer) {
+        this.emitter.removeListener('interactiveMouseMove', this.followMousePointer);
+      }
     }
 
     render() {
@@ -113,6 +133,7 @@ class Tooltip extends Component {
 
     getTooltipContainer() {
       let tipContainer = []; 
+      let transitionFunction = "transform 0.3s cubic-bezier(.03,.26,.32,1), opacity 0.3s cubic-bezier(.03,.26,.32,1)";
       for (let i = 0; i < this.props.instanceCount; i++) {
         if(!this.instances[i].opacity) {
           continue;
@@ -121,8 +142,11 @@ class Tooltip extends Component {
           <Style>
             {{
               ['.sc-tip-'+ this.instances[i].tipId]: {
-                transition: "transform 0.3s cubic-bezier(.03,.26,.32,1)",
-                transform:this.instances[i].transform
+                WebkitTransition: this.config.followPointer ? "" : transitionFunction,
+                MozTransition: this.config.followPointer ? "" : transitionFunction,
+                OTransition: this.config.followPointer ? "" : transitionFunction,
+                transition: this.config.followPointer ? "" : transitionFunction,
+                transform: this.instances[i].transform
               },
               ['.sc-tip-'+ this.instances[i].tipId +" .sc-tooltip-content"]: {
                 color: this.config.textColor,
@@ -257,30 +281,32 @@ class Tooltip extends Component {
 
         let newState = {
           topLeft,
+          originPoint,
           cPoint : new Point(cPoint.x - topLeft.x, cPoint.y - topLeft.y),
           transform: `translate(${topLeft.x}px,${topLeft.y}px)`,
           tooltipContent: strContents, 
           contentWidth: width,
           contentHeight: height,
           strokeColor: strokeColor,
-          opacity:1,
+          opacity:1
         };
 
         if(!this.props.grouped) {
           this.instances.filter((v) => v.opacity).map((oldTip) => {
-            let count = 0; 
+            let count = 0;
+            let ol = false;
             do {
               count++;
-              var ol = this.isOverlapping({
+              ol = this.isOverlapping({
                 X1: newState.topLeft.x,
                 Y1: newState.topLeft.y, 
                 X2: newState.topLeft.x + newState.contentWidth,
-                Y2: newState.topLeft.y + newState.contentHeight,
+                Y2: newState.topLeft.y + newState.contentHeight
               },{
                 X1: oldTip.topLeft.x,
                 Y1: oldTip.topLeft.y, 
                 X2: oldTip.topLeft.x + oldTip.contentWidth,
-                Y2: oldTip.topLeft.y + oldTip.contentHeight,
+                Y2: oldTip.topLeft.y + oldTip.contentHeight
               });
               if(ol) {
                 if(newState.topLeft.y < oldTip.topLeft.y) {
@@ -309,6 +335,18 @@ class Tooltip extends Component {
       }
 
       this.update();
+    }
+
+    followMousePointer(e) {
+      let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+      if(this.instances[0] && this.instances[0].opacity) {
+        let cPoint = this.instances[0].originPoint;
+        let contentWidth = this.instances[0].contentWidth;
+        let contentHeight = this.instances[0].contentHeight; 
+        this.instances[0].transform = `translate(${mousePos.x - contentWidth}px,${mousePos.y - contentHeight}px)`;
+        this.instances[0].cPoint = new Point(cPoint.x - mousePos.x + contentWidth, cPoint.y - mousePos.y + contentHeight);
+        this.update();
+      }
     }
 
     isOverlapping(rectA, rectB) {
