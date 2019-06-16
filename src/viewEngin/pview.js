@@ -212,9 +212,9 @@ function parseStyleProps(objStyle) {
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
     if(objStyle[key].old && objStyle[key].new) {
-      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
+      sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
     }else {
-      sArr.push(`${key.replace(/([A-Z]+)/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
+      sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
     }
   });
   return sArr.join('');
