@@ -19,28 +19,30 @@ import { Component } from "./../viewEngin/pview";
  * When Float type is left or right only only top param is acceptable and left param was ignored. 
  * When Float was undefined then top and left both value was considered. 
  * 
- * Accepted config --
- * "legends":{
-      "enable" : true,
-      "top": 10,
-      "left": 10, 
-      "alignment": "horizontal",  // [horizontal | vertical]
-      "display"="inline"          // [inline | block] block will take entire row but inline only take space as much required
-      "float": "bottom",          // [top | bottom | left | right]
-      "color": "#000",
-      "bgColor": "#eee",
-      "hoverColor":"#999",
-      "fontSize": 14, 
-      "fontFamily": "Lato", 
-      "borderColor": "none",
-      "borderWidth": 3,
-      "borderOpacity": 1,
-      "opacity": 0.9,
-      "toggleType": false,
-      "hideIcon": false, 
-      "hideLabel": false, 
-      "hideValue": false
-    }
+ * @config --
+ * ```js
+"legends":{
+  "enable" : true,              // [ default: true | false ]
+  "top": 70,                    // [ default: 70 ]
+  "left": 100,                  // [ default: 100 ]
+  "alignment": "horizontal",    // [ default: horizontal | vertical ]
+  "display": "inline",          // [ default: inline | block] block will take entire row but inline only take space as much required
+  "float": "none",              // [ top | bottom | left | right | default: none ]
+  "textColor": "#000",          // [ default: theme.fontColorDark ]
+  "bgColor": "none",            // [ default: none ]
+  "hoverColor":"none",          // [ default: none ]
+  "fontSize": 14,               // [ default: theme.fontSizeMedium ]
+  "fontFamily": "Lato",         // [ default: Lato ]
+  "borderColor": "none",        // [ default: none ]
+  "borderWidth": 1,             // [ default: 1 ]
+  "borderOpacity": 1,           // [ default: 1 ]
+  "opacity": 0.9,               // [ default: 0.9 ]
+  "toggleType": true,           // [ default: true | false ]
+  "hideIcon": false,            // [ true | default: false ]
+  "hideLabel": false,           // [ true | default: false ]
+  "hideValue": false            // [ true | default: false ]
+}```
+ 
  * Supported events - 
  * legendClicked - Triggered when clicked on a legend box.
  * legendHovered - Triggered when mouse hover on a legend box.
@@ -52,21 +54,24 @@ class LegendBox extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId); 
     this.config = {
-      top: this.props.opts.top || this.props.top,
-      left: this.props.opts.left || this.props.left,
+      top: typeof this.props.opts.top === "undefined" ? (this.props.top || 0) : this.props.opts.top,
+      left: typeof this.props.opts.left === "undefined" ? (this.props.left || 0) : this.props.opts.left,
       type: this.props.opts.alignment || this.props.type || "horizontal",
       float: this.props.opts.float || this.props.float || "none",
       display: this.props.opts.display || this.props.display || "inline",
-      color: this.props.opts.color || defaultConfig.theme.fontColorDark,
+      textColor: this.props.opts.textColor || defaultConfig.theme.fontColorDark,
       bgColor: this.props.opts.bgColor || this.props.background || "none",
       hoverColor: this.props.opts.hoverColor || this.props.hoverColor || "#999",
       fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
       fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
       strokeColor: this.props.opts.borderColor || this.props.strokeColor || "none",
-      strokeWidth: this.props.opts.borderWidth || this.props.strokeWidth || "1",
-      strokeOpacity: this.props.opts.borderOpacity || this.props.strokeOpacity || 0,
-      opacity: this.props.opts.opacity || this.props.opacity || "0.9",
-      toggleType: !!(this.props.opts.toggleType || this.props.toggleType || false)
+      strokeWidth: typeof this.props.opts.borderWidth === "undefined" ? (this.props.strokeWidth || 1) : 1,
+      strokeOpacity: typeof this.props.opts.borderOpacity === "undefined" ? (this.props.strokeOpacity || 1) : 1,
+      opacity: typeof this.props.opts.opacity === "undefined" ? (this.props.opacity|| 0.9) : 0.9,
+      toggleType: !!(this.props.opts.toggleType || this.props.toggleType || false),
+      hideIcon: this.props.opts.hideIcon === "undefined" ? (typeof this.props.hideIcon === "undefined" ? false : this.props.hideIcon) : this.props.opts.hideIcon,
+      hideLabel: this.props.opts.hideLabel === "undefined" ? (typeof this.props.hideLabel === "undefined" ? false : this.props.hideLabel) : this.props.opts.hideLabel,
+      hideValue: this.props.opts.hideValue === "undefined" ? (typeof this.props.hideValue === "undefined" ? false : this.props.hideValue) : this.props.opts.hideValue
     };
 
     this.state = {
@@ -92,11 +97,11 @@ class LegendBox extends Component {
     this.padding = 10; 
     this.containerWidth = 0; 
     this.containerHeight = 0; 
-    this.colorContWidth = this.props.opts.hideIcon ? 0 : 15;
+    this.colorContWidth = this.config.hideIcon === true ? 0 : 15;
     this.textResized = false;
     this.hoverHeight = 15; 
     this.lineHeight = 30;
-    this.toggleColor = '#bbb';
+    this.toggleColor = 'none';
     this.onClick = this.onClick.bind(this);
     this.onHover = this.onHover.bind(this);
     this.onLeave = this.onLeave.bind(this);
@@ -133,7 +138,7 @@ class LegendBox extends Component {
   getLegendSet() {
     return this.state.legendSet.map((data, index) =>{
       return (
-        <g class={`legend-${index} series-legend`} tabindex='0' transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
+        <g class={`sc-legend-${index} sc-series-legend`} tabindex='0' transform={this.getTransformation(index)} style={{cursor:'pointer'}} 
           events={{
             click:this.onClick,
             keyup:this.onClick,
@@ -142,21 +147,32 @@ class LegendBox extends Component {
             focusin: this.onHover,
             focusout: this.onLeave
           }} >
-          <rect class={`legend-${index} legend-border-${index}`} x={this.state.left + (this.padding/2)} y={this.state.top + (this.padding/2)} rx='7'
+          <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding/2)} y={this.state.top + (this.padding/2)} rx='7'
            width={this.state.lengthSet.max.width + this.padding} height={this.hoverHeight + this.padding} fill={this.config.hoverColor}  
            stroke='none' style={{'transition': 'fill-opacity 0.3s linear',"fillOpacity":"0"}}>
           </rect>
           {!this.props.opts.hideIcon &&
-            <rect class={`legend-${index} legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding} 
-              width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggeled ? this.toggleColor : data.color} 
-              shape-rendering='optimizeSpeed' stroke='none' opacity='1'>
-            </rect>
+            <g class="sc-legend-icon-group"> []
+              <rect class={`sc-legend-${index} sc-legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding} 
+                width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggeled ? this.toggleColor : data.color} 
+                shape-rendering='optimizeSpeed' stroke-width={2} stroke='none' opacity='1'>
+              </rect>
+              <path class={`sc-icon-x-${index}`} stroke="#000" fill="none" stroke-linecap="round" stroke-opacity={data.isToggeled ? 1 : 0}
+                d={[
+                  "M", this.state.left + this.padding, this.state.top + this.padding,
+                  "L", this.state.left + this.padding + this.colorContWidth, this.state.top + this.padding + this.colorContWidth ,
+                  "M", this.state.left + this.padding + this.colorContWidth , this.state.top + this.padding ,
+                  "L", this.state.left + this.padding, this.state.top + this.padding + this.colorContWidth
+                ].join(" ")} stroke-width="1">
+              </path> 
+            </g>
           }
-          <text class={`legend-${index} legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14} fill={this.config.color} font-family={this.config.fontFamily} pointer-events='none' >
-            <tspan class={`legend-${index} legend-txt-label-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}>{!this.props.opts.hideLabel && data.label}</tspan>
-            <tspan class={`legend-${index} legend-txt-value-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}
+          <text class={`sc-legend-${index} sc-legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14} 
+            fill={this.config.textColor} font-family={this.config.fontFamily} pointer-events='none' >
+            <tspan class={`sc-legend-${index} sc-legend-txt-label-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}>{!this.config.hideLabel && data.label}</tspan>
+            <tspan class={`sc-legend-${index} sc-legend-txt-value-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}
               dx={this.state.lengthSet.max.labelLength-this.state.legendSet[index].labelLength + this.padding}>
-              {!this.props.opts.hideValue && data.value}
+              {!this.config.hideValue && data.value}
             </tspan>
           </text>
         </g>
@@ -221,9 +237,9 @@ class LegendBox extends Component {
       valueLength: []
     };
     this.state.legendSet.forEach((lSet, index) => {
-      lengthSet.eachWidth.push(lSet.eachWidth = this.ref.node.querySelector(`.legend-${index}.series-legend`).getBBox().width);
-      lengthSet.labelLength.push(lSet.labelLength = this.ref.node.querySelector(`.legend-txt-label-${index}`).getComputedTextLength());
-      lengthSet.valueLength.push(lSet.valueLength = this.ref.node.querySelector(`.legend-txt-value-${index}`).getComputedTextLength());
+      lengthSet.eachWidth.push(lSet.eachWidth = this.ref.node.querySelector(`.sc-legend-${index}.sc-series-legend`).getBBox().width);
+      lengthSet.labelLength.push(lSet.labelLength = this.ref.node.querySelector(`.sc-legend-txt-label-${index}`).getComputedTextLength());
+      lengthSet.valueLength.push(lSet.valueLength = this.ref.node.querySelector(`.sc-legend-txt-value-${index}`).getComputedTextLength());
     });
     lengthSet.max = {
       width: Math.max(...lengthSet.eachWidth),
@@ -268,7 +284,7 @@ class LegendBox extends Component {
     if(e.type === "keyup" && (e.which || e.keyCode) !== 32) {
       return; 
     }
-    let index = e.target.classList[0].substring("legend-".length);
+    let index = e.target.classList[0].substring("sc-legend-".length);
     if (this.config.toggleType) {
       this.state.legendSet[index].isToggeled = !this.state.legendSet[index].isToggeled;
       this.update();
@@ -278,20 +294,34 @@ class LegendBox extends Component {
   }
 
   onHover(e) {
-    let index = e.target.classList[0].substring("legend-".length);
-    this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0.9; 
+    let index = e.target.classList[0].substring("sc-legend-".length);
+    if(this.ref.node.querySelector(`.sc-legend-border-${index}`)) {
+      this.ref.node.querySelector(`.sc-legend-border-${index}`).style['fill-opacity'] = 0.9;
+    }
+    if(this.ref.node.querySelector(`.sc-legend-txt-${index}`)) {
+      this.ref.node.querySelector(`.sc-legend-txt-${index}`).style['font-weight'] = "bold";
+    }
+    if(this.ref.node.querySelector(`.sc-legend-color-${index}`)) {
+      this.ref.node.querySelector(`.sc-legend-color-${index}`).setAttribute('stroke','#000');
+    }
     this.assignLegendData(index, e);
     this.emitter.emit('legendHovered', e);
   }
 
   onLeave(e) {
-    let index = e.target.classList[0].substring("legend-".length);
-    if(this.ref.node.querySelector(`.legend-border-${index}`)){
-      this.ref.node.querySelector(`.legend-border-${index}`).style['fill-opacity'] = 0; 
+    let index = e.target.classList[0].substring("sc-legend-".length);
+    if(this.ref.node.querySelector(`.sc-legend-border-${index}`)){
+      this.ref.node.querySelector(`.sc-legend-border-${index}`).style['fill-opacity'] = 0; 
+    }
+    if(this.ref.node.querySelector(`.sc-legend-txt-${index}`)) {
+      this.ref.node.querySelector(`.sc-legend-txt-${index}`).style['font-weight'] = "normal";
+    }
+    if(this.ref.node.querySelector(`.sc-legend-color-${index}`)) {
+      this.ref.node.querySelector(`.sc-legend-color-${index}`).setAttribute('stroke','none');
     }
     this.assignLegendData(index, e);
     this.emitter.emit('legendLeaved', e);
   }
 }
 
-export default LegendBox; 
+export default LegendBox;

@@ -82,19 +82,29 @@
             }
           },
           "legends":{
-            "enable" : true,
-            "alignment": "horizontal",
-            "color": "#000",
-            "bgColor": "none",
-            "opacity": 0.9,
-            "toggleType": true,
-            // "onLegendClick": function() {console.log("onClick-",this)},
-            // "onLegendHover": function() {console.log("onHover-",this)},
-            // "onLegendLeave": function() {console.log("onLeave-",this)}
+            "enable" : true,              // [ default: true | false ]
+            "top": 70,                    // [ default: 70 ]
+            "left": 100,                  // [ default: 100 ]
+            "alignment": "horizontal",    // [ default: horizontal | vertical ]
+            "display": "inline",          // [ default: inline | block] block will take entire row but inline only take space as much required
+            "float": "none",              // [ top | bottom | left | right | default: none ]
+            "textColor": "#000",          // [ default: theme.fontColorDark ]
+            "bgColor": "none",            // [ default: none ]
+            "hoverColor":"none",          // [ default: none ]
+            "fontSize": 14,               // [ default: theme.fontSizeMedium ]
+            "fontFamily": "Lato",         // [ default: Lato ]
+            "borderColor": "none",        // [ default: none ]
+            "borderWidth": 1,             // [ default: 1 ]
+            "borderOpacity": 1,           // [ default: 1 ]
+            "opacity": 0.9,               // [ default: 0.9 ]
+            "toggleType": true,           // [ default: true | false ]
+            "hideIcon": false,            // [ true | default: false ]
+            "hideLabel": false,           // [ true | default: false ]
+            "hideValue": false            // [ true | default: false ]
           },
           "tooltip": {
             "enable": true,                   // [default: true | false ]
-            "followPointer": false,           // [true | default: false ]
+            "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
             "grouped": true,                  // [default: true | false ]
             "content": {
               "header": function(pointSet, index, tipConfig) {
@@ -125,10 +135,10 @@
             },
             "headerTextColor": "greenyellow",   // [ default: #fff ]
             "headerBgColor": "#555",            // [ default: #555 ]
-            "textColor": "yellow",              // [ default: #000 ]
-            "bgColor": "green",                 // [ default: #fff ]
-            "footerTextColor": "greenyellow",   // [ default: #fff ]
-            "footerBgColor": "#555",            // [ default: #555 ]
+            "textColor": "#000",                // [ default: #000 ]
+            "bgColor": "#e8f4f8",               // [ default: #fff ]
+            "footerTextColor": "#000",          // [ default: #fff ]
+            "footerBgColor": "#d4ebf2",         // [ default: #555 ]
             "fontSize": 14,                     // [ default: 14 ]
             "fontFamily": "Lato",               // [ default: Lato ]
             "xPadding": 0,                      // [ default: 0 ] 

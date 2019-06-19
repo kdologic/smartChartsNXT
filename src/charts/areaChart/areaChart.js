@@ -75,8 +75,8 @@ class AreaChart extends Component {
           this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
         }
         this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
-        this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return i;});
-        this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => {return d.value;});
+        this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => i);
+        this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d,i) => d.value);
       }
       
       this.state = {
@@ -155,8 +155,8 @@ class AreaChart extends Component {
         shouldFSRender: this.props.resizeComponent
       }; 
 
-      this.legendBoxType = this.props.chartOptions.legends ? this.props.chartOptions.legends.alignment : 'horizontal';
-      this.legendBoxFloat = this.props.chartOptions.legends ? this.props.chartOptions.legends.float : 'none';
+      this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
+      this.legendBoxFloat = this.props.chartOptions.legends ? (this.props.chartOptions.legends.float || 'none') : 'none';
       this.pointData = [], 
       this.originPoint;
       this.prevOriginPoint;
@@ -403,7 +403,7 @@ class AreaChart extends Component {
           <Draggable>
             <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.offsetHeight+5} opts={this.CHART_OPTIONS.legends || {}} 
               display="inline" canvasWidth={this.CHART_DATA.svgWidth} canvasHeight={this.CHART_DATA.svgHeight} type={this.legendBoxType} background='none'
-              hoverColor="#ddd" toggleType={true} >
+              hoverColor="none" hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
             </LegendBox>
           </Draggable>
         }
@@ -463,7 +463,9 @@ class AreaChart extends Component {
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true}
-          getScaleX={(scaleX) => { this.state.cs.scaleX = scaleX;}}
+          getScaleX={(scaleX) => { 
+            this.state.cs.scaleX = scaleX;
+          }}
           clip={{
             x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
             width: this.CHART_DATA.gridBoxWidth - (2*this.CHART_DATA.paddingX),
@@ -490,7 +492,9 @@ class AreaChart extends Component {
           gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
           marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
-          getScaleX={(scaleX) => { this.state.fs.scaleX = scaleX;}}>
+          getScaleX={(scaleX) => { 
+            this.state.fs.scaleX = scaleX;
+          }}>
         </AreaFill>
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
           width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
@@ -744,4 +748,4 @@ class AreaChart extends Component {
   }
 }
 
-export default AreaChart; 
+export default AreaChart;

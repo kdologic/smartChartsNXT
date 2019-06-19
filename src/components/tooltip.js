@@ -19,7 +19,7 @@ import Style from './../viewEngin/style';
  ```js
 "tooltip": {
   "enable": true,                   // [default: true | false ]
-  "followPointer": false,           // [true | default: false ]
+  "followPointer": false,           // [true | default: false ]  Note: This option only available when tooltip are grouped.
   "grouped": true,                  // [default: true | false ]
   "content": {
     "header": function(pointSet, index, tipConfig) {
@@ -123,7 +123,7 @@ class Tooltip extends Component {
         return <tooltip-disabled></tooltip-disabled>;
       }
       return (
-        <g class='sc-tooltip-container' pointer-events='none'>
+        <g class='sc-tooltip-container' pointer-events='none' aria-atomic="true" aria-live="assertive"> 
           {
             this.getTooltipContainer()
           }
@@ -132,8 +132,11 @@ class Tooltip extends Component {
     }
 
     getTooltipContainer() {
-      let tipContainer = []; 
-      let transitionFunction = "transform 0.3s cubic-bezier(.03,.26,.32,1), opacity 0.3s cubic-bezier(.03,.26,.32,1)";
+      let tipContainer = [];
+      let transitionFunction = "transform 0.3s cubic-bezier(.03,.26,.32,1)";
+      if(this.props.grouped && this.config.followPointer) {
+        transitionFunction = "none";
+      }
       for (let i = 0; i < this.props.instanceCount; i++) {
         if(!this.instances[i].opacity) {
           continue;
@@ -142,10 +145,10 @@ class Tooltip extends Component {
           <Style>
             {{
               ['.sc-tip-'+ this.instances[i].tipId]: {
-                WebkitTransition: this.config.followPointer ? "" : transitionFunction,
-                MozTransition: this.config.followPointer ? "" : transitionFunction,
-                OTransition: this.config.followPointer ? "" : transitionFunction,
-                transition: this.config.followPointer ? "" : transitionFunction,
+                WebkitTransition: transitionFunction,
+                MozTransition: transitionFunction,
+                OTransition: transitionFunction,
+                transition: transitionFunction,
                 transform: this.instances[i].transform
               },
               ['.sc-tip-'+ this.instances[i].tipId +" .sc-tooltip-content"]: {
@@ -280,6 +283,7 @@ class Tooltip extends Component {
         
 
         let newState = {
+          preAlign,
           topLeft,
           originPoint,
           cPoint : new Point(cPoint.x - topLeft.x, cPoint.y - topLeft.y),
@@ -288,7 +292,8 @@ class Tooltip extends Component {
           contentWidth: width,
           contentHeight: height,
           strokeColor: strokeColor,
-          opacity:1
+          opacity:1,
+          anchorSize: delta
         };
 
         if(!this.props.grouped) {
@@ -341,10 +346,10 @@ class Tooltip extends Component {
       let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
       if(this.instances[0] && this.instances[0].opacity) {
         let cPoint = this.instances[0].originPoint;
-        let contentWidth = this.instances[0].contentWidth;
-        let contentHeight = this.instances[0].contentHeight; 
-        this.instances[0].transform = `translate(${mousePos.x - contentWidth}px,${mousePos.y - contentHeight}px)`;
-        this.instances[0].cPoint = new Point(cPoint.x - mousePos.x + contentWidth, cPoint.y - mousePos.y + contentHeight);
+        let shiftLeft = this.instances[0].contentWidth + 20;
+        let shiftTop = this.instances[0].contentHeight / 2; 
+        this.instances[0].transform = `translate(${mousePos.x - shiftLeft}px,${mousePos.y - shiftTop}px)`;
+        this.instances[0].cPoint = new Point(cPoint.x - mousePos.x + shiftLeft, cPoint.y - mousePos.y + shiftTop);
         this.update();
       }
     }
