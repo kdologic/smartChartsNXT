@@ -23,21 +23,31 @@
       SmartChartsNXT.ready(function () {
         var areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
-          "title": "Multi Series Area Chart",
-          "subtitle": "Sales report of company XYZ",
-          "description": "A javascript area chart that visualize the data of sales",
           "targetElem": "chartContainer",
-          "titleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
-            "fontFamily": "Lato",
-            "maxFontSize": 25
+          "description": "A javascript area chart that visualize the data of sales",
+          "title": {
+            "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales",     // [ default : "" ]
+            "textColor": "crimson",               // [ default : theme.fontColorDark ]
+            "borderColor":"none",                 // [ default : none ]
+            "fontFamily": "Lato",                 // [ default : Lato ]
+            "bgColor": "none",
+            "textAlign": "middle", 
+            "padding": 0,
+            "fontSize": 20,                    // [ default : theme.fontSizeLarge ]
+            "responsive": {
+              "maxWidth": 400,
+              "wrapText": true,
+              "modifire": function(width) {
+                console.log('width of text'+ width);
+              }
+            }
           },
-          "subtitleStyle": {
-            "fillColor":"#717171",
-            "borderColor":"none",
-            "fontFamily": "Lato",
-            "maxFontSize": 12
+          "subtitle": {
+            "text":"Sales report of company XYZ", // [ default : "" ]
+            "textColor":"#9c27b0",                // [ default : theme.fontColorDark ]
+            "borderColor":"none",                 // [ default : none ]
+            "fontFamily": "Lato",                 // [ default : Lato ]
+            "maxFontSize": 12                     // [ default : 25 ]
           },
           "canvasBorder": false,
           "bgColor": "#f7fdf7", //[default: white]
@@ -86,7 +96,7 @@
             "top": 70,                    // [ default: 70 ]
             "left": 100,                  // [ default: 100 ]
             "alignment": "horizontal",    // [ default: horizontal | vertical ]
-            "display": "inline",          // [ default: inline | block] block will take entire row but inline only take space as much required
+            "display": "inline",          // [ default: inline | block] Note: block will take entire row but inline only take space as much required
             "float": "none",              // [ top | bottom | left | right | default: none ]
             "textColor": "#000",          // [ default: theme.fontColorDark ]
             "bgColor": "none",            // [ default: none ]

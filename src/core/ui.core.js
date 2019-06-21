@@ -15,6 +15,8 @@ class UiCore {
   /**
    * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element. 
    * @param {String} shadowId Element ID of dropshadow Component.
+   * @param {String} offsetX Offset value to shift shadow by x coordinate.
+   * @param {String} offsetY Offset value to shift shadow by y coordinate.
    * @returns {Object} Virtual node of drop shadow component. 
    */
   dropShadow(shadowId, offsetX, offsetY) {
@@ -43,7 +45,8 @@ class UiCore {
    * @param {number} fy - Offset y.
    * @param {number} r -  Radius
    * @param {Array} gradArr - Array of number or object. 
-   * Example --
+   * @return {Object} JSX
+   * @config
    * gradArr = [0.1, -0.06, 0.9] or 
    * gradArr = [{offset:0, opacity:0.06},{offset:83, opacity:0.2},{offset:95, opacity:0}]
    * (-) negative indicates darker shades
@@ -77,6 +80,7 @@ class UiCore {
    * @param {Number} totalWidth Max width of component.
    * @param {Number} scale Scale factor when width change.
    * @param {Number} maxSize Max font size bound.
+   * @return {Number} Calculated font size.
    */
   getScaledFontSize(totalWidth, scale, maxSize) {
     let fSize = totalWidth / scale;
@@ -87,7 +91,7 @@ class UiCore {
    * Get text width in svg pixel.
    * @param {DOM} parentNode - Parent DOM node.
    * @param {Object} textNode - JSX of text node. 
-   * @return Text width in Pixel
+   * @return {Number} Text width in Pixel.
    */
   getComputedTextWidth(parentNode, textNode) {
     let width = 0; 
@@ -200,11 +204,13 @@ class UiCore {
   }
 
 /**
- * 
+ * Insert and style tag in DOM
  * @param {Object} parentNode DOM node where style will be prepend
  * @param {String} styleStr String of CSS text
  * @param {String} position Optional. in which position will add this style. Default: 'afterbegin' 
- * Values: 'beforebegin' | 'afterbegin' | 'beforeend' | 'afterend' 
+ * @return {void} void
+ * @config
+ * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
  */
   prependStyle(parentNode, styleStr, position='afterbegin') {
     parentNode.insertAdjacentHTML(position, "<style>"+styleStr+"</style>");

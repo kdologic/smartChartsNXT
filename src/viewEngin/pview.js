@@ -660,11 +660,11 @@ class Component {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
     if(typeof this.componentWillUpdate === 'function') {
-      this.componentWillUpdate(vnodeNow.attributes);
+      this.componentWillUpdate(this.props);
     }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext); 
     if(typeof this.componentDidUpdate === 'function') {
-      this.componentDidUpdate(this.vnode.attributes);
+      this.componentDidUpdate(this.props);
     }
 
     if(window._debug) {

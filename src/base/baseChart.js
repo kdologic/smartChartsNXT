@@ -86,7 +86,6 @@ class BaseChart extends Component {
   passContext() {
     return {
       runId: this.props.runId,
-      chartName: this.CHART_DATA.chartName,
       chartType: this.chartType, 
       rootSvgId: this.getChartId(),
       rootContainerId: this.CHART_OPTIONS.targetElem, 
@@ -100,7 +99,9 @@ class BaseChart extends Component {
     for (let key in config) {
       try {
         this.CHART_DATA[key] = config[key];
-      } catch (ex) { throw ex; }
+      } catch (ex) { 
+        throw ex; 
+      }
     }
   }
 
@@ -158,7 +159,7 @@ class BaseChart extends Component {
         }} >
 
         <text class='sc-title' id={this.titleId} style="display:none;">{(this.CHART_OPTIONS.title||"")+" "+(this.CHART_OPTIONS.subtitle||"")}</text>
-        <desc id={this.descId}>{(this.CHART_OPTIONS.description||this.CHART_DATA.chartName)+" -created using SmartChartsNXT chart library."}</desc>
+        <desc id={this.descId}>{(this.CHART_OPTIONS.description||this.CHART_DATA.chartType)+" -created using SmartChartsNXT chart library."}</desc>
         
         <CommonStyles></CommonStyles>
 

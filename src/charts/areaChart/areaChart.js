@@ -10,6 +10,7 @@ import eventEmitter from './../../core/eventEmitter';
 import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
+import Header from './../../components/header';
 import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
 import PointerCrosshair from './../../components/pointerCrosshair';
@@ -53,6 +54,22 @@ class AreaChart extends Component {
       }, this.props.chartData);
 
       this.CHART_OPTIONS = UtilCore.extends({
+        title: {
+          textColor: defaultConfig.theme.fontColorDark,
+          borderColor: "none",
+          fontFamily: defaultConfig.theme.fontFamily,
+          fontSize: defaultConfig.theme.fontSizeLarge,
+          responsive: {
+            maxWidth: this.context.svgWidth - 50,
+            wrapText: true
+          }
+        },
+        subtitle: {
+          textColor: defaultConfig.theme.fontColorDark,
+          borderColor: "none",
+          fontFamily: defaultConfig.theme.fontFamily,
+          fontSize: defaultConfig.theme.fontSizeSmall
+        },
         dataSet: {
           xAxis: {title: 'Label-axis'},
           yAxis: {title: 'Value-axis'}
@@ -355,9 +372,10 @@ class AreaChart extends Component {
         <Style src={this.getStyle()}></Style> 
         <g>
           <Draggable>
-            <text class='txt-title-grp' text-rendering='geometricPrecision'>
-              <tspan text-anchor='middle' class='txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)}>{this.CHART_OPTIONS.title}</tspan>
-              <tspan text-anchor='middle' class='txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)}>{this.CHART_OPTIONS.subtitle}</tspan>
+            <Header opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth/2} posY={this.CHART_DATA.offsetHeight - 30} />
+            <text class='sc-txt-title-grp' text-rendering='geometricPrecision'>
+              {/* <tspan text-anchor='middle' class='sc-txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)}>{this.CHART_OPTIONS.title.text || ""}</tspan> */}
+              <tspan text-anchor='middle' class='sc-txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)}>{this.CHART_OPTIONS.subtitle.text || ""}</tspan>
             </text>
           </Draggable>
         </g>
@@ -383,12 +401,12 @@ class AreaChart extends Component {
         </HorizontalLabels>   
 
         <TextBox class="sc-vertical-axis-title" posX={20} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
-          transform={`rotate(${-90})`} background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
-          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
+          transform={`rotate(${-90})`} bgColor={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={15} padding={5} stroke="none" fontWeight="bold" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
 
         <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}
-          background={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
-          fill={defaultConfig.theme.fontColorDark} borderRadius={15} padding={10} stroke="none" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
+          bgColor={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
+          textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={15} padding={5} stroke="none" fontWeight="bold" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
 
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
@@ -726,20 +744,12 @@ class AreaChart extends Component {
 
   getStyle() {
     return ({
-      "*": {
-        "outline":"none"
-      },
-      ".txt-title-grp .txt-title": {
-        "font-family": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fontFamily) || defaultConfig.theme.fontFamily,
-        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 20, (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.maxFontSize) || 25)+'px',
-        "fill":(this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.fillColor) || defaultConfig.theme.fontColorDark,
-        "stroke": (this.CHART_OPTIONS.titleStyle && this.CHART_OPTIONS.titleStyle.borderColor) || 'none'
-      },
-      ".txt-title-grp .txt-subtitle": {
-        "font-family": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fontFamily) || defaultConfig.theme.fontFamily,
-        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.maxFontSize) || 18)+'px',
-        "fill": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.fillColor) || defaultConfig.theme.fontColorDark,
-        "stroke": (this.CHART_OPTIONS.subtitleStyle && this.CHART_OPTIONS.subtitleStyle.borderColor) || 'none'
+      
+      ".sc-txt-title-grp .sc-txt-subtitle": {
+        "font-family": this.CHART_OPTIONS.subtitle.fontFamily,
+        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, this.CHART_OPTIONS.subtitle.maxFontSize || 18)+'px',
+        "fill": this.CHART_OPTIONS.subtitle.textColor,
+        "stroke": this.CHART_OPTIONS.subtitle.borderColor
       },
       ".sc-vertical-axis-title, .sc-horizontal-axis-title": {
         "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
