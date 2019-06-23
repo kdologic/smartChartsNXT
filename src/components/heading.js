@@ -1,21 +1,21 @@
 "use strict";
 
-import defaultConfig from "./../settings/config";
-import { Component } from "./../viewEngin/pview";
+import defaultConfig from "../settings/config";
+import { Component } from "../viewEngin/pview";
 import Textbox from "./textBox";
-import Style from "./../viewEngin/style";
+import Style from "../viewEngin/style";
 import UtilCore from "../core/util.core";
 import UiCore from "../core/ui.core";
 
 /**
- * header.js
+ * heading.js
  * @createdOn:20-Jun-2019
  * @author:SmartChartsNXT
- * @description: This components will create header elements of chart. 
+ * @description: This components will create heading elements of chart. 
  * @extends: Component
  */
 
-class Header extends Component{
+class heading extends Component{
   constructor(props) {
     super(props);
     this.id = UtilCore.getRandomID();
@@ -65,4 +65,4 @@ class Header extends Component{
 
 }
 
-export default Header;
+export default heading;

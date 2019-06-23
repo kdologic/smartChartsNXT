@@ -10,7 +10,7 @@ import eventEmitter from './../../core/eventEmitter';
 import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
-import Header from './../../components/header';
+import Heading from './../../components/heading';
 import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
 import PointerCrosshair from './../../components/pointerCrosshair';
@@ -372,7 +372,7 @@ class AreaChart extends Component {
         <Style src={this.getStyle()}></Style> 
         <g>
           <Draggable>
-            <Header opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth/2} posY={this.CHART_DATA.offsetHeight - 30} />
+            <Heading opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth/2} posY={this.CHART_DATA.offsetHeight - 40} />
             <text class='sc-txt-title-grp' text-rendering='geometricPrecision'>
               {/* <tspan text-anchor='middle' class='sc-txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)}>{this.CHART_OPTIONS.title.text || ""}</tspan> */}
               <tspan text-anchor='middle' class='sc-txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)}>{this.CHART_OPTIONS.subtitle.text || ""}</tspan>
