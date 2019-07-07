@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * ui.core.js
@@ -7,7 +7,7 @@
  * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
  */
 
-import { mountTo } from "./../viewEngin/pview";
+import { mountTo } from './../viewEngin/pview';
 
 class UiCore {
   constructor() {}
@@ -22,15 +22,15 @@ class UiCore {
   dropShadow(shadowId, offsetX, offsetY) {
     return (
       <defs>
-        <filter xmlns="http://www.w3.org/2000/svg" id={shadowId} height="130%">
-          <feGaussianBlur in="SourceAlpha" stdDeviation="1"/> 
-          <feOffset dx={offsetX || 4} dy={offsetY || 4} result="offsetblur"/>
+        <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
+          <feGaussianBlur in='SourceAlpha' stdDeviation='1'/> 
+          <feOffset dx={offsetX || 4} dy={offsetY || 4} result='offsetblur'/>
           <feComponentTransfer>
-            <feFuncA type="linear" slope="0.2"/>
+            <feFuncA type='linear' slope='0.2'/>
           </feComponentTransfer>
           <feMerge> 
             <feMergeNode/>
-            <feMergeNode in="SourceGraphic"/> 
+            <feMergeNode in='SourceGraphic'/> 
           </feMerge>
         </filter>
       </defs>
@@ -55,7 +55,7 @@ class UiCore {
   radialGradient(gradId, cx, cy, fx, fy, r, gradArr) {
     return (
       <defs>
-        <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits="userSpaceOnUse">
+        <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
           {gradArr.map((grad, i) =>{
             let offset = i/gradArr.length*100;
             let opacity = grad; 
@@ -89,28 +89,38 @@ class UiCore {
 
   /**
    * Get text width in svg pixel.
-   * @param {DOM} parentNode - Parent DOM node.
    * @param {Object} textNode - JSX of text node. 
    * @return {Number} Text width in Pixel.
    */
-  getComputedTextWidth(parentNode, textNode) {
-    let width = 0; 
-    let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    g.style.visibility = "hidden"; 
-    parentNode.appendChild(g);
-    let textDOM = mountTo(textNode, g).node;
+
+  getComputedTextWidth(textNode) {
+    return this.getComputedTextBBox(textNode).width;
+  }
+
+  /**
+   * Get text bounding box {width, height} before rendering. 
+   * @param {Object} textNode - JSX of text node. 
+   * @return {Object} Text bounding Box
+   */
+  getComputedTextBBox(textNode) {
+    let bbox = {};
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.visibility = 'hidden';
+    svg.style.position = 'absolute';
+    document.body.appendChild(svg);
+    const textDOM = mountTo(textNode, svg).node;
     if(textDOM) {
-      width = textDOM.getBoundingClientRect().width;
+      bbox = textDOM.getBoundingClientRect();
     }
-    g.parentNode.removeChild(g);
-    return width;
+    svg.parentNode.removeChild(svg);
+    return {width: bbox.width, height: bbox.height};
   }
 
   /** Returns true if it is a touch device 
    * @return {boolean} Returns 'true' for touch device otherwise return 'false'.
    */
   isTouchDevice() {
-    return "ontouchstart" in document.documentElement;
+    return 'ontouchstart' in document.documentElement;
   }
 
   /**
@@ -120,13 +130,29 @@ class UiCore {
    * @return {Point} Returns a point which transform into SVG cordinate system. 
    */
   cursorPoint(targetElem, evt) {
-    if (typeof targetElem === "string") {
-      targetElem = document.querySelector("#" + targetElem + " .smartcharts-nxt");
+    if (typeof targetElem === 'string') {
+      targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt');
     }
     let pt = targetElem.createSVGPoint();
     pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
     pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches[0] ? evt.touches[0].clientY : 0;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
+  }
+
+  /**
+   * Convert pixel value into pixel value.
+   * @param {Number} total Total length in pixel.
+   * @param {Number} percent Percent value out of total pixel
+   * @return {Number} Calculated percent value.
+   */
+  percentToPixel(total, percent = '') {
+    if (percent.toString().indexOf('%') === -1) {
+      return percent;
+    }
+    if (!isNaN(percent = Number.parseFloat(percent))) {
+      return total * percent / 100;
+    }
+    return 0;
   } 
 
   /**
@@ -191,13 +217,13 @@ class UiCore {
 
   formatTextValue(value) {
     if (Math.abs(Number(value)) >= 1000000000000) {
-      return (Number(value) / 1000000000000).toFixed(2) + " T";
+      return (Number(value) / 1000000000000).toFixed(2) + ' T';
     } else if (Math.abs(Number(value)) >= 1000000000) {
-      return (Number(value) / 1000000000).toFixed(2) + " B";
+      return (Number(value) / 1000000000).toFixed(2) + ' B';
     } else if (Math.abs(Number(value)) >= 1000000) {
-        return (Number(value) / 1000000).toFixed(2) + " M";
+        return (Number(value) / 1000000).toFixed(2) + ' M';
     } else if (Math.abs(Number(value)) >= 1000) {
-        return (Number(value) / 1000).toFixed(2) + " K";
+        return (Number(value) / 1000).toFixed(2) + ' K';
     } else {
         return Number(value).toFixed(2);
     }
@@ -213,7 +239,7 @@ class UiCore {
  * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
  */
   prependStyle(parentNode, styleStr, position='afterbegin') {
-    parentNode.insertAdjacentHTML(position, "<style>"+styleStr+"</style>");
+    parentNode.insertAdjacentHTML(position, '<style>'+styleStr+'</style>');
   }
 
 }

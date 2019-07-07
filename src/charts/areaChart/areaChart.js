@@ -1,13 +1,12 @@
-"use strict";
+'use strict';
 
-import Point from "./../../core/point";
-import { Component } from "./../../viewEngin/pview";
+import Point from './../../core/point';
+import { Component } from './../../viewEngin/pview';
 import crossfilter from './../../plugIns/crossfilter.min.js';
-import defaultConfig from "./../../settings/config";
+import defaultConfig from './../../settings/config';
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
-import Style from "./../../viewEngin/style";
 import Draggable from './../../components/draggable'; 
 import LegendBox from './../../components/legendBox';
 import Heading from './../../components/heading';
@@ -21,7 +20,7 @@ import HorizontalScroller from './../../components/horizontalScroller';
 import ZoomoutBox from './../../components/zoomOutBox';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane'; 
-import dateFormat from "dateformat";
+import dateFormat from 'dateformat';
 
 /**
  * SVG Area Chart :: areaChart.js
@@ -44,7 +43,9 @@ class AreaChart extends Component {
         marginBottom: 0,
         gridBoxWidth: 0,
         gridBoxHeight: 0,
-        offsetHeight: 70, // distance of text label from top and bottom side
+        titleTop: 20,         // Default x position of title from top
+        subtitleTop: 50,      // Default x position of subtitle from top
+        legendTop: 70,
         hLabelHeight: 80, 
         vLabelWidth: 70,
         paddingX: 5,
@@ -55,20 +56,24 @@ class AreaChart extends Component {
 
       this.CHART_OPTIONS = UtilCore.extends({
         title: {
+          top: this.CHART_DATA.titleTop, 
           textColor: defaultConfig.theme.fontColorDark,
-          borderColor: "none",
+          borderColor: 'none',
           fontFamily: defaultConfig.theme.fontFamily,
           fontSize: defaultConfig.theme.fontSizeLarge,
           responsive: {
-            maxWidth: this.context.svgWidth - 50,
             wrapText: true
           }
         },
         subtitle: {
+          top: this.CHART_DATA.subtitleTop, 
           textColor: defaultConfig.theme.fontColorDark,
-          borderColor: "none",
+          borderColor: 'none',
           fontFamily: defaultConfig.theme.fontFamily,
-          fontSize: defaultConfig.theme.fontSizeSmall
+          fontSize: defaultConfig.theme.fontSizeLarge,
+          responsive: {
+            wrapText: true
+          }
         },
         dataSet: {
           xAxis: {title: 'Label-axis'},
@@ -294,7 +299,7 @@ class AreaChart extends Component {
   copyDataset(dataSet) {
     let data = {}; 
     for(let key in dataSet) {
-      if(key === "series") {
+      if(key === 'series') {
         data[key] = []; 
         for(let i=0; i < dataSet[key].length; i++) {
           let series = dataSet[key][i], s = {};
@@ -369,14 +374,10 @@ class AreaChart extends Component {
   render() {
     return (
       <g>
-        <Style src={this.getStyle()}></Style> 
         <g>
           <Draggable>
-            <Heading opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth/2} posY={this.CHART_DATA.offsetHeight - 40} />
-            <text class='sc-txt-title-grp' text-rendering='geometricPrecision'>
-              {/* <tspan text-anchor='middle' class='sc-txt-title' x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight - 30)}>{this.CHART_OPTIONS.title.text || ""}</tspan> */}
-              <tspan text-anchor='middle' class='sc-txt-subtitle'x={(this.CHART_DATA.svgWidth/2)} y={(this.CHART_DATA.offsetHeight)}>{this.CHART_OPTIONS.subtitle.text || ""}</tspan>
-            </text>
+            <Heading opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth/2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+            <Heading opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth/2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
           </Draggable>
         </g>
         
@@ -400,13 +401,23 @@ class AreaChart extends Component {
           }} >
         </HorizontalLabels>   
 
-        <TextBox class="sc-vertical-axis-title" posX={20} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
-          transform={`rotate(${-90})`} bgColor={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
-          textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={15} padding={5} stroke="none" fontWeight="bold" text={this.CHART_OPTIONS.dataSet.yAxis.title} />
+        <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
+          transform={`rotate(${-90})`} bgColor={'lightblue' || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} 
+          textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.yAxis.title} 
+          style={{
+            '.sc-vertical-axis-title': {
+              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
+            }
+          }} />
 
-        <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 15)}
-          bgColor={(this.CHART_OPTIONS.bgColor == 'none' || this.CHART_OPTIONS.bgColor == undefined) ? "#fff" : this.CHART_OPTIONS.bgColor}
-          textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={15} padding={5} stroke="none" fontWeight="bold" text={this.CHART_OPTIONS.dataSet.xAxis.title} />
+        <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 5)}
+          bgColor={'lightblue' || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={1} padding={5} stroke='none' 
+          textAnchor='middle' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.xAxis.title} 
+          style={{
+            '.sc-horizontal-axis-title': {
+              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
+            }
+          }} />
 
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} 
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
@@ -419,28 +430,28 @@ class AreaChart extends Component {
         
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           <Draggable>
-            <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.offsetHeight+5} opts={this.CHART_OPTIONS.legends || {}} 
-              display="inline" canvasWidth={this.CHART_DATA.svgWidth} canvasHeight={this.CHART_DATA.svgHeight} type={this.legendBoxType} background='none'
-              hoverColor="none" hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
+            <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}} 
+              display='inline' canvasWidth={this.CHART_DATA.svgWidth} canvasHeight={this.CHART_DATA.svgHeight} type={this.legendBoxType} background='none'
+              hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
             </LegendBox>
           </Draggable>
         }
 
         {this.CHART_OPTIONS.tooltip.enable &&
-          <Tooltip instanceId="marker-tooltip" instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length} 
+          <Tooltip instanceId='marker-tooltip' instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length} 
             opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
             svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
           </Tooltip>
         }
 
-        <Tooltip instanceId="label-tooltip" instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
+        <Tooltip instanceId='label-tooltip' instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
           opts={{
-            textColor: "#fff",
-            bgColor: "black",
+            textColor: '#fff',
+            bgColor: 'black',
             fontSize: 14, 
             xPadding: 5,
             yPadding: 5,
-            borderColor: "none",
+            borderColor: 'none',
             borderWidth: 0
           }}>
         </Tooltip>
@@ -506,18 +517,18 @@ class AreaChart extends Component {
       return (
       <g class='sc-fs-chart-area-container'>
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
-          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#ddd" lineFillColor="#ddd" 
-          gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
+          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#ddd' lineFillColor='#ddd' 
+          gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline} 
+          marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
           getScaleX={(scaleX) => { 
             this.state.fs.scaleX = scaleX;
           }}>
         </AreaFill>
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-'+ series.index}  posX={marginLeft} posY={marginTop} paddingX={0} 
-          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor="#8c4141" lineFillColor="#8c4141" 
-          gradient={false} opacity="1" spline={typeof series.spline === 'undefined' ? true : series.spline} 
-          marker={false} markerRadius="0" centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
+          width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#8c4141' lineFillColor='#8c4141' 
+          gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline} 
+          marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
           maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
           clipId={clipId}>
         </AreaFill>
@@ -656,7 +667,7 @@ class AreaChart extends Component {
   updateDataTooltip(originPoint, pointData) {
     if (this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'object') {
       this.emitter.emit('updateTooltip', {
-        instanceId: "marker-tooltip",
+        instanceId: 'marker-tooltip',
         originPoint, 
         pointData,
         content: {
@@ -668,7 +679,7 @@ class AreaChart extends Component {
       }); 
     }else {
       this.emitter.emit('updateTooltip', {
-        instanceId: "marker-tooltip",
+        instanceId: 'marker-tooltip',
         originPoint, 
         pointData, 
         content: {
@@ -683,7 +694,7 @@ class AreaChart extends Component {
 
   getTooltipHeader(pointSet, index, tipConfig) {
     return (
-      `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;padding: 3px 5px;">
+      `<p style='background-color:${tipConfig.headerBgColor || '#555'}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || '#fff'};margin:0;padding: 3px 5px;'>
         ${pointSet[index].formattedLabel}
       </p>`
     );
@@ -692,9 +703,9 @@ class AreaChart extends Component {
   getTooltipBody(pointSet, index, tipConfig) {
     let point = pointSet[index];
     return (
-      `<tr  style="font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; color:${tipConfig.textColor || "#000"};">
+      `<tr  style='font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; color:${tipConfig.textColor || '#000'};'>
         <td>
-          <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
+          <span style='background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;'></span>${point.seriesName}
         </td>
         <td>${point.value}</td>
       </tr>`
@@ -702,7 +713,7 @@ class AreaChart extends Component {
   }
 
   getTooltipFooter(pointSet, index, tipConfig) {
-    return "";
+    return '';
   }
 
   hideTip(e) {
@@ -742,20 +753,6 @@ class AreaChart extends Component {
     });
   }
 
-  getStyle() {
-    return ({
-      
-      ".sc-txt-title-grp .sc-txt-subtitle": {
-        "font-family": this.CHART_OPTIONS.subtitle.fontFamily,
-        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, this.CHART_OPTIONS.subtitle.maxFontSize || 18)+'px',
-        "fill": this.CHART_OPTIONS.subtitle.textColor,
-        "stroke": this.CHART_OPTIONS.subtitle.borderColor
-      },
-      ".sc-vertical-axis-title, .sc-horizontal-axis-title": {
-        "font-size": UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14)+'px'
-      }
-    });
-  }
 }
 
 export default AreaChart;

@@ -16,12 +16,13 @@ import ployfills from "./shims/polyfills";
 
 window._debug = false; 
 /** 
- * mountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
- * @param {object} node - It will be a real DOM node or Virtual node which can be mount.
- * @param {object} targetNode - This will be the target DOM where actually mount will done.
- * @param {string='vnode'} nodeType - This flag decide node variable having real node or virtual node ['vnode' | 'rnode'].
- * @param {object=null} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node. 
- * @return {object} will be the component object. 
+ * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM 
+ * @param {Object} node - It will be a real DOM node or Virtual node which can be mount.
+ * @param {Object} targetNode - This will be the target DOM where actually mount will done.
+ * @param {String} nodeType - This flag decide node variable having real node or virtual node ['vnode' | 'rnode'].
+ * @param {Object} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node.
+ * @param {Object} ctx Pass the existing context.
+ * @return {Object} Will be the component object. 
  * */
 function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}) {
 
@@ -57,8 +58,11 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
 
   return component;
 }
-
-/** Render Virtual DOM to the real DOM */
+/**
+ * Render virtual node into real DOM node in memory.
+ * @param {Object} vnode Virtual Node object.
+ * @return {Object} Real DOM node.
+ */
 function renderDOM(vnode) {
   let svgNS = "http://www.w3.org/2000/svg";
   if (typeof vnode === 'string' || typeof vnode === 'number') {
@@ -122,8 +126,7 @@ function renderDOM(vnode) {
   /* when vnode is type normal function */
   else if (typeof vnode.nodeName === 'function') {
     ({ node: component.node, children: component.children } = renderDOM.call({}, vnode.nodeName(vnode.attributes)));
-  } 
-  else {
+  } else {
     throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
   }
 
@@ -428,6 +431,10 @@ class Component {
           return false;
         }
       }
+
+      if(ref && ref.self) {
+        ref.self.__proto__.context = context; 
+      }
       
 
       if(ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
@@ -435,7 +442,6 @@ class Component {
       }
 
       if(ref && ref.self) {
-        ref.self.__proto__.context = context; 
         newRenderedVnode = ref.self.render();
       }
     }

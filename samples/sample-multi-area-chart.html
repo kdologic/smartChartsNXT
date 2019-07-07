@@ -27,27 +27,61 @@
           "description": "A javascript area chart that visualize the data of sales",
           "title": {
             "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales",     // [ default : "" ]
+            "top": 20,                            // [ default : 20]  x % value accepted
+            "left": "50%",                        // [ default : 50%] x % value accepted
+            "width": "90%",                       // [ default : 90%] x % value accepted
+            "height": "",                         // [ default : ""]  x % value accepted
+            "textAlign": "center",                // [ left | default: center | right ]
             "textColor": "crimson",               // [ default : theme.fontColorDark ]
             "borderColor":"none",                 // [ default : none ]
             "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",
-            "textAlign": "middle", 
-            "padding": 0,
-            "fontSize": 20,                    // [ default : theme.fontSizeLarge ]
+            "bgColor": "none",                    // [ default : none ]
+            "padding": 0,                         // [ default : 0 ]
+            "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
+            "style": {
+              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+            },
             "responsive": {
-              "maxWidth": 400,
-              "wrapText": true,
-              "modifire": function(width) {
-                console.log('width of text'+ width);
+              "wrapText": false,                   // [ default: true | false ]
+              "reducer": function(chartWidth, chartHeight) {
+                if(chartWidth < 500) {
+                  return {
+                    "text": "Multi Area Chart"
+                  }
+                }else if(chartWidth < 600) {
+                  return {
+                    "text": "Multi Series Area Chart for sales report"
+                  }
+                }else if(chartWidth < 800) {
+                  return {
+                    "text": "Multi Series Area Chart for sales report with SmartChartsNXT"
+                  }
+                }
               }
             }
           },
           "subtitle": {
             "text":"Sales report of company XYZ", // [ default : "" ]
-            "textColor":"#9c27b0",                // [ default : theme.fontColorDark ]
+            "top": 50,                            // [ default : 50]  x % value accepted
+            "left": "50%",                        // [ default : 50%] x % value accepted
+            "width": "95%",                       // [ default : 95%] x % value accepted
+            "height": "",                         // [ default : ""]  x % value accepted
+            "textAlign": "center",                // [ left | default: center | right ]
+            "textColor": "#9c27b0",               // [ default : theme.fontColorDark ]
             "borderColor":"none",                 // [ default : none ]
             "fontFamily": "Lato",                 // [ default : Lato ]
-            "maxFontSize": 12                     // [ default : 25 ]
+            "bgColor": "none",                    // [ default : none ]
+            "padding": 0,                         // [ default : 0 ]
+            "fontSize": 12,                       // [ default : theme.fontSizeSmall ]
+            "style": {
+              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+            },
+            "responsive": {
+              "wrapText": true,                   // [ default: true | false ]
+              "reducer": function(chartWidth, chartHeight) {
+                // support reducer same as title property
+              }
+            }
           },
           "canvasBorder": false,
           "bgColor": "#f7fdf7", //[default: white]

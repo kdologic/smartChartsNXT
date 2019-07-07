@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * util.core.js
@@ -11,15 +11,16 @@ class UtilCore {
   constructor() {}
   /**
    * Merge object 2 into object 1 recursively. Object 1 will be modified. 
-   * @param {Object} obj1
-   * @param {Object} obj2 
+   * @param {Object} obj1 Mutable object will change after merge
+   * @param {Object} obj2 Will merge into obj1
    * @deprecated This method is depricated and will be removed soon.
+   * @return {Object} Merged JSON
    */
   mergeRecursive(obj1, obj2) {
     //iterate over all the properties in the object which is being consumed
     for (let p in obj2) {
       // Property in destination object set; update its value.
-      if (obj2.hasOwnProperty(p) && typeof obj1[p] !== "undefined") {
+      if (obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined') {
         this.mergeRecursive(obj1[p], obj2[p]);
       } else {
         //We don't have that level in the heirarchy so add it
@@ -29,9 +30,10 @@ class UtilCore {
   }
 
   /**
-   * Properties from the Souce1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
-   * @param {Object} source First Source object. 
+   * Properties from the Source1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
+   * @param {Object} source Source object is mutable will change after merge.  First Source object. 
    * @param {Object} source1 Second Source Object.
+   * @returns {Object} Merged JSON object. 
    */
   extends(source, source1) {
     if(!source || !source1) {
@@ -58,14 +60,13 @@ class UtilCore {
 
   /**
    * Returns a number whose value is limited to the given range.
-   *
+   * @param {Number} min The lower boundary of the output range.
+   * @param {Number} max The upper boundary of the output range.
+   * @param {Numebr} val Value to compare within range of min-max.
+   * @return {Number} A number in the range [min, max].
+   * 
    * Example: limit the output of this computation to between 0 and 255
    * (x * 255).clamp(0, 255)
-   *
-   * @param {Number} min The lower boundary of the output range
-   * @param {Number} max The upper boundary of the output range
-   * @returns A number in the range [min, max]
-   * @type Number
    */
   clamp(min, max, val) {
     return Math.min(Math.max(val, min), max);
@@ -74,7 +75,7 @@ class UtilCore {
   /**
    * Check if it is a date.
    * @param {Number} ms Milliseconds since Jan 1, 1970, 00:00:00.000 GMT 
-   * @return boolean
+   * @return {Boolean} Return true or false. 
    */
   isDate(ms) {
     try {
@@ -86,17 +87,16 @@ class UtilCore {
   }
 
   /**
-   * Return memoized version of a function
+   * Memoized version of a function for faster execution.
    * @param {Function} fn A function to memoize. 
-   * @return Function
+   * @return {Function} Return a memoized version of the function.
    */
   memoize = (fn) => {
     let cache = {};
     return (...args) => {
       if (args in cache) {
         return cache[args];
-      }
-      else {
+      }else {
         let result = fn(...args);
         cache[args] = result;
         return result;
@@ -112,38 +112,38 @@ class UtilCore {
   getColor(index, ranbowFlag) {
     let Colors = {};
     Colors.names = {
-      "light-blue": "#95CEFF",
-      "light-orange": "#ff9e01",
-      "olive-green": "#b0de09",
-      "coral": "#FF7F50",
-      "light-seagreen": "#20B2AA",
-      "gold": "#ffd700",
-      "light-slategray": "#778899",
-      "rust": "#F56B19",
-      "mat-violet": "#B009DE",
-      "violet": "#DE09B0",
-      "dark-Orange": "#FF8C00",
-      "mat-blue": "#09b0de",
-      "mat-green": "#09DEB0",
-      "ruscle-red": "#d9534f",
-      "dark-turquoise": "#00CED1",
-      "orchid": "#DA70D6",
-      "length": 16
+      'light-blue': '#95CEFF',
+      'light-orange': '#ff9e01',
+      'olive-green': '#b0de09',
+      'coral': '#FF7F50',
+      'light-seagreen': '#20B2AA',
+      'gold': '#ffd700',
+      'light-slategray': '#778899',
+      'rust': '#F56B19',
+      'mat-violet': '#B009DE',
+      'violet': '#DE09B0',
+      'dark-Orange': '#FF8C00',
+      'mat-blue': '#09b0de',
+      'mat-green': '#09DEB0',
+      'ruscle-red': '#d9534f',
+      'dark-turquoise': '#00CED1',
+      'orchid': '#DA70D6',
+      'length': 16
     };
     Colors.rainbow = {
-      "red": "#ff0f00",
-      "dark-orange": "#ff6600",
-      "light-orange": "#ff9e01",
-      "dark-yello": "#fcd202",
-      "light-yellow": "#f8ff01",
-      "olive-green": "#b0de09",
-      "green": "#04d215",
-      "sky-blue": "#0d8ecf",
-      "light-blue": "#0d52d1",
-      "blue": "#2a0cd0",
-      "violet": "#8a0ccf",
-      "pink": "#cd0d74",
-      "length": 12
+      'red': '#ff0f00',
+      'dark-orange': '#ff6600',
+      'light-orange': '#ff9e01',
+      'dark-yello': '#fcd202',
+      'light-yellow': '#f8ff01',
+      'olive-green': '#b0de09',
+      'green': '#04d215',
+      'sky-blue': '#0d8ecf',
+      'light-blue': '#0d52d1',
+      'blue': '#2a0cd0',
+      'violet': '#8a0ccf',
+      'pink': '#cd0d74',
+      'length': 12
     };
     let result;
     let count = 0;
@@ -175,17 +175,17 @@ class UtilCore {
     }
     lum = lum || 0;
     /* convert to decimal and change luminosity*/
-    let rgb = "#", c, i;
+    let rgb = '#', c, i;
     for (i = 0; i < 3; i++) {
       c = parseInt(hex.substr(i * 2, 2), 16);
       c = Math.round(Math.min(Math.max(0, c + (c * lum)), 255)).toString(16);
-      rgb += ("00" + c).substr(c.length);
+      rgb += ('00' + c).substr(c.length);
     }
     return rgb;
   }
 
   assemble(literal, params) {
-    return new Function(params, "return `" + literal + "`;"); // TODO: Proper escaping
+    return new Function(params, 'return `' + literal + '`;'); // TODO: Proper escaping
   }
 
   /** 
