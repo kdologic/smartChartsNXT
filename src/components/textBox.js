@@ -8,7 +8,7 @@ import Style from './../viewEngin/style';
  * textBox.js
  * @createdOn:04-May-2019
  * @author:SmartChartsNXT
- * @description: This components will create a text box area. 
+ * @description: This components will create a text box area.
  * @extends: Component
  */
 
@@ -43,9 +43,9 @@ class TextBox extends Component{
   }
 
   processBeforeRender() {
-    this.state.text = this.props.text; 
+    this.state.text = this.props.text;
     const textBBox = UiCore.getComputedTextBBox(this.getTextNode([this.state.text]));
-    this.state.textWidth = textBBox.width; 
+    this.state.textWidth = textBBox.width;
     this.state.lineHeight = textBBox.height;
     this.state.splitText = textBBox.width > this.props.width && this.props.wrapText;
     this.state.textBBox.width = this.props.width || textBBox.width + (2 * this.props.padding || 0);
@@ -70,8 +70,8 @@ class TextBox extends Component{
     let textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
     return (
       <g transform={`translate(${this.props.posX},${this.props.posY}) ${this.props.transform || ''}`} tabindex='-1'>
-          <rect class='sc-textbox-bg' x={ (this.state.textAnchor === 'middle' ? -(this.state.textBBox.width/2) : 0) } y={0} 
-            width={this.state.textBBox.width} height={this.state.textBBox.height} 
+          <rect class='sc-textbox-bg' x={ (this.state.textAnchor === 'middle' ? -(this.state.textBBox.width/2) : 0) } y={0}
+            width={this.state.textBBox.width} height={this.state.textBBox.height}
             rx={this.props.borderRadius || 0} opacity={this.props.bgOpacity || 1} fill={this.props.bgColor || 'none'}>
           </rect>
         { textNode }
@@ -87,7 +87,7 @@ class TextBox extends Component{
   getTextNode(lines) {
     return (
       <g>
-        {this.props.style && 
+        {this.props.style &&
           <Style>
             {this.props.style}
           </Style>
@@ -98,15 +98,15 @@ class TextBox extends Component{
       </g>
     );
   }
-  
+
   splitText(txt = '') {
     let words = txt.split(/(\s+)/).filter( e => e.trim().length > 0);
-    let lines = [], line=[]; 
+    let lines = [], line=[];
     for(let w of words) {
       let textWidth = UiCore.getComputedTextWidth(this.getTextNode([line.concat(w).join(' ')]));
       if (textWidth > this.state.textBBox.width) {
         lines.push(line.join(' '));
-        line = [w]; 
+        line = [w];
       }else {
         line.push(w);
       }

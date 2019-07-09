@@ -11,9 +11,9 @@ import UiCore from '../core/ui.core';
  * heading.js
  * @createdOn:20-Jun-2019
  * @author:SmartChartsNXT
- * @description: This components will create heading elements of chart. 
+ * @description: This components will create heading elements of chart.
  * @extends: Component
- * @config 
+ * @config
  * ```js
   "title":{
     "text":"heading text",                // [ default : "" ]
@@ -50,7 +50,7 @@ class heading extends Component{
     this.id = UtilCore.getRandomID();
     this.state = {
       text: this.props.opts.text
-    }; 
+    };
     this.config = {};
     this.setConfig(this.props);
   }
@@ -71,12 +71,12 @@ class heading extends Component{
       textAnchor: alignTextMap[props.opts.textAlign] || alignTextMap[props.textAlign] || alignTextMap.center,
       padding: props.opts.padding || props.padding || 0,
       responsive: Object.assign({
-        wrapText: true, 
+        wrapText: true,
         reducer: () => ({text: props.opts.text})
       }, props.opts.responsive)
     };
 
-    let modifiedConfig = {}; 
+    let modifiedConfig = {};
     if(typeof this.config.responsive.reducer === 'function') {
       modifiedConfig = this.config.responsive.reducer(this.context.svgWidth, this.context.svgHeight) || {};
       this.state.text = modifiedConfig.text || this.props.opts.text;
@@ -102,7 +102,7 @@ class heading extends Component{
         <Style>
           {{[`.sc-header-grp-${this.id}` ]: this.config.style}}
         </Style>
-        <Textbox class={`sc-header-text-${this.id}`} style={style} posX={this.config.left} posY={this.config.top} width={this.config.width} height={this.config.height} textAnchor={this.config.textAnchor} bgColor={this.config.bgColor} 
+        <Textbox class={`sc-header-text-${this.id}`} style={style} posX={this.config.left} posY={this.config.top} width={this.config.width} height={this.config.height} textAnchor={this.config.textAnchor} bgColor={this.config.bgColor}
           textColor={this.config.textColor} borderRadius={0} padding={this.config.padding} stroke={this.config.stroke} text={this.state.text || ''} wrapText={this.config.responsive.wrapText}>
         </Textbox>
       </g>

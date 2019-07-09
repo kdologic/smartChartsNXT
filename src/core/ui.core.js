@@ -13,24 +13,24 @@ class UiCore {
   constructor() {}
 
   /**
-   * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element. 
+   * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element.
    * @param {String} shadowId Element ID of dropshadow Component.
    * @param {String} offsetX Offset value to shift shadow by x coordinate.
    * @param {String} offsetY Offset value to shift shadow by y coordinate.
-   * @returns {Object} Virtual node of drop shadow component. 
+   * @returns {Object} Virtual node of drop shadow component.
    */
   dropShadow(shadowId, offsetX, offsetY) {
     return (
       <defs>
         <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
-          <feGaussianBlur in='SourceAlpha' stdDeviation='1'/> 
+          <feGaussianBlur in='SourceAlpha' stdDeviation='1'/>
           <feOffset dx={offsetX || 4} dy={offsetY || 4} result='offsetblur'/>
           <feComponentTransfer>
             <feFuncA type='linear' slope='0.2'/>
           </feComponentTransfer>
-          <feMerge> 
+          <feMerge>
             <feMergeNode/>
-            <feMergeNode in='SourceGraphic'/> 
+            <feMergeNode in='SourceGraphic'/>
           </feMerge>
         </filter>
       </defs>
@@ -44,13 +44,13 @@ class UiCore {
    * @param {number} fx - Offset x.
    * @param {number} fy - Offset y.
    * @param {number} r -  Radius
-   * @param {Array} gradArr - Array of number or object. 
+   * @param {Array} gradArr - Array of number or object.
    * @return {Object} JSX
    * @config
-   * gradArr = [0.1, -0.06, 0.9] or 
+   * gradArr = [0.1, -0.06, 0.9] or
    * gradArr = [{offset:0, opacity:0.06},{offset:83, opacity:0.2},{offset:95, opacity:0}]
    * (-) negative indicates darker shades
-   * 
+   *
   */
   radialGradient(gradId, cx, cy, fx, fy, r, gradArr) {
     return (
@@ -58,14 +58,14 @@ class UiCore {
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
           {gradArr.map((grad, i) =>{
             let offset = i/gradArr.length*100;
-            let opacity = grad; 
-            let color = '#fff'; 
+            let opacity = grad;
+            let color = '#fff';
             if(typeof grad === 'object'){
-              offset = grad.offset !== 'undefined' ? grad.offset : offset; 
-              opacity = grad.opacity  !== 'undefined' ? grad.opacity : opacity; 
+              offset = grad.offset !== 'undefined' ? grad.offset : offset;
+              opacity = grad.opacity  !== 'undefined' ? grad.opacity : opacity;
               if(opacity < 0) {
-                color = '#000'; 
-                opacity = Math.abs(opacity); 
+                color = '#000';
+                opacity = Math.abs(opacity);
               }
             }
             return <stop offset={`${offset}%`} stop-color={color} stop-opacity={opacity}></stop>;
@@ -89,7 +89,7 @@ class UiCore {
 
   /**
    * Get text width in svg pixel.
-   * @param {Object} textNode - JSX of text node. 
+   * @param {Object} textNode - JSX of text node.
    * @return {Number} Text width in Pixel.
    */
 
@@ -98,8 +98,8 @@ class UiCore {
   }
 
   /**
-   * Get text bounding box {width, height} before rendering. 
-   * @param {Object} textNode - JSX of text node. 
+   * Get text bounding box {width, height} before rendering.
+   * @param {Object} textNode - JSX of text node.
    * @return {Object} Text bounding Box
    */
   getComputedTextBBox(textNode) {
@@ -116,7 +116,7 @@ class UiCore {
     return {width: bbox.width, height: bbox.height};
   }
 
-  /** Returns true if it is a touch device 
+  /** Returns true if it is a touch device
    * @return {boolean} Returns 'true' for touch device otherwise return 'false'.
    */
   isTouchDevice() {
@@ -127,7 +127,7 @@ class UiCore {
    * Convert Window screen coordinate into SVG point coordinate in global SVG space.
    * @param {String} targetElem SVG element in which point coordinate will be calculated.
    * @param {Object} evt Ponter event related to screen like mouse or touch point.
-   * @return {Point} Returns a point which transform into SVG cordinate system. 
+   * @return {Point} Returns a point which transform into SVG cordinate system.
    */
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === 'string') {
@@ -153,10 +153,10 @@ class UiCore {
       return total * percent / 100;
     }
     return 0;
-  } 
+  }
 
   /**
-   * Calculate interval value and also interval count for a given range. 
+   * Calculate interval value and also interval count for a given range.
    * @param {Number} minVal Minimum Value.
    * @param {Number} maxVal Maximum Value
    * @return {Object} Returns interval object.
@@ -164,7 +164,7 @@ class UiCore {
 
   calcIntervalByMinMax(minVal, maxVal, zeroBase) {
     let arrWeight = [0.01, 0.02, 0.05];
-    let weightDecimalLevel = 1; 
+    let weightDecimalLevel = 1;
     let minIntvCount = 6;
     let maxIntvCount = 12;
     let mid = (maxVal + minVal) / 2;
@@ -173,13 +173,13 @@ class UiCore {
       tMinVal = minVal > 0 ? 0 : minVal;
       maxVal = maxVal < 0 ? 0 : maxVal;
     }
-    
+
     let digitBase10 = Math.round(mid).toString().length;
     for(let w = 0; w <= 100 ; w = (w + 1) % arrWeight.length) {
       let weight = arrWeight[w] * weightDecimalLevel;
       let tInt = Math.pow(10, digitBase10 - 1) * weight;
       if(w === arrWeight.length -1) {
-        weightDecimalLevel *= 10; 
+        weightDecimalLevel *= 10;
       }
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
         let hitIntv = +parseFloat(tInt * intv).toFixed(2);
@@ -194,10 +194,10 @@ class UiCore {
             tMinVal -= (2*tInt);
             intv += 2;
           }else if(Math.floor(tMinVal) == Math.floor(minVal)) {
-            tMinVal -= tInt; 
+            tMinVal -= tInt;
             intv++;
           }
-          
+
           return {
             iVal: tInt,
             iCount: intv,
@@ -233,7 +233,7 @@ class UiCore {
  * Insert and style tag in DOM
  * @param {Object} parentNode DOM node where style will be prepend
  * @param {String} styleStr String of CSS text
- * @param {String} position Optional. in which position will add this style. Default: 'afterbegin' 
+ * @param {String} position Optional. in which position will add this style. Default: 'afterbegin'
  * @return {void} void
  * @config
  * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
