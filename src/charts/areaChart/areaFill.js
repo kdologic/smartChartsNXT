@@ -1,35 +1,35 @@
-"use strict";
+'use strict';
 
-import Point from "./../../core/point";
-import { Component } from "./../../viewEngin/pview";
-import Geom from "./../../core/geom.core";
-import UiCore from "./../../core/ui.core";
-import UtilCore from "./../../core/util.core";
-import DataPoints from "./../../components/dataPoints";
-import eventEmitter from "./../../core/eventEmitter";
-import Easing from "./../../plugIns/easing";
+import Point from './../../core/point';
+import { Component } from './../../viewEngin/pview';
+import Geom from './../../core/geom.core';
+import UiCore from './../../core/ui.core';
+import UtilCore from './../../core/util.core';
+import DataPoints from './../../components/dataPoints';
+import eventEmitter from './../../core/eventEmitter';
+import Easing from './../../plugIns/easing';
 
 /**
  * areaFill.js
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
- * @extends Component 
+ * @extends Component
  */
 
 class AreaFill extends Component{
   constructor(props) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId); 
+    this.emitter = eventEmitter.getInstance(this.context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
-    this.gradId = "sc-area-fill-grad-" + this.rid;
+    this.gradId = 'sc-area-fill-grad-' + this.rid;
     this.state = {
       marker: ~~this.props.marker,
       scaleX: 0,
       scaleY: 0,
       baseLine: 0,
-      pointSet: [], 
+      pointSet: [],
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
       opacity: this.props.opacity || 1
@@ -41,12 +41,12 @@ class AreaFill extends Component{
       width: this.props.width,
       height: this.props.height
     }, this.props.clip);
-    
-    this.subComp = {}; 
+
+    this.subComp = {};
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
-    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this); 
-    this.prepareData(this.props); 
+    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
+    this.prepareData(this.props);
     this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
     this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
   }
@@ -54,7 +54,7 @@ class AreaFill extends Component{
   shouldComponentUpdate() {
     return this.props.shouldRender;
   }
-  
+
   componentWillMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
@@ -88,11 +88,13 @@ class AreaFill extends Component{
   render() {
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
-        <style>
-          {this.props.animated && 
-            this.getScaleKeyframe()
-          }
-        </style>
+        <remove-before-save>
+          <style>
+            {this.props.animated &&
+              this.getScaleKeyframe()
+            }
+          </style>
+        </remove-before-save>
         {this.props.clipId === undefined &&
           <defs>
             <clipPath id={this.clipPathId}>
@@ -100,17 +102,17 @@ class AreaFill extends Component{
             </clipPath>
           </defs>
         }
-        {this.props.gradient && 
+        {this.props.gradient &&
           this.createGradient(this.gradId)
         }
-        <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor} 
+        <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor}
           d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
-        </path> 
-        {this.props.lineStrokeWidth && 
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path> 
+        </path>
+        {this.props.lineStrokeWidth &&
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path>
         }
-        {this.props.dataPoints && !this.state.isAnimationPlaying && 
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} /> 
+        {this.props.dataPoints && !this.state.isAnimationPlaying &&
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
         }
       </g>
     );
@@ -131,11 +133,11 @@ class AreaFill extends Component{
       if(i > 0) {
         path.push('L', point.x, point.y);
       }
-      point.index = i; 
-      return point; 
+      point.index = i;
+      return point;
     });
     path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
-    return path; 
+    return path;
   }
 
   getCurvedLinePath(props) {
@@ -145,31 +147,31 @@ class AreaFill extends Component{
       if(props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
-      point.index = i; 
-      return point; 
+      point.index = i;
+      return point;
     });
     path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.catmullRomFitting(this.state.pointSet, 0.1));
     path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
-    return path; 
+    return path;
   }
 
   createGradient(gardId) {
     return(
       <defs>
-        <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-          <stop offset="0%" stop-color={this.props.areaFillColor} stop-opacity="1" />
-          <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
+        <linearGradient id={gardId} x1='0%' y1='0%' x2='0%' y2='100%' gradientUnits='objectBoundingBox'>
+          <stop offset='0%' stop-color={this.props.areaFillColor} stop-opacity='1' />
+          <stop offset='100%' stop-color='rgb(255,255,255)' stop-opacity='0' />
         </linearGradient>
       </defs>
     );
   }
-  
+
   prepareData(props) {
     this.state.valueSet = props.dataSet;
     this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen-1 || 2);
-    this.state.scaleY = props.height / (props.maxVal-props.minVal); 
-    this.state.baseLine = props.maxVal * this.state.scaleY; 
-    this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker; 
+    this.state.scaleY = props.height / (props.maxVal-props.minVal);
+    this.state.baseLine = props.maxVal * this.state.scaleY;
+    this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker;
     if(typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
     }
@@ -181,16 +183,16 @@ class AreaFill extends Component{
     }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY); 
-    let pointSet = this.state.pointSet; 
+    let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
+    let pointSet = this.state.pointSet;
     if(this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
     }
     if(pointSet.length && +pointSet[pointSet.length-1].x.toFixed(3) > +(this.state.clip.x+this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length-1);
     }
-    let nearPoint = Geom.findClosestPoint(pointSet, pt, true); 
-    this.emitter.emit("normalizeAllPointMarker", {seriesIndex: this.props.index});
+    let nearPoint = Geom.findClosestPoint(pointSet, pt, true);
+    this.emitter.emit('normalizeAllPointMarker', {seriesIndex: this.props.index});
     if(nearPoint.dist < (this.state.scaleX / 2)) {
       e.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
@@ -206,18 +208,18 @@ class AreaFill extends Component{
         pointIndex: null
       };
     }
-    this.emitter.emit("highlightPointMarker", e);
+    this.emitter.emit('highlightPointMarker', e);
   }
 
-  interactiveMouseLeave(e) {
+  interactiveMouseLeave() {
     if(this.props.dataPoints && !this.state.isAnimationPlaying) {
-      this.emitter.emit("normalizeAllPointMarker", {seriesIndex: this.props.index});
+      this.emitter.emit('normalizeAllPointMarker', {seriesIndex: this.props.index});
     }
   }
 
   changeAreaBrightness(e) {
     if(this.props.instanceId === e.instanceId && e.strokeOpacity) {
-      this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1}); 
+      this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1});
     }
   }
 
@@ -232,19 +234,19 @@ class AreaFill extends Component{
   }
 
   generateAnimKeyframe(duration, steps=10) {
-    let aStage = duration/steps; 
-    
+    let aStage = duration/steps;
+
     let keyFrame = `@keyframes scale-easeOutElastic-${this.props.instanceId} {`;
     for(let i=0; i<steps; i++) {
-      let stageNow = aStage*i; 
+      let stageNow = aStage*i;
       let scaleD = Easing.easeOutElastic(stageNow/duration).toFixed(2);
       let frame = `${Math.round(100/steps*i)}% {
         transform: translate(${this.props.posX}px, ${this.props.posY}px) translate(${this.props.width/2}px, ${this.props.height}px) scale(1, ${scaleD}) translate(${-this.props.width/2}px, ${-this.props.height}px);
       }`;
-      keyFrame += frame; 
+      keyFrame += frame;
     }
-    keyFrame += "}";
-    return keyFrame; 
+    keyFrame += '}';
+    return keyFrame;
   }
 }
 

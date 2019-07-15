@@ -1,8 +1,8 @@
-"use strict";
+/* eslint-disable quotes */
+'use strict';
 
-/** 
+/**
  * config.js
- * @version:2.0.0
  * @createdOn:24-Nov-2017
  * @author:SmartChartsNXT
  * @description:This will be the Global default configureation for all charts.

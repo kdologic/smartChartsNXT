@@ -22,7 +22,7 @@
     window.onload = function () {
       SmartChartsNXT.ready(function () {
         var areaChart = new SmartChartsNXT.Chart({
-          "type": "AreaChart",
+          "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "description": "A javascript area chart that visualize the data of sales",
           "title": {
@@ -42,7 +42,7 @@
               "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
             },
             "responsive": {
-              "wrapText": false,                   // [ default: true | false ]
+              "wrapText": true,                   // [ default: true | false ]
               "reducer": function(chartWidth, chartHeight) {
                 if(chartWidth < 500) {
                   return {
@@ -84,28 +84,29 @@
             }
           },
           "canvasBorder": false,
-          "bgColor": "#f7fdf7", //[default: white]
-          // "gridBox": {  // : TODO
-          //   "vertical": {
-          //     "style": "dashed", //[dashed | solid]
-          //     "gridColor": "#000",
-          //     "axisColor" : "#000",
-          //     "lineWidth": 1,
-          //     "opacity": 1
-          //   },
-          //   "horizontal": {
-          //     "style": "dashed", //[dashed | solid]
-          //     "gridColor": "#000",
-          //     "axisColor" : "#000",
-          //     "lineWidth": 1,
-          //     "opacity": 1
-          //   },
-          //  "backgroundColor": '#555',
-          //  "backgroundGradient": true
-          // },
+          "bgColor": "#f7fdf7",                         //[default: white]
+          "gridBox": {
+            "vertical": {
+              "enable": true,                           //[default: true | false]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
+              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
+              "lineThickness": 1,                       //[default: 1]
+              "lineOpacity": 0.2                        //[default: 0.2]
+            },
+            "horizontal": {
+              "enable": true,                           //[default: true | false]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: ENUMS.LINE_STYLE.SOLID | ENUMS.LINE_STYLE.DASHED]
+              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
+              "lineThickness": 1,                       //[default: 1]
+              "lineOpacity": 0.2                        //[default: 0.2]
+            },
+           "bgColor": 'skyblue',                           //[default: none]
+           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, //[default: none]
+           "bgOpacity": 0.2                             //[default: 0.1]   
+          },
           "pointerCrosshair": {
             "vertical": {
-              "style": "dashed",              // [default: dashed | solid]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
               "spread" : "full",              // [default: full | inPoint | none]
               "lineColor": "#000",            // [default: #000]
               "lineWidth": 1,                 // [default: 1]
@@ -115,7 +116,7 @@
               "labelOpacity": 1               // [default: 1]
             },
             "horizontal": {
-              "style": "dashed",              // [default: dashed | solid]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
               "spread" : "none",              // [full | inPoint | default: none]
               "lineColor": "#000",            // [default: #000]
               "lineWidth": 1,                 // [default: 1]
@@ -209,6 +210,7 @@
               "tickSpan": 6,
               "labelOpacity": 1,
               "labelColor": "#000",
+              "axisColor": "#000", // TODO
               "fontSize": 12,
               "fontFamily": "Lato"
             },
@@ -221,6 +223,7 @@
               "tickSpan": 5,
               "labelOpacity": 1,
               "labelColor": "#000",
+              "axisColor": "#000", // TODO
               "fontSize": 20,
               "fontFamily": "Lato",
               "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.

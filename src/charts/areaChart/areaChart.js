@@ -383,7 +383,7 @@ class AreaChart extends Component {
           </Draggable>
         </g>
 
-        <Grid opts={this.CHART_OPTIONS.grid || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+        <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
@@ -404,7 +404,7 @@ class AreaChart extends Component {
         </HorizontalLabels>
 
         <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight/2))}
-          transform={`rotate(${-90})`} bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8}
+          transform={`rotate(${-90})`} bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
           textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.yAxis.title}
           style={{
             '.sc-vertical-axis-title': {
@@ -413,7 +413,7 @@ class AreaChart extends Component {
           }} />
 
         <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth/2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight/2) + 5)}
-          bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.8} borderRadius={1} padding={5} stroke='none'
+          bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
           textAnchor='middle' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.xAxis.title}
           style={{
             '.sc-horizontal-axis-title': {

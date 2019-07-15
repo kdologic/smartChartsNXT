@@ -13,8 +13,8 @@ import UiCore from '../core/ui.core';
  * @author:SmartChartsNXT
  * @description: This components will create heading elements of chart.
  * @extends: Component
- * @config
- * ```js
+ * @example
+ * config :
   "title":{
     "text":"heading text",                // [ default : "" ]
     "top": 20,                            // [ default : 20]  x % value accepted
@@ -29,7 +29,7 @@ import UiCore from '../core/ui.core';
     "padding": 0,                         // [ default : 0 ]
     "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
     "style": {
-      "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+      "opacity": 1.0                      // Support any style JSON other than available config property.
     },
     "responsive": {
       "wrapText": false,                   // [ default: true | false ]
@@ -41,7 +41,7 @@ import UiCore from '../core/ui.core';
         }
       }
     }
-  }```
+  }
  */
 
 class heading extends Component{
