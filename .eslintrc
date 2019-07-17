@@ -49,6 +49,7 @@
   },
 
   "globals": {
+    "$SC": true
     // e.g. "angular": true
   },
 

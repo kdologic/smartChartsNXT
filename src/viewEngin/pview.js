@@ -12,9 +12,9 @@
  * TODO: If the first element in jsx is a component type then behave incorrecly, Need to fix this.
  */
 
-const  Ployfills = require('./shims/polyfills');
+const Polyfills = require('./shims/polyfills');
+const config = require('./config').default;
 
-window._debug = false;
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
  * @param {Object} node - It will be a real DOM node or Virtual node which can be mount.
@@ -64,7 +64,6 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
  * @returns {Object} Real DOM node.
  */
 function renderDOM(vnode) {
-  let svgNS = 'http://www.w3.org/2000/svg';
   if (typeof vnode === 'string' || typeof vnode === 'number') {
     return { node: document.createTextNode(vnode), children: [], eventStack: []};
   }
@@ -75,8 +74,12 @@ function renderDOM(vnode) {
   };
   /* when vnode is string like - any tag [text, svg, line, path etc.] */
   if (typeof vnode.nodeName === 'string') {
-    let isHtml = vnode.nodeName.match('x-');
-    component.node = isHtml ? document.createElement(vnode.nodeName.substring('x-'.length)) : document.createElementNS(svgNS, vnode.nodeName);
+    let typeNS = config.svgNS;
+    if(vnode.nodeName.match('x-')) {
+      typeNS = config.htmlNS;
+      vnode.nodeName = vnode.nodeName.replace('x-', '');
+    }
+    component.node = document.createElementNS(typeNS, vnode.nodeName);
     Object.keys(vnode.attributes || {}).forEach(key => {
       let attrVal = ((k) => {
         switch (k) {
@@ -90,6 +93,7 @@ function renderDOM(vnode) {
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
     vnode.nodeName.prototype.context = this.context || {};
+    /* eslint-disable-next-line new-cap*/
     let objComp = new vnode.nodeName(vnode.attributes);
     let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let renderedComp = renderDOM.call({context: objChildContext}, objComp.getVirtualNode());
@@ -197,7 +201,7 @@ function __h__(nodeName, attributes, ...args) {
   args = args.filter((v) => {
     return !!v;
   });
-  let children = args.length ? [].concat(...args) : null;
+  const children = args.length ? [].concat(...args) : null;
   return { nodeName, attributes: attributes|| {}, children };
 }
 window.__h__ = window.__h__ || __h__;
@@ -670,9 +674,10 @@ class Component {
    */
   update() {
     let compName;
-    if(window._debug) {
+    if(config.debug) {
       compName = this.__proto__.constructor.name;
-      console.time(compName+' update');
+      /* eslint-disable-next-line no-console */
+      console.time(compName + ' update');
     }
 
     if(!this.shouldComponentUpdate(this.props)) {
@@ -691,8 +696,9 @@ class Component {
       this.componentDidUpdate(this.props);
     }
 
-    if(window._debug) {
-      console.timeEnd(compName+' update');
+    if(config.debug) {
+      /* eslint-disable-next-line no-console */
+      console.timeEnd(compName + ' update');
     }
 
     return this.vnode = vnodeNow;

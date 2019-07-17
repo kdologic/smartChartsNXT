@@ -14,7 +14,7 @@ import Error from './../components/errorView';
  */
 
 class Chart {
-  constructor(opts){
+  constructor(opts) {
     try {
       this.runId = UtilCore.uuidv4();
       this.events = eventEmitter.createInstance(this.runId);
@@ -22,8 +22,8 @@ class Chart {
       this.targetNode.setAttribute('runId', this.runId);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false);
-      // eslint-disable-next-line no-console
-      window._debug && console.debug(this.core);
+      /* eslint-disable-next-line no-console */
+      $SC.debug && console.debug(this.core);
     }catch(ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex;
@@ -31,7 +31,10 @@ class Chart {
   }
 
   onResize(e) {
-    e.data = {targetWidth: this.targetNode.offsetWidth, targetHeight: this.targetNode.offsetHeight};
+    e.data = {
+      targetWidth: this.targetNode.offsetWidth,
+      targetHeight: this.targetNode.offsetHeight
+    };
     this.events.emit('resize', e);
   }
 

@@ -4,7 +4,7 @@ import defaultConfig from './../settings/config';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import UtilCore from './../core/util.core';
-import {OPTIONS_TYPE as ENUMS} from './../settings/global_enums';
+import {OPTIONS_TYPE as ENUMS} from './../settings/globalEnums';
 
 /**
  * grid.js

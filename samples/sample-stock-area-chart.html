@@ -3,7 +3,6 @@
 <head>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
-    var _debug = false;
     async function getStock(stockId) {
       var data = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockId}&interval=5min&apikey=NSQWJINYQ9CB6GR3`
@@ -39,6 +38,7 @@
     function displayChart(seriesName, dataSet) {
       console.log(dataSet);
       SmartChartsNXT.ready(function () {
+        SmartChartsNXT.debug = false;
         let areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
           "title": "Stock Chart",

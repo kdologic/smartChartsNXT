@@ -1,7 +1,7 @@
 'use strict';
 
 import Core  from './core/chart.core';
-import {OPTIONS_TYPE, CHART_TYPE} from './settings/global_enums';
+import {OPTIONS_TYPE, CHART_TYPE} from './settings/globalEnums';
 import defautlConfig from './settings/config';
 
 /**

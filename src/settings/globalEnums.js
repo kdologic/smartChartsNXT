@@ -1,4 +1,12 @@
 /* eslint-disable quotes */
+'use strict';
+
+/**
+ * globalEnums.js
+ * @createdOn: 15-Jul-2019
+ * @author: SmartChartsNXT
+ * @description: Global enumeraton values.
+ */
 
 export const OPTIONS_TYPE = {
     LINE_STYLE: {

@@ -4,7 +4,6 @@
   <title>Example of Basic Area Chart</title>
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
-    var _debug = false; 
 	  function getData(n) {
       var arr = [], i, x, a, b, c, spike;
       for (i = 0, x = Date.UTC(new Date().getUTCFullYear(), 0, 1) - n * 36e5; i < n; i = i + 1, x = x + 36e5) {
@@ -45,6 +44,7 @@
 
     window.onload = function () {
       SmartChartsNXT.ready(function () {
+        SmartChartsNXT.debug = false;
         var areaChart = new SmartChartsNXT.Chart({
           "type": "AreaChart",
           "title": "Series Area Chart",

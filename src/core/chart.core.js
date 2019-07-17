@@ -1,20 +1,23 @@
-"use strict";
+/* eslint-disable no-console */
+'use strict';
 
 import UiCore from './../core/ui.core';
-import fontLato from "./../styles/font-lato.css";
-import Morphing from "./../plugIns/morph";
+import fontLato from './../styles/font-lato.css';
+import Morphing from './../plugIns/morph';
 import Chart from './../charts/chart';
+import viewConfig from './../viewEngin/config';
 
 /**
  * chart.core.js
  * @createdOn:10-Jul-2017
  * @author: SmartChartsNXT
- * @description:SmartChartsNXT Core Library components. It's bootstrap the code, 
- * by loading appropriate dependencies. Loading ployfills and shims, fonts etc. 
+ * @description:SmartChartsNXT Core Library components. It's bootstrap the code,
+ * by loading appropriate dependencies. Loading ployfills and shims, fonts etc.
  */
 
  class Core {
   constructor() {
+    this._debug = false;
     this.nameSpaceReadyStatus = false;
     this.Chart = Chart;
     this.loadFont();
@@ -25,7 +28,7 @@ import Chart from './../charts/chart';
     let intervalId = setInterval(() => {
       if(document.body) {
         clearInterval(intervalId);
-        document.body.insertAdjacentHTML('beforeend','<p id="sc-temp-font-loader" aria-hidden="true" style="visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;">Loading...</p>');
+        document.body.insertAdjacentHTML('beforeend','<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
         setTimeout(() => {
           this.nameSpaceReadyStatus = true;
           setTimeout(() => {
@@ -37,6 +40,15 @@ import Chart from './../charts/chart';
     }, 10);
   }
 
+  set debug(isEnable = true) {
+    this._debug = isEnable;
+    viewConfig.debug = isEnable;
+  }
+
+  get debug() {
+    return this._debug;
+  }
+
 
   /** since we add static base64 font in commonStyle area so ignore dynamic font loading now */
   // addFont(cb) {
@@ -46,24 +58,24 @@ import Chart from './../charts/chart';
   //     },
   //     /* Called when all of the web fonts have either finished loading or failed to load, as long as at least one loaded successfully. */
   //     active: function () {
-  //       if (typeof cb === "function") {
+  //       if (typeof cb === 'function') {
   //         cb();
   //       }
   //     },
   //     inactive: function () {
-  //       if (typeof cb === "function") {
+  //       if (typeof cb === 'function') {
   //         cb();
   //       }
   //     }
   //   });
-  // } 
+  // }
 
   ready(successBack) {
     /* strat polling for the ready state*/
     let statusCheck = setInterval(() => {
       if (this.nameSpaceReadyStatus) {
         clearInterval(statusCheck);
-        if (typeof successBack === "function") {
+        if (typeof successBack === 'function') {
           let startTime = window.performance.now();
           try {
             successBack.call(this);
@@ -72,14 +84,14 @@ import Chart from './../charts/chart';
           }
 
           let endTitme = window.performance.now();
-          console.info("Time elapsed for chart: %c" + (endTitme - startTime) + " Ms", "color:green");
+          console.info('Time elapsed for chart: %c' + (endTitme - startTime) + ' Ms', 'color:green');
         }
       }
     }, 100);
   }
 
   handleError(ex, msg) {
-    console.error("SmartChartsNXT:" + (ex.errorIn || ""));
+    console.error('SmartChartsNXT:' + (ex.errorIn || ''));
     ex.stack && console.error(ex.stack);
   }
 

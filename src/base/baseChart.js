@@ -5,7 +5,7 @@ import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import {CHART_TYPE} from './../settings/global_enums'
+import {CHART_MODULES} from './../settings/componentMapper';
 import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';
 import Menu from './../components/menu';
@@ -16,26 +16,6 @@ import Menu from './../components/menu';
  * @author: SmartChartsNXT
  * @description:This is base chart with defaulf config and this will initiate loading of a specific chart type.
  */
-
-/** ------- Requireing all chart types ------- */
-const CHART_MODULES = {
-    [CHART_TYPE.AREA_CHART]: {
-      config: require('./../charts/areaChart/config').default,
-      chart: require('./../charts/areaChart/areaChart').default
-    }
-    //,
-    // LineChart: require('./../charts/lineChart/lineChart'),
-    // StepChart: require('./../charts/stepChart/stepChart'),
-    // PieChart: {
-    //   config: require('./../charts/pieChart/config').default,
-    //   chart: require('./../charts/pieChart/pieChart').default
-    // },
-    // DonutChart: {
-    //   config: require('./../charts/donutChart/config').default,
-    //   chart: require('./../charts/donutChart/donutChart').default
-    // }
-    // ColumnChart: require('./../charts/columnChart/columnChart')
-};
 
 class BaseChart extends Component {
   constructor(props) {
@@ -64,7 +44,7 @@ class BaseChart extends Component {
       this.blurFilterId = UtilCore.getRandomID();
       this.menuIconGradId = UtilCore.getRandomID();
 
-      this.loadConfig(CHART_MODULES[this.chartType].config.call(this));
+      this.loadConfig(CHART_MODULES[this.chartType].config);
       this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
       ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
@@ -97,13 +77,7 @@ class BaseChart extends Component {
   }
 
   loadConfig(config) {
-    for (let key in config) {
-      try {
-        this.CHART_DATA[key] = config[key];
-      } catch (ex) {
-        throw ex;
-      }
-    }
+    this.CHART_DATA = {...this.CHART_DATA, ...config};
   }
 
   componentDidMount() {
@@ -160,7 +134,7 @@ class BaseChart extends Component {
         }} >
 
         <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '')+' '+((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
-        <desc id={this.descId}>{(this.CHART_OPTIONS.description||this.CHART_DATA.chartType)+' -created using SmartChartsNXT chart library.'}</desc>
+        <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType)+' -created using SmartChartsNXT chart library.'}</desc>
 
         <CommonStyles></CommonStyles>
 
