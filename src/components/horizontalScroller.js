@@ -20,9 +20,8 @@ import UiCore from './../core/ui.core';
  *    "height": 20,
  *    "chartInside": true // Show chart inside scroll area.
  * }
- * Supported events:
- * hScroll : fire when user perform scrolling.
-
+ * @event
+ * hScroll : Fire when user perform scrolling.
  */
 
 class HorizontalScroller extends Component {
@@ -69,10 +68,10 @@ class HorizontalScroller extends Component {
   }
 
   propsWillReceive(nextProps) {
-    let widthChangePercent = ((nextProps.width - this.props.width)/this.props.width)*100;
-    if(widthChangePercent) {
-      this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset*widthChangePercent/100);
-      this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth*widthChangePercent/100);
+    let widthChangePercent = ((nextProps.width - this.props.width) / this.props.width) * 100;
+    if (widthChangePercent) {
+      this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset * widthChangePercent / 100);
+      this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth * widthChangePercent / 100);
     }
   }
 
@@ -89,10 +88,10 @@ class HorizontalScroller extends Component {
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <rect class='sc-slider-bg' x={0} y={0} width={this.props.width} height={this.props.height} fill='#000' fill-opacity='0.04' />
-        { this.props.extChildren }
+        {this.props.extChildren}
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height}
           fillOpacity={this.state.sliderWindowOpacity} focusedIn={this.state.handlerFocused === 'window'}
-          events= {{
+          events={{
             mousedown: this.onMouseDown,
             touchstart: this.onMouseDown,
             mouseenter: this.onHoverInSliderWindow,
@@ -103,10 +102,10 @@ class HorizontalScroller extends Component {
           }}>
         </SliderWindow>
 
-        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth}  offsetPercent={this.state.leftOffsetPercent}
+        <SliderLeftHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth} offsetPercent={this.state.leftOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.leftHandlerColor} innerBarColor={this.state.leftInnerBarColor}
           focusedIn={this.state.handlerFocused === 'left'}
-          events= {{
+          events={{
             handlerEvent: {
               mousedown: this.onMouseDown,
               touchstart: this.onMouseDown,
@@ -125,7 +124,7 @@ class HorizontalScroller extends Component {
         <SliderRightHandle leftOffset={this.state.leftOffset} windowWidth={this.state.windowWidth} offsetPercent={this.state.rightOffsetPercent}
           width={this.props.width} height={this.props.height} handlerColor={this.state.rightHandlerColor} innerBarColor={this.state.rightInnerBarColor}
           focusedIn={this.state.handlerFocused === 'right'}
-          events= {{
+          events={{
             handlerEvent: {
               mousedown: this.onMouseDown,
               touchstart: this.onMouseDown,
@@ -141,8 +140,8 @@ class HorizontalScroller extends Component {
           }}>
         </SliderRightHandle>
 
-        { this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width= {this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
+        {this.selectedHandler &&
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width={this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
         }
       </g>
     );
@@ -166,17 +165,17 @@ class HorizontalScroller extends Component {
     let leftOffset = (props.leftOffset * props.width / 100) || 0;
     let rightOffset = (props.rightOffset * props.width / 100) || 0;
     let windowWidth = rightOffset - leftOffset;
-    return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset/props.width*100, rightOffsetPercent: rightOffset/props.width*100 };
+    return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset / props.width * 100, rightOffsetPercent: rightOffset / props.width * 100 };
   }
 
   onMouseDown(e) {
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let classList = e.target.classList.value.split(' ');
-    if(classList.includes('sc-slider-left-sel')) {
+    if (classList.includes('sc-slider-left-sel')) {
       this.selectedHandler = 'left';
-    }else if(classList.includes('sc-slider-right-sel')) {
+    } else if (classList.includes('sc-slider-right-sel')) {
       this.selectedHandler = 'right';
-    }else if(classList.includes('sc-hScroll-window') || classList.includes('sc-slider-left-offset') || classList.includes('sc-slider-right-offset')) {
+    } else if (classList.includes('sc-hScroll-window') || classList.includes('sc-slider-left-offset') || classList.includes('sc-slider-right-offset')) {
       this.selectedHandler = 'window';
     }
 
@@ -189,7 +188,7 @@ class HorizontalScroller extends Component {
   }
 
   onScrollMove(e) {
-    if(this.selectedHandler) {
+    if (this.selectedHandler) {
       let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
       switch (this.selectedHandler) {
@@ -207,41 +206,41 @@ class HorizontalScroller extends Component {
           break;
       }
 
-      if(winWidth < 0) {
-        if(this.selectedHandler === 'right') {
+      if (winWidth < 0) {
+        if (this.selectedHandler === 'right') {
           lOffset = this.lOffset + winWidth;
-        }else {
+        } else {
           lOffset += winWidth;
         }
         winWidth = Math.abs(winWidth);
       }
 
-      if(lOffset < 0) {
-        if(this.selectedHandler !== 'window') {
+      if (lOffset < 0) {
+        if (this.selectedHandler !== 'window') {
           winWidth += lOffset;
         }
         lOffset = 0;
-      }else if(lOffset > this.props.width) {
-        lOffset =this.props.width;
+      } else if (lOffset > this.props.width) {
+        lOffset = this.props.width;
       }
 
-      if(lOffset + winWidth > this.props.width) {
-        if(this.selectedHandler === 'window') {
+      if (lOffset + winWidth > this.props.width) {
+        if (this.selectedHandler === 'window') {
           winWidth = this.winWidth;
           lOffset = this.props.width - this.winWidth;
-        }else {
+        } else {
           winWidth = this.props.width - lOffset;
         }
       }
 
       this.state.leftOffset = lOffset;
       this.state.windowWidth = winWidth;
-      this.state.leftOffsetPercent = this.state.leftOffset/this.props.width*100;
-      this.state.rightOffsetPercent = ((this.state.leftOffset+this.state.windowWidth)/this.props.width)*100;
+      this.state.leftOffsetPercent = this.state.leftOffset / this.props.width * 100;
+      this.state.rightOffsetPercent = ((this.state.leftOffset + this.state.windowWidth) / this.props.width) * 100;
       this.emitter.emit('hScroll', {
         leftOffset: this.state.leftOffsetPercent,
         rightOffset: this.state.rightOffsetPercent,
-        windowWidth: ((this.state.windowWidth/this.props.width)*100)
+        windowWidth: ((this.state.windowWidth / this.props.width) * 100)
       });
     }
 
@@ -260,57 +259,57 @@ class HorizontalScroller extends Component {
 
   onOffsetClick(e) {
     this.onMouseDown(e);
-    this.mouseDownPos.x = this.lOffset + (this.winWidth/2) + this.props.posX;
+    this.mouseDownPos.x = this.lOffset + (this.winWidth / 2) + this.props.posX;
     this.onScrollMove(e);
     this.onScrollEnd(e);
   }
 
   onHoverInHandler(e) {
-    if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.setState({leftHandlerColor:'#333', leftInnerBarColor:'#fff'});
-    }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.setState({rightHandlerColor:'#333', rightInnerBarColor:'#fff'});
+    if (e.target.querySelector('.sc-slider-left-sel')) {
+      this.setState({ leftHandlerColor: '#333', leftInnerBarColor: '#fff' });
+    } else if (e.target.querySelector('.sc-slider-right-sel')) {
+      this.setState({ rightHandlerColor: '#333', rightInnerBarColor: '#fff' });
     }
   }
 
   onLeaveInHandler(e) {
-    if(e.target.querySelector('.sc-slider-left-sel') && this.state.handlerFocused !== 'left') {
-      this.setState({'leftHandlerColor':'#fff', leftInnerBarColor:'#5a5a5a'});
-    }else if(e.target.querySelector('.sc-slider-right-sel') && this.state.handlerFocused !== 'right') {
-      this.setState({'rightHandlerColor':'#fff', rightInnerBarColor:'#5a5a5a'});
+    if (e.target.querySelector('.sc-slider-left-sel') && this.state.handlerFocused !== 'left') {
+      this.setState({ 'leftHandlerColor': '#fff', leftInnerBarColor: '#5a5a5a' });
+    } else if (e.target.querySelector('.sc-slider-right-sel') && this.state.handlerFocused !== 'right') {
+      this.setState({ 'rightHandlerColor': '#fff', rightInnerBarColor: '#5a5a5a' });
     }
   }
 
   onFocusInHandler(e) {
-    if(e.target.querySelector('.sc-slider-left-sel') ) {
-      this.setState({leftHandlerColor:'#333', leftInnerBarColor:'#fff', handlerFocused: 'left'});
-    }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.setState({rightHandlerColor:'#333', rightInnerBarColor:'#fff', handlerFocused: 'right'});
+    if (e.target.querySelector('.sc-slider-left-sel')) {
+      this.setState({ leftHandlerColor: '#333', leftInnerBarColor: '#fff', handlerFocused: 'left' });
+    } else if (e.target.querySelector('.sc-slider-right-sel')) {
+      this.setState({ rightHandlerColor: '#333', rightInnerBarColor: '#fff', handlerFocused: 'right' });
     }
   }
 
   onFocusOutHandler(e) {
-    if(e.target.querySelector('.sc-slider-left-sel')) {
-      this.setState({'leftHandlerColor':'#fff', leftInnerBarColor:'#5a5a5a',handlerFocused: null});
-    }else if(e.target.querySelector('.sc-slider-right-sel')) {
-      this.setState({'rightHandlerColor':'#fff', rightInnerBarColor:'#5a5a5a', handlerFocused: null});
+    if (e.target.querySelector('.sc-slider-left-sel')) {
+      this.setState({ 'leftHandlerColor': '#fff', leftInnerBarColor: '#5a5a5a', handlerFocused: null });
+    } else if (e.target.querySelector('.sc-slider-right-sel')) {
+      this.setState({ 'rightHandlerColor': '#fff', rightInnerBarColor: '#5a5a5a', handlerFocused: null });
     }
   }
 
   onHoverInSliderWindow() {
-    this.setState({'sliderWindowOpacity': 0.5});
+    this.setState({ 'sliderWindowOpacity': 0.5 });
   }
 
   onLeaveSliderWindow() {
-    this.setState({'sliderWindowOpacity': 0.2});
+    this.setState({ 'sliderWindowOpacity': 0.2 });
   }
 
   onFocusInSliderWindow() {
-    this.setState({'sliderWindowOpacity': 0.5, handlerFocused: 'window'});
+    this.setState({ 'sliderWindowOpacity': 0.5, handlerFocused: 'window' });
   }
 
   onFocusOutSliderWindow() {
-    this.setState({'sliderWindowOpacity': 0.2, handlerFocused: null});
+    this.setState({ 'sliderWindowOpacity': 0.2, handlerFocused: null });
   }
 
   onKeyMove(e) {
@@ -318,7 +317,7 @@ class HorizontalScroller extends Component {
       clientX: this.state.leftOffset,
       clientY: 0
     };
-    switch(this.state.handlerFocused) {
+    switch (this.state.handlerFocused) {
       case 'left':
         event.target = this.ref.node.querySelector('.sc-slider-left-sel');
         break;
@@ -331,11 +330,11 @@ class HorizontalScroller extends Component {
     }
 
     // left arrow pressed
-    if(e.keyCode == 37) {
+    if (e.keyCode == 37) {
       this.onMouseDown(event);
       event.clientX = this.state.leftOffset - 10;
-    // right arrow pressed
-    }else if(e.keyCode == 39) {
+      // right arrow pressed
+    } else if (e.keyCode == 39) {
       this.onMouseDown(event);
       event.clientX = this.state.leftOffset + 10;
     }
@@ -357,7 +356,7 @@ class HorizontalScroller extends Component {
 class SliderWindow extends Component {
   constructor(props) {
     super(props);
-    this.state = {...this.props};
+    this.state = { ...this.props };
     this.titleId = UtilCore.getRandomID();
   }
 
@@ -380,7 +379,7 @@ class SliderWindow extends Component {
           fill-opacity={this.props.fillOpacity} style='transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;' events={this.state.events}>
         </rect>
         <title id={this.titleId}> Slider Window (use arrow left or right to slide) </title>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={0} y={0} rx={5} ry={5} width={this.props.width} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
+        <rect class={(this.props.focusedIn ? 'focus-in' : '')} x={0} y={0} rx={5} ry={5} width={this.props.width} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
       </g>
     );
   }
@@ -389,13 +388,13 @@ class SliderWindow extends Component {
 class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
-    this.state = {...this.props};
+    this.state = { ...this.props };
     this.titleId = UtilCore.getRandomID();
     this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
-    this.state = {...this.state, ...nextProps};
+    this.state = { ...this.state, ...nextProps };
   }
 
   componentWillMount() {
@@ -412,24 +411,24 @@ class SliderLeftHandle extends Component {
       <g class='sc-slider-left-handle' transform={`translate(${this.state.leftOffset},0)`} >
         <defs>
           <filter xmlns='http://www.w3.org/2000/svg' id={this.gradId} height='130%' width='130%'>
-              <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
-              <feOffset dx='0' dy='1' result='offsetblur'></feOffset>
-              <feComponentTransfer>
-                <feFuncA type='linear' slope='0.7'></feFuncA>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode></feMergeNode>
-                <feMergeNode in='SourceGraphic'></feMergeNode>
-              </feMerge>
+            <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
+            <feOffset dx='0' dy='1' result='offsetblur'></feOffset>
+            <feComponentTransfer>
+              <feFuncA type='linear' slope='0.7'></feFuncA>
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode></feMergeNode>
+              <feMergeNode in='SourceGraphic'></feMergeNode>
+            </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0' >
+        <rect class='sc-slider-left-offset' x={-this.state.leftOffset} y='0' width={this.state.leftOffset} height={this.props.height} events={this.props.events.offsetEvent} fill='rgba(102,133,194,0.3)' fill-opacity='0' >
           <title> Click to move window here  </title>
         </rect>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
-        <g style={{'cursor': 'ew-resize'}} events={this.props.events.handlerEvent} role='slider' aria-labelledby={this.titleId} aria-orientation='horizontal' aria-valuemin='0' aria-valuemax='100' aria-valuenow={Math.round(this.state.offsetPercent)} tabindex='0'>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '')} x={-this.props.height / 2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
+        <g style={{ 'cursor': 'ew-resize' }} events={this.props.events.handlerEvent} role='slider' aria-labelledby={this.titleId} aria-orientation='horizontal' aria-valuemin='0' aria-valuemax='100' aria-valuenow={Math.round(this.state.offsetPercent)} tabindex='0'>
           <title id={this.titleId}> Left Slider Handle (use arrow key left or right to slide) </title>
-          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke='none' filter={`url(#${this.gradId})`}></circle>
+          <circle class='sc-slider-left-sel' cx={0} cy={this.props.height / 2} r={15} fill={this.props.handlerColor} stroke='none' filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-left-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderLeftSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
@@ -438,13 +437,14 @@ class SliderLeftHandle extends Component {
 
   calcSliderPaths() {
     let innerBarLeft = [
-      'M',-2, (this.props.height/2) - 5,
-      'L',-2, (this.props.height/2) + 5,
-      'M', 2, (this.props.height/2) - 5,
-      'L', 2, (this.props.height/2) + 5
+      'M', -2, (this.props.height / 2) - 5,
+      'L', -2, (this.props.height / 2) + 5,
+      'M', 2, (this.props.height / 2) - 5,
+      'L', 2, (this.props.height / 2) + 5
     ];
 
-    this.state = {...this.state,
+    this.state = {
+      ...this.state,
       sliderLeftSelInner: innerBarLeft.join(' ')
     };
   }
@@ -453,13 +453,13 @@ class SliderLeftHandle extends Component {
 class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
-    this.state = {...this.props};
+    this.state = { ...this.props };
     this.titleId = UtilCore.getRandomID();
     this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
-    this.state = {...this.state, ...nextProps};
+    this.state = { ...this.state, ...nextProps };
   }
 
   componentWillMount() {
@@ -476,24 +476,24 @@ class SliderRightHandle extends Component {
       <g class='sc-slider-right-handle' transform={`translate(${this.state.leftOffset + this.state.windowWidth},0)`} >
         <defs>
           <filter xmlns='http://www.w3.org/2000/svg' id={this.gradId} height='130%' width='130%'>
-              <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
-              <feOffset dx='0' dy='1' result='offsetblur'></feOffset>
-              <feComponentTransfer>
-                <feFuncA type='linear' slope='0.7'></feFuncA>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode></feMergeNode>
-                <feMergeNode in='SourceGraphic'></feMergeNode>
-              </feMerge>
+            <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
+            <feOffset dx='0' dy='1' result='offsetblur'></feOffset>
+            <feComponentTransfer>
+              <feFuncA type='linear' slope='0.7'></feFuncA>
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode></feMergeNode>
+              <feMergeNode in='SourceGraphic'></feMergeNode>
+            </feMerge>
           </filter>
         </defs>
-        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill= 'rgba(102,133,194,0.3)'  fill-opacity='0'>
+        <rect class='sc-slider-right-offset' x='0' y='0' width={this.state.rightOffset} height={this.props.height} events={this.props.events.offsetEvent} fill='rgba(102,133,194,0.3)' fill-opacity='0'>
           <title> Click to move window here  </title>
         </rect>
-        <rect class={(this.props.focusedIn ? 'focus-in' : '' )} x={-this.props.height/2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
-        <g style={{'cursor': 'ew-resize'}} class='right-handler' events={this.props.events.handlerEvent} role='slider' aria-labelledby={this.titleId} aria-orientation='horizontal' aria-valuemin='0' aria-valuemax='100' aria-valuenow={Math.round(this.state.offsetPercent)} tabindex='0'>
+        <rect class={(this.props.focusedIn ? 'focus-in' : '')} x={-this.props.height / 2} y={0} rx={5} ry={5} width={this.props.height} height={this.props.height} pointer-events='none' stroke='none' fill='none' stroke-width='1' />
+        <g style={{ 'cursor': 'ew-resize' }} class='right-handler' events={this.props.events.handlerEvent} role='slider' aria-labelledby={this.titleId} aria-orientation='horizontal' aria-valuemin='0' aria-valuemax='100' aria-valuenow={Math.round(this.state.offsetPercent)} tabindex='0'>
           <title id={this.titleId}> Right Slider Handle </title>
-          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height/2} r={15} fill={this.props.handlerColor} stroke='none' filter={`url(#${this.gradId})`}></circle>
+          <circle class='sc-slider-right-sel' cx={0} cy={this.props.height / 2} r={15} fill={this.props.handlerColor} stroke='none' filter={`url(#${this.gradId})`}></circle>
           <path class='sc-slider-right-sel-inner' stroke={this.props.innerBarColor} fill='none' d={this.state.sliderRightSelInner} pointer-events='none' shape-rendering='optimizeSpeed' stroke-width='1' opacity='1'></path>
         </g>
       </g>
@@ -502,13 +502,14 @@ class SliderRightHandle extends Component {
 
   calcSliderPaths() {
     let innerBarRight = [
-      'M',-2, (this.props.height/2) - 5,
-      'L',-2, (this.props.height/2) + 5,
-      'M', 2, (this.props.height/2) - 5,
-      'L', 2, (this.props.height/2) + 5
+      'M', -2, (this.props.height / 2) - 5,
+      'L', -2, (this.props.height / 2) + 5,
+      'M', 2, (this.props.height / 2) - 5,
+      'L', 2, (this.props.height / 2) + 5
     ];
 
-    this.state = {...this.state,
+    this.state = {
+      ...this.state,
       sliderRightSelInner: innerBarRight.join(' '),
       rightOffset: Math.abs(this.props.width - (this.state.leftOffset + this.state.windowWidth))
     };

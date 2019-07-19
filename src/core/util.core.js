@@ -8,7 +8,7 @@
  */
 
 class UtilCore {
-  constructor() {}
+  constructor() { }
   /**
    * Merge object 2 into object 1 recursively. Object 1 will be modified.
    * @param {Object} obj1 Mutable object will change after merge
@@ -36,7 +36,7 @@ class UtilCore {
    * @returns {Object} Merged JSON object.
    */
   extends(source, source1) {
-    if(!source || !source1) {
+    if (!source || !source1) {
       return {};
     }
     let mergedJSON = source;
@@ -81,7 +81,7 @@ class UtilCore {
     try {
       let d = new Date(ms);
       return d instanceof Date && !isNaN(d);
-    }catch(e){
+    } catch (e) {
       return false;
     }
   }
@@ -96,19 +96,19 @@ class UtilCore {
     return (...args) => {
       if (args in cache) {
         return cache[args];
-      }else {
+      } else {
         let result = fn(...args);
         cache[args] = result;
         return result;
       }
     };
   }
-/**
- * Return a color HEX code from index.
- * @param {Number} index Index of color HEX code.
- * @param {Boolean} ranbowFlag Return rainbow color HEX code.
- * @returns {String} Color HEX code.
- */
+  /**
+   * Return a color HEX code from index.
+   * @param {Number} index Index of color HEX code.
+   * @param {Boolean} ranbowFlag Return rainbow color HEX code.
+   * @returns {String} Color HEX code.
+   */
   getColor(index, ranbowFlag) {
     let Colors = {};
     Colors.names = {
@@ -206,7 +206,7 @@ class UtilCore {
     let chr4 = () => {
       return Math.random().toString(16).slice(-4);
     };
-    return chr4() + '-' + chr4()+ '-' + chr4();
+    return chr4() + '-' + chr4() + '-' + chr4();
   }
 
 }

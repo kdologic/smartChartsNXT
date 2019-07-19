@@ -6,13 +6,13 @@ import Style from './../viewEngin/style';
 
 /**
  * textBox.js
- * @createdOn:04-May-2019
- * @author:SmartChartsNXT
+ * @createdOn: 04-May-2019
+ * @author: SmartChartsNXT
  * @description: This components will create a text box area.
  * @extends: Component
  */
 
-class TextBox extends Component{
+class TextBox extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -24,7 +24,7 @@ class TextBox extends Component{
       text: this.props.text,
       textBBox: {
         width: this.props.width || 0,
-        height: this.props.height|| 0
+        height: this.props.height || 0
       },
       textWidth: 0,
       textHeight: 0,
@@ -58,7 +58,7 @@ class TextBox extends Component{
     this.state.textBBox.width = this.props.width || textBBox.width + (2 * this.props.padding || 0);
     this.state.textBBox.height = this.props.height || textBBox.height + (2 * this.props.padding || 0);
     const bgRect = this.ref.node.querySelector('.sc-textbox-bg');
-    if(bgRect) {
+    if (bgRect) {
       bgRect.setAttribute('width', this.state.textBBox.width);
       bgRect.setAttribute('height', this.state.textBBox.height);
     }
@@ -70,11 +70,11 @@ class TextBox extends Component{
     let textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
     return (
       <g transform={`translate(${this.props.posX},${this.props.posY}) ${this.props.transform || ''}`} tabindex='-1'>
-          <rect class='sc-textbox-bg' x={ (this.state.textAnchor === 'middle' ? -(this.state.textBBox.width/2) : 0) } y={0}
-            width={this.state.textBBox.width} height={this.state.textBBox.height}
-            rx={this.props.borderRadius || 0} opacity={this.props.bgOpacity || 1} fill={this.props.bgColor || 'none'}>
-          </rect>
-        { textNode }
+        <rect class='sc-textbox-bg' x={(this.state.textAnchor === 'middle' ? -(this.state.textBBox.width / 2) : 0)} y={0}
+          width={this.state.textBBox.width} height={this.state.textBBox.height}
+          rx={this.props.borderRadius || 0} opacity={this.props.bgOpacity || 1} fill={this.props.bgColor || 'none'}>
+        </rect>
+        {textNode}
       </g>
     );
   }
@@ -100,14 +100,14 @@ class TextBox extends Component{
   }
 
   splitText(txt = '') {
-    let words = txt.split(/(\s+)/).filter( e => e.trim().length > 0);
-    let lines = [], line=[];
-    for(let w of words) {
+    let words = txt.split(/(\s+)/).filter(e => e.trim().length > 0);
+    let lines = [], line = [];
+    for (let w of words) {
       let textWidth = UiCore.getComputedTextWidth(this.getTextNode([line.concat(w).join(' ')]));
       if (textWidth > this.state.textBBox.width) {
         lines.push(line.join(' '));
         line = [w];
-      }else {
+      } else {
         line.push(w);
       }
     }

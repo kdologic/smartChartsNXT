@@ -5,7 +5,7 @@ import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import {CHART_MODULES} from './../settings/componentMapper';
+import { CHART_MODULES } from './../settings/componentMapper';
 import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';
 import Menu from './../components/menu';
@@ -22,8 +22,8 @@ class BaseChart extends Component {
     try {
       super(props);
       this.chartType = this.props.opts.type;
-      this.CHART_OPTIONS = UtilCore.extends(this.props.opts, { width: 1, height: 1});
-      this.CHART_DATA = {scaleX: 0, scaleY: 0};
+      this.CHART_OPTIONS = UtilCore.extends(this.props.opts, { width: 1, height: 1 });
+      this.CHART_DATA = { scaleX: 0, scaleY: 0 };
       this.CHART_CONST = {
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600
@@ -77,7 +77,7 @@ class BaseChart extends Component {
   }
 
   loadConfig(config) {
-    this.CHART_DATA = {...this.CHART_DATA, ...config};
+    this.CHART_DATA = { ...this.CHART_DATA, ...config };
   }
 
   componentDidMount() {
@@ -133,8 +133,8 @@ class BaseChart extends Component {
           UserSelect: 'none'
         }} >
 
-        <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '')+' '+((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
-        <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType)+' -created using SmartChartsNXT chart library.'}</desc>
+        <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '') + ' ' + ((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
+        <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType) + ' -created using SmartChartsNXT chart library.'}</desc>
 
         <CommonStyles></CommonStyles>
 
@@ -147,7 +147,7 @@ class BaseChart extends Component {
             fill={this.CHART_OPTIONS.bgColor || '#fff'}
             strokeWidth={1}
             stroke={this.CHART_OPTIONS.canvasBorder ? defaultConfig.theme.fontColorDark : 'none'}
-            style={{pointerEvents: 'none'}}
+            style={{ pointerEvents: 'none' }}
           />
         </g>
 
@@ -156,7 +156,7 @@ class BaseChart extends Component {
         }
 
         {this.CHART_OPTIONS.showMenu !== false &&
-          this.getMenuIcon(this.CHART_DATA.svgWidth, 0, )
+          this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
         }
 
         <g id={`${this.getChartId()}_cont`}>
@@ -167,9 +167,9 @@ class BaseChart extends Component {
           <Menu x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
         }
 
-        { this.loader() }
+        {this.loader()}
       </svg>
-     );
+    );
   }
 
   getRunId() {
@@ -217,18 +217,18 @@ class BaseChart extends Component {
         </style>
         <defs>
           <filter xmlns='http://www.w3.org/2000/svg' id={this.menuIconGradId} height='130%' width='130%'>
-              <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
-              <feOffset dx='-1' dy='1' result='offsetblur'></feOffset>
-              <feComponentTransfer>
-                <feFuncA type='linear' slope='0.7'></feFuncA>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode></feMergeNode>
-                <feMergeNode in='SourceGraphic'></feMergeNode>
-              </feMerge>
+            <feGaussianBlur in='SourceAlpha' stdDeviation='1'></feGaussianBlur>
+            <feOffset dx='-1' dy='1' result='offsetblur'></feOffset>
+            <feComponentTransfer>
+              <feFuncA type='linear' slope='0.7'></feFuncA>
+            </feComponentTransfer>
+            <feMerge>
+              <feMergeNode></feMergeNode>
+              <feMergeNode in='SourceGraphic'></feMergeNode>
+            </feMerge>
           </filter>
         </defs>
-        <circle role='menu' class='sc-menu-icon-bg do-focus-highlight' cx='0' cy ='0' r='34' fill='#fff' stroke-width='1' pointer-events='all' tabindex='0'
+        <circle role='menu' class='sc-menu-icon-bg do-focus-highlight' cx='0' cy='0' r='34' fill='#fff' stroke-width='1' pointer-events='all' tabindex='0'
           aria-label='chart options' aria-haspopup='true' aria-expanded={this.state.menuExpanded}
           filter={`url(#${this.menuIconGradId})`}
           events={{
@@ -240,25 +240,25 @@ class BaseChart extends Component {
             focusout: this.onMenuIconFocusOut
           }}
         />
-        <g class={'dot-group' + (this.state.menuExpanded ? ' active':'')} fill='#000' stroke='#000' stroke-width='2' transform='rotate(-45, -15, 15)'
-          vector-effect='non-scaling-stroke' pointer-events='none' style={{'cursor':'pointer'}} >
-          <circle class='inner-dot' cx='-15' cy ='5' r='1' />
-          <circle class='inner-dot' cx='-15' cy ='15' r='1' />
-          <circle class='inner-dot' cx='-15' cy ='25' r='1' />
+        <g class={'dot-group' + (this.state.menuExpanded ? ' active' : '')} fill='#000' stroke='#000' stroke-width='2' transform='rotate(-45, -15, 15)'
+          vector-effect='non-scaling-stroke' pointer-events='none' style={{ 'cursor': 'pointer' }} >
+          <circle class='inner-dot' cx='-15' cy='5' r='1' />
+          <circle class='inner-dot' cx='-15' cy='15' r='1' />
+          <circle class='inner-dot' cx='-15' cy='25' r='1' />
         </g>
       </g>
     );
   }
 
   showMenuPopup(e) {
-    if(e.type =='click' || (e.type == 'keypress' && (e.which === 13 || e.which === 32))) {
-      this.setState({menuExpanded: true});
+    if (e.type == 'click' || (e.type == 'keypress' && (e.which === 13 || e.which === 32))) {
+      this.setState({ menuExpanded: true });
     }
   }
 
   hideMenuPopup() {
-    this.setState({menuExpanded: false});
-    setTimeout(() =>{
+    this.setState({ menuExpanded: false });
+    setTimeout(() => {
       this.ref.node.querySelector('.sc-menu-icon-bg').focus();
     }, 0);
   }
@@ -278,7 +278,7 @@ class BaseChart extends Component {
   }
 
   onMenuIconMouseOut() {
-    if(!this.state.menuIconFocused) {
+    if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
     }
   }
@@ -289,8 +289,8 @@ class BaseChart extends Component {
 
   hideBeforeSave() {
     let elemList = ['.sc-menu-icon', '.sc-redirect-icon'];
-    for(let elem of elemList) {
-      if(this.ref.node.querySelector(elem)) {
+    for (let elem of elemList) {
+      if (this.ref.node.querySelector(elem)) {
         this.ref.node.querySelector(elem).classList.add('sc-hide');
       }
     }
@@ -298,33 +298,33 @@ class BaseChart extends Component {
 
   showAfterSave() {
     let elemList = ['.sc-menu-icon', '.sc-redirect-icon'];
-    for(let elem of elemList) {
-      if(this.ref.node.querySelector(elem)) {
+    for (let elem of elemList) {
+      if (this.ref.node.querySelector(elem)) {
         this.ref.node.querySelector(elem).classList.remove('sc-hide');
       }
     }
   }
 
   onResizeComponent(e) {
-    this.setState({resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight});
+    this.setState({ resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight });
   }
 
   onShowLoader() {
-    this.setState({'showLoader': true});
+    this.setState({ 'showLoader': true });
   }
 
   onHideLoader() {
-    this.setState({'showLoader': false});
+    this.setState({ 'showLoader': false });
   }
 
   loader() {
-    if(!this.state.showLoader) {
+    if (!this.state.showLoader) {
       return false;
     }
     return (
       <g id='smartsChartsNXT-loader-container' >
         <rect class='sc-overlay' x={0} y={0} width={this.state.width} height={this.state.height} opacity='0.2' fill='#000' ></rect>
-        <g id='loader-icon'  transform={`translate(${this.state.width/2},${(this.state.height/2) - 40}) scale(0.6,0.6)`}>
+        <g id='loader-icon' transform={`translate(${this.state.width / 2},${(this.state.height / 2) - 40}) scale(0.6,0.6)`}>
           <rect x='-30' y='-30' width='160' height='160' stroke='#000' fill='#f1f1f1' class='bk' rx='10' opacity='0.8'></rect>
           <g transform='translate(-20,-20)'>
             <path d='M79.9,52.6C80,51.8,80,50.9,80,50s0-1.8-0.1-2.6l-5.1-0.4c-0.3-2.4-0.9-4.6-1.8-6.7l4.2-2.9c-0.7-1.6-1.6-3.1-2.6-4.5 L70,35c-1.4-1.9-3.1-3.5-4.9-4.9l2.2-4.6c-1.4-1-2.9-1.9-4.5-2.6L59.8,27c-2.1-0.9-4.4-1.5-6.7-1.8l-0.4-5.1C51.8,20,50.9,20,50,20 s-1.8,0-2.6,0.1l-0.4,5.1c-2.4,0.3-4.6,0.9-6.7,1.8l-2.9-4.1c-1.6,0.7-3.1,1.6-4.5,2.6l2.1,4.6c-1.9,1.4-3.5,3.1-5,4.9l-4.5-2.1 c-1,1.4-1.9,2.9-2.6,4.5l4.1,2.9c-0.9,2.1-1.5,4.4-1.8,6.8l-5,0.4C20,48.2,20,49.1,20,50s0,1.8,0.1,2.6l5,0.4 c0.3,2.4,0.9,4.7,1.8,6.8l-4.1,2.9c0.7,1.6,1.6,3.1,2.6,4.5l4.5-2.1c1.4,1.9,3.1,3.5,5,4.9l-2.1,4.6c1.4,1,2.9,1.9,4.5,2.6l2.9-4.1 c2.1,0.9,4.4,1.5,6.7,1.8l0.4,5.1C48.2,80,49.1,80,50,80s1.8,0,2.6-0.1l0.4-5.1c2.3-0.3,4.6-0.9,6.7-1.8l2.9,4.2 c1.6-0.7,3.1-1.6,4.5-2.6L65,69.9c1.9-1.4,3.5-3,4.9-4.9l4.6,2.2c1-1.4,1.9-2.9,2.6-4.5L73,59.8c0.9-2.1,1.5-4.4,1.8-6.7L79.9,52.6 z M50,65c-8.3,0-15-6.7-15-15c0-8.3,6.7-15,15-15s15,6.7,15,15C65,58.3,58.3,65,50,65z' fill='#000'>

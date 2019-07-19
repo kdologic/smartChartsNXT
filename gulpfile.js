@@ -1,8 +1,8 @@
-"use strict";
+'use strict';
 
 const argv = require('yargs').argv;
 
-process.env.NODE_ENV = argv.env == "production" ? "production" : "development"; 
+process.env.NODE_ENV = argv.env == 'production' ? 'production' : 'development';
 
 const gulp = require('gulp');
 const insert = require('gulp-insert');
@@ -10,7 +10,7 @@ const insert = require('gulp-insert');
 const minify = require('gulp-uglify-es').default;
 const rename = require('gulp-rename');
 
-const webpack = require("webpack-stream");
+const webpack = require('webpack-stream');
 const webpackConfig = require('./webpack.config.js');
 
 const pkg = require('./package.json');
@@ -18,11 +18,11 @@ const srcDir = './src/';
 const buildDir = './public/';
 const testDir = './test/';
 
-const header = `/** 
+const header = `/**
 * SmartChartsNXT
 * http://www.smartcharts.cf
 * Version:${pkg.version}
-* 
+*
 * Copyright 2019 Kausik Dey
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
@@ -45,8 +45,8 @@ function buildTask() {
 function minifyTask() {
   return gulp.src(buildDir + 'smartChartsNXT.bundle.js')
     .pipe(minify({
-      keep_classnames: true,
-      keep_fnames: true
+      'keep_classnames': true,
+      'keep_fnames': true
     }))
     .pipe(rename('smartChartsNXT.bundle.min.js'))
     .pipe(insert.prepend(header))

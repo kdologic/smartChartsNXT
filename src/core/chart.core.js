@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 'use strict';
 
 import UiCore from './../core/ui.core';
@@ -9,13 +8,13 @@ import viewConfig from './../viewEngin/config';
 
 /**
  * chart.core.js
- * @createdOn:10-Jul-2017
+ * @createdOn: 10-Jul-2017
  * @author: SmartChartsNXT
- * @description:SmartChartsNXT Core Library components. It's bootstrap the code,
+ * @description: SmartChartsNXT Core Library components. It's bootstrap the code,
  * by loading appropriate dependencies. Loading ployfills and shims, fonts etc.
  */
 
- class Core {
+class Core {
   constructor() {
     this._debug = false;
     this.nameSpaceReadyStatus = false;
@@ -26,15 +25,15 @@ import viewConfig from './../viewEngin/config';
   loadFont() {
     UiCore.prependStyle(document.querySelector('head'), fontLato);
     let intervalId = setInterval(() => {
-      if(document.body) {
+      if (document.body) {
         clearInterval(intervalId);
-        document.body.insertAdjacentHTML('beforeend','<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
+        document.body.insertAdjacentHTML('beforeend', '<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
         setTimeout(() => {
           this.nameSpaceReadyStatus = true;
           setTimeout(() => {
             let fLoader = document.getElementById('sc-temp-font-loader');
             fLoader.parentNode.removeChild(fLoader);
-          },1000 );
+          }, 1000);
         });
       }
     }, 10);
@@ -84,14 +83,17 @@ import viewConfig from './../viewEngin/config';
           }
 
           let endTitme = window.performance.now();
+          /* eslint-disable-next-line no-console */
           console.info('Time elapsed for chart: %c' + (endTitme - startTime) + ' Ms', 'color:green');
         }
       }
     }, 100);
   }
 
-  handleError(ex, msg) {
+  handleError(ex) {
+    /* eslint-disable-next-line no-console */
     console.error('SmartChartsNXT:' + (ex.errorIn || ''));
+    /* eslint-disable-next-line no-console */
     ex.stack && console.error(ex.stack);
   }
 

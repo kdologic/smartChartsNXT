@@ -1,10 +1,10 @@
-"use strict";
+'use strict';
 
 /**
  * eventEmitter.js
  * @createdOn: 14-Mar-2018
  * @author: SmartChartsNXT
- * @description:This is singleTone class for event emitter. For propagate events between components. 
+ * @description: This is singleTone class for event emitter. For communicate through events between components.
  */
 
 const EventEmitter = require('events');
@@ -28,7 +28,7 @@ class EventEmitterSingleTone {
   }
 
   getInstance(runId) {
-    return instance[runId]; 
+    return instance[runId];
   }
 }
 

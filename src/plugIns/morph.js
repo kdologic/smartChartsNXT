@@ -1,74 +1,77 @@
-"use strict";
+'use strict';
 
 /**
  * morph.js
  * @createdOn: 31-Mar-2019
  * @author: SmartChartsNXT
- * @description: Animate a path by shape morphing technique. 
- * 
- * Note : 
- * It can automatically add the missing points if two paths have unequal number of points. 
- * Corresponding command character must be match for both path. (i.e. 'C' can't be morph into 'L' etc.) 
+ * @description: Animate a path by shape morphing technique.
+ *
+ * Note :
+ * It can automatically add the missing points if two paths have unequal number of points.
+ * Corresponding command character must be match for both path. (i.e. 'C' can't be morph into 'L' etc.)
  */
 
-import PathSegList from "../viewEngin/shims/pathSegmentList";
-import Easing from "./easing"; 
+import PathSegList from '../viewEngin/shims/pathSegmentList';
+import Easing from './easing';
 
-(function() { 
+(function () {
 
   /**
-   * A morphing function that morph a path element from a defferent shape. 
+   * A morphing function that morph a path element from a defferent shape.
    * @param {number} duration A string or number determining how long the morphing will run. default: 400 ms.
-   * @param {string} fromPath A string value represent the path d attribute, that will be morphing from it. 
+   * @param {string} fromPath A string value represent the path d attribute, that will be morphing from it.
    * @param {function} easing A function that calculate the easing value between [0 <==> 1] indicating which easing function to use for the transition.
    * @param {function} callback A function to call once the morphing is complete, called once per matched element.
+   * @return {void} undefined
    */
-  window.SVGPathElement.prototype.morphFrom = function(duration=400, fromPath, easing, callback) {
-    let self = this; 
+  window.SVGPathElement.prototype.morphFrom = function (duration = 400, fromPath, easing, callback) {
+    let self = this;
     fromPath = _createPathElement(fromPath);
     let fromPathPoints = fromPath.pathSegList;
     let toPathPoints = this.pathSegList;
-    let toPathClone = this.cloneNode(); 
+    let toPathClone = this.cloneNode();
 
     _equalizePaths(fromPathPoints, toPathPoints);
     let diffPoints = _getPathDiff(fromPathPoints, toPathPoints);
-    if(typeof easing !== 'function') {
+    if (typeof easing !== 'function') {
       easing = Easing.easeInQuad;
     }
     if (_validateMorphing(fromPathPoints, toPathPoints)) {
       this.frameId = _letsAnimate(duration, easing, (pos) => {
         _morphPathFrom(fromPath, this, diffPoints, pos);
       }, () => {
-        animObj.isPlaying = false; 
-        if(typeof callback == 'function') {
+        animObj.isPlaying = false;
+        if (typeof callback == 'function') {
           callback();
         }
       });
-    }else {
+    } else {
+      /* eslint-disable-next-line no-console */
       console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
       this.setAttribute('d', toPathClone.getAttribute('d'));
     }
 
     let animObj = {
       isPlaying: true,
-      stop: function() {
-        this.isPlaying = false; 
+      stop: function () {
+        this.isPlaying = false;
         cancelAnimationFrame(self.frameId.id);
       }
     };
 
-    return animObj; 
+    return animObj;
   };
 
   /**
-   * A morphing function that morph a path element into a defferent shape. 
+   * A morphing function that morph a path element into a defferent shape.
    * @param {number} duration A string or number determining how long the morphing will run. default: 400 ms.
-   * @param {string} toPath A string value represent the path d attribute, that will be morphing into it. 
+   * @param {string} toPath A string value represent the path d attribute, that will be morphing into it.
    * @param {function} easing A function that calculate the easing value between [0 <==> 1] indicating which easing function to use for the transition.
    * @param {function} callback A function to call once the morphing is complete, called once per matched element.
+   * @returns {void} undefined
    */
-  window.SVGPathElement.prototype.morphTo = function (duration=400, toPath, easing, callback) {
-    let self = this; 
+  window.SVGPathElement.prototype.morphTo = function (duration = 400, toPath, easing, callback) {
+    let self = this;
     toPath = _createPathElement(toPath);
     let fromPathPoints = this.pathSegList;
     let toPathPoints = toPath.pathSegList;
@@ -77,27 +80,28 @@ import Easing from "./easing";
 
     let fromPathClone = this.cloneNode();
     let diffPoints = _getPathDiff(toPathPoints, fromPathPoints);
-    if(typeof easing !== 'function') {
+    if (typeof easing !== 'function') {
       easing = Easing.easeInQuad;
     }
     if (_validateMorphing(fromPathPoints, toPathPoints)) {
       this.frameId = _letsAnimate(duration, easing, (pos) => {
-          _morphPathTo(this, toPath, fromPathClone, diffPoints, pos);
+        _morphPathTo(this, toPath, fromPathClone, diffPoints, pos);
       }, () => {
-        animObj.isPlaying = false; 
-        if(typeof callback == 'function') {
+        animObj.isPlaying = false;
+        if (typeof callback == 'function') {
           callback();
         }
       });
     } else {
+      /* eslint-disable-next-line no-console */
       console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
       this.setAttribute('d', fromPathClone.getAttribute('d'));
     }
 
     let animObj = {
       isPlaying: true,
-      stop: function() {
-        this.isPlaying = false; 
+      stop: function () {
+        this.isPlaying = false;
         cancelAnimationFrame(self.frameId.id);
       }
     };
@@ -113,7 +117,7 @@ import Easing from "./easing";
     let smallPath = fromPathPoints.numberOfItems < toPathPoints.numberOfItems ? fromPathPoints : toPathPoints;
     let pointMissingCount = largePath.numberOfItems - smallPath.numberOfItems;
     let insertIndex = smallPath.numberOfItems - 1;
-    for (let i = 0; i < pointMissingCount; i++, insertIndex++) {
+    for (let i = 0; i < pointMissingCount; i++ , insertIndex++) {
       let missingPoint = smallPath.getItem(insertIndex - 1);
       let existPoint = largePath.getItem(insertIndex);
       if (existPoint.pathSegTypeAsLetter.toUpperCase() !== missingPoint.pathSegTypeAsLetter.toUpperCase()) {
@@ -139,8 +143,7 @@ import Easing from "./easing";
   function _letsAnimate(duration, easing, morphFunc, doneCallback) {
     let animTime = 0, position = 0;
     let startTime = performance.now();
-    let frameId = {id: null};
-    
+    let frameId = { id: null };
 
     function frame(time) {
       animTime = time - startTime;
@@ -148,10 +151,10 @@ import Easing from "./easing";
       // Are we done?
       if (animTime >= duration) {
         // last rendered value wasn't final position, set it here.
-        if(typeof morphFunc == 'function') {
+        if (typeof morphFunc == 'function') {
           morphFunc(1);
         }
-        if(typeof doneCallback == 'function') {
+        if (typeof doneCallback == 'function') {
           doneCallback();
         }
       } else {
@@ -159,7 +162,7 @@ import Easing from "./easing";
         // What position should the animation be in?
         position = (easing(animTime / duration)).toPrecision(3);
 
-        if(typeof morphFunc == 'function') {
+        if (typeof morphFunc == 'function') {
           morphFunc(position);
         }
 
@@ -169,7 +172,7 @@ import Easing from "./easing";
     }
     // reqest the first frame
     frameId.id = requestAnimationFrame(frame);
-    return frameId; 
+    return frameId;
   }
 
   function _getPathDiff(fromPathPoints, toPathPoints) {
@@ -210,7 +213,7 @@ import Easing from "./easing";
 
   function _morphPathTo(fromPath, toPath, fromPathClone, diffObj, multiplier) {
     let sourcePathPoints = fromPath.pathSegList;
-    let sourceClonedPathPoints = fromPathClone.pathSegList; 
+    let sourceClonedPathPoints = fromPathClone.pathSegList;
     let destPathPoints = toPath.pathSegList;
     let numPoints = destPathPoints.numberOfItems;
     for (let k = 0; k < numPoints; k++) {
@@ -273,7 +276,7 @@ import Easing from "./easing";
   }
 
   function _createPathElement(pathData) {
-    let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', pathData);
     return path;
   }

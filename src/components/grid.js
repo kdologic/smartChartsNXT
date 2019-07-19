@@ -4,7 +4,7 @@ import defaultConfig from './../settings/config';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import UtilCore from './../core/util.core';
-import {OPTIONS_TYPE as ENUMS} from './../settings/globalEnums';
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
  * grid.js
@@ -14,7 +14,7 @@ import {OPTIONS_TYPE as ENUMS} from './../settings/globalEnums';
  * @extends: Component
  */
 
-class Grid extends Component{
+class Grid extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
@@ -93,14 +93,14 @@ class Grid extends Component{
         <g class='sc-h-grid-lines'>
           {this.config.horizontal.enable && this.drawHGridLines()}
         </g>
-        <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none'  shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.showBgGradient ? `url(#${this.gradId})` : this.config.bgColor} fill-opacity={this.config.bgOpacity} stroke-width='0' />
-        <line class='sc-grid-box-left-border' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
-        <line class='sc-grid-box-bottom-border' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed'/>
+        <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.showBgGradient ? `url(#${this.gradId})` : this.config.bgColor} fill-opacity={this.config.bgOpacity} stroke-width='0' />
+        <line class='sc-grid-box-left-border' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
+        <line class='sc-grid-box-bottom-border' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
       </g>
     );
   }
 
-  drawVGridLines(){
+  drawVGridLines() {
     let grids = [];
     for (let gridCount = 0; gridCount < this.state.vGridCount; gridCount++) {
       grids.push(<line class={`sc-v-grid-line-${gridCount}`} x1={gridCount * this.state.vGridInterval} y1={0} x2={gridCount * this.state.vGridInterval} y2={this.props.height} fill='none' stroke={this.config.vertical.lineColor} stroke-opacity={this.config.vertical.lineOpacity} stroke-width={this.config.vertical.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.vLineDashArray} />);
@@ -108,7 +108,7 @@ class Grid extends Component{
     return grids;
   }
 
-  drawHGridLines(){
+  drawHGridLines() {
     let grids = [];
     for (let gridCount = 0; gridCount < this.state.hGridCount; gridCount++) {
       grids.push(<line class={`sc-h-grid-line-${gridCount}`} x1={0} y1={gridCount * this.state.hGridInterval} x2={this.props.width} y2={gridCount * this.state.hGridInterval} fill='none' stroke={this.config.horizontal.lineColor} stroke-opacity={gridCount == this.state.zeroBaseGridIndex ? 1 : this.config.vertical.lineOpacity} stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray} />);
@@ -118,24 +118,24 @@ class Grid extends Component{
 
   createGradient(gardId, gradType, color) {
     let gradHtml = '';
-    switch(gradType) {
+    switch (gradType) {
       case ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL:
         gradHtml =
-        (<defs>
-          <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-            <stop offset="0%" stop-color="rgb(255,255,255)" stop-opacity="0" />
-            <stop offset="100%" stop-color={color} stop-opacity="1" />
-          </linearGradient>
-        </defs>);
+          (<defs>
+            <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color="rgb(255,255,255)" stop-opacity="0" />
+              <stop offset="100%" stop-color={color} stop-opacity="1" />
+            </linearGradient>
+          </defs>);
         break;
       case ENUMS.GRADIENT_STYLE.LINEAR_HORIZONTAL:
         gradHtml =
-        (<defs>
-          <linearGradient id={gardId} x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="objectBoundingBox">
-            <stop offset="0%" stop-color={color} stop-opacity="1" />
-            <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
-          </linearGradient>
-        </defs>);
+          (<defs>
+            <linearGradient id={gardId} x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="objectBoundingBox">
+              <stop offset="0%" stop-color={color} stop-opacity="1" />
+              <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
+            </linearGradient>
+          </defs>);
         break;
       case ENUMS.GRADIENT_STYLE.RADIAL:
         gradHtml = (<defs>

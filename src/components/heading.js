@@ -44,7 +44,7 @@ import UiCore from '../core/ui.core';
   }
  */
 
-class heading extends Component{
+class heading extends Component {
   constructor(props) {
     super(props);
     this.id = UtilCore.getRandomID();
@@ -56,7 +56,7 @@ class heading extends Component{
   }
 
   setConfig(props) {
-    let alignTextMap = {'left': 'left', 'center': 'middle', 'right': 'right' };
+    let alignTextMap = { 'left': 'left', 'center': 'middle', 'right': 'right' };
     this.config = {
       width: UiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
       height: UiCore.percentToPixel(this.context.svgWidth, props.opts.height),
@@ -64,7 +64,7 @@ class heading extends Component{
       top: typeof props.opts.top === 'undefined' ? (this.props.posY || 0) : UiCore.percentToPixel(this.context.svgHeight, props.opts.top),
       left: typeof props.opts.left === 'undefined' ? (this.props.posX || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
       fontFamily: props.opts.fontFamily || props.fontFamily || defaultConfig.theme.fontFamily,
-      fontSize: props.opts.fontSize|| props.fontSize || defaultConfig.theme.fontSizeLarge,
+      fontSize: props.opts.fontSize || props.fontSize || defaultConfig.theme.fontSizeLarge,
       textColor: props.opts.textColor || props.textColor || defaultConfig.theme.fontColorDark,
       stroke: props.opts.borderColor || props.stroke || 'none',
       bgColor: props.opts.bgColor || props.bgColor || 'none',
@@ -72,12 +72,12 @@ class heading extends Component{
       padding: props.opts.padding || props.padding || 0,
       responsive: Object.assign({
         wrapText: true,
-        reducer: () => ({text: props.opts.text})
+        reducer: () => ({ text: props.opts.text })
       }, props.opts.responsive)
     };
 
     let modifiedConfig = {};
-    if(typeof this.config.responsive.reducer === 'function') {
+    if (typeof this.config.responsive.reducer === 'function') {
       modifiedConfig = this.config.responsive.reducer(this.context.svgWidth, this.context.svgHeight) || {};
       this.state.text = modifiedConfig.text || this.props.opts.text;
     }
@@ -91,7 +91,7 @@ class heading extends Component{
     const style = {
       [`.sc-header-text-${this.id}`]: {
         'font-family': this.config.fontFamily,
-        'font-size': this.config.fontSize+'px',
+        'font-size': this.config.fontSize + 'px',
         'fill': this.config.textColor,
         'stroke': this.config.stroke,
         ...this.config.style
@@ -100,7 +100,7 @@ class heading extends Component{
     return (
       <g class={`sc-header-grp-${this.id}`}>
         <Style>
-          {{[`.sc-header-grp-${this.id}` ]: this.config.style}}
+          {{ [`.sc-header-grp-${this.id}`]: this.config.style }}
         </Style>
         <Textbox class={`sc-header-text-${this.id}`} style={style} posX={this.config.left} posY={this.config.top} width={this.config.width} height={this.config.height} textAnchor={this.config.textAnchor} bgColor={this.config.bgColor}
           textColor={this.config.textColor} borderRadius={0} padding={this.config.padding} stroke={this.config.stroke} text={this.state.text || ''} wrapText={this.config.responsive.wrapText}>

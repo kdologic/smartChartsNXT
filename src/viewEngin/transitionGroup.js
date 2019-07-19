@@ -1,6 +1,6 @@
-"use strict";
+'use strict';
 
-import { Component } from "./pview";
+import { Component } from './pview';
 
 /**
  * transitionGroup.js
@@ -8,34 +8,34 @@ import { Component } from "./pview";
  * @author:SmartChartsNXT
  * @description: This component will be used to create css transition on top of pView Library. Must use InstanceId as props to uniquely identify elements.
  * @extends Component
- * 
- * 
- * This component will be used to create css transition on top of pView Library. 
+ *
+ *
+ * This component will be used to create css transition on top of pView Library.
  * Must use InstanceId as props to uniquely identify elements.
- * 
+ *
  * It accept the following props :
- * 
+ *
  * transitionName='box-effect' // Name of the transition.
- * 
+ *
  * transitionEnterDelay='1000' // How long the animation playes when new element added.
- * 
+ *
  * transitionExitDelay='300' // How long the animation playes when element removed.
- * 
+ *
  * applyForNew=true //If true then transition only for new elements and if false then all the existing elements also.
- * 
+ *
  * ${transition-name}-enter -- Apply this class just before mount.
- * 
+ *
  * ${transition-name}-enter-active -- Apply this class after mount and remove after animation completed.
- * 
+ *
  * ${transition-name}-exit -- Apply this class just before remove an element.
- * 
+ *
  * ${transition-name}-exit-active -- Apply this class after remove an element and remove when transitionExitDelay completed.
  */
 
 class TransitionGroup extends Component {
   constructor(props) {
     super(props);
-    this.prevExtChildren = []; 
+    this.prevExtChildren = [];
     this.removedExtChildren = [];
     this.mergedExtChildren = [];
     this.removedChildNodes = [];
@@ -55,12 +55,12 @@ class TransitionGroup extends Component {
         return c.attributes.instanceId === this.mergedExtChildren[i].attributes.instanceId;
       }) >= 0;
 
-      if(this.props.applyForNew){
+      if (this.props.applyForNew) {
         isNewChild && childNodes[i].classList.add(this.props.transitionName + '-enter');
-      }else {
+      } else {
         childNodes[i].classList.add(this.props.transitionName + '-enter');
       }
-      
+
       isRemovedChild && childNodes[i].classList.add(this.props.transitionName + '-exit');
     }
   }
@@ -68,7 +68,7 @@ class TransitionGroup extends Component {
   componentDidMount() {
     let childNodes = this.ref.node.childNodes;
     window.requestNextAnimationFrame(() => {
-      
+
       for (let i = 0; i < childNodes.length; i++) {
 
         let isRemovedChild = this.removedExtChildren.findIndex(c => {
@@ -78,16 +78,16 @@ class TransitionGroup extends Component {
         childNodes[i].classList.add(this.props.transitionName + '-enter-active');
         isRemovedChild && childNodes[i].classList.add(this.props.transitionName + '-exit-active');
 
-        
-        (function(elem, tn, td){
+
+        (function (elem, tn, td) {
           setTimeout(() => {
             elem && elem.classList.remove(tn + '-enter', tn + '-enter-active');
           }, td || 0);
         })(childNodes[i], this.props.transitionName, this.props.transitionEnterDelay);
-          
-        
-        if(isRemovedChild) {
-          (function(elem, td){
+
+
+        if (isRemovedChild) {
+          (function (elem, td) {
             setTimeout(() => {
               elem && elem.parentNode && elem.parentNode.removeChild(elem);
             }, td || 0);
@@ -96,10 +96,10 @@ class TransitionGroup extends Component {
       }
     });
 
-    this.prevExtChildren = this.props.extChildren || []; 
+    this.prevExtChildren = this.props.extChildren || [];
   }
 
-  componentWillUpdate(nextProps) {
+  componentWillUpdate() {
     this.newExtChildren = this.findNewChildren();
     this.removedExtChildren = this.findRemovedChildren();
     this.mergedExtChildren = this.mergeChildren();
@@ -109,17 +109,17 @@ class TransitionGroup extends Component {
     this.removedChildNodes = this.findRemoveChildNodes();
   }
 
-  componentDidUpdate(prevProps) {
+  componentDidUpdate() {
     let childNodes = this.ref.node.childNodes;
     for (let i = 0; i < childNodes.length; i++) {
-      let childInstId = childNodes[i].getAttribute('instanceId'); 
+      let childInstId = childNodes[i].getAttribute('instanceId');
       let isNewChild = this.newExtChildren.findIndex(c => {
         return c.attributes.instanceId == childInstId;
-       }) >= 0;
+      }) >= 0;
 
-      if(this.props.applyForNew){
+      if (this.props.applyForNew) {
         isNewChild && childNodes[i].classList.add(this.props.transitionName + '-enter');
-      }else {
+      } else {
         childNodes[i].classList.add(this.props.transitionName + '-enter');
       }
     }
@@ -131,8 +131,8 @@ class TransitionGroup extends Component {
     window.requestNextAnimationFrame(() => {
       for (let i = 0; i < childNodes.length; i++) {
         childNodes[i].classList.add(this.props.transitionName + '-enter-active');
-        
-        (function(elem, tn, td){
+
+        (function (elem, tn, td) {
           setTimeout(() => {
             elem.classList.remove(tn + '-enter', tn + '-enter-active');
           }, td || 0);
@@ -141,7 +141,7 @@ class TransitionGroup extends Component {
 
       for (let i = 0; i < this.removedChildNodes.length; i++) {
         this.removedChildNodes[i].classList.add(this.props.transitionName + '-exit-active');
-        (function(elem, td){
+        (function (elem, td) {
           setTimeout(() => {
             elem.parentNode.removeChild(elem);
           }, td || 0);
@@ -150,7 +150,7 @@ class TransitionGroup extends Component {
       this.removedChildNodes = [];
     });
 
-    this.prevExtChildren = this.props.extChildren || []; 
+    this.prevExtChildren = this.props.extChildren || [];
   }
 
   render() {
@@ -162,8 +162,8 @@ class TransitionGroup extends Component {
   }
 
   findNewChildren() {
-    if(!this.props.extChildren) {
-      return []; 
+    if (!this.props.extChildren) {
+      return [];
     }
     return this.props.extChildren.filter(v => {
       return this.prevExtChildren.findIndex(c => c.attributes.instanceId === v.attributes.instanceId) === -1;
@@ -172,21 +172,21 @@ class TransitionGroup extends Component {
 
   findRemovedChildren() {
     return this.prevExtChildren.filter(v => {
-      if(!this.props.extChildren) {
-        return true; 
+      if (!this.props.extChildren) {
+        return true;
       }
       return this.props.extChildren.findIndex(c => c.attributes.instanceId === v.attributes.instanceId) === -1;
     });
   }
 
   findRemoveChildNodes() {
-    let removedNode = []; 
+    let removedNode = [];
     this.ref.node.childNodes.forEach((elem) => {
-      if(!this.props.extChildren) {
+      if (!this.props.extChildren) {
         removedNode.push(elem.cloneNode(true));
         return;
       }
-      if(this.props.extChildren.findIndex(c => c.attributes.instanceId === elem.getAttribute('instanceId')) === -1) {
+      if (this.props.extChildren.findIndex(c => c.attributes.instanceId === elem.getAttribute('instanceId')) === -1) {
         removedNode.push(elem.cloneNode(true));
       }
     });
@@ -194,7 +194,7 @@ class TransitionGroup extends Component {
   }
 
   mergeChildren() {
-    return (this.props.extChildren || []).concat(this.removedExtChildren);  
+    return (this.props.extChildren || []).concat(this.removedExtChildren);
   }
 }
 

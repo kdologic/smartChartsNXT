@@ -1,12 +1,12 @@
-"use strict";
+'use strict';
 
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-const isProduction = process.env.NODE_ENV == "production" ? true : false; 
+const isProduction = process.env.NODE_ENV == 'production' ? true : false;
 
 module.exports = {
-  mode: "production",
+  mode: 'production',
   devtool: undefined,
   plugins: [
     new BundleAnalyzerPlugin()
@@ -15,33 +15,33 @@ module.exports = {
     rules: [{
       exclude: /node_modules/,
       use: {
-        loader: "babel-loader",
+        loader: 'babel-loader',
         options: {
           plugins: [
             ['@babel/plugin-proposal-class-properties'],
             ['@babel/plugin-proposal-object-rest-spread'],
-            // ["@babel/plugin-transform-runtime", { // creating error after minification
-            //   "corejs": 2,
-            //   "helpers": true,
-            //   "regenerator": true,
-            //   "useESModules": false
+            // ['@babel/plugin-transform-runtime', { // creating error after minification
+            //   'corejs': 2,
+            //   'helpers': true,
+            //   'regenerator': true,
+            //   'useESModules': false
             // }],
             ['@babel/plugin-transform-react-jsx', {
-              "pragma": "__h__"
+              'pragma': '__h__'
             }] // change default pragma React.createElement into __h__
           ],
-          presets: [ (isProduction ? 
+          presets: [(isProduction ?
             ['@babel/preset-env', {
-              "useBuiltIns": 'entry',
-              "debug": true,
-              "targets": {
-                "browsers": ["last 2 versions", "> 1%", "safari > 8", "ie 11", "not dead"]
+              'useBuiltIns': 'entry',
+              'debug': true,
+              'targets': {
+                'browsers': ['last 2 versions', '> 1%', 'safari > 8', 'ie 11', 'not dead']
               }
             }] : [{}])
           ]
         }
       }
-    },{
+    }, {
       test: /\.css$/,
       use: [{ loader: 'to-string-loader' }, { loader: 'css-loader' }]
     }]

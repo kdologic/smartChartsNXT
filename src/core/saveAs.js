@@ -13,7 +13,7 @@
  *    srcElem:// element ID of root
  * }
  *
- * Supported Events:
+ * @event Supported Events:
  * 1. beforeSave
  * 2. afterSave
  * 3. beforePrint
@@ -25,7 +25,7 @@ class SaveAs {
 
   print(opts) {
     opts.type = 'print';
-    if(opts.emitter && typeof opts.emitter.emit === 'function') {
+    if (opts.emitter && typeof opts.emitter.emit === 'function') {
       opts.emitter.emit('beforePrint');
     }
     this.doConvert(opts);
@@ -33,32 +33,32 @@ class SaveAs {
 
   pdf(opts) {
     opts.type = 'pdf';
-    if(opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', {type: opts.type});
+    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+      opts.emitter.emit('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
 
   jpg(opts) {
     opts.type = 'jpg';
-    if(opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', {type: opts.type});
+    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+      opts.emitter.emit('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
 
   png(opts) {
     opts.type = 'png';
-    if(opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', {type: opts.type});
+    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+      opts.emitter.emit('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
 
   svg(opts) {
     opts.type = 'svg';
-    if(opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', {type: opts.type});
+    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+      opts.emitter.emit('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
@@ -94,15 +94,15 @@ class SaveAs {
       iframe.onload = () => {
         let frameDoc = iframe.contentDocument;
         frameDoc.getElementsByTagName('body')[0].innerHTML = svgString;
-        if(opts.width > opts.height) {
+        if (opts.width > opts.height) {
           let css = '@page { size: landscape; }',
-          frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0],
-          style = frameDoc.createElement('style');
+            frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0],
+            style = frameDoc.createElement('style');
 
           style.type = 'text/css';
           style.media = 'print';
 
-          if (style.styleSheet){
+          if (style.styleSheet) {
             style.styleSheet.cssText = css;
           } else {
             style.appendChild(frameDoc.createTextNode(css));
@@ -113,7 +113,7 @@ class SaveAs {
         window.frames['chartFrame'].focus();
         window.frames['chartFrame'].print();
         iframe.parentNode.removeChild(iframe);
-        if(opts.emitter && typeof opts.emitter.emit === 'function') {
+        if (opts.emitter && typeof opts.emitter.emit === 'function') {
           opts.emitter.emit('afterPrint');
         }
       };
@@ -132,12 +132,12 @@ class SaveAs {
           canvas = document.createElement('canvas');
           canvas.width = opts.width;
           canvas.height = opts.height;
-          let ctx = this.setDPI(canvas, 1.5*96);
+          let ctx = this.setDPI(canvas, 1.5 * 96);
           ctx.drawImage(img, 0, 0, opts.width, opts.height);
         }
 
         if (opts.type === 'pdf') {
-          if(opts.emitter && typeof opts.emitter.emit === 'function') {
+          if (opts.emitter && typeof opts.emitter.emit === 'function') {
             opts.emitter.emit('showLoader');
           }
           let head = document.getElementsByTagName('head')[0];
@@ -146,29 +146,29 @@ class SaveAs {
           pdfLib.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js';
           pdfLib.onload = function () {
             let imgAsURL = canvas.toDataURL('image/jpeg');
-            let orientation = opts.width >  opts.height ? 'landscape' : 'portrait';
+            let orientation = opts.width > opts.height ? 'landscape' : 'portrait';
             /* eslint-disable-next-line new-cap, no-undef */
             let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
             doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
             doc.output('save', 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type);
-            if(opts.emitter && typeof opts.emitter.emit === 'function') {
-              opts.emitter.emit('afterSave', {type: opts.type});
+            if (opts.emitter && typeof opts.emitter.emit === 'function') {
+              opts.emitter.emit('afterSave', { type: opts.type });
             }
-            if(opts.emitter && typeof opts.emitter.emit === 'function') {
+            if (opts.emitter && typeof opts.emitter.emit === 'function') {
               opts.emitter.emit('hideLoader');
             }
           };
           head.appendChild(pdfLib);
-        }else {
-          let imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>'+svgString) : canvas.toDataURL('image/' + opts.type);
+        } else {
+          let imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString) : canvas.toDataURL('image/' + opts.type);
           let link = document.createElement('a');
           link.href = imgAsURL;
           link.download = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          if(opts.emitter && typeof opts.emitter.emit === 'function') {
-            opts.emitter.emit('afterSave', {type: opts.type});
+          if (opts.emitter && typeof opts.emitter.emit === 'function') {
+            opts.emitter.emit('afterSave', { type: opts.type });
           }
         }
       };

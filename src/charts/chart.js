@@ -24,7 +24,7 @@ class Chart {
       window.addEventListener('resize', this.onResize.bind(this), false);
       /* eslint-disable-next-line no-console */
       $SC.debug && console.debug(this.core);
-    }catch(ex) {
+    } catch (ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
       throw ex;
     }

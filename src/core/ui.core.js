@@ -10,7 +10,7 @@
 import { mountTo } from './../viewEngin/pview';
 
 class UiCore {
-  constructor() {}
+  constructor() { }
 
   /**
    * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element.
@@ -23,14 +23,14 @@ class UiCore {
     return (
       <defs>
         <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
-          <feGaussianBlur in='SourceAlpha' stdDeviation='1'/>
-          <feOffset dx={offsetX || 4} dy={offsetY || 4} result='offsetblur'/>
+          <feGaussianBlur in='SourceAlpha' stdDeviation='1' />
+          <feOffset dx={offsetX || 4} dy={offsetY || 4} result='offsetblur' />
           <feComponentTransfer>
-            <feFuncA type='linear' slope='0.2'/>
+            <feFuncA type='linear' slope='0.2' />
           </feComponentTransfer>
           <feMerge>
-            <feMergeNode/>
-            <feMergeNode in='SourceGraphic'/>
+            <feMergeNode />
+            <feMergeNode in='SourceGraphic' />
           </feMerge>
         </filter>
       </defs>
@@ -56,14 +56,14 @@ class UiCore {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
-          {gradArr.map((grad, i) =>{
-            let offset = i/gradArr.length*100;
+          {gradArr.map((grad, i) => {
+            let offset = i / gradArr.length * 100;
             let opacity = grad;
             let color = '#fff';
-            if(typeof grad === 'object'){
+            if (typeof grad === 'object') {
               offset = grad.offset !== 'undefined' ? grad.offset : offset;
-              opacity = grad.opacity  !== 'undefined' ? grad.opacity : opacity;
-              if(opacity < 0) {
+              opacity = grad.opacity !== 'undefined' ? grad.opacity : opacity;
+              if (opacity < 0) {
                 color = '#000';
                 opacity = Math.abs(opacity);
               }
@@ -109,11 +109,11 @@ class UiCore {
     svg.style.position = 'absolute';
     document.body.appendChild(svg);
     const textDOM = mountTo(textNode, svg).node;
-    if(textDOM) {
+    if (textDOM) {
       bbox = textDOM.getBoundingClientRect();
     }
     svg.parentNode.removeChild(svg);
-    return {width: bbox.width, height: bbox.height};
+    return { width: bbox.width, height: bbox.height };
   }
 
   /** Returns true if it is a touch device
@@ -169,31 +169,31 @@ class UiCore {
     let maxIntvCount = 12;
     let mid = (maxVal + minVal) / 2;
     let tMinVal = minVal;
-    if(zeroBase) {
+    if (zeroBase) {
       tMinVal = minVal > 0 ? 0 : minVal;
       maxVal = maxVal < 0 ? 0 : maxVal;
     }
 
     let digitBase10 = Math.round(mid).toString().length;
-    for(let w = 0; w <= 100 ; w = (w + 1) % arrWeight.length) {
+    for (let w = 0; w <= 100; w = (w + 1) % arrWeight.length) {
       let weight = arrWeight[w] * weightDecimalLevel;
       let tInt = Math.pow(10, digitBase10 - 1) * weight;
-      if(w === arrWeight.length -1) {
+      if (w === arrWeight.length - 1) {
         weightDecimalLevel *= 10;
       }
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
         let hitIntv = +parseFloat(tInt * intv).toFixed(2);
-        if(minVal <= 0) {
+        if (minVal <= 0) {
           tMinVal = (Math.ceil(tMinVal / tInt) * tInt);
-        }else {
-          tMinVal = (Math.floor(tMinVal / tInt) * tInt) ;
+        } else {
+          tMinVal = (Math.floor(tMinVal / tInt) * tInt);
         }
         if ((tMinVal + hitIntv) >= (maxVal + tInt)) {
           let iMax = tMinVal + hitIntv;
           if (minVal < 0) {
-            tMinVal -= (2*tInt);
+            tMinVal -= (2 * tInt);
             intv += 2;
-          }else if(Math.floor(tMinVal) == Math.floor(minVal)) {
+          } else if (Math.floor(tMinVal) == Math.floor(minVal)) {
             tMinVal -= tInt;
             intv++;
           }
@@ -221,25 +221,25 @@ class UiCore {
     } else if (Math.abs(Number(value)) >= 1000000000) {
       return (Number(value) / 1000000000).toFixed(2) + ' B';
     } else if (Math.abs(Number(value)) >= 1000000) {
-        return (Number(value) / 1000000).toFixed(2) + ' M';
+      return (Number(value) / 1000000).toFixed(2) + ' M';
     } else if (Math.abs(Number(value)) >= 1000) {
-        return (Number(value) / 1000).toFixed(2) + ' K';
+      return (Number(value) / 1000).toFixed(2) + ' K';
     } else {
-        return Number(value).toFixed(2);
+      return Number(value).toFixed(2);
     }
   }
 
-/**
- * Insert and style tag in DOM
- * @param {Object} parentNode DOM node where style will be prepend
- * @param {String} styleStr String of CSS text
- * @param {String} position Optional. in which position will add this style. Default: 'afterbegin'
- * @return {void} void
- * @config
- * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
- */
-  prependStyle(parentNode, styleStr, position='afterbegin') {
-    parentNode.insertAdjacentHTML(position, '<style>'+styleStr+'</style>');
+  /**
+   * Insert and style tag in DOM
+   * @param {Object} parentNode DOM node where style will be prepend
+   * @param {String} styleStr String of CSS text
+   * @param {String} position Optional. in which position will add this style. Default: 'afterbegin'
+   * @return {void} void
+   * @config
+   * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
+   */
+  prependStyle(parentNode, styleStr, position = 'afterbegin') {
+    parentNode.insertAdjacentHTML(position, '<style>' + styleStr + '</style>');
   }
 
 }

@@ -1,7 +1,7 @@
 'use strict';
 
-import Core  from './core/chart.core';
-import {OPTIONS_TYPE, CHART_TYPE} from './settings/globalEnums';
+import Core from './core/chart.core';
+import { OPTIONS_TYPE, CHART_TYPE } from './settings/globalEnums';
 import defautlConfig from './settings/config';
 
 /**
@@ -13,13 +13,13 @@ import defautlConfig from './settings/config';
  */
 
 const SmartChartsNXT = new Core();
-SmartChartsNXT.CHART_TYPE = {...CHART_TYPE};
-SmartChartsNXT.ENUMS = {...OPTIONS_TYPE};
-SmartChartsNXT.global = {...defautlConfig};
+SmartChartsNXT.CHART_TYPE = { ...CHART_TYPE };
+SmartChartsNXT.ENUMS = { ...OPTIONS_TYPE };
+SmartChartsNXT.global = { ...defautlConfig };
 
 export default SmartChartsNXT;
 
 if (typeof window !== 'undefined') {
-	window.SmartChartsNXT = SmartChartsNXT;
-	window.$SC = SmartChartsNXT;
+  window.SmartChartsNXT = SmartChartsNXT;
+  window.$SC = SmartChartsNXT;
 }

@@ -17,7 +17,7 @@ import Easing from './../../plugIns/easing';
  * @extends Component
  */
 
-class AreaFill extends Component{
+class AreaFill extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
@@ -32,7 +32,10 @@ class AreaFill extends Component{
       pointSet: [],
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
-      opacity: this.props.opacity || 1
+      opacity: this.props.opacity || 1,
+      currentHighlightedPoint: {
+        pointIndex: null
+      }
     };
 
     this.state.clip = Object.assign({
@@ -45,6 +48,7 @@ class AreaFill extends Component{
     this.subComp = {};
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
+    this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
     this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
     this.prepareData(this.props);
     this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
@@ -63,12 +67,14 @@ class AreaFill extends Component{
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
+    this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
   }
 
   componentWillUnmount() {
     this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
+    this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightnessBind);
   }
 
@@ -127,10 +133,10 @@ class AreaFill extends Component{
     let path = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
-      if(props.centerSinglePoint && this.state.valueSet.length === 1) {
+      if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
-      if(i > 0) {
+      if (i > 0) {
         path.push('L', point.x, point.y);
       }
       point.index = i;
@@ -144,7 +150,7 @@ class AreaFill extends Component{
     let path = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
-      if(props.centerSinglePoint && this.state.valueSet.length === 1) {
+      if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       point.index = i;
@@ -156,7 +162,7 @@ class AreaFill extends Component{
   }
 
   createGradient(gardId) {
-    return(
+    return (
       <defs>
         <linearGradient id={gardId} x1='0%' y1='0%' x2='0%' y2='100%' gradientUnits='objectBoundingBox'>
           <stop offset='0%' stop-color={this.props.areaFillColor} stop-opacity='1' />
@@ -168,32 +174,32 @@ class AreaFill extends Component{
 
   prepareData(props) {
     this.state.valueSet = props.dataSet;
-    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen-1 || 2);
-    this.state.scaleY = props.height / (props.maxVal-props.minVal);
+    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
+    this.state.scaleY = props.height / (props.maxVal - props.minVal);
     this.state.baseLine = props.maxVal * this.state.scaleY;
     this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker;
-    if(typeof props.getScaleX === 'function') {
+    if (typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
     }
   }
 
   interactiveMouseMove(e) {
-    if(!this.props.dataPoints || this.state.isAnimationPlaying) {
+    if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
     e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
-    if(this.props.clip.offsetLeft > this.props.markerRadius) {
+    if (this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
     }
-    if(pointSet.length && +pointSet[pointSet.length-1].x.toFixed(3) > +(this.state.clip.x+this.state.clip.width).toFixed(3)) {
-      pointSet = pointSet.slice(0, pointSet.length-1);
+    if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
+      pointSet = pointSet.slice(0, pointSet.length - 1);
     }
     let nearPoint = Geom.findClosestPoint(pointSet, pt, true);
-    this.emitter.emit('normalizeAllPointMarker', {seriesIndex: this.props.index});
-    if(nearPoint.dist < (this.state.scaleX / 2)) {
+    this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+    if (nearPoint.dist <= (this.state.scaleX / 2)) {
       e.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
         y: (this.props.posY + nearPoint.y),
@@ -208,18 +214,60 @@ class AreaFill extends Component{
         pointIndex: null
       };
     }
+    this.state.currentHighlightedPoint = e.highlightedPoint;
     this.emitter.emit('highlightPointMarker', e);
   }
 
   interactiveMouseLeave() {
-    if(this.props.dataPoints && !this.state.isAnimationPlaying) {
-      this.emitter.emit('normalizeAllPointMarker', {seriesIndex: this.props.index});
+    if (this.props.dataPoints && !this.state.isAnimationPlaying) {
+      this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+    }
+  }
+
+  interactiveKeyPress(e) {
+    if (!this.props.dataPoints || this.state.isAnimationPlaying) {
+      return;
+    }
+    e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    if (e.which == 37 || e.which == 39) {
+      let pointSet = this.state.pointSet;
+      if (this.props.clip.offsetLeft > this.props.markerRadius) {
+        pointSet = pointSet.slice(1);
+      }
+      if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
+        pointSet = pointSet.slice(0, pointSet.length - 1);
+      }
+      let nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[0].index : this.state.currentHighlightedPoint.pointIndex + 1;
+      if (e.which == 37) {
+        nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[pointSet.length - 1].index : this.state.currentHighlightedPoint.pointIndex - 1;
+      }
+
+      const nearPoint = pointSet.find((p) => p.index === nextPointIndex);
+      if (nearPoint) {
+        this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+        e.highlightedPoint = {
+          x: (this.props.posX + nearPoint.x),
+          y: (this.props.posY + nearPoint.y),
+          relX: nearPoint.x,
+          relY: nearPoint.y,
+          dist: 0,
+          pointIndex: nearPoint.index,
+          seriesIndex: this.props.index
+        };
+      } else {
+        e.highlightedPoint = {
+          pointIndex: null
+        };
+      }
+
+      this.state.currentHighlightedPoint = e.highlightedPoint;
+      this.emitter.emit('highlightPointMarker', e);
     }
   }
 
   changeAreaBrightness(e) {
-    if(this.props.instanceId === e.instanceId && e.strokeOpacity) {
-      this.setState({strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1});
+    if (this.props.instanceId === e.instanceId && e.strokeOpacity) {
+      this.setState({ strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1 });
     }
   }
 
@@ -233,15 +281,15 @@ class AreaFill extends Component{
     `);
   }
 
-  generateAnimKeyframe(duration, steps=10) {
-    let aStage = duration/steps;
+  generateAnimKeyframe(duration, steps = 10) {
+    let aStage = duration / steps;
 
     let keyFrame = `@keyframes scale-easeOutElastic-${this.props.instanceId} {`;
-    for(let i=0; i<steps; i++) {
-      let stageNow = aStage*i;
-      let scaleD = Easing.easeOutElastic(stageNow/duration).toFixed(2);
-      let frame = `${Math.round(100/steps*i)}% {
-        transform: translate(${this.props.posX}px, ${this.props.posY}px) translate(${this.props.width/2}px, ${this.props.height}px) scale(1, ${scaleD}) translate(${-this.props.width/2}px, ${-this.props.height}px);
+    for (let i = 0; i < steps; i++) {
+      let stageNow = aStage * i;
+      let scaleD = Easing.easeOutElastic(stageNow / duration).toFixed(2);
+      let frame = `${Math.round(100 / steps * i)}% {
+        transform: translate(${this.props.posX}px, ${this.props.posY}px) translate(${this.props.width / 2}px, ${this.props.height}px) scale(1, ${scaleD}) translate(${-this.props.width / 2}px, ${-this.props.height}px);
       }`;
       keyFrame += frame;
     }
