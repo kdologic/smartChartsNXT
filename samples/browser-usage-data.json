@@ -1,0 +1,429 @@
+[
+  {
+    "lineWidth": 1.5,
+    "name": "Chrome",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 66.87
+      },
+      {
+        "label": "2018-07",
+        "value": 67.6
+      },
+      {
+        "label": "2018-08",
+        "value": 67.66
+      },
+      {
+        "label": "2018-09",
+        "value": 67.88
+      },
+      {
+        "label": "2018-10",
+        "value": 69.64
+      },
+      {
+        "label": "2018-11",
+        "value": 72.38
+      },
+      {
+        "label": "2018-12",
+        "value": 70.95
+      },
+      {
+        "label": "2019-01",
+        "value": 70.88
+      },
+      {
+        "label": "2019-02",
+        "value": 71.58
+      },
+      {
+        "label": "2019-03",
+        "value": 69.52
+      },
+      {
+        "label": "2019-04",
+        "value": 69.55
+      },
+      {
+        "label": "2019-05",
+        "value": 69.49
+      },
+      {
+        "label": "2019-06",
+        "value": 70.71
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "Firefox",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 11.44
+      },
+      {
+        "label": "2018-07",
+        "value": 11.23
+      },
+      {
+        "label": "2018-08",
+        "value": 10.96
+      },
+      {
+        "label": "2018-09",
+        "value": 10.94
+      },
+      {
+        "label": "2018-10",
+        "value": 10.14
+      },
+      {
+        "label": "2018-11",
+        "value": 9.1
+      },
+      {
+        "label": "2018-12",
+        "value": 10.05
+      },
+      {
+        "label": "2019-01",
+        "value": 9.5
+      },
+      {
+        "label": "2019-02",
+        "value": 8.72
+      },
+      {
+        "label": "2019-03",
+        "value": 9.58
+      },
+      {
+        "label": "2019-04",
+        "value": 9.78
+      },
+      {
+        "label": "2019-05",
+        "value": 9.95
+      },
+      {
+        "label": "2019-06",
+        "value": 9.76
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "IE",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 7.13
+      },
+      {
+        "label": "2018-07",
+        "value": 6.97
+      },
+      {
+        "label": "2018-08",
+        "value": 6.97
+      },
+      {
+        "label": "2018-09",
+        "value": 6.45
+      },
+      {
+        "label": "2018-10",
+        "value": 6.01
+      },
+      {
+        "label": "2018-11",
+        "value": 5.38
+      },
+      {
+        "label": "2018-12",
+        "value": 5.4
+      },
+      {
+        "label": "2019-01",
+        "value": 5.74
+      },
+      {
+        "label": "2019-02",
+        "value": 5.34
+      },
+      {
+        "label": "2019-03",
+        "value": 5.44
+      },
+      {
+        "label": "2019-04",
+        "value": 5.16
+      },
+      {
+        "label": "2019-05",
+        "value": 5.09
+      },
+      {
+        "label": "2019-06",
+        "value": 5.03
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "Safari",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 5.38
+      },
+      {
+        "label": "2018-07",
+        "value": 5.01
+      },
+      {
+        "label": "2018-08",
+        "value": 5.13
+      },
+      {
+        "label": "2018-09",
+        "value": 5.58
+      },
+      {
+        "label": "2018-10",
+        "value": 5.61
+      },
+      {
+        "label": "2018-11",
+        "value": 5.06
+      },
+      {
+        "label": "2018-12",
+        "value": 5.06
+      },
+      {
+        "label": "2019-01",
+        "value": 5.15
+      },
+      {
+        "label": "2019-02",
+        "value": 5.77
+      },
+      {
+        "label": "2019-03",
+        "value": 6.46
+      },
+      {
+        "label": "2019-04",
+        "value": 6.91
+      },
+      {
+        "label": "2019-05",
+        "value": 6.94
+      },
+      {
+        "label": "2019-06",
+        "value": 5.64
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "Edge",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 4.16
+      },
+      {
+        "label": "2018-07",
+        "value": 4.19
+      },
+      {
+        "label": "2018-08",
+        "value": 4.24
+      },
+      {
+        "label": "2018-09",
+        "value": 4.36
+      },
+      {
+        "label": "2018-10",
+        "value": 4.21
+      },
+      {
+        "label": "2018-11",
+        "value": 4
+      },
+      {
+        "label": "2018-12",
+        "value": 4.17
+      },
+      {
+        "label": "2019-01",
+        "value": 4.41
+      },
+      {
+        "label": "2019-02",
+        "value": 4.34
+      },
+      {
+        "label": "2019-03",
+        "value": 4.56
+      },
+      {
+        "label": "2019-04",
+        "value": 4.37
+      },
+      {
+        "label": "2019-05",
+        "value": 4.32
+      },
+      {
+        "label": "2019-06",
+        "value": 4.5
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "Opera",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 2.47
+      },
+      {
+        "label": "2018-07",
+        "value": 2.48
+      },
+      {
+        "label": "2018-08",
+        "value": 2.48
+      },
+      {
+        "label": "2018-09",
+        "value": 2.44
+      },
+      {
+        "label": "2018-10",
+        "value": 2.29
+      },
+      {
+        "label": "2018-11",
+        "value": 2.18
+      },
+      {
+        "label": "2018-12",
+        "value": 2.38
+      },
+      {
+        "label": "2019-01",
+        "value": 2.37
+      },
+      {
+        "label": "2019-02",
+        "value": 2.41
+      },
+      {
+        "label": "2019-03",
+        "value": 2.43
+      },
+      {
+        "label": "2019-04",
+        "value": 2.38
+      },
+      {
+        "label": "2019-05",
+        "value": 2.35
+      },
+      {
+        "label": "2019-06",
+        "value": 2.45
+      }
+    ]
+  },
+  {
+    "lineWidth": 1.5,
+    "name": "Other",
+    "areaOpacity": 0.3,
+    "spline": true,
+    "animated": true,
+    "data": [
+      {
+        "label": "2018-06",
+        "value": 0.07
+      },
+      {
+        "label": "2018-07",
+        "value": 0.08
+      },
+      {
+        "label": "2018-08",
+        "value": 0.08
+      },
+      {
+        "label": "2018-09",
+        "value": 0.06
+      },
+      {
+        "label": "2018-10",
+        "value": 0.06
+      },
+      {
+        "label": "2018-11",
+        "value": 0.08
+      },
+      {
+        "label": "2018-12",
+        "value": 0.07
+      },
+      {
+        "label": "2019-01",
+        "value": 0.06
+      },
+      {
+        "label": "2019-02",
+        "value": 0.05
+      },
+      {
+        "label": "2019-03",
+        "value": 0.05
+      },
+      {
+        "label": "2019-04",
+        "value": 0.05
+      },
+      {
+        "label": "2019-05",
+        "value": 0.06
+      },
+      {
+        "label": "2019-06",
+        "value": 0.07
+      }
+    ]
+  }
+]

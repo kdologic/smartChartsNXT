@@ -8,6 +8,7 @@
  */
 
 const EventEmitter = require('events');
+const MAX_LIMIT = 25;
 let instance = {};
 
 class EventEmitterSingleTone {
@@ -24,7 +25,9 @@ class EventEmitterSingleTone {
   }
 
   createInstance(runId) {
-    return instance[runId] = new EventEmitter();
+    const  inst = new EventEmitter();
+    inst.setMaxListeners(MAX_LIMIT);
+    return instance[runId] = inst;
   }
 
   getInstance(runId) {

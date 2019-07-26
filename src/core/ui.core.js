@@ -94,21 +94,21 @@ class UiCore {
    */
 
   getComputedTextWidth(textNode) {
-    return this.getComputedTextBBox(textNode).width;
+    return this.getComputedBBox(textNode).width;
   }
 
   /**
    * Get text bounding box {width, height} before rendering.
-   * @param {Object} textNode - JSX of text node.
+   * @param {Object} vnode - JSX of text node.
    * @return {Object} Text bounding Box
    */
-  getComputedTextBBox(textNode) {
+  getComputedBBox(vnode) {
     let bbox = {};
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.style.visibility = 'hidden';
     svg.style.position = 'absolute';
     document.body.appendChild(svg);
-    const textDOM = mountTo(textNode, svg).node;
+    const textDOM = mountTo(vnode, svg).node;
     if (textDOM) {
       bbox = textDOM.getBoundingClientRect();
     }

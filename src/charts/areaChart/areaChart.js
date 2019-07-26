@@ -2,7 +2,7 @@
 
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
-import crossfilter from './../../plugIns/crossfilter.min.js';
+import crossfilter from 'crossfilter2';
 import defaultConfig from './../../settings/config';
 import UtilCore from './../../core/util.core';
 import UiCore from './../../core/ui.core';
@@ -431,12 +431,12 @@ class AreaChart extends Component {
         </g>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
-          <Draggable>
+          // <Draggable>
             <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
               display='inline' canvasWidth={this.CHART_DATA.svgWidth} canvasHeight={this.CHART_DATA.svgHeight} type={this.legendBoxType} background='none'
               hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
             </LegendBox>
-          </Draggable>
+          // </Draggable>
         }
 
         {this.CHART_OPTIONS.tooltip.enable &&
@@ -750,8 +750,8 @@ class AreaChart extends Component {
   }
 
   getLegendData() {
-    return this.state.cs.dataSet.series.map((data) => {
-      return { label: data.name, color: data.bgColor, isToggeled: !data.visible };
+    return this.state.cs.dataSet.series.map((data, i) => {
+      return { label: data.name, color: data.bgColor || UtilCore.getColor(i), isToggeled: !data.visible };
     });
   }
 

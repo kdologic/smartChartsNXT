@@ -44,7 +44,7 @@ class TextBox extends Component {
 
   processBeforeRender() {
     this.state.text = this.props.text;
-    const textBBox = UiCore.getComputedTextBBox(this.getTextNode([this.state.text]));
+    const textBBox = UiCore.getComputedBBox(this.getTextNode([this.state.text]));
     this.state.textWidth = textBBox.width;
     this.state.lineHeight = textBBox.height;
     this.state.splitText = textBBox.width > this.props.width && this.props.wrapText;
@@ -54,7 +54,7 @@ class TextBox extends Component {
 
   processAfterRender() {
     const textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
-    const textBBox = UiCore.getComputedTextBBox(textNode);
+    const textBBox = UiCore.getComputedBBox(textNode);
     this.state.textBBox.width = this.props.width || textBBox.width + (2 * this.props.padding || 0);
     this.state.textBBox.height = this.props.height || textBBox.height + (2 * this.props.padding || 0);
     const bgRect = this.ref.node.querySelector('.sc-textbox-bg');
