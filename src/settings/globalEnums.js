@@ -1,4 +1,3 @@
-/* eslint-disable quotes */
 'use strict';
 
 /**
@@ -10,13 +9,28 @@
 
 export const OPTIONS_TYPE = {
   LINE_STYLE: {
-    DASHED: "dashed",
-    SOLID: "solid"
+    DASHED: 'dashed',
+    SOLID: 'solid'
   },
   GRADIENT_STYLE: {
-    LINEAR_HORIZONTAL: "linear_horizontal",
-    LINEAR_VERTICAL: "linear_vertical",
-    RADIAL: "radial"
+    LINEAR_HORIZONTAL: 'linear_horizontal',
+    LINEAR_VERTICAL: 'linear_vertical',
+    RADIAL: 'radial'
+  },
+  ALIGNMENT: {
+    HORIZONTAL: 'horizontal',
+    VERTICAL: 'vertical'
+  },
+  DISPLAY: {
+    INLINE: 'inline',
+    BLOCK: 'block'
+  },
+  FLOAT: {
+    TOP: 'top',
+    BOTTOM: 'bottom',
+    LEFT: 'left',
+    RIGHT: 'right',
+    NONE: 'none'
   }
 };
 

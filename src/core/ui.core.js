@@ -107,6 +107,7 @@ class UiCore {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.style.visibility = 'hidden';
     svg.style.position = 'absolute';
+    svg.style.left = '-10000px';
     document.body.appendChild(svg);
     const textDOM = mountTo(vnode, svg).node;
     if (textDOM) {

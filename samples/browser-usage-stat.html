@@ -5,7 +5,7 @@
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
     var borwserData = []; 
-    fetch('./browser-usage-data.json')
+    fetch('./data/browser-usage-data-full.json')
       .then(function (response) {
         return response.json();
       })
@@ -109,14 +109,14 @@
             }
           },
           "legends":{
-            "enable" : true,              // [ default: true | false ]
-            "top": 70,                    // [ default: 70 ]
-            "left": 0,                  // [ default: 100 ]
-            "alignment": "horizontal",    // [ default: horizontal | vertical ]
-            "display": "inline",          // [ default: inline | block] Note: block will take entire row but inline only take space as much required
-            "float": "left",              // [ top | bottom | left | right | default: none ]
+            "enable" : true,                  // [ default: true | false ]
+            "top": 70,                        // [ default: 70 ]
+            "left": 100,                        // [ default: 100 ]
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: horizontal | vertical ]
+            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: inline | block] Note: block will take entire row but inline only take space as much required
+            "float": $SC.ENUMS.FLOAT.TOP,                // [ top | bottom | left | right | default: none ]
             "textColor": "#000",          // [ default: theme.fontColorDark ]
-            "bgColor": "#ccc",            // [ default: none ]
+            "bgColor": "#CCC",            // [ default: none ]
             "hoverColor":"none",          // [ default: none ]
             "fontSize": 14,               // [ default: theme.fontSizeMedium ]
             "fontFamily": "Lato",         // [ default: Lato ]
