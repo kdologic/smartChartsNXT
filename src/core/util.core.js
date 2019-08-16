@@ -1,5 +1,7 @@
 'use strict';
 
+import deepmerge from 'deepmerge';
+
 /**
  * util.core.js
  * @createdOn: 07-Apr-2016
@@ -29,30 +31,36 @@ class UtilCore {
     }
   }
 
+  /* Need to replace extends with more efficient module https://www.npmjs.com/package/deepmerge */
+  // extends(source1, source2) {
+  //   return source1 = deepmerge(source1, source2);
+  // }
+
   /**
    * Properties from the Source1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
-   * @param {Object} source Source object is mutable will change after merge.  First Source object.
-   * @param {Object} source1 Second Source Object.
+   * @param {Object} source1 Source object is mutable will change after merge.  First Source object.
+   * @param {Object} source2 Second Source Object.
    * @returns {Object} Merged JSON object.
    */
-  extends(source, source1) {
-    if (!source || !source1) {
+
+  extends(source1, source2) {
+    if (!source1 || !source2) {
       return {};
     }
-    let mergedJSON = source;
-    for (let attrname in source1) {
+    let mergedJSON = source1;
+    for (let attrname in source2) {
       if (mergedJSON.hasOwnProperty(attrname)) {
-        if (source1[attrname] != null && source1[attrname].constructor == Object) {
+        if (source2[attrname] != null && source2[attrname].constructor == Object) {
           /*
            * Recursive call if the property is an object,
            * Iterate the object and set all properties of the inner object.
            */
-          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source1[attrname]);
+          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source2[attrname]);
         } else { //else copy the property from source1
-          mergedJSON[attrname] = source1[attrname];
+          mergedJSON[attrname] = source2[attrname];
         }
       } else { //else copy the property from source1
-        mergedJSON[attrname] = source1[attrname];
+        mergedJSON[attrname] = source2[attrname];
       }
     }
     return mergedJSON;

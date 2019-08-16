@@ -111,15 +111,20 @@
           "legends":{
             "enable" : true,                  // [ default: true | false ]
             "top": 70,                        // [ default: 70 ]
-            "left": 100,                        // [ default: 100 ]
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: horizontal | vertical ]
+            "left": 100,                      // [ default: 100 ]
+            "maxWidth": '80%',                // [ default : 100%] x % value accepted. Only applicable when display inline.
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ENUMS.ALIGNMENT.HORIZONTAL | ENUMS.ALIGNMENT.VERTICAL ]
             "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: inline | block] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.TOP,                // [ top | bottom | left | right | default: none ]
+            "float": $SC.ENUMS.FLOAT.NONE,                // [ top | bottom | left | right | default: none ]
             "textColor": "#000",          // [ default: theme.fontColorDark ]
             "bgColor": "#CCC",            // [ default: none ]
             "hoverColor":"none",          // [ default: none ]
             "fontSize": 14,               // [ default: theme.fontSizeMedium ]
             "fontFamily": "Lato",         // [ default: Lato ]
+            "itemBorderWidth": 1,         // [ default: 1 ]
+            "itemBborderColor": "#000",   // [ default: #000 ]
+            "itemBorderOpacity": 1,       // [ default: 1 ]
+            "itemBorderRadius": 10,       // [ default: 10 ]
             "borderColor": "none",        // [ default: none ]
             "borderWidth": 1,             // [ default: 1 ]
             "borderOpacity": 1,           // [ default: 1 ]

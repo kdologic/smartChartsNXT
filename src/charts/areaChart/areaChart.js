@@ -433,7 +433,7 @@ class AreaChart extends Component {
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           // <Draggable>
             <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
-              display='inline' canvasWidth={this.CHART_DATA.svgWidth} canvasHeight={this.CHART_DATA.svgHeight} type={this.legendBoxType} background='none'
+              display='inline' type={this.legendBoxType} background='none'
               hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
             </LegendBox>
           // </Draggable>

@@ -683,15 +683,18 @@ class Component {
     if (!this.shouldComponentUpdate(this.props)) {
       return false;
     }
+
+    if (typeof this.componentWillUpdate === 'function') {
+      this.componentWillUpdate(this.props);
+    }
+
     let vnodeNow = this.render();
     let objContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
-    if (typeof this.componentWillUpdate === 'function') {
-      this.componentWillUpdate(this.props);
-    }
     this._reconsile(this.vnode, vnodeNow, this.ref, objContext);
+
     if (typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.props);
     }
