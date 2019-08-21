@@ -423,7 +423,7 @@ class Component {
    * @param {Object} context Combination of existing self context and new context that passed from parent.
    * @returns {undefined} void
    */
-  _reconsile(oldVNode, newVNode, ref, context = {}) {
+  _reconcile(oldVNode, newVNode, ref, context = {}) {
     let newRenderedVnode = undefined;
 
     if (newVNode.children && newVNode.children.length) {
@@ -470,7 +470,7 @@ class Component {
       case 'NODE_ATTR_DIFF':
         if (typeof newVNode.nodeName === 'object') {
 
-          this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
+          this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
           newVNode.nodeName.vnode = newRenderedVnode;
           ref.children = ref.self.ref.children;
           if (ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
@@ -495,19 +495,19 @@ class Component {
 
       for (let child = 0; child < Math.max(oldVNode.children.length, newVNode.children.length); child++) {
         if (oldVNode.children[child] && newVNode.children[child]) {
-          let reconsileDiff;
+          let reconcileDiff;
           if (typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
             child = Math.max(oldVNode.children.length, newVNode.children.length);
-            reconsileDiff = this._reconsile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
+            reconcileDiff = this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
             ref.children = ref.self.ref.children;
           } else {
-            reconsileDiff = this._reconsile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
+            reconcileDiff = this._reconcile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
 
             if (ref.children[child].children instanceof Array && ref.children[child].children.length) {
               ref.children[child].children = ref.children[child].children.filter(v => v != undefined);
             }
           }
-          if (reconsileDiff && reconsileDiff.type === 'NODE_NAME_DIFF') {
+          if (reconcileDiff && reconcileDiff.type === 'NODE_NAME_DIFF') {
             this._removeOldNode(child, oldVNode, ref);
             if (typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
               newVNode.children[child].nodeName = newVNode.children[child].class;
@@ -515,7 +515,7 @@ class Component {
             }
             this._createNewNode(child, newVNode, ref, context);
           }
-          if (reconsileDiff && reconsileDiff.type === 'NODE_TEXT_DIFF') {
+          if (reconcileDiff && reconcileDiff.type === 'NODE_TEXT_DIFF') {
             this._updateTextNode(child, newVNode, ref);
           }
           if (ref.children instanceof Array && ref.children.length) {
@@ -693,7 +693,7 @@ class Component {
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
-    this._reconsile(this.vnode, vnodeNow, this.ref, objContext);
+    this._reconcile(this.vnode, vnodeNow, this.ref, objContext);
 
     if (typeof this.componentDidUpdate === 'function') {
       this.componentDidUpdate(this.props);
