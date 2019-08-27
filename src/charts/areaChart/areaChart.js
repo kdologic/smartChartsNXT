@@ -1,11 +1,12 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import crossfilter from 'crossfilter2';
 import defaultConfig from './../../settings/config';
-import UtilCore from './../../core/util.core';
-import UiCore from './../../core/ui.core';
+import utilCore from './../../core/util.core';
+import uiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
 import Draggable from './../../components/draggable';
 import LegendBox from './../../components/legendBox';
@@ -35,7 +36,7 @@ class AreaChart extends Component {
     super(props);
     try {
       let self = this;
-      this.CHART_DATA = UtilCore.extends({
+      this.CHART_DATA = utilCore.extends({
         chartCenter: 0,
         marginLeft: 0,
         marginRight: 0,
@@ -54,7 +55,7 @@ class AreaChart extends Component {
         zoomOutBoxHeight: 40
       }, this.props.chartData);
 
-      this.CHART_OPTIONS = UtilCore.extends({
+      this.CHART_OPTIONS = utilCore.extends({
         title: {
           top: this.CHART_DATA.titleTop,
           textColor: defaultConfig.theme.fontColorDark,
@@ -90,7 +91,7 @@ class AreaChart extends Component {
           grouped: true
         }
       }, this.props.chartOptions);
-      this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
+      this.CHART_CONST = utilCore.extends({}, this.props.chartConst);
 
       for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
         for (let j = 0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
@@ -174,6 +175,7 @@ class AreaChart extends Component {
         clipRightOffset: 100,
         offsetLeftChange: 0,
         offsetRightChange: 0,
+        areaFillMarginTop: 0,
         shouldFSRender: this.props.resizeComponent
       };
 
@@ -192,6 +194,7 @@ class AreaChart extends Component {
       this.onLegendClick = this.onLegendClick.bind(this);
       this.onLegendHover = this.onLegendHover.bind(this);
       this.onLegendLeave = this.onLegendLeave.bind(this);
+      this.onLegendRendered = this.onLegendRendered.bind(this);
       this.onZoomout = this.onZoomout.bind(this);
 
       this.init();
@@ -284,16 +287,16 @@ class AreaChart extends Component {
       }
       maxSet.push(maxVal);
       minSet.push(minVal);
-      dataSet.series[i].color = dataSet.series[i].color || UtilCore.getColor(i);
+      dataSet.series[i].color = dataSet.series[i].color || utilCore.getColor(i);
       dataSet.series[i].index = i;
     }
     this.state[dataFor].dataSet = dataSet;
     this.state[dataFor].dataSet.xAxis.categories = categories;
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
+    this.state[dataFor].yInterval = uiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
     ({ iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount } = this.state[dataFor].yInterval);
-    this.state.gridHeight = (((this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom) / (this.state.hGridCount));
+    this.state.gridHeight = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount);
   }
 
   copyDataset(dataSet) {
@@ -331,9 +334,9 @@ class AreaChart extends Component {
   }
 
   propsWillReceive(nextProps) {
-    this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
-    this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
-    this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
+    this.CHART_CONST = utilCore.extends(this.CHART_CONST, nextProps.chartConst);
+    this.CHART_DATA = utilCore.extends(this.CHART_DATA, nextProps.chartData);
+    this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
     this.state.shouldFSRender = nextProps.resizeComponent;
     this.init();
   }
@@ -349,6 +352,7 @@ class AreaChart extends Component {
     this.emitter.on('legendClicked', this.onLegendClick);
     this.emitter.on('legendHovered', this.onLegendHover);
     this.emitter.on('legendLeaved', this.onLegendLeave);
+    this.emitter.on('legendRendered', this.onLegendRendered);
     this.emitter.on('onZoomout', this.onZoomout);
     this.state.shouldFSRender = false;
   }
@@ -368,6 +372,7 @@ class AreaChart extends Component {
     this.emitter.removeListener('legendClicked', this.onLegendClick);
     this.emitter.removeListener('legendHovered', this.onLegendHover);
     this.emitter.removeListener('legendLeaved', this.onLegendLeave);
+    this.emitter.removeListener('legendRendered', this.onLegendRendered);
     this.emitter.removeListener('onZoomout', this.onZoomout);
   }
 
@@ -376,10 +381,10 @@ class AreaChart extends Component {
       <g>
         <g>
           <Draggable>
-            <Heading opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+            <Heading opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
           </Draggable>
           <Draggable>
-            <Heading opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
+            <Heading opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
           </Draggable>
         </g>
 
@@ -408,7 +413,7 @@ class AreaChart extends Component {
           textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.yAxis.title}
           style={{
             '.sc-vertical-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
             }
           }} />
 
@@ -417,7 +422,7 @@ class AreaChart extends Component {
           textAnchor='middle' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.xAxis.title}
           style={{
             '.sc-horizontal-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
             }
           }} />
 
@@ -432,10 +437,10 @@ class AreaChart extends Component {
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           // <Draggable>
-            <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
-              display='inline' type={this.legendBoxType} background='none'
-              hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
-            </LegendBox>
+          <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
+            display='inline' type={this.legendBoxType} background='none'
+            hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
+          </LegendBox>
           // </Draggable>
         }
 
@@ -489,8 +494,8 @@ class AreaChart extends Component {
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series, i) => {
       return (
-        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || UtilCore.getColor(i)} lineFillColor={series.bgColor || UtilCore.getColor(i)}
+        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop } paddingX={this.CHART_DATA.paddingX}
+          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true}
@@ -586,7 +591,7 @@ class AreaChart extends Component {
   updateLabelTip(e) {
     this.emitter.emit('updateTooltip', {
       instanceId: 'label-tooltip',
-      originPoint: UiCore.cursorPoint(this.context.rootContainerId, e),
+      originPoint: uiCore.cursorPoint(this.context.rootContainerId, e),
       pointData: undefined,
       line1: e.labelText,
       line2: undefined
@@ -597,7 +602,7 @@ class AreaChart extends Component {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
     let point = series.data[e.highlightedPoint.pointIndex];
     let formattedLabel = point.label;
-    let formattedValue = UiCore.formatTextValue(point.value);
+    let formattedValue = uiCore.formatTextValue(point.value);
     if (this.state.cs.dataSet.yAxis && this.state.cs.dataSet.yAxis.prefix) {
       formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
     }
@@ -614,7 +619,7 @@ class AreaChart extends Component {
       seriesName: series.name,
       seriesIndex: e.highlightedPoint.seriesIndex,
       pointIndex: e.highlightedPoint.pointIndex,
-      seriesColor: series.bgColor || UtilCore.getColor(e.highlightedPoint.seriesIndex),
+      seriesColor: series.bgColor || utilCore.getColor(e.highlightedPoint.seriesIndex),
       dist: e.highlightedPoint.dist
     };
 
@@ -723,6 +728,18 @@ class AreaChart extends Component {
     this.updateCrosshair(null);
   }
 
+  onLegendRendered(e) {
+    if (e.float === ENUMS.FLOAT.NONE) {
+      const newMarginTop = e.bBox.y + e.bBox.height + 10;
+      if(this.CHART_DATA.marginTop !== newMarginTop) {
+        this.CHART_DATA.marginTop = newMarginTop;
+        this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
+        this.prepareDataSet();
+        this.update();
+      }
+    }
+  }
+
   onLegendClick(e) {
     this.CHART_OPTIONS.dataSet.series[e.index].visible = !this.CHART_OPTIONS.dataSet.series[e.index].visible;
     this.prepareDataSet();
@@ -751,7 +768,7 @@ class AreaChart extends Component {
 
   getLegendData() {
     return this.state.cs.dataSet.series.map((data, i) => {
-      return { label: data.name, color: data.bgColor || UtilCore.getColor(i), isToggeled: !data.visible };
+      return { label: data.name, color: data.bgColor || utilCore.getColor(data.index), isToggeled: !data.visible };
     });
   }
 

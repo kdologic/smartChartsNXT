@@ -4,7 +4,7 @@ import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import eventEmitter from './../core/eventEmitter';
-import UiCore from './../core/ui.core';
+import uiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
 
@@ -176,7 +176,7 @@ class PointerCrosshair extends Component {
       return;
     }
     this.state.verticalLabelText = data[0].formattedLabel;
-    let textWidth = UiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
+    let textWidth = uiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = this.config.vertical.spread === 'full' ? this.props.vLineStart : Math.min(...data.map(d => d.y));
     this.setState({
       isVerticalCrosshairVisible: true,
@@ -194,7 +194,7 @@ class PointerCrosshair extends Component {
       return;
     }
     this.state.horizontalLabelText = data[0].formattedValue;
-    let textWidth = UiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
+    let textWidth = uiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = Math.min(...data.map(d => d.y));
     this.setState({
       isHorizontalCrosshairVisible: true,

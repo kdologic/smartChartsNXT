@@ -1,11 +1,11 @@
 'use strict';
 
 import defaultConfig from './../settings/config';
-import Geom from './../core/geom.core';
+import geom from './../core/geom.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import uiCore from '../core/ui.core';
-import UtilCore from '../core/util.core';
+import utilCore from '../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
@@ -28,31 +28,37 @@ import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
  * @example
  * config:
 "legends":{
-  "enable" : true,              // [ default: true | false ]
-  "top": 70,                    // [ default: 70 ]
-  "left": 100,                  // [ default: 100 ]
-  "alignment": "horizontal",    // [ default: horizontal | vertical ]
-  "display": "inline",          // [ default: inline | block]
-  "float": "none",              // [ top | bottom | left | right | default: none ]
-  "textColor": "#000",          // [ default: theme.fontColorDark ]
-  "bgColor": "none",            // [ default: none ]
-  "hoverColor":"none",          // [ default: none ]
-  "fontSize": 14,               // [ default: theme.fontSizeMedium ]
-  "fontFamily": "Lato",         // [ default: Lato ]
-  "borderColor": "none",        // [ default: none ]
-  "borderWidth": 1,             // [ default: 1 ]
-  "borderOpacity": 1,           // [ default: 1 ]
-  "opacity": 0.9,               // [ default: 0.9 ]
-  "toggleType": true,           // [ default: true | false ]
-  "hideIcon": false,            // [ true | default: false ]
-  "hideLabel": false,           // [ true | default: false ]
-  "hideValue": false            // [ true | default: false ]
-}
+    "enable" : true,                              // [ default: true | false ]
+    "top": 70,                                    // [ default: 70 ]
+    "left": 100,                                  // [ default: 100 ]
+    "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
+    "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
+    "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
+    "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
+    "textColor": "#000",                          // [ default: theme.fontColorDark ]
+    "bgColor": "none",                            // [ default: none ]
+    "hoverColor":"none",                          // [ default: none ]
+    "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
+    "fontFamily": "Lato",                         // [ default: Lato ]
+    "itemBorderWidth": 1,                         // [ default: 1 ]
+    "itemBorderColor": "#000",                    // [ default: #000 ]
+    "itemBorderOpacity": 1,                       // [ default: 1 ]
+    "itemBorderRadius": 10,                       // [ default: 10 ]
+    "borderColor": "none",                        // [ default: none ]
+    "borderWidth": 1,                             // [ default: 1 ]
+    "borderOpacity": 1,                           // [ default: 1 ]
+    "opacity": 0.9,                               // [ default: 0.9 ]
+    "toggleType": true,                           // [ default: true | false ]
+    "hideIcon": false,                            // [ true | default: false ]
+    "hideLabel": false,                           // [ true | default: false ]
+    "hideValue": false                            // [ true | default: false ]
+  }
 
- * @events -
+ * @event
  * 1. legendClicked - Triggered when clicked on a legend box.
  * 2. legendHovered - Triggered when mouse hover on a legend box.
  * 3. legendLeaved - Triggered when move out of legend box.
+ * 4. legendRendered - Triggered when legneds fully rendered.
  */
 
 class LegendBox extends Component {
@@ -96,7 +102,7 @@ class LegendBox extends Component {
     this.onLeave = this.onLeave.bind(this);
 
     this.calcFloatingPosition();
-    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
@@ -114,10 +120,10 @@ class LegendBox extends Component {
       hoverColor: props.opts.hoverColor || props.hoverColor || '#999',
       fontSize: props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
       fontFamily: props.opts.fontFamily || defaultConfig.theme.fontFamily,
-      itemBorderWidth: props.opts.itemBorderWidth || 1,
+      itemBorderWidth: typeof props.opts.itemBorderWidth === 'undefined' ? 1 : props.opts.itemBorderWidth,
       itemBorderColor: props.opts.itemBorderColor || '#000',
-      itemBorderOpacicy: props.opts.itemBorderOpacicy || 1,
-      itemBorderRadius: props.opts.itemBorderRadius || 10,
+      itemBorderOpacicy: typeof props.opts.itemBorderOpacicy === 'undefined' ? 1 : props.opts.itemBorderOpacicy,
+      itemBorderRadius: typeof props.opts.itemBorderRadius === 'undefined' ? 10 : props.opts.itemBorderRadius,
       strokeColor: props.opts.borderColor || props.strokeColor || 'none',
       strokeWidth: typeof props.opts.borderWidth === 'undefined' ? (props.strokeWidth || 1) : 1,
       strokeOpacity: typeof props.opts.borderOpacity === 'undefined' ? (props.strokeOpacity || 1) : 1,
@@ -137,27 +143,31 @@ class LegendBox extends Component {
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     /* Need to re-render when float = bottm */
-    if(this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
+    if (this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
       this.update();
-    }else {
+    } else {
       this.renderCount = 0;
+      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      setTimeout(() => this.emitter.emit('legendRendered', configData));
     }
   }
 
   componentWillUpdate(nextProps) {
     this.setConfig(nextProps);
     this.calcFloatingPosition();
-    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
 
   componentDidUpdate() {
     /* Need to re-render when float = bottm */
-    if((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
+    if ((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();
-    }else {
+    } else {
       this.renderCount = 0;
+      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      this.emitter.emit('legendRendered', configData);
     }
   }
 
@@ -192,9 +202,9 @@ class LegendBox extends Component {
           focusout: this.onLeave
         }} >
         {withContainer &&
-          <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding / 2)} y={this.state.top + (this.padding / 2)} rx='7'
-            width={data.totalWidth} height={this.hoverHeight + this.padding} fill={this.config.hoverColor}
-            stroke='black' stroke-width='1' style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': '0', 'pointerEvents': 'all' }}>
+          <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding / 2)} y={this.state.top + (this.padding / 2)} rx={this.config.itemBorderRadius}
+            width={data.totalWidth} height={this.hoverHeight + this.padding} fill={this.config.hoverColor} stroke-opacity={this.config.itemBorderOpacicy}
+            stroke={this.config.itemBorderColor} stroke-width={this.config.itemBorderWidth} style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': '0', 'pointerEvents': 'all' }}>
           </rect>
         }
         {!this.props.opts.hideIcon &&
@@ -254,27 +264,29 @@ class LegendBox extends Component {
         this.state.legendBoxTrnsX = this.config.left || this.padding;
         this.state.legendBoxTrnsY = this.config.top || this.padding;
     }
-    if(this.config.display === ENUMS.DISPLAY.BLOCK) {
+    if (this.config.display === ENUMS.DISPLAY.BLOCK) {
       this.state.legendBoxTrnsX = this.padding;
-      // this.state.legendBoxTrnsY = this.config.top || this.padding;
     }
-    this.state.legendSetTrnsX = 0;//(this.containerWidth - this.state.lengthSet.innerWidth - (3 * this.padding)) / 2;
+    this.state.legendSetTrnsX = 0;
   }
 
   calcLegendPositions() {
     this.state.lineCount = 1;
     this.cumulativeWidth = 0;
     this.state.lengthSet.max.lineWidth = 0;
+    const legendBoxTrnsX = this.config.float === ENUMS.FLOAT.RIGHT ? 0 : this.state.legendBoxTrnsX;
+    let maxAllowedWidth = this.context.svgWidth;
+    if (this.config.display !== ENUMS.DISPLAY.BLOCK) {
+      maxAllowedWidth = this.config.left + this.config.maxWidth > this.context.svgWidth ? (this.context.svgWidth - this.config.left) : this.config.maxWidth;
+    }
+    if (this.state.legendSet.length && this.config.type === ENUMS.ALIGNMENT.VERTICAL) {
+      maxAllowedWidth = 1;
+    }
     for (let index = 0; index < this.state.legendSet.length; index++) {
       const legendWidth = this.state.legendSet[index].totalWidth;
-      let maxAllowedWidth = this.config.float === ENUMS.FLOAT.LEFT || this.config.float === ENUMS.FLOAT.RIGHT ? this.config.maxWidth : this.context.svgWidth;
-      if(index > 0 && this.config.type === ENUMS.ALIGNMENT.VERTICAL) {
-        maxAllowedWidth = 1;
-      }
-      const legendBoxTrnsX = this.config.float === ENUMS.FLOAT.RIGHT ? 0 : this.state.legendBoxTrnsX;
       let trnsX = this.cumulativeWidth + this.padding;
       let trnsY = (this.state.lineCount - 1) * this.lineHeight;
-      if (legendBoxTrnsX + trnsX + legendWidth + this.padding > maxAllowedWidth) {
+      if (legendBoxTrnsX + trnsX + legendWidth + this.padding > legendBoxTrnsX + maxAllowedWidth) {
         this.cumulativeWidth = 0;
         this.state.lineCount++;
         trnsX = this.cumulativeWidth + this.padding;
@@ -306,16 +318,16 @@ class LegendBox extends Component {
   }
 
   setContainerWidthHeight() {
-    if(this.config.display === ENUMS.DISPLAY.BLOCK) {
+    if (this.config.display === ENUMS.DISPLAY.BLOCK) {
       this.containerWidth = Math.max(this.context.svgWidth - (2 * this.padding), this.state.lengthSet.max.lineWidth);
-    }else if(this.config.display === ENUMS.DISPLAY.INLINE) {
+    } else if (this.config.display === ENUMS.DISPLAY.INLINE) {
       this.containerWidth = this.state.lengthSet.max.lineWidth;
     }
     this.containerHeight = (this.state.lineCount * this.lineHeight) + (this.padding / 2);
   }
 
   getContainerBorderPath() {
-    return Geom.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
+    return geom.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
   }
 
   getBBox() {

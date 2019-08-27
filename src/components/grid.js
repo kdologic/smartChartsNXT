@@ -3,7 +3,7 @@
 import defaultConfig from './../settings/config';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import UtilCore from './../core/util.core';
+import utilCore from './../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
@@ -18,8 +18,8 @@ class Grid extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.clipId = UtilCore.getRandomID();
-    this.gradId = UtilCore.getRandomID();
+    this.clipId = utilCore.getRandomID();
+    this.gradId = utilCore.getRandomID();
     this.config = {};
     this.state = {
       vGridCount: this.props.vGridCount,

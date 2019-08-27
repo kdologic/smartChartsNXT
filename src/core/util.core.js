@@ -12,58 +12,22 @@ import deepmerge from 'deepmerge';
 class UtilCore {
   constructor() { }
   /**
-   * Merge object 2 into object 1 recursively. Object 1 will be modified.
-   * @param {Object} obj1 Mutable object will change after merge
-   * @param {Object} obj2 Will merge into obj1
-   * @deprecated This method is depricated and will be removed soon.
-   * @returns {Object} Merged JSON
+   * https://www.npmjs.com/package/deepmerge
+   * Merges the enumerable properties of two or more objects deeply.
+   * It will modify the destination object.
+   * @param  {any} dest Destination object which will be extendts by rest of the paramater objects.
+   * @param  {...any} args Array of source object.
+   * @return {Object} Merged object.
    */
-  mergeRecursive(obj1, obj2) {
-    //iterate over all the properties in the object which is being consumed
-    for (let p in obj2) {
-      // Property in destination object set; update its value.
-      if (obj2.hasOwnProperty(p) && typeof obj1[p] !== 'undefined') {
-        this.mergeRecursive(obj1[p], obj2[p]);
-      } else {
-        //We don't have that level in the heirarchy so add it
-        obj1[p] = obj2[p];
-      }
-    }
-  }
-
-  /* Need to replace extends with more efficient module https://www.npmjs.com/package/deepmerge */
-  // extends(source1, source2) {
-  //   return source1 = deepmerge(source1, source2);
-  // }
-
-  /**
-   * Properties from the Source1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
-   * @param {Object} source1 Source object is mutable will change after merge.  First Source object.
-   * @param {Object} source2 Second Source Object.
-   * @returns {Object} Merged JSON object.
-   */
-
-  extends(source1, source2) {
-    if (!source1 || !source2) {
+  extends(dest, ...args) {
+    const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+    if(!dest) {
       return {};
+    }else if(args.length === 0) {
+      return dest;
+    }else {
+      return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
     }
-    let mergedJSON = source1;
-    for (let attrname in source2) {
-      if (mergedJSON.hasOwnProperty(attrname)) {
-        if (source2[attrname] != null && source2[attrname].constructor == Object) {
-          /*
-           * Recursive call if the property is an object,
-           * Iterate the object and set all properties of the inner object.
-           */
-          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source2[attrname]);
-        } else { //else copy the property from source1
-          mergedJSON[attrname] = source2[attrname];
-        }
-      } else { //else copy the property from source1
-        mergedJSON[attrname] = source2[attrname];
-      }
-    }
-    return mergedJSON;
   }
 
   /**

@@ -2,7 +2,7 @@
 
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
-import UtilCore from './../core/util.core';
+import utilCore from './../core/util.core';
 import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
 import dateFormat from 'dateformat';
@@ -17,7 +17,8 @@ import dateFormat from 'dateformat';
  * @example
  * "xAxis": {
       "title": "Date",
-      "prefix": "",
+      "prepend": "",
+      "append": "",
       "parseAsDate": true,
       "dateFormat": "dd mmm",
       "labelRotate": -45,
@@ -41,7 +42,7 @@ class HorizontalLabels extends Component {
     super(props);
     let self = this;
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.rid = UtilCore.getRandomID();
+    this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
     this.resetConfig(this.props.opts);
@@ -51,7 +52,7 @@ class HorizontalLabels extends Component {
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
-            return self.props.opts.parseAsDate && UtilCore.isDate(c) ? dateFormat(c, self.config.dateFormat) : c;
+            return self.props.opts.parseAsDate && utilCore.isDate(c) ? dateFormat(c, self.config.dateFormat) : c;
           });
         } else {
           this._categories = [];
@@ -153,7 +154,7 @@ class HorizontalLabels extends Component {
       <text instanceId={`sc-text-hlabel-${index}`} font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} opacity
         transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
         <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prefix ? this.props.opts.prefix : '') + val}
+          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val}
         </tspan>
       </text>
     );
@@ -176,7 +177,7 @@ class HorizontalLabels extends Component {
 
   onMouseEnter(e) {
     let lblIndex = e.target.getAttribute('labelIndex');
-    e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : '') + this.state.categories[lblIndex];
+    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.state.categories[lblIndex];
     this.emitter.emit('hLabelEnter', e);
   }
 

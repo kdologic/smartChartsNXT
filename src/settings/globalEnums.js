@@ -23,7 +23,8 @@ export const OPTIONS_TYPE = {
   },
   DISPLAY: {
     INLINE: 'inline',
-    BLOCK: 'block'
+    BLOCK: 'block',
+    NONE: 'none'
   },
   FLOAT: {
     TOP: 'top',

@@ -2,8 +2,8 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import UtilCore from '../core/util.core';
-import UiCore from './../core/ui.core';
+import utilCore from '../core/util.core';
+import uiCore from './../core/ui.core';
 
 /**
  * horizontalScroller.js
@@ -169,7 +169,7 @@ class HorizontalScroller extends Component {
   }
 
   onMouseDown(e) {
-    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     let classList = e.target.classList.value.split(' ');
     if (classList.includes('sc-slider-left-sel')) {
       this.selectedHandler = 'left';
@@ -189,7 +189,7 @@ class HorizontalScroller extends Component {
 
   onScrollMove(e) {
     if (this.selectedHandler) {
-      let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
+      let mousePosNow = uiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
       switch (this.selectedHandler) {
         case 'left':
@@ -357,7 +357,7 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = UtilCore.getRandomID();
+    this.titleId = utilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -389,8 +389,8 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = UtilCore.getRandomID();
-    this.gradId = UtilCore.getRandomID();
+    this.titleId = utilCore.getRandomID();
+    this.gradId = utilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -454,8 +454,8 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = UtilCore.getRandomID();
-    this.gradId = UtilCore.getRandomID();
+    this.titleId = utilCore.getRandomID();
+    this.gradId = utilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {

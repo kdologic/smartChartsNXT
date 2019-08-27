@@ -5,7 +5,7 @@
   <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
     var borwserData = []; 
-    fetch('./data/browser-usage-data-full.json')
+    fetch('./data/browser-usage-data-small.json')
       .then(function (response) {
         return response.json();
       })
@@ -43,7 +43,7 @@
             }
           },
           "subtitle": {
-            "text": "June 2018 - June 2019", // [ default : "" ]
+            "text": "June 2018 - June 2019",      // [ default : "" ]
             "top": 50,                            // [ default : 50]  x % value accepted
             "left": "50%",                        // [ default : 50%] x % value accepted
             "width": "95%",                       // [ default : 95%] x % value accepted
@@ -70,25 +70,25 @@
           "gridBox": {
             "vertical": {
               "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
               "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
               "lineThickness": 1,                       //[default: 1]
               "lineOpacity": 0.2                        //[default: 0.2]
             },
             "horizontal": {
               "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: ENUMS.LINE_STYLE.SOLID | ENUMS.LINE_STYLE.DASHED]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: LINE_STYLE.SOLID | LINE_STYLE.DASHED]
               "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
               "lineThickness": 1,                       //[default: 1]
               "lineOpacity": 0.2                        //[default: 0.2]
             },
-           "bgColor": 'skyblue',                           //[default: none]
+           "bgColor": 'skyblue',                        //[default: none]
            "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, //[default: none]
            "bgOpacity": 0.2                             //[default: 0.1]   
           },
           "pointerCrosshair": {
             "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
               "spread" : "full",              // [default: full | inPoint | none]
               "lineColor": "#000",            // [default: #000]
               "lineWidth": 1,                 // [default: 1]
@@ -98,41 +98,41 @@
               "labelOpacity": 1               // [default: 1]
             },
             "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "spread" : "none",              // [full | inPoint | default: none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
+              "spread" : "none",                    // [full | inPoint | default: none]
+              "lineColor": "#000",                  // [default: #000]
+              "lineWidth": 1,                       // [default: 1]
+              "lineOpacity": 1,                     // [default: 1]
+              "labelTextColor": "#fff",             // [default: #fff]
+              "labelBackgroundColor":"#000",        // [default: #000]
+              "labelOpacity": 1                     // [default: 1]
             }
           },
           "legends":{
-            "enable" : true,                  // [ default: true | false ]
-            "top": 70,                        // [ default: 70 ]
-            "left": 100,                      // [ default: 100 ]
-            "maxWidth": '80%',                // [ default : 100%] x % value accepted. Only applicable when display inline.
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ENUMS.ALIGNMENT.HORIZONTAL | ENUMS.ALIGNMENT.VERTICAL ]
-            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: inline | block] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.NONE,                // [ top | bottom | left | right | default: none ]
-            "textColor": "#000",          // [ default: theme.fontColorDark ]
-            "bgColor": "#CCC",            // [ default: none ]
-            "hoverColor":"none",          // [ default: none ]
-            "fontSize": 14,               // [ default: theme.fontSizeMedium ]
-            "fontFamily": "Lato",         // [ default: Lato ]
-            "itemBorderWidth": 1,         // [ default: 1 ]
-            "itemBborderColor": "#000",   // [ default: #000 ]
-            "itemBorderOpacity": 1,       // [ default: 1 ]
-            "itemBorderRadius": 10,       // [ default: 10 ]
-            "borderColor": "none",        // [ default: none ]
-            "borderWidth": 1,             // [ default: 1 ]
-            "borderOpacity": 1,           // [ default: 1 ]
-            "opacity": 0.9,               // [ default: 0.9 ]
-            "toggleType": true,           // [ default: true | false ]
-            "hideIcon": false,            // [ true | default: false ]
-            "hideLabel": false,           // [ true | default: false ]
-            "hideValue": false            // [ true | default: false ]
+            "enable" : true,                              // [ default: true | false ]
+            "top": 70,                                    // [ default: 70 ]
+            "left": 100,                                  // [ default: 100 ]
+            "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
+            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
+            "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
+            "textColor": "#000",                          // [ default: theme.fontColorDark ]
+            "bgColor": "none",                            // [ default: none ]
+            "hoverColor":"none",                          // [ default: none ]
+            "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
+            "fontFamily": "Lato",                         // [ default: Lato ]
+            "itemBorderWidth": 1,                         // [ default: 1 ]
+            "itemBorderColor": "#000",                    // [ default: #000 ]
+            "itemBorderOpacity": 1,                       // [ default: 1 ]
+            "itemBorderRadius": 10,                       // [ default: 10 ]
+            "borderColor": "none",                        // [ default: none ]
+            "borderWidth": 1,                             // [ default: 1 ]
+            "borderOpacity": 1,                           // [ default: 1 ]
+            "opacity": 0.9,                               // [ default: 0.9 ]
+            "toggleType": true,                           // [ default: true | false ]
+            "hideIcon": false,                            // [ true | default: false ]
+            "hideLabel": false,                           // [ true | default: false ]
+            "hideValue": false                            // [ true | default: false ]
           },
           "tooltip": {
             "enable": true,                   // [default: true | false ]
@@ -180,7 +180,8 @@
           "dataSet": {
             "xAxis": {
               "title": "Month",
-              "prefix": "",
+              "prepend": "",
+              "append": "",
               "parseAsDate": true,
               "dateFormat": "mmm - yyyy",
               "labelRotate": -45,
@@ -196,7 +197,8 @@
             },
             "yAxis": {
               "title": "Usage %",
-              "prefix": "",
+              "prepend": "",
+              "append": " %",
               "labelRotate": 0,
               "tickOpacity": 1,
               "tickColor": '#222',
@@ -204,50 +206,13 @@
               "labelOpacity": 1,
               "labelColor": "#000",
               "axisColor": "#000", // TODO
-              "fontSize": 20,
+              "fontSize": 14,
               "fontFamily": "Lato",
               "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
             },
             "series": borwserData
           },
-          // events: {
-          //   beforeRender: function (e) {
-          //     console.log(e, "event before rendering");
-          //   },
-          //   afterRender: function (e) {
-          //     console.log(e, "event after rendering complete");
-          //   },
-          //   onInit: function (e) {
-          //     console.log(e, "event onInit");
-          //   },
-          //   afterParseData: function (e) {
-          //     console.log(e, "event afterParseData");
-          //   },
-          //   beforeSave: function (e) {
-          //     console.log(e, "event beforeSave");
-          //   },
-          //   afterSave: function (e) {
-          //     console.log(e, "event afterSave");
-          //   },
-          //   beforePrint: function (e) {
-          //     console.log(e, "event beforePrint");
-          //   },
-          //   afterPrint: function (e) {
-          //     console.log(e, "event afterPrint");
-          //   }
-          // },
-        //   zoomWindow: {
-        //     "leftIndex": 2,
-        //     "rightIndex": 6
-        //   }
         });
-
-        /** add event listner on Horizontal scroll **/
-        // areaChart.events.on('hScroll', function(e) {console.log(e)});
-        // areaChart.events.on('beforeSave', () => {console.log('before save!');});
-        // areaChart.events.on('afterSave', () => {console.log('after save!');});
-        // areaChart.events.on('beforePrint', () => {console.log('before print!');});
-        // areaChart.events.on('afterPrint', () => {console.log('after print!');});
       });
     };
   </script>

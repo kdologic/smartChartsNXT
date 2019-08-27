@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from './../../viewEngin/pview';
-import UiCore from './../../core/ui.core';
+import uiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
 
 /**
@@ -55,7 +55,7 @@ class InteractivePlane extends Component {
   }
 
   onMouseMove(e) {
-    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     e.pos = mousePos;
     this.emitter.emit('interactiveMouseMove', e);
   }

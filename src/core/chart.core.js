@@ -1,6 +1,6 @@
 'use strict';
 
-import UiCore from './../core/ui.core';
+import uiCore from './../core/ui.core';
 import fontLato from './../styles/font-lato.css';
 import Morphing from './../plugIns/morph';
 import Chart from './../charts/chart';
@@ -23,7 +23,7 @@ class Core {
   }
 
   loadFont() {
-    UiCore.prependStyle(document.querySelector('head'), fontLato);
+    uiCore.prependStyle(document.querySelector('head'), fontLato);
     let intervalId = setInterval(() => {
       if (document.body) {
         clearInterval(intervalId);

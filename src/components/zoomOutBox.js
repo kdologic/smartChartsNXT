@@ -2,7 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import Geom from './../core/geom.core';
+import geom from './../core/geom.core';
 import defaultConfig from './../settings/config';
 
 /**
@@ -22,8 +22,8 @@ class ZoomOutBox extends Component {
       isMouseHover: false,
       width: this.props.width,
       height: this.props.height,
-      zoomHandStart: Geom.polarToCartesian(this.props.width / 2, this.props.height / 2, 10, 135),
-      zoomHandEnd: Geom.polarToCartesian(this.props.width / 2, this.props.height / 2, 20, 135)
+      zoomHandStart: geom.polarToCartesian(this.props.width / 2, this.props.height / 2, 10, 135),
+      zoomHandEnd: geom.polarToCartesian(this.props.width / 2, this.props.height / 2, 20, 135)
     };
 
     this.onClick = this.onClick.bind(this);
@@ -40,8 +40,8 @@ class ZoomOutBox extends Component {
     this.state = Object.assign({}, {
       width: nextProps.width,
       height: nextProps.height,
-      zoomHandStart: Geom.polarToCartesian(nextProps.width / 2, nextProps.height / 2, 10, 135),
-      zoomHandEnd: Geom.polarToCartesian(nextProps.width / 2, nextProps.height / 2, 20, 135)
+      zoomHandStart: geom.polarToCartesian(nextProps.width / 2, nextProps.height / 2, 10, 135),
+      zoomHandEnd: geom.polarToCartesian(nextProps.width / 2, nextProps.height / 2, 20, 135)
     });
   }
 

@@ -2,7 +2,7 @@
 
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
-import UtilCore from './../core/util.core';
+import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import Error from './../components/errorView';
 
@@ -16,7 +16,7 @@ import Error from './../components/errorView';
 class Chart {
   constructor(opts) {
     try {
-      this.runId = UtilCore.uuidv4();
+      this.runId = utilCore.uuidv4();
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode = document.querySelector('#' + opts.targetElem);
       this.targetNode.setAttribute('runId', this.runId);

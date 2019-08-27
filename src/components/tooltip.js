@@ -4,8 +4,8 @@ import defaultConfig from './../settings/config';
 import Point from './../core/point';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
-import UtilCore from './../core/util.core';
-import UiCore from './../core/ui.core';
+import utilCore from './../core/util.core';
+import uiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
 
@@ -69,7 +69,7 @@ class Tooltip extends Component {
 
     for (let i = 0; i < this.props.instanceCount; i++) {
       this.instances.push({
-        tipId: UtilCore.getRandomID(),
+        tipId: utilCore.getRandomID(),
         originPoint: new Point(0, 0),
         cPoint: new Point(0, 0),
         topLeft: new Point(0, 0),
@@ -254,7 +254,7 @@ class Tooltip extends Component {
           line2 = 'html';
         } else if (typeof event.content === 'string') {
           let tooltipContent = event.content.replace(/{{/g, '${').replace(/}}/g, '}');
-          line1 = UtilCore.assemble(tooltipContent, 'point')(pointData);
+          line1 = utilCore.assemble(tooltipContent, 'point')(pointData);
           line2 = 'html';
         }
       }
@@ -343,7 +343,7 @@ class Tooltip extends Component {
   }
 
   followMousePointer(e) {
-    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     if (this.instances[0] && this.instances[0].opacity) {
       let cPoint = this.instances[0].originPoint;
       let shiftLeft = this.instances[0].contentWidth + 20;

@@ -1,7 +1,7 @@
 'use strict';
 
 import Point from './../core/point';
-import UtilCore from './../core/util.core';
+import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
@@ -22,7 +22,7 @@ class BaseChart extends Component {
     try {
       super(props);
       this.chartType = this.props.opts.type;
-      this.CHART_OPTIONS = UtilCore.extends(this.props.opts, { width: 1, height: 1 });
+      this.CHART_OPTIONS = utilCore.extends(this.props.opts, { width: 1, height: 1 });
       this.CHART_DATA = { scaleX: 0, scaleY: 0 };
       this.CHART_CONST = {
         FIX_WIDTH: 800,
@@ -39,10 +39,10 @@ class BaseChart extends Component {
         menuIconFocused: false,
         resizeComponent: false
       };
-      this.titleId = UtilCore.getRandomID();
-      this.descId = UtilCore.getRandomID();
-      this.blurFilterId = UtilCore.getRandomID();
-      this.menuIconGradId = UtilCore.getRandomID();
+      this.titleId = utilCore.getRandomID();
+      this.descId = utilCore.getRandomID();
+      this.blurFilterId = utilCore.getRandomID();
+      this.menuIconGradId = utilCore.getRandomID();
 
       this.loadConfig(CHART_MODULES[this.chartType].config);
       this.initCanvasSize(this.state.width, this.state.height);
@@ -160,7 +160,7 @@ class BaseChart extends Component {
         }
 
         <g id={`${this.getChartId()}_cont`}>
-          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
+          <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
         </g>
 
         {this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
@@ -177,8 +177,8 @@ class BaseChart extends Component {
   }
 
   initCanvasSize(width, height, minWidth = this.CHART_DATA.minWidth, minHeight = this.CHART_DATA.minHeight) {
-    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = UtilCore.clamp(minWidth, Math.max(minWidth, width), width);
-    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = UtilCore.clamp(minHeight, Math.max(minHeight, height), height);
+    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = utilCore.clamp(minWidth, Math.max(minWidth, width), width);
+    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = utilCore.clamp(minHeight, Math.max(minHeight, height), height);
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
   }
 

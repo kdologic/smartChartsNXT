@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
+import uiCore from './../core/ui.core';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import Ticks from './ticks';
@@ -14,17 +14,21 @@ import Ticks from './ticks';
  * @extends Component
  * @example
   "yAxis": {
-      "title": "Total Sales",
-      "prefix": "Rs. ",
-      "labelRotate": 0,
-      "tickOpacity": 1,
-      "tickColor": '#222',
-      "tickSpan": 5,
-      "labelOpacity": 1,
-      "labelColor": "#009688",
-      "fontSize": 20,
-      "fontFamily": "Lato"
-    }
+    "title": "Usage %",
+    "prepend": "Rs.",
+    "append": " %",
+    "labelRotate": 0,
+    "tickOpacity": 1,
+    "tickColor": '#222',
+    "tickSpan": 5,
+    "labelOpacity": 1,
+    "labelColor": "#000",
+    "axisColor": "#000", // TODO
+    "fontSize": 14,
+    "fontFamily": "Lato",
+    "zeroBase": false,  // min label of y-axis always stick to zero if all value are positive and
+                        // max label of y-axis always sitick to zero if all value are negative.
+  }
  * @events -
  * 1. onVerticalLabelRender : Fire when horizontal labels draws.
  */
@@ -103,7 +107,7 @@ class VerticalLabels extends Component {
     this.zeroBaseIndex = -1;
     for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
       let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = UiCore.formatTextValue(labelVal);
+      this.maxLabelVal = uiCore.formatTextValue(labelVal);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {
@@ -121,7 +125,7 @@ class VerticalLabels extends Component {
       <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
         font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
         <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prefix ? this.props.opts.prefix : '') + val}
+          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '') }
         </tspan>
       </text>
     );
@@ -129,7 +133,7 @@ class VerticalLabels extends Component {
 
   onMouseEnter(e) {
     let lblIndex = e.target.classList[0].replace('vlabel-', '');
-    e.labelText = (this.props.opts.prefix ? this.props.opts.prefix : '') + this.valueSet[lblIndex];
+    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.valueSet[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('vLabelEnter', e);
   }
 

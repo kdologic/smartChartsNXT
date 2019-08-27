@@ -8,7 +8,7 @@
  */
 
 const EventEmitter = require('events');
-const MAX_LIMIT = 25;
+const MAX_LIMIT = 100;
 let instance = {};
 
 class EventEmitterSingleTone {

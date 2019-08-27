@@ -2,9 +2,9 @@
 
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
-import Geom from './../../core/geom.core';
-import UiCore from './../../core/ui.core';
-import UtilCore from './../../core/util.core';
+import geom from './../../core/geom.core';
+import uiCore from './../../core/ui.core';
+import utilCore from './../../core/util.core';
 import DataPoints from './../../components/dataPoints';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
@@ -21,7 +21,7 @@ class AreaFill extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.rid = UtilCore.getRandomID();
+    this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.gradId = 'sc-area-fill-grad-' + this.rid;
     this.state = {
@@ -156,7 +156,7 @@ class AreaFill extends Component {
       point.index = i;
       return point;
     });
-    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : Geom.catmullRomFitting(this.state.pointSet, 0.1));
+    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : geom.catmullRomFitting(this.state.pointSet, 0.1));
     path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
     return path;
   }
@@ -187,8 +187,8 @@ class AreaFill extends Component {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
-    e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
     if (this.props.clip.offsetLeft > this.props.markerRadius) {
@@ -197,10 +197,10 @@ class AreaFill extends Component {
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length - 1);
     }
-    let nearPoint = Geom.findClosestPoint(pointSet, pt, true);
+    let nearPoint = geom.findClosestPoint(pointSet, pt, true);
     this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
     if (nearPoint.dist <= (this.state.scaleX / 2)) {
-      e.highlightedPoint = {
+      evt.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
         y: (this.props.posY + nearPoint.y),
         relX: nearPoint.x,
@@ -210,12 +210,12 @@ class AreaFill extends Component {
         seriesIndex: this.props.index
       };
     } else {
-      e.highlightedPoint = {
+      evt.highlightedPoint = {
         pointIndex: null
       };
     }
-    this.state.currentHighlightedPoint = e.highlightedPoint;
-    this.emitter.emit('highlightPointMarker', e);
+    this.state.currentHighlightedPoint = evt.highlightedPoint;
+    this.emitter.emit('highlightPointMarker', evt);
   }
 
   interactiveMouseLeave() {
@@ -228,7 +228,7 @@ class AreaFill extends Component {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
-    e = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    e = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
       if (this.props.clip.offsetLeft > this.props.markerRadius) {
