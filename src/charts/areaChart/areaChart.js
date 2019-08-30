@@ -88,7 +88,8 @@ class AreaChart extends Component {
         tooltip: {
           enable: true,
           followPointer: false,
-          grouped: true
+          grouped: true,
+          pointerVicinity: 20
         }
       }, this.props.chartOptions);
       this.CHART_CONST = utilCore.extends({}, this.props.chartConst);
@@ -436,12 +437,10 @@ class AreaChart extends Component {
         </g>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
-          // <Draggable>
           <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
             display='inline' type={this.legendBoxType} background='none'
             hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
           </LegendBox>
-          // </Draggable>
         }
 
         {this.CHART_OPTIONS.tooltip.enable &&
@@ -474,7 +473,7 @@ class AreaChart extends Component {
         {this.CHART_OPTIONS.horizontalScroller.enable &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
-            svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}>
+            offsetColor='#333' >
           </HorizontalScroller>
         }
 
@@ -498,7 +497,7 @@ class AreaChart extends Component {
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
-          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true}
+          maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
           }}
@@ -517,31 +516,40 @@ class AreaChart extends Component {
   drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       let clipId = 'clip-fs-' + series.index;
+      let clipId2 = 'clip-fs-1-'+ series.index;
       let clip = {
         x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100,
         width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollRightOffset / 100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100
       };
+      
       return (
         <g class='sc-fs-chart-area-container'>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#ddd' lineFillColor='#ddd'
-            gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
-            marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
+            gradient={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
+            marker={false} markerRadius={0} centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
-            }}>
+            }}
+            >
           </AreaFill>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
-            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#8c4141' lineFillColor='#8c4141'
+            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#000' lineFillColor='#000'
             gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={clipId}>
+              <rect x={0} y={0} width={clip.x} height={this.CHART_OPTIONS.horizontalScroller.height} />
+              <rect x={clip.x + clip.width} y={0} width={(this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)- (clip.x + clip.width)} height={this.CHART_OPTIONS.horizontalScroller.height} />
           </AreaFill>
           <defs>
             <clipPath id={clipId}>
               <rect x={clip.x} y={0} width={clip.width} height={this.CHART_OPTIONS.horizontalScroller.height} />
+            </clipPath>
+            <clipPath id={clipId2}>
+              <rect x={0} y={0} width={clip.x} height={this.CHART_OPTIONS.horizontalScroller.height} />
+              <rect x={clip.x + clip.width} y={0} width={(this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)- (clip.x + clip.width)} height={this.CHART_OPTIONS.horizontalScroller.height} />
             </clipPath>
           </defs>
         </g>
@@ -767,7 +775,7 @@ class AreaChart extends Component {
   }
 
   getLegendData() {
-    return this.state.cs.dataSet.series.map((data, i) => {
+    return this.state.cs.dataSet.series.map((data) => {
       return { label: data.name, color: data.bgColor || utilCore.getColor(data.index), isToggeled: !data.visible };
     });
   }

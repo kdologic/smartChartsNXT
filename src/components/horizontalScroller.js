@@ -89,7 +89,7 @@ class HorizontalScroller extends Component {
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
         <rect class='sc-slider-bg' x={0} y={0} width={this.props.width} height={this.props.height} fill='#000' fill-opacity='0.04' />
         {this.props.extChildren}
-        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height}
+        <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} offsetColor={this.props.offsetColor}
           fillOpacity={this.state.sliderWindowOpacity} focusedIn={this.state.handlerFocused === 'window'}
           events={{
             mousedown: this.onMouseDown,
@@ -141,7 +141,7 @@ class HorizontalScroller extends Component {
         </SliderRightHandle>
 
         {this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width={this.props.svgWidth} height={this.props.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width={this.context.svgWidth} height={this.context.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
         }
       </g>
     );
@@ -375,7 +375,7 @@ class SliderWindow extends Component {
   render() {
     return (
       <g class='sc-slider-window-cont' transform={`translate(${this.state.posX},${this.state.posY})`} >
-        <rect class='sc-hScroll-window' aria-labelledby={this.titleId} x={0} y={0} width={this.state.width} height={this.state.height} fill='red' storke='none' stroke-width='1' pointer-events='all' tabindex='0'
+        <rect class='sc-hScroll-window' aria-labelledby={this.titleId} x={0} y={0} width={this.state.width} height={this.state.height} fill={this.props.offsetColor} storke='none' stroke-width='1' pointer-events='all' tabindex='0'
           fill-opacity={this.props.fillOpacity} style='transition: fill-opacity 0.3s linear;cursor: grab; cursor: -moz-grab; cursor: -webkit-grab;' events={this.state.events}>
         </rect>
         <title id={this.titleId}> Slider Window (use arrow left or right to slide) </title>

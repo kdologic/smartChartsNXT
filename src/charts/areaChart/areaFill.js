@@ -188,8 +188,8 @@ class AreaFill extends Component {
       return;
     }
     let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
-    let pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
+    const mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
     if (this.props.clip.offsetLeft > this.props.markerRadius) {
       pointSet = pointSet.slice(1);
@@ -197,9 +197,10 @@ class AreaFill extends Component {
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length - 1);
     }
-    let nearPoint = geom.findClosestPoint(pointSet, pt, true);
+    const nearPoint = geom.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
     this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
-    if (nearPoint.dist <= (this.state.scaleX / 2)) {
+    const pointerVicinity = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
+    if (nearPoint.dist <= pointerVicinity) {
       evt.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
         y: (this.props.posY + nearPoint.y),
@@ -228,7 +229,7 @@ class AreaFill extends Component {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
-    e = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
       if (this.props.clip.offsetLeft > this.props.markerRadius) {
@@ -245,7 +246,7 @@ class AreaFill extends Component {
       const nearPoint = pointSet.find((p) => p.index === nextPointIndex);
       if (nearPoint) {
         this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
-        e.highlightedPoint = {
+        evt.highlightedPoint = {
           x: (this.props.posX + nearPoint.x),
           y: (this.props.posY + nearPoint.y),
           relX: nearPoint.x,
@@ -255,13 +256,13 @@ class AreaFill extends Component {
           seriesIndex: this.props.index
         };
       } else {
-        e.highlightedPoint = {
+        evt.highlightedPoint = {
           pointIndex: null
         };
       }
 
-      this.state.currentHighlightedPoint = e.highlightedPoint;
-      this.emitter.emit('highlightPointMarker', e);
+      this.state.currentHighlightedPoint = evt.highlightedPoint;
+      this.emitter.emit('highlightPointMarker', evt);
     }
   }
 

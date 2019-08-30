@@ -21,6 +21,7 @@ import Style from './../viewEngin/style';
   "enable": true,                   // [default: true | false ]
   "followPointer": false,           // [true | default: false ]  Note: This option only available when tooltip are grouped.
   "grouped": true,                  // [default: true | false ]
+  "pointerVicinity": 10,            // [default: 20] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
   "content": {
     "header": function(pointSet, index, tipConfig) {
       return (...);

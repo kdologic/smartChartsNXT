@@ -16,19 +16,20 @@ import dateFormat from 'dateformat';
  *
  * @example
  * "xAxis": {
-      "title": "Date",
+      "title": "Month",
       "prepend": "",
       "append": "",
       "parseAsDate": true,
-      "dateFormat": "dd mmm",
+      "dateFormat": "mmm - yyyy",
       "labelRotate": -45,
       "intervalThreshold": 40,
       "tickOpacity": 1,
       "tickColor": '#222',
       "tickSpan": 6,
       "labelOpacity": 1,
-      "labelColor": "#009688",
-      "fontSize": 14,
+      "labelColor": "#000",
+      "axisColor": "#000", // TODO
+      "fontSize": 12,
       "fontFamily": "Lato"
     }
 

@@ -140,7 +140,7 @@
             "hoverColor":"none",                          // [ default: none ]
             "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
             "fontFamily": "Lato",                         // [ default: Lato ]
-            "itemBorderWidth": 1,                         // [ default: 1 ]
+            "itemBorderWidth": 0,                         // [ default: 1 ]
             "itemBorderColor": "#000",                    // [ default: #000 ]
             "itemBorderOpacity": 1,                       // [ default: 1 ]
             "itemBorderRadius": 10,                       // [ default: 10 ]
@@ -156,7 +156,8 @@
           "tooltip": {
             "enable": true,                   // [default: true | false ]
             "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
-            "grouped": true,                  // [default: true | false ]
+            "grouped": false,                  // [default: true | false ]
+            "pointerVicinity": 50,            // [default: 20] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
@@ -206,7 +207,8 @@
           "dataSet": {
             "xAxis": {
               "title": "Date",
-              "prefix": "",
+              "prepend": "",
+              "append": "",
               "parseAsDate": true,
               "dateFormat": "dd mmm",
               "labelRotate": -45,
@@ -222,7 +224,8 @@
             },
             "yAxis": {
               "title": "Total Sales",
-              "prefix": "\u20B9 ",
+              "prepend": "\u20B9 ",
+              "append": "",
               "labelRotate": 0,
               "tickOpacity": 1,
               "tickColor": '#222',
