@@ -515,13 +515,13 @@ class AreaChart extends Component {
 
   drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
-      let clipId = 'clip-fs-' + series.index;
-      let clipId2 = 'clip-fs-1-'+ series.index;
+      let clipId = 'clip-fs-window-' + series.index;
+      let clipId2 = 'clip-fs-offset-'+ series.index;
       let clip = {
         x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100,
         width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollRightOffset / 100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100
       };
-      
+
       return (
         <g class='sc-fs-chart-area-container'>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
@@ -532,7 +532,7 @@ class AreaChart extends Component {
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
-            >
+            clipId={clipId2}>
           </AreaFill>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#000' lineFillColor='#000'
@@ -540,8 +540,6 @@ class AreaChart extends Component {
             marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={clipId}>
-              <rect x={0} y={0} width={clip.x} height={this.CHART_OPTIONS.horizontalScroller.height} />
-              <rect x={clip.x + clip.width} y={0} width={(this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)- (clip.x + clip.width)} height={this.CHART_OPTIONS.horizontalScroller.height} />
           </AreaFill>
           <defs>
             <clipPath id={clipId}>

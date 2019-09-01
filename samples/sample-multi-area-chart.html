@@ -19,10 +19,11 @@
       return dataSet;
     }
 
+    let areaChart;
     window.onload = function () {
       SmartChartsNXT.debug = false;
       SmartChartsNXT.ready(function () {
-        var areaChart = new SmartChartsNXT.Chart({
+        areaChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "description": "A javascript area chart that visualize the data of sales",
@@ -156,7 +157,7 @@
           "tooltip": {
             "enable": true,                   // [default: true | false ]
             "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
-            "grouped": false,                  // [default: true | false ]
+            "grouped": true,                  // [default: true | false ]
             "pointerVicinity": 50,            // [default: 20] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
             "content": {
               "header": function(pointSet, index, tipConfig) {
@@ -238,11 +239,13 @@
               "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
             },
             "series": [{
+                "visible": true,        // [default: true | false ]
                 "lineWidth": 1.5,
                 "bgColor": "#2278b4",
                 "name": 'Raphael',
                 "areaOpacity": 0.3,
                 "spline": true,
+                "gradient": true,
                 "animated": true,      // [default: true | false ]
                 "data": generateData(10, 50, 100) 
                 // [
@@ -250,6 +253,7 @@
                 // ] 
               },
               {
+                "visible": true,        // [default: true | false ]
                 "lineWidth": 1.5,
                 "bgColor": "#ff7f0e",
                 "marker": true,
@@ -259,7 +263,6 @@
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Willson',
-                "visible": true,        // [default: true | false ]
                 "animated": true,       // [default: true | false ]
                 "data": generateData(5, 20, 100)
                 // [
@@ -267,6 +270,7 @@
                 // ] 
               },
               {
+                "visible": true,        // [default: true | false ]
                 "lineWidth": 1.5,
                 "bgColor": "#f4df0e",
                 "marker": true,
@@ -276,7 +280,6 @@
                 "areaOpacity": 0.5,
                 "lineOpacity": 1,
                 "name": 'Clara',
-                "visible": true,        // [default: true | false ]
                 "animated": true,       // [default: true | false ]
                 "data": generateData(5, 20, 10)
               }

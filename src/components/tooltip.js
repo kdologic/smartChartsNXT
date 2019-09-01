@@ -51,30 +51,25 @@ import Style from './../viewEngin/style';
 class Tooltip extends Component {
   constructor(props) {
     super(props);
-    let padding = 0;
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.config = {
-      textColor: this.props.opts.textColor || defaultConfig.theme.fontColorDark,
-      bgColor: this.props.opts.bgColor || defaultConfig.theme.bgColorLight,
-      fontSize: this.props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
-      fontFamily: this.props.opts.fontFamily || defaultConfig.theme.fontFamily,
-      xPadding: Number(this.props.opts.xPadding) || padding,
-      yPadding: Number(this.props.opts.yPadding) || padding,
-      strokeWidth: typeof this.props.opts.borderWidth === 'undefined' ? 3 : this.props.opts.borderWidth,
-      opacity: typeof this.props.opts.opacity === 'undefined' ? 0.8 : this.props.opts.opacity,
-      followPointer: typeof this.props.opts.followPointer === 'undefined' ? false : this.props.opts.followPointer
-    };
-
+    this.config = {};
     this.state = {};
-    this.instances = [];
+    this.setConfig(this.props);
+    this.initInstances(this.props);
+    this.updateTip = this.updateTip.bind(this);
+    this.hide = this.hide.bind(this);
+    this.followMousePointer = this.followMousePointer.bind(this);
+  }
 
-    for (let i = 0; i < this.props.instanceCount; i++) {
+  initInstances(props) {
+    this.instances = [];
+    for (let i = 0; i < props.instanceCount; i++) {
       this.instances.push({
         tipId: utilCore.getRandomID(),
         originPoint: new Point(0, 0),
         cPoint: new Point(0, 0),
         topLeft: new Point(0, 0),
-        transform: `translate(${this.props.svgWidth / 2},${this.props.svgHeight / 2})`,
+        transform: `translate(${this.context.svgWidth / 2},${this.context.svgHeight / 2})`,
         tooltipContent: '',
         contentX: this.config.xPadding,
         contentY: this.config.yPadding,
@@ -84,10 +79,20 @@ class Tooltip extends Component {
         opacity: 0
       });
     }
+  }
 
-    this.updateTip = this.updateTip.bind(this);
-    this.hide = this.hide.bind(this);
-    this.followMousePointer = this.followMousePointer.bind(this);
+  setConfig(props) {
+    this.config = {
+      textColor: props.opts.textColor || defaultConfig.theme.fontColorDark,
+      bgColor: props.opts.bgColor || defaultConfig.theme.bgColorLight,
+      fontSize: props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
+      fontFamily: props.opts.fontFamily || defaultConfig.theme.fontFamily,
+      xPadding: Number(props.opts.xPadding) || 0,
+      yPadding: Number(props.opts.yPadding) || 0,
+      strokeWidth: typeof props.opts.borderWidth === 'undefined' ? 3 : props.opts.borderWidth,
+      opacity: typeof props.opts.opacity === 'undefined' ? 0.8 : props.opts.opacity,
+      followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer
+    };
   }
 
   componentWillMount() {
@@ -100,6 +105,16 @@ class Tooltip extends Component {
     this.emitter.on('hideTooltip', this.hide);
     if (this.props.grouped && this.config.followPointer) {
       this.emitter.on('interactiveMouseMove', this.followMousePointer);
+    }
+  }
+
+  propsWillReceive(nextProps) {
+    this.setConfig(nextProps);
+  }
+
+  componentWillUpdate(nextProps) {
+    if(nextProps.instanceCount !== this.props.instanceCount) {
+      this.initInstances(nextProps);
     }
   }
 

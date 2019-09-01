@@ -1,5 +1,6 @@
 [
   {
+    "visible": false,
     "lineWidth": 1.5,
     "name": "Chrome",
     "areaOpacity": 0.3,

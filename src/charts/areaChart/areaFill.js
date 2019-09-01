@@ -227,7 +227,7 @@ class AreaFill extends Component {
 
   interactiveKeyPress(e) {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
-      return;
+      return void 0;
     }
     let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
@@ -237,6 +237,9 @@ class AreaFill extends Component {
       }
       if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
         pointSet = pointSet.slice(0, pointSet.length - 1);
+      }
+      if(!pointSet.length) {
+        return void 0;
       }
       let nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[0].index : this.state.currentHighlightedPoint.pointIndex + 1;
       if (e.which == 37) {
