@@ -14,6 +14,7 @@
 
 const Polyfills = require('./shims/polyfills');
 const config = require('./config').default;
+const deepmerge = require('deepmerge');
 
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
@@ -92,10 +93,11 @@ function renderDOM(vnode) {
     });
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
+    /* eslint-disable-next-line babel/no-invalid-this */
     vnode.nodeName.prototype.context = this.context || {};
     /* eslint-disable-next-line new-cap*/
     let objComp = new vnode.nodeName(vnode.attributes);
-    let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
+    let objChildContext = _extends({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let renderedComp = renderDOM.call({ context: objChildContext }, objComp.getVirtualNode());
 
     component.self = objComp;
@@ -106,8 +108,9 @@ function renderDOM(vnode) {
     return component;
   } else if (typeof vnode.nodeName === 'object' && vnode.nodeName.ref) { /* when vnode is type of object which is previously constructed */
     let objComp = vnode.nodeName;
+    /* eslint-disable-next-line babel/no-invalid-this */
     objComp.__proto__.context = this.context || {};
-    let objChildContext = Object.assign({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
+    let objChildContext = _extends({}, objComp.context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let subNodes = vnode.fromUpdate ? objComp.vnode : objComp.getVirtualNode();
 
     if (subNodes.children && subNodes.children.length) {
@@ -130,6 +133,7 @@ function renderDOM(vnode) {
 
   /* loop for childrens */
   (vnode.children || []).forEach((c) => {
+    /* eslint-disable-next-line babel/no-invalid-this */
     let childComp = renderDOM.call(({ context: this.context } || {}), c);
 
     if (childComp.self && typeof childComp.self.componentWillMount === 'function') {
@@ -206,6 +210,24 @@ function __h__(nodeName, attributes, ...args) {
 }
 window.__h__ = window.__h__ || __h__;
 
+/**
+ * Merges the enumerable properties of two or more objects deeply.
+ * It will modify the destination object.
+ * Ref: https://www.npmjs.com/package/deepmerge.
+ * @param  {any} dest Destination object which will be extendts by rest of the paramater objects.
+ * @param  {...any} args Array of source object.
+ * @return {Object} Merged object.
+ */
+function _extends(dest, ...args) {
+  const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+  if(!dest) {
+    return {};
+  }else if(args.length === 0) {
+    return dest;
+  }else {
+    return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
+  }
+}
 
 /**
  * convert style JSON into string, gets called by transpiled JSX
@@ -391,31 +413,6 @@ class Component {
   }
 
   /**
-   * Properties from the Souce1 object will be copied to source Object.This method will return a new merged object, Source1 and source original values will not be replaced.
-   * @param {Object} source1 First Source object.
-   * @param {Object} source2 Second Source Object.
-   * @returns {Object} Merged object of source1 and source2
-   */
-  _extends(source1, source2) {
-    if (!source1 || !source2) {
-      return {};
-    }
-    let mergedJSON = source1;
-    for (let attrname in source2) {
-      if (mergedJSON.hasOwnProperty(attrname)) {
-        if (source2[attrname] != null && source2[attrname].constructor == Object) {
-          mergedJSON[attrname] = this.extends(mergedJSON[attrname], source2[attrname]);
-        } else {
-          mergedJSON[attrname] = source2[attrname];
-        }
-      } else {
-        mergedJSON[attrname] = source2[attrname];
-      }
-    }
-    return mergedJSON;
-  }
-
-  /**
    * Traverse virtual node and Heuristic O(n) compare with old node to minimize DOM update.
    * @param {Object} oldVNode Previous virtual node that rendered.
    * @param {Object} newVNode Newly created virtual node that constructed recent update after passing new props.
@@ -431,21 +428,21 @@ class Component {
     }
 
     if (ref && ref.self && typeof ref.self.passContext === 'function') {
-      context = Object.assign({}, context, ref.self.passContext());
+      context = _extends({}, context, ref.self.passContext());
     }
 
     if (typeof newVNode.nodeName === 'object') {
       newVNode.attributes.extChildren = newVNode.children;
-      let newProps = Object.assign({}, ref.self ? ref.self.props : {}, newVNode.attributes);
+      let newProps = _extends({}, ref.self ? ref.self.props : {}, newVNode.attributes);
 
       if (ref && ref.self && typeof ref.self.propsWillReceive === 'function') {
         ref.self.propsWillReceive.call(ref.self, newProps);
-        ref.self.props = newProps;
       }
 
       if (ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
         let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
         if (!shouldUpdate) {
+          ref.self.props = newProps;
           return false;
         }
       }
@@ -454,9 +451,12 @@ class Component {
         ref.self.__proto__.context = context;
       }
 
-
       if (ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
         ref.self.componentWillUpdate.call(ref.self, newProps);
+      }
+
+      if (ref && ref.self) {
+        ref.self.props = newProps;
       }
 
       if (ref && ref.self) {
@@ -498,10 +498,10 @@ class Component {
           let reconcileDiff;
           if (typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
             child = Math.max(oldVNode.children.length, newVNode.children.length);
-            reconcileDiff = this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, this._extends({}, context));
+            reconcileDiff = this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, _extends({}, context));
             ref.children = ref.self.ref.children;
           } else {
-            reconcileDiff = this._reconcile(oldVNode.children[child], newVNode.children[child], ref.children[child], this._extends({}, context));
+            reconcileDiff = this._reconcile(oldVNode.children[child], newVNode.children[child], ref.children[child], _extends({}, context));
 
             if (ref.children[child].children instanceof Array && ref.children[child].children.length) {
               ref.children[child].children = ref.children[child].children.filter(v => v != undefined);
@@ -689,7 +689,7 @@ class Component {
     }
 
     let vnodeNow = this.render();
-    let objContext = Object.assign({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
+    let objContext = _extends({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
@@ -723,6 +723,7 @@ class Component {
     return (<g> Your component should override this render method </g>);
   }
 
+  /* eslint-disable no-unused-vars */
   /**
    * Lifecycle event - fires just before passing props into a pre-exist Component.
    * @param {Object} nextProps New set of props.
@@ -735,14 +736,14 @@ class Component {
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentWillMount() { }
+  componentWillMount(nextProps) { }
 
   /**
    * Lifecycle event - fires after the component mounted on parent DOM.
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentDidMount() { }
+  componentDidMount(nextProps) { }
 
   /**
    * Call before render and determite component update
