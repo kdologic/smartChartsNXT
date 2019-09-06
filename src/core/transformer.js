@@ -9,7 +9,9 @@
  */
 
 class Transformer {
-  constructor() { }
+  constructor() {
+    this.matrix = [];
+  }
 
   /**
    * Returns unit matrix as base matrix
@@ -30,77 +32,77 @@ class Transformer {
    * @return {String} String value of transformation matrix
    */
   getTransformMatrix(trnsOprtns, baseMatrix) {
-    let matrix = baseMatrix || this.getBase();
+    this.matrix = JSON.parse(JSON.stringify(baseMatrix || this.getBase()));
     for (let i = 0; i < (trnsOprtns || []).length; i++) {
       let arrOpr = trnsOprtns[i].split(/[(),]/g).filter(v => {
         return v !== '';
       });
       switch (arrOpr[0]) {
         case 'rotate':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [Math.cos(this.degToRad(arrOpr[1])), (-1) * Math.sin(this.degToRad(arrOpr[1])), 0],
             [Math.sin(this.degToRad(arrOpr[1])), Math.cos(this.degToRad(arrOpr[1])), 0],
             [0, 0, 1]
           ]);
           break;
         case 'scale':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [arrOpr[1], 0, 0],
             [0, arrOpr[1], 0],
             [0, 0, 1]
           ]);
           break;
         case 'scaleX':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [arrOpr[1], 0, 0],
             [0, 1, 0],
             [0, 0, 1]
           ]);
           break;
         case 'scaleY':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, 0, 0],
             [0, arrOpr[1], 0],
             [0, 0, 1]
           ]);
           break;
         case 'translate':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, 0, arrOpr[1]],
             [0, 1, arrOpr[2]],
             [0, 0, 1]
           ]);
           break;
         case 'translateX':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, 0, arrOpr[1]],
             [0, 1, 0],
             [0, 0, 1]
           ]);
           break;
         case 'translateY':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, 0, 0],
             [0, 1, arrOpr[1]],
             [0, 0, 1]
           ]);
           break;
         case 'skew':
-          let matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
               [1, Math.tan(this.degToRad(arrOpr[1])), 0],
               [Math.tan(this.degToRad(arrOpr[2])), 1, 0],
               [0, 0, 1]
             ]);
           break;
         case 'skewX':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, Math.tan(this.degToRad(arrOpr[1])), 0],
             [0, 1, 0],
             [0, 0, 1]
           ]);
           break;
         case 'skewY':
-          matrix = this.multiply(matrix, [
+          this.matrix = this.multiply(this.matrix, [
             [1, 0, 0],
             [Math.tan(this.degToRad(arrOpr[1])), 1, 0],
             [0, 0, 1]
@@ -108,7 +110,7 @@ class Transformer {
           break;
       }
     }
-    return `matrix(${[matrix[0][0], matrix[1][0], matrix[0][1], matrix[1][1], matrix[0][2], matrix[1][2]].join()})`;
+    return `matrix(${[this.matrix[0][0], this.matrix[1][0], this.matrix[0][1], this.matrix[1][1], this.matrix[0][2], this.matrix[1][2]].join()})`;
   }
 
   /**
@@ -177,7 +179,7 @@ class Transformer {
   multiply(a, b) {
     let aNumRows = a.length;
     let aNumCols = a[0].length;
-    let bNumRows = b.length;
+    //let bNumRows = b.length;
     let bNumCols = b[0].length;
     let m = new Array(aNumRows);
     for (let r = 0; r < aNumRows; ++r) {

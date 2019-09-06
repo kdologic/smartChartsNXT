@@ -35,7 +35,8 @@ class AreaFill extends Component {
       opacity: this.props.opacity || 1,
       currentHighlightedPoint: {
         pointIndex: null
-      }
+      },
+      animated: this.props.animated
     };
 
     this.state.clip = Object.assign({
@@ -69,6 +70,7 @@ class AreaFill extends Component {
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
+    this.state.animated = false;
   }
 
   componentWillUnmount() {
@@ -95,11 +97,11 @@ class AreaFill extends Component {
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
         <remove-before-save>
-          <style>
-            {this.props.animated &&
-              this.getScaleKeyframe()
-            }
-          </style>
+          {this.state.animated &&
+            <style>
+              { this.getScaleKeyframe() }
+            </style>
+          }
         </remove-before-save>
         {this.props.clipId === undefined &&
           <defs>
@@ -277,11 +279,11 @@ class AreaFill extends Component {
 
   getScaleKeyframe() {
     return (`
+      ${this.generateAnimKeyframe(600, 100)}
       .sc-area-fill-${this.props.instanceId} {
         transform: translate(${this.props.posX}px, ${this.props.posY}px);
         animation: scale-easeOutElastic-${this.props.instanceId} 1.5s linear both;
       }
-      ${this.generateAnimKeyframe(600, 100)}
     `);
   }
 

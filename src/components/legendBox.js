@@ -284,12 +284,12 @@ class LegendBox extends Component {
     }
     for (let index = 0; index < this.state.legendSet.length; index++) {
       const legendWidth = this.state.legendSet[index].totalWidth;
-      let trnsX = this.cumulativeWidth + this.padding;
+      let trnsX = index === 0 ? 0 : this.cumulativeWidth + this.padding;
       let trnsY = (this.state.lineCount - 1) * this.lineHeight;
       if (legendBoxTrnsX + trnsX + legendWidth + this.padding > legendBoxTrnsX + maxAllowedWidth) {
         this.cumulativeWidth = 0;
         this.state.lineCount++;
-        trnsX = this.cumulativeWidth + this.padding;
+        trnsX = 0;
         trnsY = (this.state.lineCount - 1) * this.lineHeight;
       }
       this.cumulativeWidth = trnsX + legendWidth;

@@ -8,7 +8,7 @@ import uiCore from './../core/ui.core';
  * draggable.js
  * @createdOn:31-Aug-2017
  * @author:SmartChartsNXT
- * @description: This class will make components draggable.
+ * @description: This component will make child components draggable.
  * To drag a component just double click on it then the component will be showed as selected then we can drag it
  * to fix that position jus double click again on the component. Touch device also supported, to drag long press to
  * select that element then you can drag it.
