@@ -59,12 +59,12 @@ class Grid extends Component {
         lineOpacity: opts.horizontal.lineOpacity || 0.2
       },
       bgColor: props.opts.bgColor || 'none',
-      bgGradient: props.opts.bgGradient || 'none',
+      bgGradient: props.opts.bgGradient || ENUMS.GRADIENT_STYLE.NONE,
       bgOpacity: props.opts.bgOpacity || 0.1
     };
     this.state.vLineDashArray = this.config.vertical.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
     this.state.hLineDashArray = this.config.horizontal.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
-    this.state.showBgGradient = this.config.bgColor !== 'none' && this.config.bgGradient !== 'none';
+    this.state.showBgGradient = this.config.bgColor !== 'none' && this.config.bgGradient !== ENUMS.GRADIENT_STYLE.NONE;
   }
 
   componentWillUpdate(nextProps) {
@@ -145,6 +145,9 @@ class Grid extends Component {
           </radialGradient>
         </defs>);
         break;
+      case ENUMS.GRADIENT_STYLE.NONE:
+      default:
+        gradHtml = '';
     }
     return gradHtml;
   }

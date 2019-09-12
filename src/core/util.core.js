@@ -1,6 +1,7 @@
 'use strict';
 
 import deepmerge from 'deepmerge';
+import {COLOR_MODEL, RAINBOW_COLOR_MODEL} from './fillColorModel';
 
 /**
  * util.core.js
@@ -82,61 +83,13 @@ class UtilCore {
    * @returns {String} Color HEX code.
    */
   getColor(index, ranbowFlag) {
-    let Colors = {};
-    Colors.names = {
-      'light-blue': '#95CEFF',
-      'light-orange': '#ff9e01',
-      'olive-green': '#b0de09',
-      'coral': '#FF7F50',
-      'light-seagreen': '#20B2AA',
-      'gold': '#ffd700',
-      'light-slategray': '#778899',
-      'rust': '#F56B19',
-      'mat-violet': '#B009DE',
-      'violet': '#DE09B0',
-      'dark-Orange': '#FF8C00',
-      'mat-blue': '#09b0de',
-      'mat-green': '#09DEB0',
-      'ruscle-red': '#d9534f',
-      'dark-turquoise': '#00CED1',
-      'orchid': '#DA70D6',
-      'length': 16
-    };
-    Colors.rainbow = {
-      'red': '#ff0f00',
-      'dark-orange': '#ff6600',
-      'light-orange': '#ff9e01',
-      'dark-yello': '#fcd202',
-      'light-yellow': '#f8ff01',
-      'olive-green': '#b0de09',
-      'green': '#04d215',
-      'sky-blue': '#0d8ecf',
-      'light-blue': '#0d52d1',
-      'blue': '#2a0cd0',
-      'violet': '#8a0ccf',
-      'pink': '#cd0d74',
-      'length': 12
-    };
-    let result;
-    let count = 0;
+    let colors;
     if (ranbowFlag) {
-      index = index % 12;
-      Colors.rainbow.length;
-      for (let prop in Colors.rainbow) {
-        if (index === count++) {
-          result = Colors.rainbow[prop];
-        }
-      }
+      colors = $SC.RAINBOW_COLOR_MODEL.length ? $SC.RAINBOW_COLOR_MODEL : RAINBOW_COLOR_MODEL;
     } else {
-      index = index % Colors.names.length;
-      for (let prop in Colors.names) {
-        if (index === count++) {
-          result = Colors.names[prop];
-        }
-      }
+      colors = $SC.COLOR_MODEL.length ? $SC.COLOR_MODEL : COLOR_MODEL;
     }
-
-    return result;
+    return colors[index % colors.length ];
   }
 
   colorLuminance(hex, lum) {

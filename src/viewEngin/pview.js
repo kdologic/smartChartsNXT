@@ -674,7 +674,7 @@ class Component {
    */
   update() {
     let compName;
-    if (config.debug) {
+    if (config.debug && config.debugRenderTime) {
       compName = this.__proto__.constructor.name;
       /* eslint-disable-next-line no-console */
       console.time(compName + ' update');
@@ -699,7 +699,7 @@ class Component {
       this.componentDidUpdate(this.props);
     }
 
-    if (config.debug) {
+    if (config.debug && config.debugRenderTime) {
       /* eslint-disable-next-line no-console */
       console.timeEnd(compName + ' update');
     }

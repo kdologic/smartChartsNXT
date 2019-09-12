@@ -85,8 +85,21 @@ class HorizontalScroller extends Component {
   }
 
   render() {
+    let clip = {
+      x: this.props.width * this.state.leftOffsetPercent / 100,
+      width: this.props.width * this.state.rightOffsetPercent / 100 - this.props.width * this.state.leftOffsetPercent / 100
+    };
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
+        <defs>
+          <clipPath id={this.props.windowClipId}>
+            <rect x={clip.x} y={0} width={clip.width} height={this.props.height} />
+          </clipPath>
+          <clipPath id={this.props.offsetClipId}>
+            <rect x={0} y={0} width={clip.x} height={this.props.height} />
+            <rect x={clip.x + clip.width} y={0} width={this.props.width - (clip.x + clip.width)} height={this.props.height} />
+          </clipPath>
+        </defs>
         <rect class='sc-slider-bg' x={0} y={0} width={this.props.width} height={this.props.height} fill='#ddd' fill-opacity='0.1' />
         {this.props.extChildren}
         <SliderWindow posX={this.state.leftOffset} posY={0} width={this.state.windowWidth} height={this.props.height} offsetColor={this.props.offsetColor}

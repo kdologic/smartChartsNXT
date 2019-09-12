@@ -25,9 +25,27 @@ class EventEmitterSingleTone {
   }
 
   createInstance(runId) {
-    const  inst = new EventEmitter();
-    inst.setMaxListeners(MAX_LIMIT);
-    return instance[runId] = inst;
+    const  event = new EventEmitter();
+    /* make event emitter sync and async mode*/
+    event._emit = event.emit;
+    event.emitSync = (...args) => {
+      /* eslint-disable no-console */
+      try {
+        $SC.debug && $SC.debugEvents && console.info('Event name:', args[0]);
+        $SC.debug && $SC.debugEvents && console.info('with data:', args[1]);
+      }catch(ex) {
+        console.error(ex);
+      }
+
+      event._emit(...args);
+    };
+    event.emit = (...args) => {
+      setTimeout(() => {
+        event.emitSync(...args);
+      },0);
+    };
+    event.setMaxListeners(MAX_LIMIT);
+    return instance[runId] = event;
   }
 
   getInstance(runId) {

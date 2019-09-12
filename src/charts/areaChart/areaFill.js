@@ -97,7 +97,7 @@ class AreaFill extends Component {
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
         <remove-before-save>
-          {this.state.animated &&
+          {this.props.animated &&
             <style>
               { this.getScaleKeyframe() }
             </style>
@@ -218,7 +218,7 @@ class AreaFill extends Component {
       };
     }
     this.state.currentHighlightedPoint = evt.highlightedPoint;
-    this.emitter.emit('highlightPointMarker', evt);
+    this.emitter.emitSync('highlightPointMarker', evt);
   }
 
   interactiveMouseLeave() {
@@ -267,7 +267,7 @@ class AreaFill extends Component {
       }
 
       this.state.currentHighlightedPoint = evt.highlightedPoint;
-      this.emitter.emit('highlightPointMarker', evt);
+      this.emitter.emitSync('highlightPointMarker', evt);
     }
   }
 

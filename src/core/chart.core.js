@@ -17,6 +17,8 @@ import viewConfig from './../viewEngin/config';
 class Core {
   constructor() {
     this._debug = false;
+    this.debugRenderTime = false;
+    this.debugEvents = false;
     this.nameSpaceReadyStatus = false;
     this.Chart = Chart;
     this.loadFont();
@@ -41,11 +43,22 @@ class Core {
 
   set debug(isEnable = true) {
     this._debug = isEnable;
+    this.debugRenderTime = isEnable;
+    this.debugEvents = isEnable;
     viewConfig.debug = isEnable;
   }
 
   get debug() {
     return this._debug;
+  }
+
+  set debugRenderTime(isEnable) {
+    this._debugRenderTime = isEnable;
+    viewConfig.debugRenderTime = isEnable;
+  }
+
+  get debugRenderTime() {
+    return this._debugRenderTime;
   }
 
 

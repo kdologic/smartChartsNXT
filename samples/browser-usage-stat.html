@@ -23,6 +23,7 @@
     let areaChart;
     window.onload = function () {
       SmartChartsNXT.debug = false;
+      //SmartChartsNXT.COLOR_MODEL = SmartChartsNXT.RAINBOW_COLOR_MODEL;
       SmartChartsNXT.ready(function () {
         areaChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.AREA_CHART,

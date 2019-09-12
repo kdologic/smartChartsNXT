@@ -13,6 +13,7 @@ export const OPTIONS_TYPE = {
     SOLID: 'solid'
   },
   GRADIENT_STYLE: {
+    NONE: 'none',
     LINEAR_HORIZONTAL: 'linear_horizontal',
     LINEAR_VERTICAL: 'linear_vertical',
     RADIAL: 'radial'

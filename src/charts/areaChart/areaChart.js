@@ -182,10 +182,12 @@ class AreaChart extends Component {
 
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
       this.legendBoxFloat = this.props.chartOptions.legends ? (this.props.chartOptions.legends.float || 'none') : 'none';
-      this.pointData = [],
-        this.originPoint;
+      this.pointData = [];
+      this.originPoint;
       this.prevOriginPoint;
       this.eventStream = {};
+      this.scrollWindowClipId = utilCore.getRandomID();
+      this.scrollOffsetClipId = utilCore.getRandomID();
       this.emitter = eventEmitter.getInstance(this.context.runId);
       this.onHScroll = this.onHScroll.bind(this);
       this.onHighlightPointMarker = this.onHighlightPointMarker.bind(this);
@@ -444,7 +446,7 @@ class AreaChart extends Component {
         {this.CHART_OPTIONS.horizontalScroller.enable &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
-            offsetColor='#bbb' >
+            offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} >
             {this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside &&
               this.drawHScrollSeries(0, 5)
             }
@@ -512,13 +514,6 @@ class AreaChart extends Component {
 
   drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
-      let clipId = 'clip-fs-window-' + series.index;
-      let clipId2 = 'clip-fs-offset-'+ series.index;
-      let clip = {
-        x: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100,
-        width: (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollRightOffset / 100 - (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) * this.state.hScrollLeftOffset / 100
-      };
-
       return (
         <g class='sc-fs-chart-area-container'>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
@@ -529,24 +524,15 @@ class AreaChart extends Component {
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
-            clipId={clipId2}>
+            clipId={this.scrollOffsetClipId}>
           </AreaFill>
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#777' lineFillColor='#777'
             gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
-            clipId={clipId}>
+            clipId={this.scrollWindowClipId}>
           </AreaFill>
-          <defs>
-            <clipPath id={clipId}>
-              <rect x={clip.x} y={0} width={clip.width} height={this.CHART_OPTIONS.horizontalScroller.height} />
-            </clipPath>
-            <clipPath id={clipId2}>
-              <rect x={0} y={0} width={clip.x} height={this.CHART_OPTIONS.horizontalScroller.height} />
-              <rect x={clip.x + clip.width} y={0} width={(this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)- (clip.x + clip.width)} height={this.CHART_OPTIONS.horizontalScroller.height} />
-            </clipPath>
-          </defs>
         </g>
       );
     });
@@ -592,7 +578,7 @@ class AreaChart extends Component {
   }
 
   updateLabelTip(e) {
-    this.emitter.emit('updateTooltip', {
+    this.emitter.emitSync('updateTooltip', {
       instanceId: 'label-tooltip',
       originPoint: uiCore.cursorPoint(this.context.rootContainerId, e),
       pointData: undefined,
@@ -676,7 +662,7 @@ class AreaChart extends Component {
 
   updateDataTooltip(originPoint, pointData) {
     if (this.CHART_OPTIONS.tooltip && typeof this.CHART_OPTIONS.tooltip.content === 'object') {
-      this.emitter.emit('updateTooltip', {
+      this.emitter.emitSync('updateTooltip', {
         instanceId: 'marker-tooltip',
         originPoint,
         pointData,
@@ -688,7 +674,7 @@ class AreaChart extends Component {
         line1: undefined, line2: undefined, preAlign: 'left'
       });
     } else {
-      this.emitter.emit('updateTooltip', {
+      this.emitter.emitSync('updateTooltip', {
         instanceId: 'marker-tooltip',
         originPoint,
         pointData,
@@ -727,7 +713,7 @@ class AreaChart extends Component {
   }
 
   hideTip(e) {
-    this.emitter.emit('hideTooltip', e);
+    this.emitter.emitSync('hideTooltip', e);
     this.updateCrosshair(null);
   }
 
