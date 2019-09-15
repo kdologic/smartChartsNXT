@@ -200,7 +200,7 @@ class AreaFill extends Component {
       pointSet = pointSet.slice(0, pointSet.length - 1);
     }
     const nearPoint = geom.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
-    this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+    this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
     const pointerVicinity = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
     if (nearPoint.dist <= pointerVicinity) {
       evt.highlightedPoint = {
@@ -223,7 +223,7 @@ class AreaFill extends Component {
 
   interactiveMouseLeave() {
     if (this.props.dataPoints && !this.state.isAnimationPlaying) {
-      this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+      this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
     }
   }
 
@@ -250,7 +250,7 @@ class AreaFill extends Component {
 
       const nearPoint = pointSet.find((p) => p.index === nextPointIndex);
       if (nearPoint) {
-        this.emitter.emit('normalizeAllPointMarker', { seriesIndex: this.props.index });
+        this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
         evt.highlightedPoint = {
           x: (this.props.posX + nearPoint.x),
           y: (this.props.posY + nearPoint.y),
