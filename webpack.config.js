@@ -2,14 +2,26 @@
 
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const path = require('path');
 
 const isProduction = process.env.NODE_ENV == 'production' ? true : false;
 
-module.exports = {
+const production = {
+  cache: true,
   mode: 'production',
   devtool: undefined,
+  entry:{
+    main: path.resolve(__dirname, './src/index.js')
+  },
+  output: {
+    filename: 'smartChartsNXT.bundle.js',
+    path: path.resolve('__dirname' + './build')
+  },
   plugins: [
-    new BundleAnalyzerPlugin()
+    // new BundleAnalyzerPlugin({
+    //   generateStatsFile: true,
+    //   statsFilename: path.resolve(__dirname, './build/smartChartsNXT.bundle.stat.json')
+    // })
   ],
   module: {
     rules: [{
@@ -20,24 +32,24 @@ module.exports = {
           plugins: [
             ['@babel/plugin-proposal-class-properties'],
             ['@babel/plugin-proposal-object-rest-spread'],
-            // ['@babel/plugin-transform-runtime', { // creating error after minification
-            //   'corejs': 2,
-            //   'helpers': true,
-            //   'regenerator': true,
-            //   'useESModules': false
-            // }],
+            ['@babel/plugin-transform-runtime', {
+              'helpers': false,
+              'useESModules': true,
+              'regenerator': true
+            }],
             ['@babel/plugin-transform-react-jsx', {
               'pragma': '__h__'
             }] // change default pragma React.createElement into __h__
           ],
-          presets: [(isProduction ?
+          presets: [
             ['@babel/preset-env', {
-              'useBuiltIns': 'entry',
+              'useBuiltIns': 'usage',
+              'corejs': 3,
               'debug': true,
               'targets': {
-                'browsers': ['last 2 versions', '> 1%', 'safari > 8', 'ie 11', 'not dead']
+                'browsers': ['> 1% and not dead']
               }
-            }] : [{}])
+            }]
           ]
         }
       }
@@ -66,3 +78,45 @@ module.exports = {
     // ]
   }
 };
+
+const development = {
+  cache: true,
+  mode: 'production',
+  devtool: undefined,
+  entry:{
+    main: path.resolve(__dirname, './src/index.js')
+  },
+  output: {
+    filename: 'smartChartsNXT.bundle.js',
+    path: path.resolve('__dirname' + './build')
+  },
+  plugins: [
+    new BundleAnalyzerPlugin()
+  ],
+  module: {
+    rules: [{
+      exclude: /node_modules/,
+      use: {
+        loader: 'babel-loader',
+        options: {
+          plugins: [
+            ['@babel/plugin-proposal-class-properties'],
+            ['@babel/plugin-proposal-object-rest-spread'],
+            ['@babel/plugin-transform-react-jsx', {
+              'pragma': '__h__'
+            }] // change default pragma React.createElement into __h__
+          ],
+          presets: [{}]
+        }
+      }
+    }, {
+      test: /\.css$/,
+      use: [{ loader: 'to-string-loader' }, { loader: 'css-loader' }]
+    }]
+  },
+  optimization: {
+    minimize: false
+  }
+};
+
+module.exports = isProduction ? production : development;

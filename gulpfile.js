@@ -4,7 +4,7 @@ const argv = require('yargs').argv;
 
 process.env.NODE_ENV = argv.env == 'production' ? 'production' : 'development';
 
-const gulp = require('gulp');
+const { src, dest, series, watch } = require('gulp');
 const insert = require('gulp-insert');
 
 const minify = require('gulp-uglify-es').default;
@@ -15,7 +15,7 @@ const webpackConfig = require('./webpack.config.js');
 
 const pkg = require('./package.json');
 const srcDir = './src/';
-const buildDir = './public/';
+const buildDir = './build/';
 const testDir = './test/';
 
 const header = `/**
@@ -33,32 +33,31 @@ const header = `/**
  * Generate a build based on the source file
  */
 
-function buildTask() {
-
-  return gulp.src(srcDir + 'index.js')
+function buildJSTask() {
+  return src(srcDir)
     .pipe(webpack(webpackConfig))
-    .pipe(rename('smartChartsNXT.bundle.js'))
-    .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir));
+    //.pipe(rename('smartChartsNXT.bundle.js'))
+    //.pipe(insert.prepend(header))
+    .pipe(dest(buildDir));
 }
 
 function minifyTask() {
-  return gulp.src(buildDir + 'smartChartsNXT.bundle.js')
+  return src(buildDir + 'smartChartsNXT.bundle.js')
     .pipe(minify({
       'keep_classnames': true,
       'keep_fnames': true
     }))
     .pipe(rename('smartChartsNXT.bundle.min.js'))
     .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir));
+    .pipe(dest(buildDir));
 }
 
 function watchTask() {
-  return gulp.watch('./src/**', ['build']);
+  return watch('./src/**', { events: 'all' }, series(buildJSTask));
 }
 
-gulp.task('build', buildTask);
-gulp.task('minify', ['build'], minifyTask);
-gulp.task('watch', watchTask);
-gulp.task('default', ['build', 'watch']);
-gulp.task('release', ['build', 'minify']);
+exports.minify = minifyTask;
+exports.watch = watchTask;
+exports.buildJS = buildJSTask;
+exports.build = series(buildJSTask, minifyTask);
+exports.default = series(buildJSTask, watchTask);
