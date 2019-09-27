@@ -276,8 +276,8 @@ class AreaChart extends Component {
     }
     for (let i = 0; i < dataSet.series.length; i++) {
       let data = dataSet.series[i].data;
-      let minVal = 0;
-      let maxVal = 0;
+      let minVal = Number.MAX_SAFE_INTEGER;
+      let maxVal = Number.MIN_SAFE_INTEGER;
       dataSet.series[i].valueSet = [];
       for (let j = 0, len = data.length; j < len; j++) {
         let v = data[j].value;
@@ -757,7 +757,7 @@ class AreaChart extends Component {
 
   getLegendData() {
     return this.state.cs.dataSet.series.map((data) => {
-      return { label: data.name, color: data.bgColor || utilCore.getColor(data.index), isToggeled: !data.visible };
+      return { label: data.name, color: data.bgColor || utilCore.getColor(data.index), isToggled: !data.visible };
     });
   }
 
