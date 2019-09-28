@@ -15,7 +15,7 @@ import LoaderView from './../components/loaderView';
  * baseChart.js
  * @createdOn: 10-May-2017
  * @author: SmartChartsNXT
- * @description:This is base chart with defaulf config and this will initiate loading of a specific chart type.
+ * @description:This is base chart with default config and this will initiate loading of a specific chart type.
  */
 
 class BaseChart extends Component {
@@ -23,7 +23,7 @@ class BaseChart extends Component {
     try {
       super(props);
       this.chartType = this.props.opts.type;
-      this.CHART_OPTIONS = utilCore.extends(this.props.opts, { width: 1, height: 1 });
+      this.CHART_OPTIONS = utilCore.extends({}, this.props.opts, { width: 1, height: 1 });
       this.CHART_DATA = { scaleX: 0, scaleY: 0 };
       this.CHART_CONST = {
         FIX_WIDTH: 800,

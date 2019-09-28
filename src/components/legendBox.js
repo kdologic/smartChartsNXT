@@ -12,7 +12,7 @@ import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
  * legendBox.js
  * @createdOn: 06-Nov-2017
  * @author: SmartChartsNXT
- * @description:This is a component class will create legned area.
+ * @description:This is a component class will create legend area.
  * @extends Component
  *
  * Legend box accept 3 positioning parameters -
@@ -20,9 +20,9 @@ import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
  *
  * When Float type is top or bottom only left param is acceptable and top param will be ignored.
  * When Float type is left or right only top param is acceptable and left param will be ignored.
- * When Float was't set then top and left both values will be considered.
+ * When Float wasn't set then top and left both values will be considered.
  *
- * display - inline : inline only take space as much required. it would't wrap the legends.
+ * display - inline : inline only take space as much required. it wouldn't wrap the legends.
  * display - block: block will take entire row. It will wrap the legends if overflow.
  *
  * @example
@@ -71,7 +71,7 @@ class LegendBox extends Component {
     this.state = {
       legendSet: this.props.legendSet.map(lSet => {
         lSet.totalWidth = lSet.labelLength = 0;
-        lSet.isToggeled = lSet.isToggeled === undefined ? false : lSet.isToggeled;
+        lSet.isToggled = lSet.isToggled === undefined ? false : lSet.isToggled;
         lSet.transform = '';
         return lSet;
       }),
@@ -122,7 +122,7 @@ class LegendBox extends Component {
       fontFamily: props.opts.fontFamily || defaultConfig.theme.fontFamily,
       itemBorderWidth: typeof props.opts.itemBorderWidth === 'undefined' ? 1 : props.opts.itemBorderWidth,
       itemBorderColor: props.opts.itemBorderColor || '#000',
-      itemBorderOpacicy: typeof props.opts.itemBorderOpacicy === 'undefined' ? 1 : props.opts.itemBorderOpacicy,
+      itemBorderOpacity: typeof props.opts.itemBorderOpacity === 'undefined' ? 1 : props.opts.itemBorderOpacity,
       itemBorderRadius: typeof props.opts.itemBorderRadius === 'undefined' ? 10 : props.opts.itemBorderRadius,
       strokeColor: props.opts.borderColor || props.strokeColor || 'none',
       strokeWidth: typeof props.opts.borderWidth === 'undefined' ? (props.strokeWidth || 1) : 1,
@@ -142,7 +142,7 @@ class LegendBox extends Component {
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    /* Need to re-render when float = bottm */
+    /* Need to re-render when float = bottom */
     if (this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
       this.update();
     } else {
@@ -161,7 +161,7 @@ class LegendBox extends Component {
   }
 
   componentDidUpdate() {
-    /* Need to re-render when float = bottm */
+    /* Need to re-render when float = bottom */
     if ((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();
     } else {
@@ -203,17 +203,17 @@ class LegendBox extends Component {
         }} >
         {withContainer &&
           <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding / 2)} y={this.state.top + (this.padding / 2)} rx={this.config.itemBorderRadius}
-            width={data.totalWidth} height={this.hoverHeight + this.padding} fill={this.config.hoverColor} stroke-opacity={this.config.itemBorderOpacicy}
+            width={data.totalWidth} height={this.hoverHeight + this.padding} fill={this.config.hoverColor} stroke-opacity={this.config.itemBorderOpacity}
             stroke={this.config.itemBorderColor} stroke-width={this.config.itemBorderWidth} style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': '0', 'pointerEvents': 'all' }}>
           </rect>
         }
         {!this.props.opts.hideIcon &&
           <g class='sc-legend-icon-group'>
             <rect class={`sc-legend-${index} sc-legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding}
-              width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggeled ? this.toggleColor : data.color}
+              width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggled ? this.toggleColor : data.color}
               shape-rendering='optimizeSpeed' stroke-width={2} stroke='none' opacity='1'>
             </rect>
-            <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggeled ? 1 : 0}
+            <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggled ? 1 : 0}
               d={[
                 'M', this.state.left + this.padding, this.state.top + this.padding,
                 'L', this.state.left + this.padding + this.colorContWidth, this.state.top + this.padding + this.colorContWidth,
@@ -232,8 +232,8 @@ class LegendBox extends Component {
     return (
       <text class={`sc-legend-${index} sc-legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
         fill={this.config.textColor} font-family={this.config.fontFamily} pointer-events='none' >
-        <tspan class={`sc-legend-${index} sc-legend-txt-label-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}>{!this.config.hideLabel && data.label}</tspan>
-        <tspan class={`sc-legend-${index} sc-legend-txt-value-${index}`} text-decoration={data.isToggeled ? 'line-through' : 'none'}
+        <tspan class={`sc-legend-${index} sc-legend-txt-label-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}>{!this.config.hideLabel && data.label}</tspan>
+        <tspan class={`sc-legend-${index} sc-legend-txt-value-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}
           dx={this.state.lengthSet.max.labelLength - this.state.legendSet[index].labelLength + this.padding}>
           {!this.config.hideValue && data.value}
         </tspan>
@@ -345,7 +345,7 @@ class LegendBox extends Component {
     e.value = legend.value;
     e.color = legend.color;
     e.index = index;
-    e.isToggeled = legend.isToggeled;
+    e.isToggled = legend.isToggled;
     return e;
   }
 
@@ -355,7 +355,7 @@ class LegendBox extends Component {
     }
     let index = e.target.classList[0].substring('sc-legend-'.length);
     if (this.config.toggleType) {
-      this.state.legendSet[index].isToggeled = !this.state.legendSet[index].isToggeled;
+      this.state.legendSet[index].isToggled = !this.state.legendSet[index].isToggled;
       this.update();
     }
     this.assignLegendData(index, e);

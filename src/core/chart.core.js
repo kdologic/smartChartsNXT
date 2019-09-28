@@ -11,7 +11,7 @@ import viewConfig from './../viewEngin/config';
  * @createdOn: 10-Jul-2017
  * @author: SmartChartsNXT
  * @description: SmartChartsNXT Core Library components. It's bootstrap the code,
- * by loading appropriate dependencies. Loading ployfills and shims, fonts etc.
+ * by loading appropriate dependencies. Loading polyfills and shims, fonts etc.
  */
 
 class Core {
@@ -83,7 +83,7 @@ class Core {
   // }
 
   ready(successBack) {
-    /* strat polling for the ready state*/
+    /* Start polling for the ready state*/
     let statusCheck = setInterval(() => {
       if (this.nameSpaceReadyStatus) {
         clearInterval(statusCheck);
@@ -95,9 +95,9 @@ class Core {
             this.handleError(ex);
           }
 
-          let endTitme = window.performance.now();
+          let endTime = window.performance.now();
           /* eslint-disable-next-line no-console */
-          console.info('Time elapsed for chart: %c' + (endTitme - startTime) + ' Ms', 'color:green');
+          console.info('Time elapsed for chart: %c' + (endTime - startTime) + ' Ms', 'color:green');
         }
       }
     }, 100);

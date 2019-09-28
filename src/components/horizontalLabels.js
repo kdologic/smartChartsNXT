@@ -97,7 +97,7 @@ class HorizontalLabels extends Component {
     this.config = {
       ...this.config, ...{
         labelRotate: config.labelRotate || 0,
-        fontSize: config.fontSize || defaultConfig.theme.fontSizeSmall,
+        fontSize: config.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: config.fontFamily || defaultConfig.theme.fontFamily,
         tickOpacity: config.tickOpacity || 1,
         labelOpacity: config.labelOpacity || 1,
