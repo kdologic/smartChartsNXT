@@ -1,13 +1,13 @@
 'use strict';
 
 const argv = require('yargs').argv;
-
 process.env.NODE_ENV = argv.env == 'production' ? 'production' : 'development';
 
 const { src, dest, series, watch } = require('gulp');
 const insert = require('gulp-insert');
+const clean = require('gulp-clean');
 
-const minify = require('gulp-uglify-es').default;
+const minify = require('gulp-terser');
 const rename = require('gulp-rename');
 
 const webpack = require('webpack-stream');
@@ -36,8 +36,7 @@ const header = `/**
 function buildJSTask() {
   return src(srcDir)
     .pipe(webpack(webpackConfig))
-    //.pipe(rename('smartChartsNXT.bundle.js'))
-    //.pipe(insert.prepend(header))
+    .pipe(insert.prepend(header))
     .pipe(dest(buildDir));
 }
 
@@ -52,12 +51,18 @@ function minifyTask() {
     .pipe(dest(buildDir));
 }
 
+function cleanTask() {
+  return src(buildDir, {read: false})
+    .pipe(clean());
+}
+
 function watchTask() {
   return watch('./src/**', { events: 'all' }, series(buildJSTask));
 }
 
+exports.clean = cleanTask;
 exports.minify = minifyTask;
 exports.watch = watchTask;
 exports.buildJS = buildJSTask;
-exports.build = series(buildJSTask, minifyTask);
-exports.default = series(buildJSTask, watchTask);
+exports.build = series(cleanTask, buildJSTask, minifyTask);
+exports.default = series(cleanTask, buildJSTask, watchTask);
