@@ -11,6 +11,9 @@
     "responsive"
   ],
   "main": "index.js",
+  "sideEffects": [
+    "./src/plugIns/classList.shim.min.js"
+  ],
   "scripts": {
     "start": "gulp --env=develop",
     "build": "gulp build --env=production",

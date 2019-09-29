@@ -2,7 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import Style from './../viewEngin/style';
-import fontFace from './font-lato';
+import font from './font-lato';
 import defaultConfig from './../settings/config';
 
 /**
@@ -21,7 +21,7 @@ class CommonStyles extends Component {
   render() {
     return (
       <g class='sc-common-styles'>
-        <style>{fontFace}</style>
+        <style>{font}</style>
         <Style>
           {{
             '*': {

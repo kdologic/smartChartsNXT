@@ -60,6 +60,15 @@ class UtilCore {
   }
 
   /**
+   * Check if it is IE.
+   * @returns {Boolean} Return true or false.
+   */
+  isIE() {
+    let ua = window.navigator.userAgent;
+    return /MSIE|Trident/.test(ua);
+  }
+
+  /**
    * Memoized version of a function for faster execution.
    * @param {Function} fn A function to memoize.
    * @returns {Function} Return a memoized version of the function.

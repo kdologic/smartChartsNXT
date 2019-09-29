@@ -1,5 +1,6 @@
 'use strict';
 
+const webpack = require('webpack');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const path = require('path');
@@ -9,7 +10,6 @@ const isProduction = process.env.NODE_ENV == 'production' ? true : false;
 const production = {
   cache: true,
   mode: 'production',
-  devtool: undefined,
   entry:{
     main: path.resolve(__dirname, './src/index.js')
   },
@@ -22,6 +22,9 @@ const production = {
     //   generateStatsFile: true,
     //   statsFilename: path.resolve(__dirname, './build/smartChartsNXT.bundle.stat.json')
     // })
+    new webpack.DefinePlugin({
+      PRODUCTION: JSON.stringify(isProduction)
+    })
   ],
   module: {
     rules: [{
@@ -33,7 +36,7 @@ const production = {
             ['@babel/plugin-proposal-class-properties'],
             ['@babel/plugin-proposal-object-rest-spread'],
             ['@babel/plugin-transform-runtime', {
-              'helpers': false,
+              'helpers': true,
               'useESModules': true,
               'regenerator': true
             }],
@@ -59,7 +62,8 @@ const production = {
     }]
   },
   optimization: {
-    minimize: false
+    minimize: false,
+    usedExports: true
     // minimizer: [
     //   new UglifyJsPlugin({
     //     parallel: 4,
@@ -91,7 +95,10 @@ const development = {
     path: path.resolve('__dirname' + './build')
   },
   plugins: [
-    new BundleAnalyzerPlugin()
+    new BundleAnalyzerPlugin(),
+    new webpack.DefinePlugin({
+      PRODUCTION: JSON.stringify(isProduction)
+    })
   ],
   module: {
     rules: [{

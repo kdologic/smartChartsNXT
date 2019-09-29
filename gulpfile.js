@@ -43,6 +43,13 @@ function buildJSTask() {
 function minifyTask() {
   return src(buildDir + 'smartChartsNXT.bundle.js')
     .pipe(minify({
+      'compress': {
+        'booleans_as_integers': true,
+        'drop_console': true,
+        'drop_debugger': true,
+        'side_effects': false,
+        'warnings': true
+      },
       'keep_classnames': true,
       'keep_fnames': true
     }))
@@ -52,7 +59,7 @@ function minifyTask() {
 }
 
 function cleanTask() {
-  return src(buildDir, {read: false})
+  return src(buildDir, {read: false, allowEmpty: true})
     .pipe(clean());
 }
 

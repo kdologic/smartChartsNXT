@@ -38,7 +38,6 @@ class Chart {
       
     } catch (ex) {
       this.showErrorScreen(opts, ex, ex.errorIn);
-      //throw ex;
     }
   }
 
@@ -51,7 +50,8 @@ class Chart {
   }
 
   showErrorScreen(opts, ex, errorIn) {
-    console.log(this.errors);
+    /*eslint-disable-next-line  no-console*/
+    console.error(this.errors.length ? this.errors : ex);
     mountTo(<Error width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></Error>, this.targetNode);
   }
 
