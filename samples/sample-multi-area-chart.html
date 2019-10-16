@@ -24,28 +24,28 @@
       SmartChartsNXT.debug = false;
       SmartChartsNXT.ready(function () {
         areaChart = new SmartChartsNXT.Chart({
-          "type": $SC.CHART_TYPE.AREA_CHART,
-          "targetElem": "chartContainer",
-          "description": "A javascript area chart that visualize the data of sales",
+          "type": $SC.CHART_TYPE.AREA_CHART,              // [required]
+          "targetElem": "chartContainer",                 // [required]
+          "description": "A javascript area chart that visualize the data of sales", // [default: ""]
           "title": {
             "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales",     // [ default : "" ]
-            "top": 20,                            // [ default : 20]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "90%",                       // [ default : 90%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "crimson",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
-            "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
-            },
-            "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
-              "reducer": function(chartWidth, chartHeight) {
+            "top": 20,                                    // [ default : 20]  x % value accepted
+            "left": "50%",                                // [ default : 50%] x % value accepted
+            "width": "90%",                               // [ default : 90%] x % value accepted
+            "height": "",                                 // [ default : ""]  x % value accepted
+            "textAlign": "center",                        // [ left | default: center | right ]
+            "textColor": "crimson",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "borderColor":"none",                         // [ default : none ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
+            "bgColor": "none",                            // [ default : none ]
+            "padding": 0,                                 // [ default : 0 ]
+            "fontSize": 20,                               // [ default : $SC.GLOBAL.theme.fontSizeLarge ]
+            "style": {        
+              "opacity": 1.0                              // Support any style other than available config property. Must be a json object.
+            },        
+            "responsive": {         
+              "wrapText": true,                           // [ default: true | false ]
+              "reducer": function(chartWidth, chartHeight) { // [optional]
                 if(chartWidth < 500) {
                   return {
                     "text": "Multi Area Chart"
@@ -63,69 +63,69 @@
             }
           },
           "subtitle": {
-            "text":"Sales report of company XYZ", // [ default : "" ]
-            "top": 50,                            // [ default : 50]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "95%",                       // [ default : 95%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "#9c27b0",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 12,                       // [ default : theme.fontSizeSmall ]
-            "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+            "text":"Sales report of company XYZ",         // [ default : "" ]
+            "top": 50,                                    // [ default : 50]  x % value accepted
+            "left": "50%",                                // [ default : 50%] x % value accepted
+            "width": "95%",                               // [ default : 95%] x % value accepted
+            "height": "",                                 // [ default : ""]  x % value accepted
+            "textAlign": "center",                        // [ left | default: center | right ]
+            "textColor": "#9c27b0",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "borderColor":"none",                         // [ default : none ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
+            "bgColor": "none",                            // [ default : none ]
+            "padding": 0,                                 // [ default : 0 ]
+            "fontSize": 12,                               // [ default : $SC.GLOBAL.theme.fontSizeSmall ]
+            "style": {        
+              "opacity": 1.0                              // Support any style other than available config property. Must be a json object.
             },
             "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
+              "wrapText": true,                           // [ default: true | false ]
               "reducer": function(chartWidth, chartHeight) {
                 // support reducer same as title property
               }
             }
           },
-          "canvasBorder": false,
-          "bgColor": "#f7fdf7",                         //[default: white]
+          "canvasBorder": false,                          // [ true | default: false]
+          "bgColor": "#f7fdf7",                           // [ default: #ffffff]
           "gridBox": {
             "vertical": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                             // [ default: true | false ]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
+              "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
+              "lineThickness": 1,                         // [ default: 1 ]
+              "lineOpacity": 0.2                          // [ default: 0.2 ]
             },
             "horizontal": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: ENUMS.LINE_STYLE.SOLID | ENUMS.LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                             // [ default: true | false ]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,    // [ default: $SC.ENUMS.LINE_STYLE.SOLID | $SC.ENUMS.LINE_STYLE.DASHED ]
+              "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
+              "lineThickness": 1,                         // [ default: 1 ]
+              "lineOpacity": 0.2                          // [ default: 0.2 ]
             },
-           "bgColor": 'skyblue',                           //[default: none]
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, //[default: none]
-           "bgOpacity": 0.2                             //[default: 0.1]   
+           "bgColor": 'skyblue',                          // [ default: none ]
+           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, // [ default: none ]
+           "bgOpacity": 0.2                               // [ default: 0.1 ]   
           },
           "pointerCrosshair": {
             "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "spread" : "full",              // [default: full | inPoint | none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
+              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
+              "lineColor": "#000",                        // [ default: #000 ]
+              "lineWidth": 1,                             // [ default: 1 ]
+              "lineOpacity": 1,                           // [ default: 1 ]
+              "labelTextColor": "#fff",                   // [ default: #fff ]
+              "labelBackgroundColor":"#000",              // [ default: #000 ]
+              "labelOpacity": 1                           // [ default: 1 ]
             },
             "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "spread" : "none",              // [full | inPoint | default: none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
+              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
+              "lineColor": "#000",                        // [ default: #000 ]
+              "lineWidth": 1,                             // [ default: 1 ]
+              "lineOpacity": 1,                           // [ default: 1 ]
+              "labelTextColor": "#fff",                   // [ default: #fff ]
+              "labelBackgroundColor":"#000",              // [ default: #000 ]
+              "labelOpacity": 1                           // [ default: 1 ]
             }
           },
           "legends":{
@@ -133,14 +133,14 @@
             "top": 70,                                    // [ default: 70 ]
             "left": 100,                                  // [ default: 100 ]
             "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
-            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
-            "textColor": "#000",                          // [ default: theme.fontColorDark ]
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: $SC.ENUMS.ALIGNMENT.HORIZONTAL | $SC.ENUMS.ALIGNMENT.VERTICAL ]
+            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: $SC.ENUMS.DISPLAY.INLINE | $SC.ENUMS.DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
+            "float": $SC.ENUMS.FLOAT.NONE,                // [ $SC.ENUMS.FLOAT.TOP | $SC.ENUMS.FLOAT.BOTTOM | $SC.ENUMS.FLOAT.LEFT | $SC.ENUMS.FLOAT.RIGHT | default: $SC.ENUMS.FLOAT.NONE ]
+            "textColor": "#000",                          // [ default: $SC.GLOBAL.theme.fontColorDark ]
             "bgColor": "none",                            // [ default: none ]
             "hoverColor":"none",                          // [ default: none ]
-            "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
-            "fontFamily": "Lato",                         // [ default: Lato ]
+            "fontSize": 14,                               // [ default: $SC.GLOBAL.theme.fontSizeMedium ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default: $SC.GLOBAL.theme.fontFamily ]
             "itemBorderWidth": 0,                         // [ default: 1 ]
             "itemBorderColor": "#000",                    // [ default: #000 ]
             "itemBorderOpacity": 1,                       // [ default: 1 ]
@@ -155,10 +155,10 @@
             "hideValue": false                            // [ true | default: false ]
           },
           "tooltip": {
-            "enable": true,                   // [default: true | false ]
-            "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
-            "grouped": true,                  // [default: true | false ]
-            "pointerVicinity": 50,            // [default: 20] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+            "enable": true,                               // [default: true | false ]
+            "followPointer": false,                       // [true | default: false ] Note: This option only available when tooltip are grouped.
+            "grouped": true,                              // [default: true | false ]
+            "pointerVicinity": 50,                        // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
@@ -186,101 +186,104 @@
                 );
               }
             },
-            "headerTextColor": "greenyellow",   // [ default: #fff ]
-            "headerBgColor": "#555",            // [ default: #555 ]
-            "textColor": "#000",                // [ default: #000 ]
-            "bgColor": "#e8f4f8",               // [ default: #fff ]
-            "footerTextColor": "#000",          // [ default: #fff ]
-            "footerBgColor": "#d4ebf2",         // [ default: #555 ]
-            "fontSize": 14,                     // [ default: 14 ]
-            "fontFamily": "Lato",               // [ default: Lato ]
-            "xPadding": 0,                      // [ default: 0 ] 
-            "yPadding": 0,                      // [ default: 0 ] 
-            "borderColor": "none",              // [ default: point.seriesColor ]
-            "borderWidth": 2,                   // [ default: 3 ]
-            "opacity": 0.8,                     // [ default: 0.8 ]
+            "headerTextColor": "greenyellow",             // [ default: #fff ]
+            "headerBgColor": "#555",                      // [ default: #555 ]
+            "textColor": "#000",                          // [ default: #000 ]
+            "bgColor": "#e8f4f8",                         // [ default: #fff ]
+            "footerTextColor": "#000",                    // [ default: #fff ]
+            "footerBgColor": "#d4ebf2",                   // [ default: #555 ]
+            "fontSize": 14,                               // [ default: 14 ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "xPadding": 0,                                // [ default: 0 ] 
+            "yPadding": 0,                                // [ default: 0 ] 
+            "borderColor": "none",                        // [ default: point.seriesColor ]
+            "borderWidth": 2,                             // [ default: 3 ]
+            "opacity": 0.8,                               // [ default: 0.8 ]
           },
           "horizontalScroller": {
-            "enable": true,
-            "height": 35,
-            "chartInside": true
+            "enable": true,                               // [ default: true | false ]
+            "height": 35,                                 // [ default: 35 ]
+            "chartInside": true                           // [ default: true | false ]
           },
           "dataSet": {
             "xAxis": {
-              "title": "Date",
-              "prepend": "",
-              "append": "",
-              "parseAsDate": true,
-              "dateFormat": "dd mmm",
-              "labelRotate": -45,
-              "intervalThreshold": 40,
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 6,
-              "labelOpacity": 1,
-              "labelColor": "#000",
-              "axisColor": "#000", // TODO
-              "fontSize": 12,
-              "fontFamily": "Lato"
+              "title": "Date",                            // [ default: Label-axis ]
+              "prepend": "",                              // [ default: "" ]
+              "append": "",                               // [ default: "" ]
+              "parseAsDate": true,                        // [ true | default: false ]
+              "dateFormat": "dd mmm",                     // [ default: dd mmm, yy ]
+              "labelRotate": -45,                         // [ default: 0 ]
+              "intervalThreshold": 40,                    // [ default: 30 ]
+              "tickOpacity": 1,                           // [ default: 1 ]
+              "tickColor": '#222',                        // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "tickSpan": 6,                              // [ default: 6 ]
+              "labelOpacity": 1,                          // [ default: 1 ]
+              "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "axisColor": "#000",                        // TODO
+              "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+              "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             },
             "yAxis": {
-              "title": "Total Sales",
-              "prepend": "\u20B9 ",
-              "append": "",
-              "labelRotate": 0,
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 5,
-              "labelOpacity": 1,
-              "labelColor": "#000",
-              "axisColor": "#000", // TODO
-              "fontSize": 20,
-              "fontFamily": "Lato",
-              "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+              "title": "Total Sales",                     // [ default: Value-axis ]
+              "prepend": "\u20B9 ",                       // [ default: "" ]
+              "append": "",                               // [ default: "" ]
+              "labelRotate": 0,                           // [ default: 0 ]
+              "tickOpacity": 1,                           // [ default: 1 ]
+              "tickColor": '#222',                        // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "tickSpan": 6,                              // [ default: 6 ]
+              "labelOpacity": 1,                          // [ default: 1 ]
+              "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "axisColor": "#000",                        // TODO
+              "fontSize": 20,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+              "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+              "zeroBase": false,                          // [ true : default: false ] min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
             },
             "series": [{
-                "visible": true,        // [default: true | false ]
-                "lineWidth": 1.5,
-                "bgColor": "#2278b4",
-                "name": 'Raphael',
-                "areaOpacity": 0.3,
-                "spline": true,
-                "gradient": true,
-                "animated": true,      // [default: true | false ]
-                "data": generateData(10, 50, 100) 
+                "visible": true,                          // [ default: true | false ]
+                "name": 'Raphael',                        // [ required : string ]
+                "lineWidth": 1.5,                         // [ default: 1.5 ]
+                "lineOpacity": 1,                         // [ default: 1 ]
+                "bgColor": "#2278b4",                     // [ default: $SC.COLOR_MODEL[series_index] ]
+                "areaOpacity": 0.3,                       // [ default: 0.2]
+                "marker": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
+                "markerRadius": 6,                        // [ default: 6]
+                "spline": true,                           // [ default: true | false ]
+                "gradient": true,                         // [ default: true | false ] 
+                "animated": true,                         // [ default: true | false ]
+                "data": generateData(10, 50, 100)         // [ required]
                 // [
                 //   {label:1, value:1000},{label:2, value:-1000},{label:3, value:1000},{label:4, value:-1000},{label:5, value:1000},{label:7, value:-1000}, {label:6, value:2000}
                 // ] 
               },
               {
-                "visible": true,        // [default: true | false ]
+                "visible": true,
+                "name": 'Willson',
                 "lineWidth": 1.5,
+                "lineOpacity": 1,
                 "bgColor": "#ff7f0e",
+                "areaOpacity": 0.5,
                 "marker": true,
                 "markerRadius": 6,
                 "spline": false,
                 "gradient": true,
-                "areaOpacity": 0.5,
-                "lineOpacity": 1,
-                "name": 'Willson',
-                "animated": true,       // [default: true | false ]
+                "animated": true,
                 "data": generateData(5, 20, 100)
                 // [
                 //   {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1420}, {label:6, value:1100}, {label:7, value:400}
                 // ] 
               },
               {
-                "visible": true,        // [default: true | false ]
+                "visible": true,
+                "name": 'Clara',
                 "lineWidth": 1.5,
+                "lineOpacity": 1,
                 "bgColor": "#f4df0e",
+                "areaOpacity": 0.5,
                 "marker": true,
                 "markerRadius": 6,
                 "spline": false,
                 "gradient": true,
-                "areaOpacity": 0.5,
-                "lineOpacity": 1,
-                "name": 'Clara',
-                "animated": true,       // [default: true | false ]
+                "animated": true,
                 "data": generateData(5, 20, 10)
               }
             ]
@@ -297,27 +300,15 @@
           //   },
           //   afterParseData: function (e) {
           //     console.log(e, "event afterParseData");
-          //   },
-          //   beforeSave: function (e) {
-          //     console.log(e, "event beforeSave");
-          //   },
-          //   afterSave: function (e) {
-          //     console.log(e, "event afterSave");
-          //   },
-          //   beforePrint: function (e) {
-          //     console.log(e, "event beforePrint");
-          //   },
-          //   afterPrint: function (e) {
-          //     console.log(e, "event afterPrint");
           //   }
           // },
           zoomWindow: {
-            "leftIndex": 2,
-            "rightIndex": 6
+            "leftIndex": 2,                               // [ default: 1 ]
+            "rightIndex": 6                               // [ default: max data length ]
           }
         });
 
-        /** add event listner on Horizontal scroll **/
+        /** add event listener on Horizontal scroll **/
         // areaChart.events.on('hScroll', function(e) {console.log(e)});
         // areaChart.events.on('beforeSave', () => {console.log('before save!');});
         // areaChart.events.on('afterSave', () => {console.log('after save!');});

@@ -4,7 +4,7 @@
  * globalEnums.js
  * @createdOn: 15-Jul-2019
  * @author: SmartChartsNXT
- * @description: Global enumeraton values.
+ * @description: Global enumeration values.
  */
 
 export const OPTIONS_TYPE = {
@@ -33,15 +33,20 @@ export const OPTIONS_TYPE = {
     LEFT: 'left',
     RIGHT: 'right',
     NONE: 'none'
+  },
+  CROSSHAIR_SPREAD: {
+    NONE: 'none',
+    FULL: 'full',
+    IN_POINT: 'inPoint'
   }
 };
 
 export const CHART_TYPE = {
   AREA_CHART: 'AreaChart',
-  LINE_CHART: 'LineChart',
-  STEP_CHART: 'StepChart',
+  //LINE_CHART: 'LineChart',
+  //STEP_CHART: 'StepChart',
   PIE_CHART: 'PieChart',
-  DONUT_CHART: 'DonutChart',
-  COLUMN_CHART: 'ColumnChart',
-  BAR_CHART: 'BarChart'
+  DONUT_CHART: 'DonutChart'
+  //COLUMN_CHART: 'ColumnChart',
+  //BAR_CHART: 'BarChart'
 };

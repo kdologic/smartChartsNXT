@@ -25,7 +25,7 @@ import dateFormat from 'dateformat';
 
 /**
  * SVG Area Chart :: areaChart.js
- * @createdOn:31-05-2016
+ * @createdOn:31-May-2016
  * @author:SmartChartsNXT
  * @description: SVG Area Chart, that support multiple series and zoom window.
  * @extends Component
@@ -77,8 +77,8 @@ class AreaChart extends Component {
           }
         },
         dataSet: {
-          xAxis: { title: 'Label-axis' },
-          yAxis: { title: 'Value-axis' }
+          xAxis: { title: 'Label-axis', parseAsDate: false },
+          yAxis: { title: 'Value-axis', zeroBase: false }
         },
         horizontalScroller: {
           enable: true,
@@ -89,7 +89,7 @@ class AreaChart extends Component {
           enable: true,
           followPointer: false,
           grouped: true,
-          pointerVicinity: 20
+          pointerVicinity: 50
         }
       }, this.props.chartOptions);
       this.CHART_CONST = utilCore.extends({}, this.props.chartConst);
@@ -292,6 +292,7 @@ class AreaChart extends Component {
       minSet.push(minVal);
       dataSet.series[i].color = dataSet.series[i].color || utilCore.getColor(i);
       dataSet.series[i].index = i;
+      dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1.5 : dataSet.series[i].lineWidth;
     }
     this.state[dataFor].dataSet = dataSet;
     this.state[dataFor].dataSet.xAxis.categories = categories;
@@ -448,7 +449,7 @@ class AreaChart extends Component {
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} >
             {this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside &&
-              this.drawHScrollSeries(0, 5)
+              this.drawHScrollSeries(0, 0)
             }
           </HorizontalScroller>
         }
@@ -495,7 +496,7 @@ class AreaChart extends Component {
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop } paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth || 1.5} areaStrokeWidth={0}
+          marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0}
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;

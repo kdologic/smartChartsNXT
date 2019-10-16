@@ -45,22 +45,22 @@ class Grid extends Component {
     };
     this.config = {
       vertical: {
-        enable: opts.vertical.enable === 'undefined' ? true : opts.vertical.enable,
+        enable: typeof opts.vertical.enable === 'undefined' ? true : opts.vertical.enable,
         lineStyle: opts.vertical.lineStyle || ENUMS.LINE_STYLE.DASHED,
         lineColor: opts.vertical.lineColor || defaultConfig.theme.bgColorMedium,
-        lineThickness: opts.vertical.lineThickness || 1,
-        lineOpacity: opts.vertical.lineOpacity || 0.2
+        lineThickness: typeof opts.vertical.lineThickness === 'undefined' ? 1 : opts.vertical.lineThickness,
+        lineOpacity: typeof opts.vertical.lineOpacity === 'undefined' ? 0.2 : opts.vertical.lineOpacity
       },
       horizontal: {
-        enable: opts.horizontal.enable === 'undefined' ? true : opts.horizontal.enable,
+        enable: typeof opts.horizontal.enable === 'undefined' ? true : opts.horizontal.enable,
         lineStyle: opts.horizontal.lineStyle || ENUMS.LINE_STYLE.SOLID,
         lineColor: opts.horizontal.lineColor || defaultConfig.theme.bgColorMedium,
-        lineThickness: opts.horizontal.lineThickness || 1,
-        lineOpacity: opts.horizontal.lineOpacity || 0.2
+        lineThickness: typeof opts.horizontal.lineThickness === 'undefined' ? 1 : opts.horizontal.lineThickness,
+        lineOpacity: typeof opts.horizontal.lineOpacity === 'undefined' ? 0.2 : opts.horizontal.lineOpacity
       },
       bgColor: props.opts.bgColor || 'none',
       bgGradient: props.opts.bgGradient || ENUMS.GRADIENT_STYLE.NONE,
-      bgOpacity: props.opts.bgOpacity || 0.1
+      bgOpacity: typeof props.opts.bgOpacity === 'undefined' ? 0.1 : props.opts.bgOpacity
     };
     this.state.vLineDashArray = this.config.vertical.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
     this.state.hLineDashArray = this.config.horizontal.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;

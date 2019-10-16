@@ -6,6 +6,7 @@ import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import { CHART_MODULES } from './../settings/componentMapper';
+import Validator from './../validators/validator';
 import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';
 import Menu from './../components/menu';
@@ -29,6 +30,14 @@ class BaseChart extends Component {
         FIX_WIDTH: 800,
         FIX_HEIGHT: 600
       };
+      this.loadConfig(CHART_MODULES[this.chartType].config);
+      this.chartValidationRules = CHART_MODULES[this.chartType].validationRules;
+      const validator = new Validator();
+      this.validationErrors = validator.validate(this.chartValidationRules, this.CHART_OPTIONS);
+      if(this.validationErrors.length) {
+        throw this.validationErrors;
+      }
+
       this.emitter = eventEmitter.getInstance(this.props.runId);
       this.state = {
         width: this.props.width || this.CHART_CONST.FIX_WIDTH,
@@ -43,12 +52,9 @@ class BaseChart extends Component {
       this.descId = utilCore.getRandomID();
       this.blurFilterId = utilCore.getRandomID();
       this.menuIconGradId = utilCore.getRandomID();
-
-      this.loadConfig(CHART_MODULES[this.chartType].config);
       this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
-      ex.errorIn = `Error in ${props.opts.type} base constructor : ${ex.message}`;
-      throw ex;
+        throw ex;
     }
 
     this.onMenuIconFocusIn = this.onMenuIconFocusIn.bind(this);
@@ -102,7 +108,7 @@ class BaseChart extends Component {
 
   render() {
     this.initCanvasSize(this.state.width, this.state.height);
-    let Chart = CHART_MODULES[this.chartType].chart;
+    const Chart = CHART_MODULES[this.chartType].chart;
     return (
       <svg xmlns='http://www.w3.org/2000/svg'
         role='application'

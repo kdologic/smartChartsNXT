@@ -96,14 +96,14 @@ class HorizontalLabels extends Component {
   resetConfig(config) {
     this.config = {
       ...this.config, ...{
-        labelRotate: config.labelRotate || 0,
+        labelRotate: typeof config.labelRotate === 'undefined' ? 0 : config.labelRotate,
         fontSize: config.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: config.fontFamily || defaultConfig.theme.fontFamily,
-        tickOpacity: config.tickOpacity || 1,
-        labelOpacity: config.labelOpacity || 1,
+        tickOpacity: typeof config.tickOpacity === 'undefined' ? 1 : config.tickOpacity,
+        labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        intervalThreshold: config.intervalThreshold || 30,
+        intervalThreshold: typeof config.intervalThreshold ? 30 : config.intervalThreshold,
         dateFormat: config.dateFormat || defaultConfig.formatting.dateFormat
       }
     };

@@ -1,10 +1,14 @@
 'use strict';
 
+import Validator from './../validators/validator';
+import { validationRules } from './../settings/validationRules';
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
 import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
-import Error from './../components/errorView';
+import ErrorView from './../components/errorView';
+
+/*eslint-disable  no-console*/
 
 /**
  * chart.js
@@ -17,27 +21,27 @@ class Chart {
   constructor(opts) {
     try {
       this.errors = [];
-      this.basicValidation(opts);
-      this.runId = utilCore.uuidv4();
-      this.events = eventEmitter.createInstance(this.runId);
-      this.targetNode = document.querySelector('#' + opts.targetElem);
-      if(this.errors.length) {
-        if(!this.targetNode) {
-          let errorDiv = document.createElement('div');
-          document.appendChild(errorDiv);
-          this.targetNode = errorDiv;
-        }
-        throw new Error();
+      if(!opts) {
+        throw new CError('No configuration option found !');
       }
-      
+      const validator = new Validator();
+      this.errors = validator.validate(validationRules, opts);
+      if(this.errors.length) {
+        return this.logErrors(opts);
+      }
+      this.runId = utilCore.uuidv4();
+      this.targetNode = document.querySelector('#' + opts.targetElem);
+      this.errors = this.targetElemValidate(opts);
+      if(this.errors.length) {
+        return this.logErrors(opts);
+      }
+      this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false);
-      /* eslint-disable-next-line no-console */
       $SC.debug && console.debug(this.core);
-      
     } catch (ex) {
-      this.showErrorScreen(opts, ex, ex.errorIn);
+      this.logErrors(opts, ex);
     }
   }
 
@@ -49,23 +53,43 @@ class Chart {
     this.events.emit('resize', e);
   }
 
-  showErrorScreen(opts, ex, errorIn) {
-    /*eslint-disable-next-line  no-console*/
-    console.error(this.errors.length ? this.errors : ex);
-    mountTo(<Error width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></Error>, this.targetNode);
-  }
-
-  basicValidation(opts) {
-    if(typeof opts === 'undefined') {
-      this.errors.push(new Error('Chart option can\'t be undefined or blank'));
-    }else {
-      if(typeof opts.type === 'undefined') {
-        this.errors.push(new Error('option.type can\'t be undefined'));
-      }
-      if(typeof opts.targetElem === 'undefined') {
-        this.errors.push(new Error('option.targetElem can\'t be undefined'));
+  logErrors(opts, ex) {
+    if(ex) {
+      if(ex instanceof Array){
+        this.errors = ex;
+      }else{
+        console.error(ex);
       }
     }
+    this.errors.forEach((err) => {
+      console.error(err.module + err.message);
+
+    });
+    if(this.targetNode && opts) {
+      this.showErrorScreen(opts);
+    }
+  }
+
+  showErrorScreen(opts) {
+    mountTo(<ErrorView width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></ErrorView>, this.targetNode);
+  }
+
+  targetElemValidate() {
+    let errors = [];
+    if(!this.targetNode) {
+      errors.push(new CError('Option.targetElem not found in current DOM !'));
+    }
+    return errors;
+  }
+}
+
+class CError extends Error {
+  constructor(...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CError);
+    }
+    this.module = '[SmartChartsNXT] ';
   }
 }
 

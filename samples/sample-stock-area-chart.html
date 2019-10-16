@@ -21,6 +21,11 @@
       });
     };
 
+    // window.onload = function () {
+    //   dataSet = prepareData(getStaticData());
+    //   displayChart('R-Com', dataSet);
+    // };
+
     function prepareData(data) {
       var dataSet = [];
       for (key in data['Time Series (Daily)']) {
@@ -40,83 +45,26 @@
         let areaChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
-          "description": "A javascript area chart that visualize the data of sales",
           "title": {
-            "text":"Stock Chart"
+            "text":"Stock Area Chart [ RCOM ]"
           },
           "subtitle": {
             "text":"Time Series (Daily)"
           },
-          "canvasBorder": false,
           "bgColor": "#f7fdf7",
-          "gridBox": {
-            "vertical": {
-              "enable": true
-            },
-            "horizontal": {
-              "enable": true
-            },
-           "bgColor": 'skyblue',
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL,
-           "bgOpacity": 0.2
-          },
-          "pointerCrosshair": {
-            "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED,
-            },
-            "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.SOLID
-            }
-          },
-          "legends": {
-            "enable": true
-          },
-          "tooltip": {
-            "enable": true,
-            "content": function () {
-              return '<table>' +
-                '<tbody>' +
-                '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-                '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
-                '</tr>' +
-                this.map(function (point) {
-                  return '<tr>' +
-                    '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
-                    '<span style="background-color:' + point.seriesColor +
-                    '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +
-                    '</td>' +
-                    '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' + point.value +
-                    '</td>' +
-                    '</tr>';
-                }).join('') +
-                '</tbody>' +
-                '</table>';
-            },
-            "xPadding": 3,
-            "yPadding": 3,
-          },
           "dataSet": {
             "xAxis": {
               "title": "Date",
               "parseAsDate": true,
               "dateFormat": "dd mmm",
               "labelRotate": -45,
-              "intervalThreshold": 40,
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 5,
             },
             "yAxis": {
-              "title": "Total Sales",
-              "prefix": "\u20B9 ",
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 5,
+              "title": "Unit value",
+              "prepend": "\u20B9 ",
               "zeroBase": false,
             },
             "series": [{
-              "visible": true,
-              "lineWidth": 1.5,
               "bgColor": "#2278b4",
               "name": seriesName,
               "areaOpacity": 0.3,

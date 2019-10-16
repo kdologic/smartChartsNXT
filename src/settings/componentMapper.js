@@ -4,17 +4,18 @@
  * componentMapper.js
  * @createdOn: 17-Jul-2019
  * @author: SmartChartsNXT
- * @description: Global enumeraton values.
+ * @description: Global enumeration values.
  */
 
 import { CHART_TYPE } from './globalEnums';
 import AreaChart from './../charts/areaChart/areaChart';
-import areaChartConfig from './../charts/areaChart/config';
+import {config as areaChartConfig, validationRules as areaChartValidationRules} from './../charts/areaChart/config';
 
 /** ------- Requireing all chart types ------- */
 export const CHART_MODULES = {
   [CHART_TYPE.AREA_CHART]: {
     config: areaChartConfig,
+    validationRules: areaChartValidationRules,
     chart: AreaChart
   }
   //,

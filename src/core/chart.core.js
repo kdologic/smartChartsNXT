@@ -106,9 +106,9 @@ class Core {
 
   handleError(ex) {
     /* eslint-disable-next-line no-console */
-    console.error('SmartChartsNXT:' + (ex.errorIn || ''));
+    ex.errorIn && console.error('SmartChartsNXT:' + ex.errorIn);
     /* eslint-disable-next-line no-console */
-    ex.stack && console.error(ex.stack);
+    console.error(ex);
   }
 
 }

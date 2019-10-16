@@ -27,7 +27,7 @@ import Ticks from './ticks';
     "fontSize": 14,
     "fontFamily": "Lato",
     "zeroBase": false,  // min label of y-axis always stick to zero if all value are positive and
-                        // max label of y-axis always sitick to zero if all value are negative.
+                        // max label of y-axis always stick to zero if all value are negative.
   }
  * @events -
  * 1. onVerticalLabelRender : Fire when horizontal labels draws.
@@ -39,6 +39,7 @@ class VerticalLabels extends Component {
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.config = {};
     this.resetConfig(this.props.opts);
+    this.defaultTickSpan = 6;
     this.state = {
       fontSize: this.config.fontSize
     };
@@ -74,12 +75,12 @@ class VerticalLabels extends Component {
   resetConfig(config) {
     this.config = {
       ...this.config, ...{
-        labelRotate: config.labelRotate || 0,
+        labelRotate: typeof config.labelRotate === 'undefined' ? 0 : config.labelRotate,
         fontSize: config.fontSize || defaultConfig.theme.fontSizeMedium,
         fontFamily: config.fontFamily || defaultConfig.theme.fontFamily,
-        tickOpacity: config.tickOpacity || 1,
+        tickOpacity: typeof config.tickOpacity === 'undefined' ? 1 : config.tickOpacity,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        labelOpacity: config.labelOpacity || 1,
+        labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark
       }
     };
@@ -97,7 +98,7 @@ class VerticalLabels extends Component {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
         {labels}
-        <Ticks posX={5} posY={0} span={this.props.opts.tickSpan || 5} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
+        <Ticks posX={5} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
       </g>
     );
   }

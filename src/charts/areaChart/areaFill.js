@@ -32,7 +32,7 @@ class AreaFill extends Component {
       pointSet: [],
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
-      opacity: this.props.opacity || 1,
+      opacity: typeof this.props.opacity === 'undefined' ? 1 : this.props.opacity,
       currentHighlightedPoint: {
         pointIndex: null
       },
@@ -116,8 +116,8 @@ class AreaFill extends Component {
         <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor}
           d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
         </path>
-        {this.props.lineStrokeWidth &&
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 1} opacity='1'></path>
+        {typeof this.props.lineStrokeWidth !== 'undefined'  &&
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 0} opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} />

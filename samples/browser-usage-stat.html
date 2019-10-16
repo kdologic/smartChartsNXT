@@ -30,122 +30,118 @@
           "targetElem": "chartContainer",
           "description": "Browser Market Share Worldwide from June-2018 to June-2019",
           "title": {
-            "text":"Browser Market Share Worldwide", // [ default : "" ]
-            "top": 20,                            // [ default : 20]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "90%",                       // [ default : 90%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "#064685",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
+            "text":"Browser Market Share Worldwide",
+            "top": 20,                            
+            "left": "50%",                        
+            "width": "90%",                       
+            "height": "",                         
+            "textAlign": "center",                
+            "textColor": "#064685",               
+            "borderColor":"none",                 
+            "fontFamily": "Lato",                 
+            "bgColor": "none",                    
+            "padding": 0,                         
+            "fontSize": 20,                       
             "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+              "opacity": 1.0                      
             },
             "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
+              "wrapText": true,                   
             }
           },
           "subtitle": {
-            "text": "June 2018 - June 2019",      // [ default : "" ]
-            "top": 50,                            // [ default : 50]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "95%",                       // [ default : 95%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "#064685",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 12,                       // [ default : theme.fontSizeSmall ]
+            "text": "June 2018 - June 2019",      
+            "top": 50,                            
+            "left": "50%",                        
+            "width": "95%",                       
+            "height": "",                         
+            "textAlign": "center",                
+            "textColor": "#064685",               
+            "borderColor":"none",                 
+            "fontFamily": "Lato",                 
+            "bgColor": "none",                    
+            "padding": 0,                         
+            "fontSize": 12,                       
             "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+              "opacity": 1.0                      
             },
             "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
-              "reducer": function(chartWidth, chartHeight) {
-                // support reducer same as title property
-              }
+              "wrapText": true,                  
             }
           },
           "canvasBorder": false,
-          "bgColor": "#f7fdf7",                         // [default: white]
+          "bgColor": "#f7fdf7",                        
           "gridBox": {
             "vertical": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                          
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,
+              "lineColor": "#000",                     
+              "lineThickness": 1,                      
+              "lineOpacity": 0.2                       
             },
             "horizontal": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: LINE_STYLE.SOLID | LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                          
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID, 
+              "lineColor": "#000",                      
+              "lineThickness": 1,                       
+              "lineOpacity": 0.2                        
             },
-           "bgColor": 'skyblue',                        //[default: none]
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, //[default: none]
-           "bgOpacity": 0.2                             //[default: 0.1]   
+           "bgColor": 'skyblue',                        
+           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, 
+           "bgOpacity": 0.2                             
           },
           "pointerCrosshair": {
             "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
-              "spread" : "full",              // [default: full | inPoint | none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,
+              "spread" : "full",              
+              "lineColor": "#000",            
+              "lineWidth": 1,                 
+              "lineOpacity": 1,               
+              "labelTextColor": "#fff",       
+              "labelBackgroundColor":"#000",  
+              "labelOpacity": 1               
             },
             "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [LINE_STYLE.SOLID | default: LINE_STYLE.DASHED]
-              "spread" : "none",                    // [full | inPoint | default: none]
-              "lineColor": "#000",                  // [default: #000]
-              "lineWidth": 1,                       // [default: 1]
-              "lineOpacity": 1,                     // [default: 1]
-              "labelTextColor": "#fff",             // [default: #fff]
-              "labelBackgroundColor":"#000",        // [default: #000]
-              "labelOpacity": 1                     // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED, 
+              "spread" : "none",                    
+              "lineColor": "#000",                  
+              "lineWidth": 1,                       
+              "lineOpacity": 1,                     
+              "labelTextColor": "#fff",             
+              "labelBackgroundColor":"#000",        
+              "labelOpacity": 1                     
             }
           },
-          "legends":{
-            "enable" : true,                              // [ default: true | false ]
-            "top": 70,                                    // [ default: 70 ]
-            "left": 100,                                  // [ default: 100 ]
-            "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
-            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
-            "textColor": "#000",                          // [ default: theme.fontColorDark ]
-            "bgColor": "none",                            // [ default: none ]
-            "hoverColor":"none",                          // [ default: none ]
-            "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
-            "fontFamily": "Lato",                         // [ default: Lato ]
-            "itemBorderWidth": 1,                         // [ default: 1 ]
-            "itemBorderColor": "#000",                    // [ default: #000 ]
-            "itemBorderOpacity": 1,                       // [ default: 1 ]
-            "itemBorderRadius": 10,                       // [ default: 10 ]
-            "borderColor": "none",                        // [ default: none ]
-            "borderWidth": 1,                             // [ default: 1 ]
-            "borderOpacity": 1,                           // [ default: 1 ]
-            "opacity": 0.9,                               // [ default: 0.9 ]
-            "toggleType": true,                           // [ default: true | false ]
-            "hideIcon": false,                            // [ true | default: false ]
-            "hideLabel": false,                           // [ true | default: false ]
-            "hideValue": false                            // [ true | default: false ]
-          },
-          "tooltip": {
-            "enable": true,                   // [default: true | false ]
-            "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
-            "grouped": false,                 // [default: true | false ]
-            "pointerVicinity": 15,            // [default: 20] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+          "legends":{            
+            "enable" : true,                              
+            "top": 70,                                    
+            "left": 100,                                  
+            "maxWidth": "90%",                            
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  
+            "display": $SC.ENUMS.DISPLAY.INLINE,          
+            "float": $SC.ENUMS.FLOAT.NONE,                
+            "textColor": "#000",                          
+            "bgColor": "none",                            
+            "hoverColor":"none",                          
+            "fontSize": 14,                               
+            "fontFamily": "Lato",                         
+            "itemBorderWidth": 1,                         
+            "itemBorderColor": "#000",                    
+            "itemBorderOpacity": 1,                       
+            "itemBorderRadius": 10,                       
+            "borderColor": "none",                        
+            "borderWidth": 1,                             
+            "borderOpacity": 1,                           
+            "opacity": 0.9,                               
+            "toggleType": true,                           
+            "hideIcon": false,                            
+            "hideLabel": false,                           
+            "hideValue": false                            
+          },          "tooltip": {
+            "enable": true,                   
+            "followPointer": false,           
+            "grouped": false,                 
+            "pointerVicinity": 15,            
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
@@ -166,19 +162,19 @@
                 );
               }
             },
-            "headerTextColor": "greenyellow",   // [ default: #fff ]
-            "headerBgColor": "#555",            // [ default: #555 ]
-            "textColor": "#000",                // [ default: #000 ]
-            "bgColor": "#e8f4f8",               // [ default: #fff ]
-            "footerTextColor": "#000",          // [ default: #fff ]
-            "footerBgColor": "#d4ebf2",         // [ default: #555 ]
-            "fontSize": 14,                     // [ default: 14 ]
-            "fontFamily": "Lato",               // [ default: Lato ]
-            "xPadding": 0,                      // [ default: 0 ] 
-            "yPadding": 0,                      // [ default: 0 ] 
-            "borderColor": "none",              // [ default: point.seriesColor ]
-            "borderWidth": 2,                   // [ default: 3 ]
-            "opacity": 0.8,                     // [ default: 0.8 ]
+            "headerTextColor": "greenyellow",   
+            "headerBgColor": "#555",            
+            "textColor": "#000",                
+            "bgColor": "#e8f4f8",               
+            "footerTextColor": "#000",          
+            "footerBgColor": "#d4ebf2",         
+            "fontSize": 14,                     
+            "fontFamily": "Lato",               
+            "xPadding": 0,                      
+            "yPadding": 0,                      
+            "borderColor": "none",              
+            "borderWidth": 2,                   
+            "opacity": 0.8,                     
           },
           "horizontalScroller": {
             "enable": true,
