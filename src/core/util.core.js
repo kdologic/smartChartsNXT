@@ -7,16 +7,16 @@ import {COLOR_MODEL, RAINBOW_COLOR_MODEL} from './fillColorModel';
  * util.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @description: SmartChartsNXT Core Library components contains utillity functions.
+ * @description: SmartChartsNXT Core Library components contains utility functions.
  */
 
 class UtilCore {
   constructor() { }
   /**
-   * https://www.npmjs.com/package/deepmerge
+   * https://github.com/TehShrike/deepmerge
    * Merges the enumerable properties of two or more objects deeply.
    * It will modify the destination object.
-   * @param  {any} dest Destination object which will be extendts by rest of the paramater objects.
+   * @param  {any} dest Destination object which will be extends by rest of the paramter objects.
    * @param  {...any} args Array of source object.
    * @return {Object} Merged object.
    */
@@ -30,12 +30,23 @@ class UtilCore {
       return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
     }
   }
+  /**
+   * Deep copy an object.
+   * @param {Object} src Source object which needs deep copy.
+   * @return {Object} Returns new copied object.
+   */
+  deepCopy(src = {}) {
+    if(typeof src === 'object') {
+      return deepmerge.all([{}, src]);
+    }
+    return src;
+  }
 
   /**
    * Returns a number whose value is limited to the given range.
    * @param {Number} min The lower boundary of the output range.
    * @param {Number} max The upper boundary of the output range.
-   * @param {Numebr} val Value to compare within range of min-max.
+   * @param {Number} val Value to compare within range of min-max.
    * @returns {Number} A number in the range [min, max].
    *
    * Example: limit the output of this computation to between 0 and 255
@@ -69,9 +80,9 @@ class UtilCore {
   }
 
   /**
-   * Memoized version of a function for faster execution.
+   * Memoize version of a function for faster execution.
    * @param {Function} fn A function to memoize.
-   * @returns {Function} Return a memoized version of the function.
+   * @returns {Function} Return a memoize version of the function.
    */
   memoize = (fn) => {
     let cache = {};
@@ -88,12 +99,12 @@ class UtilCore {
   /**
    * Return a color HEX code from index.
    * @param {Number} index Index of color HEX code.
-   * @param {Boolean} ranbowFlag Return rainbow color HEX code.
+   * @param {Boolean} rainbowFlag Return rainbow color HEX code.
    * @returns {String} Color HEX code.
    */
-  getColor(index, ranbowFlag) {
+  getColor(index, rainbowFlag) {
     let colors;
-    if (ranbowFlag) {
+    if (rainbowFlag) {
       colors = $SC.RAINBOW_COLOR_MODEL.length ? $SC.RAINBOW_COLOR_MODEL : RAINBOW_COLOR_MODEL;
     } else {
       colors = $SC.COLOR_MODEL.length ? $SC.COLOR_MODEL : COLOR_MODEL;
@@ -134,7 +145,7 @@ class UtilCore {
   }
 
   /**
-   * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested upto 10,000 ids).
+   * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested up to 10,000 ids).
    * @returns {string} Returns a unique string.
    */
   getRandomID() {

@@ -9,12 +9,11 @@
  * 'virtual DOM'? It's just JSON - each 'VNode' is an object with 3 properties. nodeName, Attributes, children
  * The whole process (JSX -> VDOM -> DOM) in one step
  *
- * TODO: If the first element in jsx is a component type then behave incorrecly, Need to fix this.
+ * TODO: If the first element in jsx is a component type then behave incorrectly, Need to fix this.
  */
-
 const Polyfills = require('./shims/polyfills');
 const config = require('./config').default;
-const deepmerge = require('deepmerge');
+const merge = require('deepmerge');
 
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
@@ -131,7 +130,7 @@ function renderDOM(vnode) {
     throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
   }
 
-  /* loop for childrens */
+  /* loop for children */
   (vnode.children || []).forEach((c) => {
     /* eslint-disable-next-line babel/no-invalid-this */
     let childComp = renderDOM.call(({ context: this.context } || {}), c);
@@ -157,9 +156,9 @@ function renderDOM(vnode) {
 }
 
 /**
- * Method will recursively replace the vitual class with real object which previously constructed to avoid constructor call during
+ * Method will recursively replace the virtual class with real object which previously constructed to avoid constructor call during
  * component update.
- * @param {Object} subNodes Virtual nodeds with component class.
+ * @param {Object} subNodes Virtual nodes with component class.
  * @param {Object} refs Real object that previously constructed.
  * @param {Object} replaceChildren Replace all classes of its children recursively.
  * @returns {undefined} void
@@ -172,7 +171,7 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
       for (let c = 0; c < refs.children.length; c++) {
         let refChld = refs.children[c];
         if (refChld && refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
-          /* Match instaceId for support multiple instace of same component type under same parent node */
+          /* Match instanceId for support multiple instance of same component type under same parent node */
           if (refChld.self.props.instanceId === subNode.attributes.instanceId) {
             subNode.class = subNode.nodeName;
             subNode.nodeName = refChld.self;
@@ -195,10 +194,10 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
 }
 
 /**
- * Hyperscript generator, gets called by transpiled JSX.
+ * Hyperscript generator, gets called by transpile JSX.
  * @param {String} nodeName Name of the element like: rect, path or <Custom-component>
  * @param {Array} attributes Array of attribute of the element
- * @param  {...any} args Childrens of the element that passed as args.
+ * @param  {...any} args Children of the element that passed as args.
  * @returns {Object} virtual dom object of element
  */
 function __h__(nodeName, attributes, ...args) {
@@ -214,7 +213,7 @@ window.__h__ = window.__h__ || __h__;
  * Merges the enumerable properties of two or more objects deeply.
  * It will modify the destination object.
  * Ref: https://www.npmjs.com/package/deepmerge.
- * @param  {any} dest Destination object which will be extendts by rest of the paramater objects.
+ * @param  {any} dest Destination object which will be extends by rest of the paramter objects.
  * @param  {...any} args Array of source object.
  * @return {Object} Merged object.
  */
@@ -225,7 +224,7 @@ function _extends(dest, ...args) {
   }else if(args.length === 0) {
     return dest;
   }else {
-    return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
+    return dest = merge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
   }
 }
 
@@ -268,7 +267,7 @@ function parseEventsProps(events, node) {
 }
 
 /**
- * This will return true if instace is es6 class type.
+ * This will return true if instance is es6 class type.
  * @param {Object} instance Object of a class to test.
  * @returns {Boolean} true if it's a class instance otherwise returns false.
  */
@@ -351,7 +350,7 @@ class Component {
       $deleted: {},
       $updated: {},
       $object: {},
-      $unchanges: {}
+      $unchanged: {}
     };
     let properties = this.arrayUnique(Object.keys(obj1).concat(Object.keys(obj2)));
     for (let key = 0; key < properties.length; key++) {
@@ -362,7 +361,7 @@ class Component {
         diff.$deleted[p] = obj1[p];
       } else {
         if (ignoreList.indexOf(p) >= 0) {
-          diff.$unchanges[p] = obj2[p];
+          diff.$unchanged[p] = obj2[p];
         } else if (typeof obj1[p] === 'object' && typeof obj1[p] === 'object') {
           if (obj1[p] instanceof Array || obj2[p] instanceof Array) {
             diff.$updated[p] = {
@@ -383,7 +382,7 @@ class Component {
             'old': obj1[p]
           };
         } else {
-          diff.$unchanges[p] = obj2[p];
+          diff.$unchanged[p] = obj2[p];
         }
       }
     }
@@ -630,13 +629,13 @@ class Component {
                 groups.forEach((grp) => {
                   styles += parseStyleProps(attrChanges[group][k][grp]);
                 });
-                styles += parseStyleProps(attrChanges[group][k].$unchanges);
+                styles += parseStyleProps(attrChanges[group][k].$unchanged);
               } else {
                 styles = attrChanges[group][k];
               }
               return styles;
             case 'events':
-              let evtNames = Object.keys(attrChanges[group][k].$unchanges);
+              let evtNames = Object.keys(attrChanges[group][k].$unchanged);
               groups.forEach((grp) => {
                 evtNames = evtNames.concat(parseEventsProps(attrChanges[group][k][grp], dom).split(','));
               });
@@ -717,7 +716,7 @@ class Component {
 
   /**
    * Interface that child must override - return virtual DOM of the component.
-   * @returns {Object} JSX object of the compoent that will be rendeded and mount.
+   * @returns {Object} JSX object of the component that will be rendered and mount.
    */
   render() {
     return (<g> Your component should override this render method </g>);
@@ -746,7 +745,7 @@ class Component {
   componentDidMount(nextProps) { }
 
   /**
-   * Call before render and determite component update
+   * Call before render and determine component update
    * @param {Object} nextProps Next set of props that will receive by component.
    * @returns {boolean} Return boolean true or false.
    */

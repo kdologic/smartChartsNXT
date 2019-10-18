@@ -177,7 +177,8 @@ class AreaChart extends Component {
         offsetLeftChange: 0,
         offsetRightChange: 0,
         areaFillMarginTop: 0,
-        shouldFSRender: this.props.resizeComponent
+        shouldFSRender: this.props.resizeComponent,
+        rangeTipPoints: []
       };
 
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
@@ -447,7 +448,7 @@ class AreaChart extends Component {
         {this.CHART_OPTIONS.horizontalScroller.enable &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
-            offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} >
+            offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} getRangeVal={this.getRangeVal.bind(this)} >
             {this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside &&
               this.drawHScrollSeries(0, 0)
             }
@@ -462,6 +463,18 @@ class AreaChart extends Component {
         }
 
         <Tooltip instanceId='label-tooltip' instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
+          opts={{
+            textColor: '#fff',
+            bgColor: 'black',
+            fontSize: 14,
+            xPadding: 5,
+            yPadding: 5,
+            borderColor: 'none',
+            borderWidth: 0
+          }}>
+        </Tooltip>
+
+        <Tooltip instanceId='range-tooltip' instanceCount={2} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
           opts={{
             textColor: '#fff',
             bgColor: 'black',
@@ -561,8 +574,35 @@ class AreaChart extends Component {
       this.state.windowRightIndex = rightIndex;
       this.prepareDataSet();
     }
+
+    // let leftRangePoint = new Point(e.leftHandlePos.x, e.leftHandlePos.y - 5);
+    // let rightRangePoint = new Point(e.rightHandlePos.x, e.rightHandlePos.y - 5);
+    // const xAxis = this.state.cs.dataSet.xAxis;
+    // let lRangeVal = xAxis.categories[0];
+    // lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
+    // leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
+
+    // let rRangeVal = xAxis.categories[xAxis.categories.length-1];
+    // rRangeVal = xAxis.parseAsDate && utilCore.isDate(rRangeVal) ? dateFormat(rRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : rRangeVal;
+    // rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
+    // this.state.rangeTipPoints = [leftRangePoint, rightRangePoint];
+    // this.updateRangeTip();
     this.calcOffsetChanges();
     this.update();
+  }
+
+  getRangeVal(leftHandlePos, rightHandlePos) {
+    let leftRangePoint = new Point(leftHandlePos.x, leftHandlePos.y - 5);
+    let rightRangePoint = new Point(rightHandlePos.x, rightHandlePos.y - 5);
+    const xAxis = this.state.cs.dataSet.xAxis;
+    let lRangeVal = xAxis.categories[0];
+    lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
+    leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
+
+    let rRangeVal = xAxis.categories[xAxis.categories.length-1];
+    rRangeVal = xAxis.parseAsDate && utilCore.isDate(rRangeVal) ? dateFormat(rRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : rRangeVal;
+    rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
+    return [leftRangePoint, rightRangePoint];
   }
 
   onZoomout() {
@@ -587,6 +627,22 @@ class AreaChart extends Component {
       line2: undefined
     });
   }
+
+  // updateRangeTip() {
+  //   this.emitter.emitSync('updateTooltip', {
+  //     instanceId: 'range-tooltip',
+  //     originPoint: undefined,
+  //     pointData: this.state.rangeTipPoints,
+  //     content:{
+  //       body: (data, index) => (`
+  //         <tr>
+  //           <td> ${data[index].value}</td>
+  //         </tr>
+  //       `)
+  //     },
+  //     line1: undefined, line2: undefined, preAlign: 'top'
+  //   });
+  // }
 
   consumeEvents(e) {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];

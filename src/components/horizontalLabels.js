@@ -120,7 +120,7 @@ class HorizontalLabels extends Component {
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x - 20} y={this.state.clip.y} width={this.state.clip.width + 20} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - this.props.posX} y={this.state.clip.y} width={this.state.clip.width + this.props.posX} height={this.state.clip.height} />
           </clipPath>
           <clipPath id={this.clipPathId + '-tick'}>
             <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
@@ -155,7 +155,7 @@ class HorizontalLabels extends Component {
       <text instanceId={`sc-text-hlabel-${index}`} font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} opacity
         transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
         <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val}
+          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
         </tspan>
       </text>
     );
@@ -178,7 +178,7 @@ class HorizontalLabels extends Component {
 
   onMouseEnter(e) {
     let lblIndex = e.target.getAttribute('labelIndex');
-    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.state.categories[lblIndex];
+    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.state.categories[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('hLabelEnter', e);
   }
 

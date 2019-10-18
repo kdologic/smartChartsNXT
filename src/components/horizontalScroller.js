@@ -1,9 +1,11 @@
 'use strict';
 
+import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import utilCore from '../core/util.core';
 import uiCore from './../core/ui.core';
+import Tooltip from './../components/tooltip';
 
 /**
  * horizontalScroller.js
@@ -49,7 +51,8 @@ class HorizontalScroller extends Component {
       leftInnerBarColor: '#5a5a5a',
       rightInnerBarColor: '#5a5a5a',
       sliderWindowOpacity: 0.2,
-      handlerFocused: null
+      handlerFocused: null,
+      rangeTipPoints: []
     };
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onHoverInHandler = this.onHoverInHandler.bind(this);
@@ -181,6 +184,22 @@ class HorizontalScroller extends Component {
     return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset / props.width * 100, rightOffsetPercent: rightOffset / props.width * 100 };
   }
 
+  updateRangeTip() {
+    this.emitter.emitSync('updateTooltip', {
+      instanceId: 'range-tooltip',
+      originPoint: undefined,
+      pointData: this.state.rangeTipPoints,
+      content:{
+        body: (data, index) => (`
+          <tr>
+            <td> ${data[index].value}</td>
+          </tr>
+        `)
+      },
+      line1: undefined, line2: undefined, preAlign: 'top'
+    });
+  }
+
   onMouseDown(e) {
     let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     let classList = e.target.classList.value.split(' ');
@@ -248,11 +267,17 @@ class HorizontalScroller extends Component {
 
       this.state.leftOffset = lOffset;
       this.state.windowWidth = winWidth;
+      this.state.rightOffset = lOffset + winWidth;
       this.state.leftOffsetPercent = this.state.leftOffset / this.props.width * 100;
       this.state.rightOffsetPercent = ((this.state.leftOffset + this.state.windowWidth) / this.props.width) * 100;
+      this.state.rangeTipPoints = this.props.getRangeVal(new Point(this.props.posX + this.state.leftOffset, this.props.posY), new Point(this.props.posX + this.state.rightOffset, this.props.posY));
+      console.log(this.state.rangeTipPoints);
+      this.updateRangeTip();
       this.emitter.emit('hScroll', {
         leftOffset: this.state.leftOffsetPercent,
+        leftHandlePos: new Point(this.props.posX + this.state.leftOffset, this.props.posY),
         rightOffset: this.state.rightOffsetPercent,
+        rightHandlePos: new Point(this.props.posX + this.state.rightOffset, this.props.posY),
         windowWidth: ((this.state.windowWidth / this.props.width) * 100)
       });
     }
