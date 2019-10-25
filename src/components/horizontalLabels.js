@@ -120,7 +120,7 @@ class HorizontalLabels extends Component {
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x - this.props.posX} y={this.state.clip.y} width={this.state.clip.width + this.props.posX} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - 100} y={this.state.clip.y} width={this.state.clip.width + 100} height={this.state.clip.height} />
           </clipPath>
           <clipPath id={this.clipPathId + '-tick'}>
             <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />

@@ -254,7 +254,7 @@ class Tooltip extends Component {
             line1 += event.content.header(pointData, inst, this.props.opts);
           }
           if (typeof event.content.body === 'function') {
-            line1 += '<table style=\'margin:5px;\'>';
+            line1 += '<table style=\'margin:0 auto;\'>';
             if (this.props.grouped === true) {
               for (let i = 0; i < pointData.length; i++) {
                 line1 += event.content.body(pointData, i, this.props.opts);
@@ -281,6 +281,7 @@ class Tooltip extends Component {
       temp.innerHTML = strContents;
       temp.style.display = 'inline-block';
       temp.style.fontFamily = this.config.fontFamily;
+      temp.style.fontSize = this.config.fontSize + 'px';
       temp.style.visibility = 'hidden';
       temp.style.position = 'absolute';
       document.getElementsByTagName('body')[0].appendChild(temp);
@@ -296,7 +297,6 @@ class Tooltip extends Component {
       let height = lineHeight + (2 * yPadding);
       let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
       let textPos = new Point(topLeft.x, topLeft.y);
-
 
       let newState = {
         preAlign,
