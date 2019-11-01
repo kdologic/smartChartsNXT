@@ -177,8 +177,7 @@ class AreaChart extends Component {
         offsetLeftChange: 0,
         offsetRightChange: 0,
         areaFillMarginTop: 0,
-        shouldFSRender: this.props.resizeComponent,
-        rangeTipPoints: []
+        shouldFSRender: this.props.resizeComponent
       };
 
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
@@ -385,8 +384,8 @@ class AreaChart extends Component {
     return (
       <g>
         <Draggable instanceId='drag-132'>
-            <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
-            <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
+          <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+          <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
         </Draggable>
 
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
@@ -437,7 +436,7 @@ class AreaChart extends Component {
         </g>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
-          <Draggable  instanceId='drag-135'>
+          <Draggable instanceId='drag-135'>
             <LegendBox legendSet={this.getLegendData()} float={this.legendBoxFloat} left={this.CHART_DATA.marginLeft} top={this.CHART_DATA.legendTop} opts={this.CHART_OPTIONS.legends || {}}
               display='inline' type={this.legendBoxType} background='none'
               hoverColor='none' hideIcon={false} hideLabel={false} hideValue={false} toggleType={true} >
@@ -506,7 +505,7 @@ class AreaChart extends Component {
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
-        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop } paddingX={this.CHART_DATA.paddingX}
+        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0}
@@ -574,32 +573,22 @@ class AreaChart extends Component {
       this.state.windowRightIndex = rightIndex;
       this.prepareDataSet();
     }
-
-    // let leftRangePoint = new Point(e.leftHandlePos.x, e.leftHandlePos.y - 5);
-    // let rightRangePoint = new Point(e.rightHandlePos.x, e.rightHandlePos.y - 5);
-    // const xAxis = this.state.cs.dataSet.xAxis;
-    // let lRangeVal = xAxis.categories[0];
-    // lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
-    // leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
-
-    // let rRangeVal = xAxis.categories[xAxis.categories.length-1];
-    // rRangeVal = xAxis.parseAsDate && utilCore.isDate(rRangeVal) ? dateFormat(rRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : rRangeVal;
-    // rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
-    // this.state.rangeTipPoints = [leftRangePoint, rightRangePoint];
-    // this.updateRangeTip();
+    this.emitter.emit('onUpdateRangeVal', {
+      rangeTipPoints: this.getRangeVal(e.leftHandlePos, e.rightHandlePos)
+    });
     this.calcOffsetChanges();
     this.update();
   }
 
   getRangeVal(leftHandlePos, rightHandlePos) {
-    let leftRangePoint = new Point(leftHandlePos.x, leftHandlePos.y - 5);
-    let rightRangePoint = new Point(rightHandlePos.x, rightHandlePos.y - 5);
+    const leftRangePoint = new Point(leftHandlePos.x - this.CHART_DATA.marginLeft, leftHandlePos.y - 5);
+    const rightRangePoint = new Point(rightHandlePos.x - this.CHART_DATA.marginLeft, rightHandlePos.y - 5);
     const xAxis = this.state.cs.dataSet.xAxis;
     let lRangeVal = xAxis.categories[0];
     lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
     leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
 
-    let rRangeVal = xAxis.categories[xAxis.categories.length-1];
+    let rRangeVal = xAxis.categories[xAxis.categories.length - 1];
     rRangeVal = xAxis.parseAsDate && utilCore.isDate(rRangeVal) ? dateFormat(rRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : rRangeVal;
     rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
     return [leftRangePoint, rightRangePoint];
@@ -627,22 +616,6 @@ class AreaChart extends Component {
       line2: undefined
     });
   }
-
-  // updateRangeTip() {
-  //   this.emitter.emitSync('updateTooltip', {
-  //     instanceId: 'range-tooltip',
-  //     originPoint: undefined,
-  //     pointData: this.state.rangeTipPoints,
-  //     content:{
-  //       body: (data, index) => (`
-  //         <tr>
-  //           <td> ${data[index].value}</td>
-  //         </tr>
-  //       `)
-  //     },
-  //     line1: undefined, line2: undefined, preAlign: 'top'
-  //   });
-  // }
 
   consumeEvents(e) {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
@@ -777,7 +750,7 @@ class AreaChart extends Component {
   onLegendRendered(e) {
     if (e.float === ENUMS.FLOAT.NONE) {
       const newMarginTop = e.bBox.y + e.bBox.height + 10;
-      if(this.CHART_DATA.marginTop !== newMarginTop) {
+      if (this.CHART_DATA.marginTop !== newMarginTop) {
         this.CHART_DATA.marginTop = newMarginTop;
         this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
         this.prepareDataSet();

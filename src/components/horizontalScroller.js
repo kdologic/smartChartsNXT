@@ -5,7 +5,8 @@ import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import utilCore from '../core/util.core';
 import uiCore from './../core/ui.core';
-import Tooltip from './../components/tooltip';
+import SpeechBox from './../components/speechBox';
+import defaultConfig from './../settings/config';
 
 /**
  * horizontalScroller.js
@@ -32,7 +33,9 @@ class HorizontalScroller extends Component {
     this.selectedHandler = undefined;
     this.emitter = eventEmitter.getInstance(this.context.runId);
     let offset = this.calcOffset(props);
-
+    this.rangeLabelTexPadding = 5;
+    this.rangeLabelBoxHeight = 30;
+    this.anchorHeight = 10;
     this.state = {
       sliderLeft: '',
       sliderLeftSel: '',
@@ -68,6 +71,7 @@ class HorizontalScroller extends Component {
     this.onFocusInSliderWindow = this.onFocusInSliderWindow.bind(this);
     this.onFocusOutSliderWindow = this.onFocusOutSliderWindow.bind(this);
     this.onScrollReset = this.onScrollReset.bind(this);
+    this.onUpdateRangeVal = this.onUpdateRangeVal.bind(this);
   }
 
   propsWillReceive(nextProps) {
@@ -80,10 +84,12 @@ class HorizontalScroller extends Component {
 
   componentDidMount() {
     this.emitter.on('onScrollReset', this.onScrollReset);
+    this.emitter.on('onUpdateRangeVal', this.onUpdateRangeVal);
   }
 
   componentWillUnmount() {
     this.emitter.removeListener('onScrollReset', this.onScrollReset);
+    this.emitter.removeListener('onUpdateRangeVal', this.onUpdateRangeVal);
     this.onScrollEnd();
   }
 
@@ -157,9 +163,36 @@ class HorizontalScroller extends Component {
         </SliderRightHandle>
 
         {this.selectedHandler &&
-          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width={this.context.svgWidth} height={this.context.svgHeight} fill='#000' fill-opacity='0' storke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
+          <rect class='sc-slider-pane' x={-this.props.posX} y={-this.props.posY} width={this.context.svgWidth} height={this.context.svgHeight} fill='#000' fill-opacity='0' stroke='none' pointer-events='all' style='cursor: grabbing; cursor: -webkit-grabbing; cursor: -moz-grabbing;' />
+        }
+
+        {this.state.rangeTipPoints.length > 1 && (this.selectedHandler || this.state.handlerFocused) &&
+          <g class='sc-slider-range-tip'>
+            <SpeechBox x={this.state.leftHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[0].textDim.width / 2)} y={-(this.rangeLabelBoxHeight + this.anchorHeight)} width={this.state.rangeTipPoints[0].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
+              cpoint={new Point(this.state.leftHandlePos.x, 0)} bgColor='#62d8dc' fillOpacity={0.7} cornerRadius={5}
+              shadow={true} strokeColor='#000' strokeWidth='1'>
+            </SpeechBox>
+            <SpeechBox x={this.state.rightHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[1].textDim.width / 2)} y={-(this.rangeLabelBoxHeight + this.anchorHeight)} width={this.state.rangeTipPoints[1].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
+              cpoint={new Point(this.state.rightHandlePos.x, 0)} bgColor='#62d8dc' fillOpacity={0.7} cornerRadius={5}
+              shadow={true} strokeColor='#000' strokeWidth='1'>
+            </SpeechBox>
+            {
+              [
+                this.getRangeLabelText(this.state.leftHandlePos, this.state.rangeTipPoints[0].value),
+                this.getRangeLabelText(this.state.rightHandlePos, this.state.rangeTipPoints[1].value)
+              ]
+            }
+          </g>
         }
       </g>
+    );
+  }
+
+  getRangeLabelText(position, text) {
+    return (
+      <text class='sc-range-label-text' fill={'#000'} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' stroke='none' style='font-size:12px;'>
+        <tspan x={position.x} y={-(this.rangeLabelBoxHeight / 2 + this.rangeLabelTexPadding)} text-anchor='middle'>{text}</tspan>
+      </text>
     );
   }
 
@@ -182,22 +215,6 @@ class HorizontalScroller extends Component {
     let rightOffset = (props.rightOffset * props.width / 100) || 0;
     let windowWidth = rightOffset - leftOffset;
     return { leftOffset, rightOffset, windowWidth, leftOffsetPercent: leftOffset / props.width * 100, rightOffsetPercent: rightOffset / props.width * 100 };
-  }
-
-  updateRangeTip() {
-    this.emitter.emitSync('updateTooltip', {
-      instanceId: 'range-tooltip',
-      originPoint: undefined,
-      pointData: this.state.rangeTipPoints,
-      content:{
-        body: (data, index) => (`
-          <tr>
-            <td> ${data[index].value}</td>
-          </tr>
-        `)
-      },
-      line1: undefined, line2: undefined, preAlign: 'top'
-    });
   }
 
   onMouseDown(e) {
@@ -270,20 +287,26 @@ class HorizontalScroller extends Component {
       this.state.rightOffset = lOffset + winWidth;
       this.state.leftOffsetPercent = this.state.leftOffset / this.props.width * 100;
       this.state.rightOffsetPercent = ((this.state.leftOffset + this.state.windowWidth) / this.props.width) * 100;
-      this.state.rangeTipPoints = this.props.getRangeVal(new Point(this.props.posX + this.state.leftOffset, this.props.posY), new Point(this.props.posX + this.state.rightOffset, this.props.posY));
-      console.log(this.state.rangeTipPoints);
-      this.updateRangeTip();
+
+      this.state.leftHandlePos = new Point(this.state.leftOffset, this.props.posY);
+      this.state.rightHandlePos = new Point(this.state.rightOffset, this.props.posY);
       this.emitter.emit('hScroll', {
         leftOffset: this.state.leftOffsetPercent,
-        leftHandlePos: new Point(this.props.posX + this.state.leftOffset, this.props.posY),
+        leftHandlePos: this.state.leftHandlePos,
         rightOffset: this.state.rightOffsetPercent,
-        rightHandlePos: new Point(this.props.posX + this.state.rightOffset, this.props.posY),
+        rightHandlePos: this.state.rightHandlePos,
         windowWidth: ((this.state.windowWidth / this.props.width) * 100)
       });
     }
 
     window.addEventListener('mouseup', this.onScrollEnd, false);
     window.addEventListener('touchend', this.onScrollEnd, false);
+  }
+
+  onUpdateRangeVal(e) {
+    this.state.rangeTipPoints = e.rangeTipPoints;
+    this.state.rangeTipPoints.forEach(point => point.textDim = uiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value)));
+    this.update();
   }
 
   onScrollEnd() {
