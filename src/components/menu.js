@@ -236,7 +236,7 @@ class Menu extends Component {
   hideMenuItems(e) {
     if (e.type == 'click' || (e.type == 'keydown' && (e.which === 13 || e.which === 32))) {
       e.stopPropagation();
-      this.emitter.emit('menuClosed', e);
+      this.emitter.emitSync('menuClosed', e);
     } else if (e.type == 'keydown' && e.which === 9 && e.shiftKey) {
       e.preventDefault();
       this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();

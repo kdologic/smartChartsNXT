@@ -49,13 +49,19 @@ class HorizontalScroller extends Component {
       rightOffset: offset.rightOffset,
       rightOffsetPercent: offset.rightOffsetPercent,
       windowWidth: offset.windowWidth,
+      leftHandlePos: new Point(0, 0),
+      rightHandlePos: new Point(0, 0),
       leftHandlerColor: '#fff',
       rightHandlerColor: '#fff',
       leftInnerBarColor: '#5a5a5a',
       rightInnerBarColor: '#5a5a5a',
       sliderWindowOpacity: 0.2,
       handlerFocused: null,
-      rangeTipPoints: []
+      rangeTipPoints: [],
+      leftRangeTipXY: new Point(0, -(this.rangeLabelBoxHeight + this.anchorHeight)),
+      rightRangeTipXY: new Point(0, -(this.rangeLabelBoxHeight + this.anchorHeight)),
+      leftRangeTipTextPos: new Point(0, 0),
+      rightRangeTipTextPos: new Point(0, 0)
     };
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onHoverInHandler = this.onHoverInHandler.bind(this);
@@ -79,6 +85,7 @@ class HorizontalScroller extends Component {
     if (widthChangePercent) {
       this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset * widthChangePercent / 100);
       this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth * widthChangePercent / 100);
+      this.state.rangeTipPoints = [];
     }
   }
 
@@ -168,18 +175,18 @@ class HorizontalScroller extends Component {
 
         {this.state.rangeTipPoints.length > 1 && (this.selectedHandler || this.state.handlerFocused) &&
           <g class='sc-slider-range-tip'>
-            <SpeechBox x={this.state.leftHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[0].textDim.width / 2)} y={-(this.rangeLabelBoxHeight + this.anchorHeight)} width={this.state.rangeTipPoints[0].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
+            <SpeechBox x={this.state.leftRangeTipXY.x} y={this.state.leftRangeTipXY.y} width={this.state.rangeTipPoints[0].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
               cpoint={new Point(this.state.leftHandlePos.x, 0)} bgColor='#62d8dc' fillOpacity={0.7} cornerRadius={5}
               shadow={true} strokeColor='#000' strokeWidth='1'>
             </SpeechBox>
-            <SpeechBox x={this.state.rightHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[1].textDim.width / 2)} y={-(this.rangeLabelBoxHeight + this.anchorHeight)} width={this.state.rangeTipPoints[1].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
+            <SpeechBox x={this.state.rightRangeTipXY.x} y={this.state.rightRangeTipXY.y} width={this.state.rangeTipPoints[1].textDim.width + (2 * this.rangeLabelTexPadding)} height={this.rangeLabelBoxHeight}
               cpoint={new Point(this.state.rightHandlePos.x, 0)} bgColor='#62d8dc' fillOpacity={0.7} cornerRadius={5}
               shadow={true} strokeColor='#000' strokeWidth='1'>
             </SpeechBox>
             {
               [
-                this.getRangeLabelText(this.state.leftHandlePos, this.state.rangeTipPoints[0].value),
-                this.getRangeLabelText(this.state.rightHandlePos, this.state.rangeTipPoints[1].value)
+                this.getRangeLabelText(this.state.leftRangeTipTextPos, this.state.rangeTipPoints[0].value),
+                this.getRangeLabelText(this.state.rightRangeTipTextPos, this.state.rangeTipPoints[1].value)
               ]
             }
           </g>
@@ -306,6 +313,22 @@ class HorizontalScroller extends Component {
   onUpdateRangeVal(e) {
     this.state.rangeTipPoints = e.rangeTipPoints;
     this.state.rangeTipPoints.forEach(point => point.textDim = uiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value)));
+    this.state.leftRangeTipXY.x = this.state.leftHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[0].textDim.width / 2);
+    this.state.rightRangeTipXY.x = this.state.rightRangeTipTextPos.x = this.state.rightHandlePos.x - this.rangeLabelTexPadding - (this.state.rangeTipPoints[1].textDim.width / 2);
+    if (this.state.leftRangeTipXY.x + (this.rangeLabelTexPadding * 3) + this.state.rangeTipPoints[0].textDim.width > this.state.rightRangeTipXY.x) {
+      this.state.rightRangeTipXY.x = this.state.leftRangeTipXY.x + (this.rangeLabelTexPadding * 3) + this.state.rangeTipPoints[0].textDim.width;
+    }
+    if(this.state.rightRangeTipXY.x + (this.rangeLabelTexPadding * 2) + this.state.rangeTipPoints[1].textDim.width > this.props.width) {
+      const diff = this.state.rightRangeTipXY.x + (this.rangeLabelTexPadding * 2) + this.state.rangeTipPoints[1].textDim.width - this.props.width;
+      this.state.rightRangeTipXY.x -= diff;
+    }
+    if (this.state.leftRangeTipXY.x + (this.rangeLabelTexPadding * 3) + this.state.rangeTipPoints[0].textDim.width > this.state.rightRangeTipXY.x) {
+      const diff = this.state.leftRangeTipXY.x + (this.rangeLabelTexPadding * 3) + this.state.rangeTipPoints[1].textDim.width - this.state.rightRangeTipXY.x;
+      this.state.leftRangeTipXY.x -= diff;
+    }
+    this.state.leftRangeTipTextPos.x = this.state.leftRangeTipXY.x + (this.state.rangeTipPoints[0].textDim.width + this.rangeLabelTexPadding) / 2;
+    this.state.rightRangeTipTextPos.x = this.state.rightRangeTipXY.x + (this.state.rangeTipPoints[1].textDim.width + this.rangeLabelTexPadding) / 2;
+
     this.update();
   }
 
