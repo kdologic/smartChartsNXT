@@ -162,27 +162,28 @@
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
-                  `<p style="background-color:${tipConfig.headerBgColor || "#555"}; font-size: 18px; text-align: left; color: ${tipConfig.headerTextColor || "#fff"};margin:0;padding: 5px 5px;">
-                    ${pointSet[index].formattedLabel}
-                  </p>`
+                  '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                    pointSet[index].formattedLabel +
+                  '</p>'
                 );
               },
               "body": function(pointSet, index, tipConfig) {
                 let point = pointSet[index];
                 return (
-                  `<tr  style="font-size: ${tipConfig.fontSize || 14}px; padding: 3px 6px; color:${tipConfig.textColor || "#000"};">
-                    <td>
-                      <span style="background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>${point.seriesName}
-                    </td>
-                    <td>${point.value}</td>
-                  </tr>`
+                  '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                    '<td>' + 
+                      '<span style="background-color:' + point.seriesColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                       point.seriesName +
+                    '</td>' +
+                    '<td>' + (point.value) + '</td>' +
+                  '</tr>'
                 );
               },
               "footer": function(pointSet, index, tipConfig) {
                 return (
-                  `<p style="background-color:${tipConfig.footerBgColor || "#555"}; font-size: 10px; text-align: left; color: ${tipConfig.footerTextColor || "#fff"};margin:0;padding: 5px 5px;">
-                    Units are in \u20B9
-                  </p>`
+                  '<p style="background-color:' + (tipConfig.footerBgColor || "#555") + '; font-size: 10px; text-align: left; color: ' + (tipConfig.footerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                    'Units are in \u20B9' +
+                  '</p>'
                 );
               }
             },

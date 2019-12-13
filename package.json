@@ -17,6 +17,7 @@
   "scripts": {
     "start": "gulp --env=develop",
     "build": "gulp build --env=production",
+    "build:watch": "gulp build watch --env=production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

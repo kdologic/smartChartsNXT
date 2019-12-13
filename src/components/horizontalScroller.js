@@ -226,7 +226,7 @@ class HorizontalScroller extends Component {
 
   onMouseDown(e) {
     let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
-    let classList = e.target.classList.value.split(' ');
+    let classList = Array.prototype.slice.call(e.target.classList);
     if (classList.includes('sc-slider-left-sel')) {
       this.selectedHandler = 'left';
     } else if (classList.includes('sc-slider-right-sel')) {
