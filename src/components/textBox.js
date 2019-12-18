@@ -93,7 +93,7 @@ class TextBox extends Component {
           </Style>
         }
         <text class={this.props.class || ''} fill={this.props.textColor} text-rendering='geometricPrecision' font-weight={this.props.fontWeight || 'normal'} stroke={this.props.stroke || 'none'} stroke-width={this.props.strokeWidth || 1} stroke-linejoin='round' paint-order='stroke'>
-          {lines.map((line, i) => <tspan text-anchor={this.state.textAnchor || 'middle'} x={0} y={this.props.padding + (i * this.state.lineHeight)} dy={1} dominant-baseline='hanging'>{line}</tspan>)}
+          {lines.map((line, i) => <tspan text-anchor={this.state.textAnchor || 'middle'} x={0} y={this.props.padding + ((i + 1) * (this.state.lineHeight/2))} dy={4} >{line}</tspan>)}
         </text>
       </g>
     );

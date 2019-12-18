@@ -59,6 +59,9 @@ class Tooltip extends Component {
     this.updateTip = this.updateTip.bind(this);
     this.hide = this.hide.bind(this);
     this.followMousePointer = this.followMousePointer.bind(this);
+    this.rootContainer = document.getElementById(this.context.rootContainerId);
+    this.containerIdIE = utilCore.getRandomID();
+    utilCore.isIE = true;
   }
 
   initInstances(props) {
@@ -122,7 +125,11 @@ class Tooltip extends Component {
     let nodeList = this.ref.node.querySelectorAll('.sc-tooltip-content');
     Array.prototype.forEach.call(nodeList, (node) => {
       let index = node.getAttribute('index');
-      node && (node.innerHTML = this.instances[index].tooltipContent);
+      if(!utilCore.isIE) {
+        node && (node.innerHTML = this.instances[index].tooltipContent);
+      }else {
+        this.createTipAsHTML(node);
+      }
     });
   }
 
@@ -138,6 +145,9 @@ class Tooltip extends Component {
     if (this.props.opts.enable === false) {
       return <tooltip-disabled></tooltip-disabled>;
     }
+    if(utilCore.isIE) {
+      this.createTipContainerHTML();
+    }
     return (
       <g class='sc-tooltip-container' pointer-events='none' aria-atomic='true' aria-live='assertive'>
         {
@@ -149,53 +159,104 @@ class Tooltip extends Component {
 
   getTooltipContainer() {
     let tipContainer = [];
-    let transitionFunction = 'transform 0.3s cubic-bezier(.03,.26,.32,1)';
-    if (this.props.grouped && this.config.followPointer) {
-      transitionFunction = 'none';
-    }
     for (let i = 0; i < this.props.instanceCount; i++) {
       if (!this.instances[i].opacity) {
         continue;
       }
       tipContainer.push(<g instanceId={this.props.instanceId} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
-        <Style>
-          {{
-            ['.sc-tip-' + this.instances[i].tipId]: {
-              WebkitTransition: transitionFunction,
-              MozTransition: transitionFunction,
-              OTransition: transitionFunction,
-              transition: transitionFunction,
-              transform: this.instances[i].transform
-            },
-            ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
+        {this.getTipStyle(i)}
+        <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
+          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} >
+        </SpeechBox>
+        <g class='sc-text-tooltip-grp'>
+          {utilCore.isIE ?
+          (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
+            style={{
+              position: 'absolute',
+              width: this.instances[i].contentWidth - (2 * this.config.xPadding) + 1 + 'px',
+              height: this.instances[i].contentHeight - (2 * this.config.yPadding) + 'px',
+              transform: this.instances[i].transform,
+              top: this.instances[i].contentY + 'px',
+              left: this.instances[i].contentX + 'px',
               color: this.config.textColor,
               fontSize: this.config.fontSize + 'px',
               fontFamily: this.config.fontFamily,
               overflow: 'hidden',
               opacity: this.config.opacity
-            }
-          }}
-        </Style>
-        <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
-          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} >
-        </SpeechBox>
-        <g class='sc-text-tooltip-grp'>
-          <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
-          </foreignObject>
+            }}>
+          </x-div>) :
+          (
+            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
+            </foreignObject>
+          )}
         </g>
       </g>);
     }
     return tipContainer;
   }
 
+  getTipStyle(i) {
+    let transitionFunction = 'transform 0.3s cubic-bezier(.03,.26,.32,1)';
+    if (this.props.grouped && this.config.followPointer) {
+      transitionFunction = 'none';
+    }
+    return (
+    <Style>
+      {{
+        ['.sc-tip-' + this.instances[i].tipId]: {
+          WebkitTransition: transitionFunction,
+          MozTransition: transitionFunction,
+          OTransition: transitionFunction,
+          transition: transitionFunction,
+          transform: this.instances[i].transform
+        },
+        ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
+          color: this.config.textColor,
+          fontSize: this.config.fontSize + 'px',
+          fontFamily: this.config.fontFamily,
+          overflow: 'hidden',
+          opacity: this.config.opacity
+        }
+      }}
+    </Style>);
+  }
+
   createTooltipContent(line1, line2) {
-    let strContents = '<table style=\'color:' + this.config.textColor + ';font-size:' + this.config.fontSize + 'px;font-family:' + this.config.fontFamily + ';\'>';
+    let strContents = '<table style="color:' + this.config.textColor + '; font-size:' + this.config.fontSize + 'px; font-family:' + this.config.fontFamily + ';">';
     strContents += '<tr><td>' + line1 + '</td></tr>';
     if (line2) {
       strContents += '<tr><td><b>' + line2 + '</b></td></tr>';
     }
     strContents += '</table>';
     return strContents;
+  }
+
+  createTipContainerHTML() {
+    let strHtml = `<div class='sc-tooltip-container-html' style='position: relative; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: ${-this.context.svgHeight}px; margin-top: -5px;pointer-events: none;'></div>`;
+    let allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+    if(allTipContainer === null) {
+      this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
+      allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+    }
+    let tipContainer = allTipContainer.querySelector('#sc-tooltip-container-' +  this.containerIdIE);
+    if(tipContainer) {
+      tipContainer.parentNode.removeChild(tipContainer);
+    }
+    strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='assertive' 
+      style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
+    </div>`;
+    allTipContainer.insertAdjacentHTML('beforeend', strHtml);
+  }
+
+  createTipAsHTML(node) {
+    if(node) {
+      let instanceData = JSON.parse(node.dataset.instance);
+      let tipContainer = document.getElementById(`sc-tooltip-container-${this.containerIdIE}`);
+      if(tipContainer) {
+        node.innerHTML = instanceData.tooltipContent;
+        tipContainer.appendChild(node);
+      }
+    }
   }
 
   *selectNextTipIndex(pointData) {

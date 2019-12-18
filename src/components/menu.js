@@ -112,7 +112,9 @@ class Menu extends Component {
   }
 
   componentDidMount() {
-    this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
+      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    }
   }
 
   render() {
@@ -202,7 +204,7 @@ class Menu extends Component {
             }
           `}
         </style>
-        <circle class='sc-menu-close-icon-bg do-focus-highlight' cx='0' cy='0' r='34' fill='#d73e4d' stroke='#fff' stroke-width='2' pointer-events='all' tabindex='0'
+        <circle class='sc-menu-close-icon-bg do-focus-highlight' cx='0' cy='0' r='34' fill='#d73e4d' stroke='#fff' stroke-width='2' pointer-events='all' tabindex='0' transform="scale(1.5)"
           role='button' aria-label='close menu'
           events={{
             click: this.hideMenuItems,
@@ -220,7 +222,9 @@ class Menu extends Component {
     if (e.type == 'keydown') {
       if (e.which == 9) {
         e.preventDefault();
-        this.ref.node.querySelector('.sc-menu-close-icon-bg').focus();
+        if(typeof this.ref.node.querySelector('.sc-menu-close-icon-bg').focus === 'function') {
+          this.ref.node.querySelector('.sc-menu-close-icon-bg').focus();
+        }
         return;
       } else if ([13, 32].indexOf(e.which) === -1) {
         return;
@@ -239,7 +243,9 @@ class Menu extends Component {
       this.emitter.emitSync('menuClosed', e);
     } else if (e.type == 'keydown' && e.which === 9 && e.shiftKey) {
       e.preventDefault();
-      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+      if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
+        this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+      }
     }
   }
 
@@ -252,13 +258,17 @@ class Menu extends Component {
     } else if (e.which === 40) {
       this.state.focusIndex = (this.state.focusIndex + 1) % this.menuOpt.menu.length;
     }
-    this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
+      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    }
   }
 
   onMenuItemFocusIn(e) {
     let menuItemIndex = +e.target.getAttribute('data-item-index');
     this.state.focusIndex = menuItemIndex;
-    this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
+      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    }
   }
 
   onMenuItemFocusOut() {

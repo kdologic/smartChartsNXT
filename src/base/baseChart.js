@@ -110,7 +110,8 @@ class BaseChart extends Component {
     this.initCanvasSize(this.state.width, this.state.height);
     const Chart = CHART_MODULES[this.chartType].chart;
     return (
-      <svg xmlns='http://www.w3.org/2000/svg'
+      <svg
+        xmlns='http://www.w3.org/2000/svg'
         role='application'
         version={1.1}
         width={this.CHART_OPTIONS.width}
@@ -130,7 +131,8 @@ class BaseChart extends Component {
           MozUserSelect: 'none',
           MsUserSelect: 'none',
           OUserSelect: 'none',
-          UserSelect: 'none'
+          UserSelect: 'none',
+          overflow: 'hidden'
         }} >
 
         <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '') + ' ' + ((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
@@ -258,7 +260,9 @@ class BaseChart extends Component {
   hideMenuPopup() {
     this.setState({ menuExpanded: false });
     setTimeout(() => {
-      this.ref.node.querySelector('.sc-menu-icon-bg').focus();
+      if(typeof this.ref.node.querySelector('.sc-menu-icon-bg').focus === 'function') {
+        this.ref.node.querySelector('.sc-menu-icon-bg').focus();
+      }
     }, 0);
   }
 
@@ -272,13 +276,19 @@ class BaseChart extends Component {
     this.ref.node.querySelector('.dot-group').classList.remove('active');
   }
 
-  onMenuIconMouseIn() {
+  onMenuIconMouseIn(e) {
     this.ref.node.querySelector('.dot-group').classList.add('active');
+    if(utilCore.isIE) {
+      e.target.setAttribute('transform', 'scale(1.5)');
+    }
   }
 
-  onMenuIconMouseOut() {
+  onMenuIconMouseOut(e) {
     if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
+      if(utilCore.isIE) {
+        e.target.setAttribute('transform', 'scale(1)');
+      }
     }
   }
 

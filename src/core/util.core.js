@@ -11,7 +11,13 @@ import {COLOR_MODEL, RAINBOW_COLOR_MODEL} from './fillColorModel';
  */
 
 class UtilCore {
-  constructor() { }
+  constructor() {
+  /**
+   * Check if it is IE.
+   * @returns {Boolean} Return true or false.
+   */
+    this.isIE = /MSIE|Trident/.test(window.navigator.userAgent);
+  }
   /**
    * https://github.com/TehShrike/deepmerge
    * Merges the enumerable properties of two or more objects deeply.
@@ -68,15 +74,6 @@ class UtilCore {
     } catch (e) {
       return false;
     }
-  }
-
-  /**
-   * Check if it is IE.
-   * @returns {Boolean} Return true or false.
-   */
-  isIE() {
-    let ua = window.navigator.userAgent;
-    return /MSIE|Trident/.test(ua);
   }
 
   /**

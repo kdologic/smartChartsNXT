@@ -8,8 +8,8 @@
  *
  * @example
  * opts: {
- *    width: //Total width of SVG
- *    height://Total height of SVGthis.props.svgHeight,
+ *    width:  // Total width of SVG
+ *    height: // Total height of SVG,
  *    srcElem:// element ID of root
  * }
  *
@@ -176,7 +176,8 @@ class SaveAs {
   }
 
   normalizeCSS(strSVG) {
-    return strSVG.replace(/cursor:(.*?);/gi, 'cursor:auto;');
+    return strSVG
+      .replace(/cursor:(.*?);/gi, 'cursor:auto;');
   }
 }
 
