@@ -2,23 +2,23 @@
 
 /**
  * store.js
- * @createdOn:16-Oct-2019
+ * @createdOn:01-Jan-2020
  * @author:SmartChartsNXT
- * @description: This components will manage the data as central storage.
+ * @description: This class was used to save state data in store.
  */
 
- let _store = {};
-
- class StoreManager {
-
-  constructor(runId) {
-    
+class Store {
+  constructor(initialState={}) {
+    this._state = initialState;
   }
 
-  createStore(runId, initialState = {}){
-    _store[runId] = {};
+  getState() {
+    return this._state;
   }
 
- }
+  setStore(state) {
+    this._state = state;
+  }
+}
 
- export default StoreManager;
+export default Store;

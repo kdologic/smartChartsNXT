@@ -4,6 +4,7 @@ import Validator from './../validators/validator';
 import { validationRules } from './../settings/validationRules';
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
+import storeManager from './../liveStore/storeManager';
 import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
@@ -35,9 +36,11 @@ class Chart {
       if(this.errors.length) {
         return this.logErrors(opts);
       }
+
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
       this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
+      this.store = storeManager.getStore(storeManager.createStore(this.runId, opts));
       window.addEventListener('resize', this.onResize.bind(this), false);
       $SC.debug && console.debug(this.core);
     } catch (ex) {
@@ -63,7 +66,6 @@ class Chart {
     }
     this.errors.forEach((err) => {
       console.error(err.module + err.message);
-
     });
     if(this.targetNode && opts) {
       this.showErrorScreen(opts);

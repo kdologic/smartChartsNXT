@@ -20,7 +20,7 @@ class Core {
     this._debug = false;
     this.debugRenderTime = false;
     this.debugEvents = false;
-    this.nameSpaceReadyStatus = false;
+    this.namespaceReadyStatus = false;
     this.Chart = Chart;
     this.loadFont();
   }
@@ -32,7 +32,7 @@ class Core {
         clearInterval(intervalId);
         document.body.insertAdjacentHTML('beforeend', '<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
         setTimeout(() => {
-          this.nameSpaceReadyStatus = true;
+          this.namespaceReadyStatus = true;
           setTimeout(() => {
             let fLoader = document.getElementById('sc-temp-font-loader');
             fLoader.parentNode.removeChild(fLoader);
@@ -86,7 +86,7 @@ class Core {
   ready(successBack) {
     /* Start polling for the ready state*/
     let statusCheck = setInterval(() => {
-      if (this.nameSpaceReadyStatus) {
+      if (this.namespaceReadyStatus) {
         clearInterval(statusCheck);
         if (typeof successBack === 'function') {
           let startTime = window.performance.now();
