@@ -22,33 +22,33 @@ class Chart {
   constructor(opts) {
     try {
       this.errors = [];
-      if(!opts) {
+      if (!opts) {
         throw new CError('No configuration option found !');
       }
-      const validator = new Validator();
-      this.errors = validator.validate(validationRules, opts);
-      if(this.errors.length) {
+      this.validator = new Validator();
+      this.errors = this.validator.validate(validationRules, opts);
+      if (this.errors.length) {
         return this.logErrors(opts);
       }
       this.runId = utilCore.uuidv4();
       this.targetNode = document.querySelector('#' + opts.targetElem);
       this.errors = this.targetElemValidate(opts);
-      if(this.errors.length) {
+      if (this.errors.length) {
         return this.logErrors(opts);
       }
 
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
-      this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
-      this.store = storeManager.getStore(storeManager.createStore(this.runId, opts));
+      this.config = storeManager.getStore(storeManager.createStore(this.runId, opts));
+      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false);
       $SC.debug && console.debug(this.core);
     } catch (ex) {
-      this.logErrors(opts, ex);
+      this.logErrors(this.config._state, ex);
     }
   }
 
-  onResize(e) {
+  onResize(e = {}) {
     e.data = {
       targetWidth: this.targetNode.offsetWidth,
       targetHeight: this.targetNode.offsetHeight
@@ -56,18 +56,26 @@ class Chart {
     this.events.emit('resize', e);
   }
 
+  render() {
+    this.errors = this.validator.validate(validationRules, this.config._state);
+    if (this.errors.length) {
+      return this.logErrors(this.config._state);
+    }
+    this.events.emit('render', this.config._state);
+  }
+
   logErrors(opts, ex) {
-    if(ex) {
-      if(ex instanceof Array){
+    if (ex) {
+      if (ex instanceof Array) {
         this.errors = ex;
-      }else{
+      } else {
         console.error(ex);
       }
     }
     this.errors.forEach((err) => {
       console.error(err.module + err.message);
     });
-    if(this.targetNode && opts) {
+    if (this.targetNode && opts) {
       this.showErrorScreen(opts);
     }
   }
@@ -78,7 +86,7 @@ class Chart {
 
   targetElemValidate() {
     let errors = [];
-    if(!this.targetNode) {
+    if (!this.targetNode) {
       errors.push(new CError('Option.targetElem not found in current DOM !'));
     }
     return errors;

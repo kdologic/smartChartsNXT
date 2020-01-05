@@ -32,8 +32,8 @@ class BaseChart extends Component {
       };
       this.loadConfig(CHART_MODULES[this.chartType].config);
       this.chartValidationRules = CHART_MODULES[this.chartType].validationRules;
-      const validator = new Validator();
-      this.validationErrors = validator.validate(this.chartValidationRules, this.CHART_OPTIONS);
+      this.validator = new Validator();
+      this.validationErrors = this.validator.validate(this.chartValidationRules, this.CHART_OPTIONS);
       if(this.validationErrors.length) {
         throw this.validationErrors;
       }
@@ -66,6 +66,7 @@ class BaseChart extends Component {
     this.showAfterSave = this.showAfterSave.bind(this);
     this.hideBeforeSave = this.hideBeforeSave.bind(this);
     this.onResizeComponent = this.onResizeComponent.bind(this);
+    this.onRenderComponent = this.onRenderComponent.bind(this);
   }
 
   passContext() {
@@ -91,6 +92,7 @@ class BaseChart extends Component {
     this.emitter.on('beforeSave', this.hideBeforeSave);
     this.emitter.on('afterSave', this.showAfterSave);
     this.emitter.on('resize', this.onResizeComponent);
+    this.emitter.on('render', this.onRenderComponent);
   }
 
   componentWillUnmount() {
@@ -316,6 +318,15 @@ class BaseChart extends Component {
 
   onResizeComponent(e) {
     this.setState({ resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight });
+  }
+
+  onRenderComponent(newOpts) {
+    this.validationErrors = this.validator.validate(this.chartValidationRules, newOpts);
+    if(this.validationErrors.length) {
+      throw this.validationErrors;
+    }
+    this.CHART_OPTIONS = utilCore.extends({}, newOpts, { width: 1, height: 1 });
+    this.update();
   }
 }
 

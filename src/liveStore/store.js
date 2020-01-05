@@ -8,7 +8,7 @@
  */
 
 class Store {
-  constructor(initialState={}) {
+  constructor(initialState = {}) {
     this._state = initialState;
   }
 

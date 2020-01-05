@@ -309,13 +309,16 @@
           }
         });
 
-        console.log(areaChart);
-        /** add event listener on Horizontal scroll **/
+        /** add event listener **/
         // areaChart.events.on('hScroll', function(e) {console.log(e)});
         // areaChart.events.on('beforeSave', () => {console.log('before save!');});
         // areaChart.events.on('afterSave', () => {console.log('after save!');});
         // areaChart.events.on('beforePrint', () => {console.log('before print!');});
         // areaChart.events.on('afterPrint', () => {console.log('after print!');});
+
+        /* To change config */ 
+        // areaChart.config._state.dataSet.xAxis.title = 'changed x title';
+        // areaChart.render(); /* Re-draw the chart */
       });
     };
   </script>

@@ -5,7 +5,7 @@ import Store from './store';
 
 /**
  * storeManager.js
- * @createdOn:16-Oct-2019
+ * @createdOn:31-Dec-2019
  * @author:SmartChartsNXT
  * @description: This is a service class that will manage the state of multiple store.
  */
@@ -14,7 +14,7 @@ let _storeCollection = {};
 
 class StoreManager {
 
-  constructor() {}
+  constructor() { }
 
   createStore(storeId = utilCore.uuidv4(), initialState = {}) {
     if (!storeId) {
@@ -27,13 +27,6 @@ class StoreManager {
   getStore(storeId) {
     return _storeCollection[storeId];
   }
-
-  connectStore(storeId, mapStoreToProps, mapDispatchToProps) {
-    if(typeof mapStoreToProps === 'function') {
-      mapStoreToProps(this.getStore(storeId));
-    }
-  }
-
 }
 
 export default new StoreManager();
