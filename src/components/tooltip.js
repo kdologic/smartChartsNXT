@@ -61,7 +61,6 @@ class Tooltip extends Component {
     this.followMousePointer = this.followMousePointer.bind(this);
     this.rootContainer = document.getElementById(this.context.rootContainerId);
     this.containerIdIE = utilCore.getRandomID();
-    utilCore.isIE = true;
   }
 
   initInstances(props) {
