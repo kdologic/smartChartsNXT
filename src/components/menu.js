@@ -21,6 +21,7 @@ class Menu extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.state = {
+      menuItem: [],
       menuIconWidth: 30,
       padding: 5,
       focusIndex: 0
@@ -33,6 +34,7 @@ class Menu extends Component {
     this.menuFontSize = 10;
     this.menuOpt = {
       menu: [{
+        id: 'itemSaveAsJPG',
         label: 'Save As JPG',
         hotKey: 8,
         bottomLine: true,
@@ -46,6 +48,7 @@ class Menu extends Component {
           }
         }
       }, {
+        id: 'itemSaveAsPNG',
         label: 'Save As PNG',
         hotKey: 9,
         bottomLine: true,
@@ -59,6 +62,7 @@ class Menu extends Component {
           }
         }
       }, {
+        id: 'itemSaveAsSVG',
         label: 'Save As SVG',
         hotKey: 9,
         bottomLine: true,
@@ -72,6 +76,7 @@ class Menu extends Component {
           }
         }
       }, {
+        id: 'itemSaveAsPDF',
         label: 'Save As PDF',
         hotKey: 9,
         bottomLine: true,
@@ -85,6 +90,7 @@ class Menu extends Component {
           }
         }
       }, {
+        id: 'itemPrint',
         label: 'Print',
         hotKey: 0,
         bottomLine: false,
@@ -109,12 +115,26 @@ class Menu extends Component {
     this.menuOpt.menu.map((m) => {
       m.splitLabel = splitAt(m.label, m.hotKey);
     });
+    this.configureMenuItems(this.props.opts);
   }
 
   componentDidMount() {
     if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
       this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
     }
+  }
+
+  componentWillUpdate(nextProps) {
+    this.configureMenuItems(nextProps.opts);
+  }
+
+  configureMenuItems(opts) {
+    this.state.menuItems = [];
+    this.menuOpt.menu.map((item) => {
+      if(opts[item.id]) {
+        this.state.menuItems.push(item);
+      }
+    });
   }
 
   render() {
@@ -136,11 +156,11 @@ class Menu extends Component {
     let xPos = -(this.menuItemWidth + this.menuAnchor + (2 * this.state.padding));
     return (
       <g role='menu' transform={`translate(${this.menuPosition.x},${this.menuPosition.y})`}>
-        <SpeechBox x={xPos} y={this.menuPaddingTop} width={this.menuItemWidth} height={(this.menuOpt.menu.length * this.menuItemHeight)} cpoint={new Point(this.menuAnchor, 12)}
+        <SpeechBox x={xPos} y={this.menuPaddingTop} width={this.menuItemWidth} height={(this.state.menuItems.length * this.menuItemHeight)} cpoint={new Point(this.menuAnchor, 12)}
           bgColor='#fff' opacity='1' shadow={true} strokeColor='none'>
         </SpeechBox>
         {
-          this.menuOpt.menu.map((menu, index) => this.getEachItem.call(this, menu, index, xPos))
+          this.state.menuItems.map((menu, index) => this.getEachItem.call(this, menu, index, xPos))
         }
       </g>
     );
@@ -253,10 +273,10 @@ class Menu extends Component {
     if (e.which === 38) {
       this.state.focusIndex = this.state.focusIndex - 1;
       if (this.state.focusIndex < 0) {
-        this.state.focusIndex = this.menuOpt.menu.length - 1;
+        this.state.focusIndex = this.state.menuItems.length - 1;
       }
     } else if (e.which === 40) {
-      this.state.focusIndex = (this.state.focusIndex + 1) % this.menuOpt.menu.length;
+      this.state.focusIndex = (this.state.focusIndex + 1) % this.state.menuItems.length;
     }
     if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
       this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
@@ -282,8 +302,8 @@ class Menu extends Component {
         evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
         this.ref.node.querySelector('.sc-menu-close-icon-bg').dispatchEvent(evt);
       } else {
-        for (let i = 0; i < this.menuOpt.menu.length; i++) {
-          let menu = this.menuOpt.menu[i];
+        for (let i = 0; i < this.state.menuItems.length; i++) {
+          let menu = this.state.menuItems[i];
           if (e.key.toString().toLowerCase() == menu.splitLabel[1].toString().toLowerCase()) {
             let evt = document.createEvent('MouseEvents');
             evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
