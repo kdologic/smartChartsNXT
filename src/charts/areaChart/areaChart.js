@@ -215,10 +215,10 @@ class AreaChart extends Component {
     this.minWidth = this.CHART_DATA.minWidth;
     this.minHeight = this.CHART_DATA.minHeight;
     this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-    this.CHART_DATA.marginLeft = ((-1) * this.CHART_DATA.scaleX / 2) + 100;
-    this.CHART_DATA.marginRight = ((-1) * this.CHART_DATA.scaleX / 2) + 20;
-    this.CHART_DATA.marginTop = ((-1) * this.CHART_DATA.scaleY / 2) + 120;
-    this.CHART_DATA.marginBottom = ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_OPTIONS.horizontalScroller.height + 90;
+    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? ((-1) * this.CHART_DATA.scaleX / 2) + 100 : this.CHART_DATA.marginLeft;
+    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? ((-1) * this.CHART_DATA.scaleX / 2) + 20 : this.CHART_DATA.marginRight;
+    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? ((-1) * this.CHART_DATA.scaleY / 2) + 120 : this.CHART_DATA.marginTop;
+    this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_OPTIONS.horizontalScroller.height + 90 : this.CHART_DATA.marginBottom;
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
 
