@@ -1,5 +1,8 @@
 'use strict';
 
+import utilCore from './util.core';
+import Canvg from 'canvg';
+
 /**
  * saveAs.js
  * @createdOn:02-Feb-2018
@@ -26,7 +29,7 @@ class SaveAs {
   print(opts) {
     opts.type = 'print';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforePrint');
+      opts.emitter.emitSync('beforePrint');
     }
     this.doConvert(opts);
   }
@@ -34,7 +37,7 @@ class SaveAs {
   pdf(opts) {
     opts.type = 'pdf';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', { type: opts.type });
+      opts.emitter.emitSync('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
@@ -42,7 +45,7 @@ class SaveAs {
   jpg(opts) {
     opts.type = 'jpg';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', { type: opts.type });
+      opts.emitter.emitSync('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
@@ -50,7 +53,7 @@ class SaveAs {
   png(opts) {
     opts.type = 'png';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', { type: opts.type });
+      opts.emitter.emitSync('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
@@ -58,7 +61,7 @@ class SaveAs {
   svg(opts) {
     opts.type = 'svg';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emit('beforeSave', { type: opts.type });
+      opts.emitter.emitSync('beforeSave', { type: opts.type });
     }
     this.doConvert(opts);
   }
@@ -82,6 +85,10 @@ class SaveAs {
   }
 
   doConvert(opts) {
+    let today = new Date();
+    let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
+    today = (new Date(Date.now() - tzoffset));
+    const fileName = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
     let svgString = this.normalizeCSS(this.serialize(document.querySelector(opts.srcElem)));
     if (opts.type === 'print') {
       let iframe = document.createElement('iframe');
@@ -95,9 +102,9 @@ class SaveAs {
         let frameDoc = iframe.contentDocument;
         frameDoc.getElementsByTagName('body')[0].innerHTML = svgString;
         if (opts.width > opts.height) {
-          let css = '@page { size: landscape; }',
-            frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0],
-            style = frameDoc.createElement('style');
+          let css = '@page { size: landscape; }';
+          let frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0];
+          let style = frameDoc.createElement('style');
 
           style.type = 'text/css';
           style.media = 'print';
@@ -118,24 +125,31 @@ class SaveAs {
         }
       };
       document.body.appendChild(iframe);
-    } else {
+    }else {
       let img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = 'data:image/svg+xml;base64,' + window.btoa(unescape(encodeURIComponent(svgString)));
+      img.setAttribute('crossOrigin', 'anonymous');
+      img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
       img.onload = () => {
-        let today = new Date();
-        let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
-        let canvas;
-        today = (new Date(Date.now() - tzoffset));
-
+        let canvas, v;
         if (opts.type !== 'svg' && opts.type !== 'print') {
-          canvas = document.createElement('canvas');
-          canvas.width = opts.width;
-          canvas.height = opts.height;
-          let ctx = this.setDPI(canvas, 1.5 * 96);
-          ctx.drawImage(img, 0, 0, opts.width, opts.height);
+          if(utilCore.isIE) {
+            canvas = document.createElement('canvas');
+            canvas.style.position = 'absolute';
+            canvas.style.display  = 'none';
+            document.body.appendChild(canvas);
+            canvas.width = opts.width;
+            canvas.height = opts.height;
+            let ctx = this.setDPI(canvas, 1.5 * 96);
+            v = Canvg.fromString(ctx, svgString);
+            v.start();
+          }else {
+            canvas = document.createElement('canvas');
+            canvas.width = opts.width;
+            canvas.height = opts.height;
+            let ctx = this.setDPI(canvas, 1.5 * 96);
+            ctx.drawImage(img, 0, 0, opts.width, opts.height);
+          }
         }
-
         if (opts.type === 'pdf') {
           if (opts.emitter && typeof opts.emitter.emit === 'function') {
             opts.emitter.emit('showLoader');
@@ -144,13 +158,17 @@ class SaveAs {
           let pdfLib = document.createElement('script');
           pdfLib.type = 'text/javascript';
           pdfLib.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js';
-          pdfLib.onload = function () {
+          pdfLib.onload = () => {
             let imgAsURL = canvas.toDataURL('image/jpeg');
             let orientation = opts.width > opts.height ? 'landscape' : 'portrait';
             /* eslint-disable-next-line new-cap, no-undef */
             let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
             doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
-            doc.output('save', 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type);
+            doc.output('save', fileName);
+            if(utilCore.isIE) {
+              v.stop();
+              canvas.parentElement.removeChild(canvas);
+            }
             if (opts.emitter && typeof opts.emitter.emit === 'function') {
               opts.emitter.emit('afterSave', { type: opts.type });
             }
@@ -161,18 +179,68 @@ class SaveAs {
           head.appendChild(pdfLib);
         } else {
           let imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString) : canvas.toDataURL('image/' + opts.type);
-          let link = document.createElement('a');
-          link.href = imgAsURL;
-          link.download = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          this.download(imgAsURL, fileName, 'image/' + opts.type);
+          if(utilCore.isIE) {
+            v.stop();
+            canvas.parentElement.removeChild(canvas);
+          }
           if (opts.emitter && typeof opts.emitter.emit === 'function') {
             opts.emitter.emit('afterSave', { type: opts.type });
           }
         }
       };
     }
+  }
+
+  download(base64Data, fileName, mimeType) {
+    const link = document.createElement('a');
+    mimeType = mimeType || 'application/octet-stream';
+    if (navigator.msSaveBlob) { // IE10, IE11
+      const imageBlob = this.b64toBlob(base64Data.replace(/^[^,]+,/, '').replace('data:' + mimeType + ';base64,',''), mimeType);
+      return navigator.msSaveBlob(imageBlob, fileName);
+    }
+
+    if ('download' in link) { //html5 A[download]
+      link.href = base64Data;
+      link.setAttribute('download', fileName);
+      link.innerHTML = 'downloading...';
+      document.body.appendChild(link);
+      setTimeout(function() {
+        link.click();
+        document.body.removeChild(link);
+      }, 66);
+      return true;
+    }
+
+
+    //do iframe dataURL download (old ch+FF):
+    const frame = document.createElement('iframe');
+    document.body.appendChild(frame);
+    frame.src = base64Data;
+    setTimeout(function() {
+      document.body.removeChild(frame);
+    }, 333);
+    return true;
+  }
+
+  b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
   }
 
   normalizeCSS(strSVG) {
