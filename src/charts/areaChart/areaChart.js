@@ -276,8 +276,8 @@ class AreaChart extends Component {
     }
     for (let i = 0; i < dataSet.series.length; i++) {
       let data = dataSet.series[i].data;
-      let minVal = Number.MAX_SAFE_INTEGER;
-      let maxVal = Number.MIN_SAFE_INTEGER;
+      let minVal = data.length === 0 ? 0 : Number.MAX_SAFE_INTEGER;
+      let maxVal = data.length === 0 ? 1 : Number.MIN_SAFE_INTEGER;
       dataSet.series[i].valueSet = [];
       for (let j = 0, len = data.length; j < len; j++) {
         let v = data[j].value;
@@ -584,6 +584,11 @@ class AreaChart extends Component {
     const leftRangePoint = new Point(leftHandlePos.x - this.CHART_DATA.marginLeft, leftHandlePos.y - 5);
     const rightRangePoint = new Point(rightHandlePos.x - this.CHART_DATA.marginLeft, rightHandlePos.y - 5);
     const xAxis = this.state.cs.dataSet.xAxis;
+    if(!xAxis.categories.length) {
+      leftRangePoint.value = undefined;
+      rightRangePoint.value = undefined;
+      return [leftRangePoint, rightRangePoint];
+    }
     let lRangeVal = xAxis.categories[0];
     lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
     leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
