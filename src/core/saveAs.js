@@ -1,7 +1,6 @@
 'use strict';
 
 import utilCore from './util.core';
-import Canvg from 'canvg';
 
 /**
  * saveAs.js
@@ -130,18 +129,27 @@ class SaveAs {
       img.setAttribute('crossOrigin', 'anonymous');
       img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
       img.onload = () => {
-        let canvas, v;
+        let canvas, vector;
         if (opts.type !== 'svg' && opts.type !== 'print') {
           if(utilCore.isIE) {
-            canvas = document.createElement('canvas');
-            canvas.style.position = 'absolute';
-            canvas.style.display  = 'none';
-            document.body.appendChild(canvas);
-            canvas.width = opts.width;
-            canvas.height = opts.height;
-            let ctx = this.setDPI(canvas, 1.5 * 96);
-            v = Canvg.fromString(ctx, svgString);
-            v.start();
+            if($SC.IESupport && $SC.IESupport.Canvg) {
+              canvas = document.createElement('canvas');
+              canvas.style.position = 'absolute';
+              canvas.style.display  = 'none';
+              document.body.appendChild(canvas);
+              canvas.width = opts.width;
+              canvas.height = opts.height;
+              let ctx = this.setDPI(canvas, 1.5 * 96);
+              vector = $SC.IESupport.Canvg.fromString(ctx, svgString);
+              vector.start();
+            }else {
+              /*eslint-disable-next-line  no-alert*/
+              alert('Please include lib - SmartChartsNXT.IESupport for this feature !!');
+              if (opts.emitter && typeof opts.emitter.emit === 'function') {
+                opts.emitter.emit('afterSave', { type: opts.type });
+              }
+              return;
+            }
           }else {
             canvas = document.createElement('canvas');
             canvas.width = opts.width;
@@ -165,8 +173,8 @@ class SaveAs {
             let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
             doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
             doc.output('save', fileName);
-            if(utilCore.isIE) {
-              v.stop();
+            if(utilCore.isIE && vector) {
+              vector.stop();
               canvas.parentElement.removeChild(canvas);
             }
             if (opts.emitter && typeof opts.emitter.emit === 'function') {
@@ -178,10 +186,15 @@ class SaveAs {
           };
           head.appendChild(pdfLib);
         } else {
-          let imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString) : canvas.toDataURL('image/' + opts.type);
-          this.download(imgAsURL, fileName, 'image/' + opts.type);
+          let imgAsURL;
           if(utilCore.isIE) {
-            v.stop();
+            imgAsURL = (opts.type === 'svg') ? (svgString) : canvas.toDataURL('image/' + opts.type);
+          }else {
+            imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString) : canvas.toDataURL('image/' + opts.type);
+          }
+          this.download(imgAsURL, fileName, 'image/' + opts.type);
+          if(utilCore.isIE && vector) {
+            vector.stop();
             canvas.parentElement.removeChild(canvas);
           }
           if (opts.emitter && typeof opts.emitter.emit === 'function') {
@@ -196,6 +209,10 @@ class SaveAs {
     const link = document.createElement('a');
     mimeType = mimeType || 'application/octet-stream';
     if (navigator.msSaveBlob) { // IE10, IE11
+      if(mimeType === 'image/svg') {
+        const blob = new Blob([base64Data], {type: 'image/svg+xml;charset=utf-8'});
+        return navigator.msSaveBlob(blob, fileName);
+      }
       const imageBlob = this.b64toBlob(base64Data.replace(/^[^,]+,/, '').replace('data:' + mimeType + ';base64,',''), mimeType);
       return navigator.msSaveBlob(imageBlob, fileName);
     }

@@ -11,17 +11,15 @@ const production = {
   cache: true,
   mode: 'production',
   entry:{
-    main: path.resolve(__dirname, './src/index.js')
+    ['smartChartsNXT.main']: path.resolve(__dirname, './src/index.js'),
+    ['smartChartsNXT.ieSupport']: path.resolve(__dirname, './src/ieSupport/index.js')
   },
   output: {
-    filename: 'smartChartsNXT.bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve('__dirname' + './build')
   },
   plugins: [
-    // new BundleAnalyzerPlugin({
-    //   generateStatsFile: true,
-    //   statsFilename: path.resolve(__dirname, './build/smartChartsNXT.bundle.stat.json')
-    // })
+    new BundleAnalyzerPlugin(),
     new webpack.DefinePlugin({
       PRODUCTION: JSON.stringify(isProduction)
     })
@@ -88,10 +86,11 @@ const development = {
   mode: 'production',
   devtool: undefined,
   entry:{
-    main: path.resolve(__dirname, './src/index.js')
+    ['smartChartsNXT.main']: path.resolve(__dirname, './src/index.js'),
+    ['smartChartsNXT.ieSupport']: path.resolve(__dirname, './src/ieSupport/index.js')
   },
   output: {
-    filename: 'smartChartsNXT.bundle.js',
+    filename: '[name].bundle.js',
     path: path.resolve('__dirname' + './build')
   },
   plugins: [

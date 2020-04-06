@@ -18,12 +18,16 @@ const srcDir = './src/';
 const buildDir = './build/';
 const testDir = './test/';
 
+let buildType = process.env.NODE_ENV == 'production' ? 'Production Build' : 'Developer Build';
+buildType += ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' , hour:'numeric', minute:'numeric', second:'numeric'});
+
 const header = `/**
 * SmartChartsNXT
 * http://www.smartcharts.cf
 * Version:${pkg.version}
+* ${buildType}
 *
-* Copyright 2019 Kausik Dey
+* Copyright 2020 Kausik Dey
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
 */
@@ -41,7 +45,7 @@ function buildJSTask() {
 }
 
 function minifyTask() {
-  return src(buildDir + 'smartChartsNXT.bundle.js')
+  return src(buildDir + 'smartChartsNXT.main.bundle.js')
     .pipe(minify({
       'compress': {
         'booleans_as_integers': true,
@@ -53,7 +57,7 @@ function minifyTask() {
       'keep_classnames': true,
       'keep_fnames': true
     }))
-    .pipe(rename('smartChartsNXT.bundle.min.js'))
+    .pipe(rename('smartChartsNXT.main.bundle.min.js'))
     .pipe(insert.prepend(header))
     .pipe(dest(buildDir));
 }
