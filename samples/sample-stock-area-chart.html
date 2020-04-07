@@ -1,169 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="/smartChartsNXT/public/smartChartsNXT.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNXT.bundle.js" type="text/javascript"></script>
   <script>
-    var _debug = false;
     async function getStock(stockId) {
       var data = await fetch(
         `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockId}&interval=5min&apikey=NSQWJINYQ9CB6GR3`
       );
-      return data.json();
+      return await data.json();
     }
 
     window.onload = function () {
-      var dataSet;
       //^BSESN, RCOM.NS, GRAPHITE.NS
       getStock('RCOM.NS').then(data => {
         dataSet = prepareData(data);
-        displayChart('RCom', dataSet);
+        displayChart('R-COM', dataSet);
       }).catch(ex => {
         dataSet = prepareData(getStaticData());
-        displayChart('RCom', dataSet);
+        displayChart('R-Com', dataSet);
       });
     };
+
+    // window.onload = function () {
+    //   dataSet = prepareData(getStaticData());
+    //   displayChart('R-Com', dataSet);
+    // };
 
     function prepareData(data) {
       var dataSet = [];
       for (key in data['Time Series (Daily)']) {
         dataSet.push({
           label: key,
-          value: data['Time Series (Daily)'][key]['4. close']
+          value: parseFloat(data['Time Series (Daily)'][key]['4. close'])
         });
       }
       dataSet = dataSet.filter(d => d.value > 0);
       return dataSet.reverse();
     }
 
-
     function displayChart(seriesName, dataSet) {
       console.log(dataSet);
       SmartChartsNXT.ready(function () {
+        SmartChartsNXT.debug = false;
         let areaChart = new SmartChartsNXT.Chart({
-          "type": "AreaChart",
-          "title": "Stock Chart",
-          "subtitle": "Time Series (Daily)",
+          "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
-          "titleStyle": {
-            "fillColor": "#717171",
-            "borderColor": "none",
-            "fontFamily": "Lato",
-            "maxFontSize": "25"
+          "title": {
+            "text":"Stock Area Chart [ RCOM ]"
           },
-          "subtitleStyle": {
-            "fillColor": "#717171",
-            "borderColor": "none",
-            "fontFamily": "Lato",
-            "maxFontSize": "18"
+          "subtitle": {
+            "text":"Time Series (Daily)"
           },
-          "canvasBorder": false,
-          "bgColor": "none",
-          "pointerCrosshair": {
-            "vertical": {
-              "style": "dashed", // [dashed | solid]
-              "spread": "full", // [full | inPoint | none]
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
-            },
-            "horizontal": {
-              "style": "dashed",
-              "spread": "none",
-              "color": "#000",
-              "lineWidth": 1,
-              "opacity": 1
-            }
-          },
-          "legends": {
-            "enable": true,
-            "alignment": "horizontal",
-            "color": "#000",
-            "bgColor": "none",
-            "opacity": 0.9,
-            "toggleType": true,
-          },
-          "tooltip": {
-            "content": function () {
-              return '<table>' +
-                '<tbody>' +
-                '<tr style="background-color: #aaa; font-size: 14px; text-align: left; color: #FFF;">' +
-                '<th colspan="2" style="padding: 2px 5px; ">' + this[0].formattedLabel + '</th>' +
-                '</tr>' +
-                this.map(function (point) {
-                  return '<tr>' +
-                    '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' +
-                    '<span style="background-color:' + point.seriesColor +
-                    '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +
-                    '</td>' +
-                    '<td style="font-size: 13px; padding: 3px 6px; background-color: #fff;">' + point.value +
-                    '</td>' +
-                    '</tr>';
-                }).join('') +
-                '</tbody>' +
-                '</table>';
-            },
-            "xPadding": 3,
-            "yPadding": 3,
-          },
+          "bgColor": "#f7fdf7",
           "dataSet": {
             "xAxis": {
               "title": "Date",
-              "prefix": "",
               "parseAsDate": true,
               "dateFormat": "dd mmm",
               "labelRotate": -45,
-              "intervalThreshold": 40,
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 6,
-              "labelOpacity": 1,
-              //"labelColor": "#009688",
-              "fontSize": 14,
-              "fontFamily": "Lato"
             },
             "yAxis": {
-              "title": "Total Sales",
-              "prefix": "Rs. ",
-              "labelRotate": 0,
-              "tickOpacity": 1,
-              "tickColor": '#222',
-              "tickSpan": 5,
-              "labelOpacity": 1,
-              //"labelColor": "#009688",
-              "fontSize": 20,
-              "fontFamily": "Lato",
-              "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
+              "title": "Unit value",
+              "prepend": "\u20B9 ",
+              "zeroBase": false,
             },
             "series": [{
-                "lineWidth": 1.5,
-                "bgColor": "#2278b4",
-                "name": seriesName,
-                "areaOpacity": 0.3,
-                "spline": false,
-                "data": dataSet //generateData(10, 50, 100) 
-              }
-              // ,{
-              //   "lineWidth": 1.5,
-              //   "bgColor": "#ff7f0e",
-              //   "marker": true,
-              //   "markerRadius": 3,
-              //   "spline": false,
-              //   "gradient": true,
-              //   "areaOpacity": 0.5,
-              //   "lineOpacity": 1,
-              //   "name": 'Willson',
-              //   "data": //generateData(5, 20, 10)
-              //   [
-              //     {label:1, value:25},{label:2, value:79},{label:3, value:-19},{label:4, value:0},{label:5, value:1220}
-              //     //{label:1, value:0},{label:2, value:1}
-              //   ] 
-              // }
-            ]
+              "bgColor": "#2278b4",
+              "name": seriesName,
+              "areaOpacity": 0.3,
+              "spline": false,
+              "data": dataSet
+            }]
           }
-          // zoomWindow: {
-          //   "leftIndex": dataSet.length-20,
-          //   "rightIndex": dataSet.length
-          // }
         });
       });
     }
@@ -884,7 +792,7 @@
   </script>
 </head>
 
-<body>
+<body style='background: rgb(34, 120, 180);'>
   <div>
     <div id='chartContainer' style="width:100%; height:600px;">
     </div>

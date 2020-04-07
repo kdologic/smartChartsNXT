@@ -1,29 +1,33 @@
-"use strict";
+'use strict';
 
 const argv = require('yargs').argv;
+process.env.NODE_ENV = argv.env == 'production' ? 'production' : 'development';
 
-process.env.NODE_ENV = argv.env == "production" ? "production" : "development"; 
-
-const gulp = require('gulp');
+const { src, dest, series, watch } = require('gulp');
 const insert = require('gulp-insert');
+const clean = require('gulp-clean');
 
-const minify = require('gulp-uglify-es').default;
+const minify = require('gulp-terser');
 const rename = require('gulp-rename');
 
-const webpack = require("webpack-stream");
+const webpack = require('webpack-stream');
 const webpackConfig = require('./webpack.config.js');
 
 const pkg = require('./package.json');
 const srcDir = './src/';
-const buildDir = './public/';
+const buildDir = './build/';
 const testDir = './test/';
 
-const header = `/** 
+let buildType = process.env.NODE_ENV == 'production' ? 'Production Build' : 'Developer Build';
+buildType += ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' , hour:'numeric', minute:'numeric', second:'numeric'});
+
+const header = `/**
 * SmartChartsNXT
 * http://www.smartcharts.cf
 * Version:${pkg.version}
-* 
-* Copyright 2019 Kausik Dey
+* ${buildType}
+*
+* Copyright 2020 Kausik Dey
 * Released under the MIT license
 * https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
 */
@@ -33,32 +37,43 @@ const header = `/**
  * Generate a build based on the source file
  */
 
-function buildTask() {
-
-  return gulp.src(srcDir + 'index.js')
+function buildJSTask() {
+  return src(srcDir)
     .pipe(webpack(webpackConfig))
-    .pipe(rename('smartChartsNXT.bundle.js'))
     .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir));
+    .pipe(dest(buildDir));
 }
 
 function minifyTask() {
-  return gulp.src(buildDir + 'smartChartsNXT.bundle.js')
+  return src(buildDir + 'smartChartsNXT.main.bundle.js')
     .pipe(minify({
-      keep_classnames: true,
-      keep_fnames: true
+      'compress': {
+        'booleans_as_integers': true,
+        'drop_console': true,
+        'drop_debugger': true,
+        'side_effects': false,
+        'warnings': true
+      },
+      'keep_classnames': true,
+      'keep_fnames': true
     }))
-    .pipe(rename('smartChartsNXT.bundle.min.js'))
+    .pipe(rename('smartChartsNXT.main.bundle.min.js'))
     .pipe(insert.prepend(header))
-    .pipe(gulp.dest(buildDir));
+    .pipe(dest(buildDir));
+}
+
+function cleanTask() {
+  return src(buildDir, {read: false, allowEmpty: true})
+    .pipe(clean());
 }
 
 function watchTask() {
-  return gulp.watch('./src/**', ['build']);
+  return watch('./src/**', { events: 'all' }, series(buildJSTask));
 }
 
-gulp.task('build', buildTask);
-gulp.task('minify', ['build'], minifyTask);
-gulp.task('watch', watchTask);
-gulp.task('default', ['build', 'watch']);
-gulp.task('release', ['build', 'minify']);
+exports.clean = cleanTask;
+exports.minify = minifyTask;
+exports.watch = watchTask;
+exports.buildJS = buildJSTask;
+exports.build = series(cleanTask, buildJSTask, minifyTask);
+exports.default = series(cleanTask, buildJSTask, watchTask);

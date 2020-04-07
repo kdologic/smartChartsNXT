@@ -1,10 +1,15 @@
-"use strict";
+'use strict';
 
-import { mountTo } from "./../viewEngin/pview";
+import Validator from './../validators/validator';
+import { validationRules } from './../settings/validationRules';
+import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
-import UtilCore from './../core/util.core';
+import storeManager from './../liveStore/storeManager';
+import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
-import Error from "./../components/errorView"; 
+import ErrorView from './../components/errorView';
+
+/*eslint-disable  no-console*/
 
 /**
  * chart.js
@@ -14,56 +19,88 @@ import Error from "./../components/errorView";
  */
 
 class Chart {
-  constructor(opts){
+  constructor(opts) {
     try {
-      this.runId = UtilCore.uuidv4();
+      this.errors = [];
+      if (!opts) {
+        throw new CError('No configuration option found !');
+      }
+      this.validator = new Validator();
+      this.errors = this.validator.validate(validationRules, opts);
+      if (this.errors.length) {
+        return this.logErrors(opts);
+      }
+      this.runId = utilCore.uuidv4();
+      this.targetNode = document.querySelector('#' + opts.targetElem);
+      this.errors = this.targetElemValidate(opts);
+      if (this.errors.length) {
+        return this.logErrors(opts);
+      }
+
       this.events = eventEmitter.createInstance(this.runId);
-      this.targetNode = document.querySelector("#" + opts.targetElem);
-      this.targetNode.setAttribute("runId", this.runId);
-      this.core = mountTo(<BaseChart opts={opts} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
-      window.addEventListener('resize', this.onResize.bind(this), false); 
-      _debug && console.debug(this.core);
-    }catch(ex) {
-      this.showErrorScreen(opts, ex, ex.errorIn);
-      throw ex; 
+      this.targetNode.setAttribute('runId', this.runId);
+      this.config = storeManager.getStore(storeManager.createStore(this.runId, opts));
+      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
+      window.addEventListener('resize', this.onResize.bind(this), false);
+      $SC.debug && console.debug(this.core);
+    } catch (ex) {
+      this.logErrors(this.config._state, ex);
     }
   }
 
-  onResize(e) {
-    e.data = {targetWidth: this.targetNode.offsetWidth, targetHeight: this.targetNode.offsetHeight};
+  onResize(e = {}) {
+    e.data = {
+      targetWidth: this.targetNode.offsetWidth,
+      targetHeight: this.targetNode.offsetHeight
+    };
     this.events.emit('resize', e);
   }
 
-  showErrorScreen(opts, ex, errorIn) {
-    mountTo(<Error width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></Error>, this.targetNode);
+  render() {
+    this.errors = this.validator.validate(validationRules, this.config._state);
+    if (this.errors.length) {
+      return this.logErrors(this.config._state);
+    }
+    this.events.emit('render', this.config._state);
+  }
+
+  logErrors(opts, ex) {
+    if (ex) {
+      if (ex instanceof Array) {
+        this.errors = ex;
+      } else {
+        console.error(ex);
+      }
+    }
+    this.errors.forEach((err) => {
+      console.error(err.module + err.message);
+    });
+    if (this.targetNode && opts) {
+      this.showErrorScreen(opts);
+    }
+  }
+
+  showErrorScreen(opts) {
+    mountTo(<ErrorView width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></ErrorView>, this.targetNode);
+  }
+
+  targetElemValidate() {
+    let errors = [];
+    if (!this.targetNode) {
+      errors.push(new CError('Option.targetElem not found in current DOM !'));
+    }
+    return errors;
   }
 }
 
-// function Loader(props) {
-//   return (
-//   <svg width='135' height='140' viewBox='0 0 135 140' xmlns='http://www.w3.org/2000/svg' fill='#555'>
-//     <rect y='10' width='15' height='120' rx='6'> 
-//       <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> 
-//       <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> 
-//     </rect> 
-//     <rect x='30' y='10' width='15' height='120' rx='6'> 
-//       <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> 
-//       <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> 
-//     </rect> 
-//     <rect x='60' width='15' height='140' rx='6'> 
-//       <animate attributeName='height' begin='0s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> 
-//       <animate attributeName='y' begin='0s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' />
-//     </rect> 
-//     <rect x='90' y='10' width='15' height='120' rx='6'> 
-//       <animate attributeName='height' begin='0.25s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> 
-//       <animate attributeName='y' begin='0.25s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> 
-//     </rect> 
-//     <rect x='120' y='10' width='15' height='120' rx='6'> 
-//       <animate attributeName='height' begin='0.5s' dur='1s' values='120;110;100;90;80;70;60;50;40;140;120' calcMode='linear' repeatCount='indefinite' /> 
-//       <animate attributeName='y' begin='0.5s' dur='1s' values='10;15;20;25;30;35;40;45;50;0;10' calcMode='linear' repeatCount='indefinite' /> 
-//     </rect>
-//     <text x="15" y="140" style="font-family:Lato;">Loading...</text>
-//   </svg>);
-// }
+class CError extends Error {
+  constructor(...params) {
+    super(...params);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CError);
+    }
+    this.module = '[SmartChartsNXT] ';
+  }
+}
 
-export default Chart; 
+export default Chart;

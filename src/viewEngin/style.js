@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-import { Component, parseStyleProps } from "./pview";
+import { Component, parseStyleProps } from './pview';
 
 /**
  * style.js
  * @createdOn:02-May-2018
  * @author:SmartChartsNXT
  * @description: This component will create a style element into dom.
- * @extends Compoent 
+ * @extends Compoent
  */
 
 class Style extends Component {
@@ -24,16 +24,16 @@ class Style extends Component {
     );
   }
   /**
-   * Convert a JSON object into String of CSS
-   * @param {any} json  A JSON object
-   * @returns {string} String of CSS 
+   * Convert a JSON object into String of CSS.
+   * @param {Object} json  A JSON object.
+   * @returns {String} String of CSS.
    */
   jsonToCss(json) {
-    let strCSS = ''; 
-    for(let selector in json) {
-      strCSS += selector + " {" + parseStyleProps(json[selector]) + " } \n";
+    let strCSS = '';
+    for (let selector in json) {
+      strCSS += selector + ' {' + parseStyleProps(json[selector]) + ' } \n';
     }
-    return strCSS; 
+    return strCSS;
   }
 }
 

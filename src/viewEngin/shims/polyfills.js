@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * polyfills.js
@@ -94,9 +94,10 @@ class Polyfills {
   }
 
   /**
-   * Maintain a list of event listener that attached with each node. 
-   * So that we can remove all listener handler before removing the node 
-   * to avoid possible momory leak. 
+   * Maintain a list of event listener that attached with each node.
+   * So that we can remove all listener handler before removing the node
+   * to avoid possible momory leak.
+   * @return {void}
    */
   supportEventLisenerList() {
     Element.prototype._addEventListener = function (eventName, handle, useCapture) {

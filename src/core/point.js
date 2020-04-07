@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * point.js
@@ -8,14 +8,14 @@
  */
 
 class Point {
-    constructor(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
-    }
+  constructor(x = 0, y = 0) {
+    this.x = x;
+    this.y = y;
+  }
 
-    toString() {
-        return "x:" + this.x + ", y:" + this.y;
-    }
+  toString() {
+    return 'x:' + this.x + ', y:' + this.y;
+  }
 }
 
-export default Point; 
+export default Point;

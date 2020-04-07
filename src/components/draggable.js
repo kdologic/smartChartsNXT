@@ -1,21 +1,21 @@
-"use strict";
+'use strict';
 
-import transformer from "./../core/transformer";
-import { Component } from "./../viewEngin/pview";
-import UiCore from './../core/ui.core';
+import transformer from './../core/transformer';
+import { Component } from './../viewEngin/pview';
+import uiCore from './../core/ui.core';
 
 /**
  * draggable.js
  * @createdOn:31-Aug-2017
  * @author:SmartChartsNXT
- * @description: This class will make components draggable.
- * To drag a component just double click on it then the component will be showed as selected then we can drag it 
- * to fix that position jus double click again on the component. Touch device also supported, to drag long press to 
- * select that element then you can drag it. 
+ * @description: This component will make child components draggable.
+ * To drag a component just double click on it then the component will be showed as selected then we can drag it
+ * to fix that position jus double click again on the component. Touch device also supported, to drag long press to
+ * select that element then you can drag it.
  * @extends Component
  */
 
-class Draggable extends Component{
+class Draggable extends Component {
   constructor(props) {
     super(props);
     this.overlappingColor = '#ff1201';
@@ -25,31 +25,31 @@ class Draggable extends Component{
     this.state = {
       showHandler: false,
       hBBox: {
-        x: 0, 
-        y: 0, 
-        width: 0, 
+        x: 0,
+        y: 0,
+        width: 0,
         height: 0
-      }, 
+      },
       tranMatrix: transformer.getTransformMatrix(),
-      handlerRectPE: 'all', 
+      handlerRectPE: 'all',
       draggerPanePE: 'none',
       handlerStrokeColor: this.nonOverlappingColor,
       handlerFill: this.nonOverlappingFill,
       overlapping: false
     };
-    this.padding = 5; 
-    this.handleMouseDown = false; 
-    this.mouseDrag = false; 
-    this.timer = 0; 
-    this.prevent = false; 
-    this.presentTrnsMatrix = null; 
+    this.padding = 5;
+    this.handleMouseDown = false;
+    this.mouseDrag = false;
+    this.timer = 0;
+    this.prevent = false;
+    this.presentTrnsMatrix = null;
     this.touchDelay = 500;
     this.initialIntersectElems = null;
-    this.initialSvgWidth = this.context.svgWidth; 
+    this.initialSvgWidth = this.context.svgWidth;
     this.initialSvgHeight = this.context.svgHeight;
-    
-    this.onDoubleClick =  this.onDoubleClick.bind(this);
-    this.onTouchStart = this.onTouchStart.bind(this); 
+
+    this.onDoubleClick = this.onDoubleClick.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onClickHandler = this.onClickHandler.bind(this);
     this.onMouseDownHandler = this.onMouseDownHandler.bind(this);
@@ -62,7 +62,7 @@ class Draggable extends Component{
   componentDidUpdate() {
     if (this.initialIntersectElems && this.mouseDrag) {
       let intersectedElemsNow = this.getIntersectedElems();
-      
+
       this.overlapping = this.isIntersected(this.initialIntersectElems, intersectedElemsNow);
       if (this.overlapping && this.state.handlerStrokeColor !== this.overlappingColor) {
         this.setState({ overlapping: true, handlerStrokeColor: this.overlappingColor, handlerFill: this.overlappingFill });
@@ -73,18 +73,18 @@ class Draggable extends Component{
   }
 
   render() {
-    if(Math.abs(this.context.svgWidth - this.initialSvgWidth) > 0) {
-      this.initialSvgWidth = this.context.svgWidth; 
-      this.state.showHandler = false; 
+    if (Math.abs(this.context.svgWidth - this.initialSvgWidth) > 0) {
+      this.initialSvgWidth = this.context.svgWidth;
+      this.state.showHandler = false;
     }
     return (
-      <g class='dragger drag-handler-container' events={this.getHandlerEventMap()} transform={this.state.tranMatrix} style={{"pointer-events":'all',cursor: this.state.showHandler ?'move':'default'}}>
+      <g class='dragger drag-handler-container' events={this.getHandlerEventMap()} transform={this.state.tranMatrix} style={{ 'pointer-events': 'all', cursor: this.state.showHandler ? 'move' : 'default' }}>
         <g clsss='dragger drag-innter-child-container'>
           {this.props.extChildren}
         </g>
         {this.state.showHandler &&
-          <rect class='dragger drag-handler-outerbox' 
-            x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height} 
+          <rect class='dragger drag-handler-outerbox'
+            x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height}
             stroke-dasharray='5, 5' fill={this.state.handlerFill} pointer-events={this.state.handlerRectPE} stroke={this.state.handlerStrokeColor} stroke-width='1' opacity='1'
           />
         }
@@ -126,20 +126,20 @@ class Draggable extends Component{
   }
 
   onTouchStart(e) {
-    if(this.state.showHandler) {
+    if (this.state.showHandler) {
       this.onMouseDownHandler(e);
-    }else {
+    } else {
       this.timer = setTimeout(this.onDoubleClick.bind(this, e), this.touchDelay);
     }
   }
 
-  onTouchEnd(e) {
+  onTouchEnd() {
     if (this.timer) {
       clearTimeout(this.timer);
     }
   }
 
-  onClickHandler(e) {
+  onClickHandler() {
     let delay = 200;
     this.timer = setTimeout(() => {
       this.prevent = false;
@@ -162,14 +162,14 @@ class Draggable extends Component{
       height: contBBox.height + (2 * this.padding)
     };
     this.setState({ showHandler: !this.state.showHandler, hBBox: hBBox });
-    if(UiCore.isTouchDevice()) {
+    if (uiCore.isTouchDevice()) {
       this.onMouseDownHandler(e);
     }
   }
 
   initiateDragPane() {
-    this.rootSVG.insertAdjacentHTML("beforeend", `<rect class='dragger drag-pane' 
-      x=${0} y=${0} width=${this.context.svgWidth} height=${this.context.svgHeight} 
+    this.rootSVG.insertAdjacentHTML('beforeend', `<rect class='dragger drag-pane'
+      x=${0} y=${0} width=${this.context.svgWidth} height=${this.context.svgHeight}
       stroke-dasharray='5, 5' fill='none' pointer-events='${this.state.draggerPanePE}' stroke='#009688' stroke-width='1' opacity='1'/>`);
     this.dragPane = this.rootSVG.querySelector('.dragger.drag-pane');
     this.dragPane.addEventListener('mousemove', this.onMouseMoveDragPane.bind(this));
@@ -216,7 +216,7 @@ class Draggable extends Component{
     }
   }
 
-  onMouseUpDragPane(e) {
+  onMouseUpDragPane() {
     this.handleMouseDown = false;
     this.mouseDrag = false;
     this.setState({ handlerRectPE: 'all', draggerPanePE: 'none' });
@@ -234,7 +234,7 @@ class Draggable extends Component{
       dblclick: this.onDoubleClick,
       touchstart: this.onTouchStart,
       touchend: this.onTouchEnd
-    }; 
+    };
     return this.state.showHandler ? Object.assign(evtList, {
       click: this.onClickHandler,
       mousedown: this.onMouseDownHandler

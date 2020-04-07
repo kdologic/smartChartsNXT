@@ -1,17 +1,17 @@
-"use strict";
+'use strict';
 
-import { Component } from "./../viewEngin/pview";
-import eventEmitter from "./../core/eventEmitter";
+import { Component } from './../viewEngin/pview';
+import eventEmitter from './../core/eventEmitter';
 
 /**
  * dataPoints.js
  * @createdOn:09-Mar-2018
  * @author:SmartChartsNXT
- * @description: This components will plot data points in chart area. 
+ * @description: This components will plot data points in chart area.
  * @extends Component
  */
 
-class DataPoints extends Component{
+class DataPoints extends Component {
 
   constructor(props) {
     super(props);
@@ -21,12 +21,12 @@ class DataPoints extends Component{
       pointSet: this.props.opacity ? this.props.pointSet : [],
       opacity: this.props.opacity
     };
-    this.doHighlight = this.doHighlight.bind(this); 
+    this.doHighlight = this.doHighlight.bind(this);
     this.normalize = this.normalize.bind(this);
   }
 
   componentWillMount() {
-    typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
+    typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
   componentDidMount() {
@@ -41,70 +41,73 @@ class DataPoints extends Component{
   }
 
   propsWillReceive(newProps) {
-    this.state.pointSet = newProps.opacity ? newProps.pointSet : [],
-    this.state.opacity = newProps.opacity; 
+    this.state.pointSet = newProps.opacity ? newProps.pointSet : [];
+    this.state.opacity = newProps.opacity;
   }
 
   render() {
     return (
-      <g class='sc-data-points'> 
-      {
-        this.state.pointSet.map((point, i) => {
-          return this.drawPoint(point);
-        })
-      } 
+      <g class='sc-data-points'>
+        {
+          this.state.pointSet.map((point) => {
+            return this.drawPoint(point);
+          })
+        }
       </g>
-    ); 
+    );
   }
 
   drawPoint(point) {
-    switch(this.props.type) {
-      case 'circle': 
+    switch (this.props.type) {
+      case 'circle':
       default:
-      return (
-      <g class={`sc-data-point-${point.index}`}>
-        <circle cx={point.x} cy={point.y} r={this.props.r + 2} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' stroke='#fff' stroke-opacity='0' style={{'transition': 'fill-opacity 0.2s linear'}} > </circle>
-        <circle cx={point.x} cy={point.y} r={this.props.r - 2} class='outer-offset' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
-        <circle cx={point.x} cy={point.y} r={this.props.r - 3} class='inner-dot' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
-      </g>);
+        return (
+          <g class={`sc-data-point-${point.index}`}>
+            <circle cx={point.x} cy={point.y} r={this.props.r + 2} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' stroke='#fff' stroke-opacity='0' style={{ 'transition': 'fill-opacity 0.2s linear' }} > </circle>
+            <circle cx={point.x} cy={point.y} r={this.props.r - 2} class='outer-offset' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
+            <circle cx={point.x} cy={point.y} r={this.props.r - 3} class='inner-dot' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
+          </g>);
     }
   }
 
   normalize(e) {
-    if(this.props.opacity === 0) {
-      this.setState({pointSet: []});
-    }else {
-      let index = this.state.highlitedIndex || 0; 
-      let fillOpacity = 0; 
+    if (this.props.instanceId !== e.seriesIndex) {
+      return;
+    }
+    if (this.props.opacity === 0) {
+      this.setState({ pointSet: [] });
+    } else {
+      let index = this.state.highlitedIndex || 0;
+      let fillOpacity = 0;
       this.state.highlitedIndex = null;
       let pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`);
-      if(pointDom) {
-        let highlighterElem = pointDom.querySelector(`.outer-highliter`);
+      if (pointDom) {
+        let highlighterElem = pointDom.querySelector('.outer-highliter');
         highlighterElem.setAttribute('fill-opacity', fillOpacity);
-        highlighterElem.setAttribute('stroke-opacity', fillOpacity);  
+        highlighterElem.setAttribute('stroke-opacity', fillOpacity);
       }
     }
   }
 
   doHighlight(e) {
     let index = e.highlightedPoint.pointIndex;
-    if(index == undefined || index == null || isNaN(index)) {
+    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
       return;
     }
-    let fillOpacity = 1; 
+    let fillOpacity = 1;
     let pointDom;
-    if(this.props.opacity === 0) {
-      let pData = {x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index};
-      this.setState({pointSet: [pData]});
+    if (this.props.opacity === 0) {
+      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
+      this.setState({ pointSet: [pData] });
     }
     this.state.highlitedIndex = index;
-    pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`); 
-    if(pointDom) {
-      let highlighterElem = pointDom.querySelector(`.outer-highliter`);
+    pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`);
+    if (pointDom) {
+      let highlighterElem = pointDom.querySelector('.outer-highliter');
       highlighterElem.setAttribute('fill-opacity', fillOpacity);
-      highlighterElem.setAttribute('stroke-opacity', fillOpacity); 
+      highlighterElem.setAttribute('stroke-opacity', fillOpacity);
     }
   }
 }
 
-export default DataPoints; 
+export default DataPoints;

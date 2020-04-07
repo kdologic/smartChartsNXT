@@ -1,40 +1,65 @@
-"use strict";
+'use strict';
 
-import UiCore from './../core/ui.core';
-import fontLato from "./../styles/font-lato.css";
-import Morphing from "./../plugIns/morph";
+import uiCore from './../core/ui.core';
+import font from './../styles/font-lato';
+import Morphing from './../plugIns/morph';
+import '../plugIns/classList.shim.min';
 import Chart from './../charts/chart';
+import viewConfig from './../viewEngin/config';
 
 /**
  * chart.core.js
- * @createdOn:10-Jul-2017
+ * @createdOn: 10-Jul-2017
  * @author: SmartChartsNXT
- * @description:SmartChartsNXT Core Library components. It's bootstrap the code, 
- * by loading appropriate dependencies. Loading ployfills and shims, fonts etc. 
+ * @description: SmartChartsNXT Core Library components. It's bootstrap the code,
+ * by loading appropriate dependencies. Loading polyfills and shims, fonts etc.
  */
 
- class Core {
+class Core {
   constructor() {
-    this.nameSpaceReadyStatus = false;
+    this._debug = false;
+    this.debugRenderTime = false;
+    this.debugEvents = false;
+    this.namespaceReadyStatus = false;
     this.Chart = Chart;
     this.loadFont();
   }
 
   loadFont() {
-    UiCore.prependStyle(document.querySelector('head'), fontLato);
+    uiCore.prependStyle(document.querySelector('head'), font);
     let intervalId = setInterval(() => {
-      if(document.body) {
+      if (document.body) {
         clearInterval(intervalId);
-        document.body.insertAdjacentHTML('beforeend','<p id="sc-temp-font-loader" aria-hidden="true" style="visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;">Loading...</p>');
+        document.body.insertAdjacentHTML('beforeend', '<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
         setTimeout(() => {
-          this.nameSpaceReadyStatus = true;
+          this.namespaceReadyStatus = true;
           setTimeout(() => {
             let fLoader = document.getElementById('sc-temp-font-loader');
             fLoader.parentNode.removeChild(fLoader);
-          },1000 );
+          }, 1000);
         });
       }
     }, 10);
+  }
+
+  set debug(isEnable = true) {
+    this._debug = isEnable;
+    this.debugRenderTime = isEnable;
+    this.debugEvents = isEnable;
+    viewConfig.debug = isEnable;
+  }
+
+  get debug() {
+    return this._debug;
+  }
+
+  set debugRenderTime(isEnable) {
+    this._debugRenderTime = isEnable;
+    viewConfig.debugRenderTime = isEnable;
+  }
+
+  get debugRenderTime() {
+    return this._debugRenderTime;
   }
 
 
@@ -46,24 +71,24 @@ import Chart from './../charts/chart';
   //     },
   //     /* Called when all of the web fonts have either finished loading or failed to load, as long as at least one loaded successfully. */
   //     active: function () {
-  //       if (typeof cb === "function") {
+  //       if (typeof cb === 'function') {
   //         cb();
   //       }
   //     },
   //     inactive: function () {
-  //       if (typeof cb === "function") {
+  //       if (typeof cb === 'function') {
   //         cb();
   //       }
   //     }
   //   });
-  // } 
+  // }
 
   ready(successBack) {
-    /* strat polling for the ready state*/
+    /* Start polling for the ready state*/
     let statusCheck = setInterval(() => {
-      if (this.nameSpaceReadyStatus) {
+      if (this.namespaceReadyStatus) {
         clearInterval(statusCheck);
-        if (typeof successBack === "function") {
+        if (typeof successBack === 'function') {
           let startTime = window.performance.now();
           try {
             successBack.call(this);
@@ -71,16 +96,19 @@ import Chart from './../charts/chart';
             this.handleError(ex);
           }
 
-          let endTitme = window.performance.now();
-          console.info("Time elapsed for chart: %c" + (endTitme - startTime) + " Ms", "color:green");
+          let endTime = window.performance.now();
+          /* eslint-disable-next-line no-console */
+          console.info('Time elapsed for chart: %c' + (endTime - startTime) + ' Ms', 'color:green');
         }
       }
     }, 100);
   }
 
-  handleError(ex, msg) {
-    console.error("SmartChartsNXT:" + (ex.errorIn || ""));
-    ex.stack && console.error(ex.stack);
+  handleError(ex) {
+    /* eslint-disable-next-line no-console */
+    ex.errorIn && console.error('SmartChartsNXT:' + ex.errorIn);
+    /* eslint-disable-next-line no-console */
+    console.error(ex);
   }
 
 }

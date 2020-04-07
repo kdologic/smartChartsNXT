@@ -16,7 +16,7 @@ let pkg = require('./package.json');
 
 
 let srcDir = './src/';
-let buildDir = './public/';
+let buildDir = './build/';
 let testDir = './test/';
 
 

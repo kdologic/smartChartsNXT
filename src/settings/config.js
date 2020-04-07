@@ -1,8 +1,8 @@
-"use strict";
+/* eslint-disable quotes */
+'use strict';
 
-/** 
+/**
  * config.js
- * @version:2.0.0
  * @createdOn:24-Nov-2017
  * @author:SmartChartsNXT
  * @description:This will be the Global default configureation for all charts.
@@ -14,7 +14,7 @@ export default {
     fontColorLight: "#fff",
     fontColorMedium: "#848484",
     fontColorDark: "#000",
-    fontColorHighlight: "#9c27b0",
+    fontColorHighlight: "#09b0de",
     fontSizeSmall: 9,
     fontSizeMedium: 14,
     fontSizeLarge: 18,
