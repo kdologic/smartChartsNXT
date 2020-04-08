@@ -19,7 +19,6 @@ const production = {
     path: path.resolve('__dirname' + './build')
   },
   plugins: [
-    new BundleAnalyzerPlugin(),
     new webpack.DefinePlugin({
       PRODUCTION: JSON.stringify(isProduction)
     })
