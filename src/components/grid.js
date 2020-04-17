@@ -94,8 +94,6 @@ class Grid extends Component {
           {this.config.horizontal.enable && this.drawHGridLines()}
         </g>
         <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.showBgGradient ? `url(#${this.gradId})` : this.config.bgColor} fill-opacity={this.config.bgOpacity} stroke-width='0' />
-        <line class='sc-grid-box-left-border' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
-        <line class='sc-grid-box-bottom-border' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
       </g>
     );
   }

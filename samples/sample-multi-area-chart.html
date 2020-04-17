@@ -227,11 +227,11 @@
               "labelRotate": -45,                         // [ default: 0 ]
               "intervalThreshold": 40,                    // [ default: 30 ]
               "tickOpacity": 1,                           // [ default: 1 ]
-              "tickColor": '#222',                        // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
               "tickSpan": 6,                              // [ default: 6 ]
               "labelOpacity": 1,                          // [ default: 1 ]
               "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
-              "axisColor": "#000",                        // TODO
+              "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
               "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
               "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             },
@@ -241,12 +241,13 @@
               "append": "",                               // [ default: "" ]
               "labelRotate": 0,                           // [ default: 0 ]
               "tickOpacity": 1,                           // [ default: 1 ]
-              "tickColor": '#222',                        // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
               "tickSpan": 6,                              // [ default: 6 ]
+              "labelAlign": $SC.ENUMS.LABEL_ALIGN.RIGHT,  // [ default: $SC.ENUMS.LABEL_ALIGN.RIGHT | $SC.ENUMS.LABEL_ALIGN.LEFT | $SC.ENUMS.LABEL_ALIGN.CENTER] Text Anchor position of the text.
               "labelOpacity": 1,                          // [ default: 1 ]
               "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
-              "axisColor": "#000",                        // TODO
-              "fontSize": 20,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+              "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
               "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
               "zeroBase": false,                          // [ true : default: false ] min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
             },

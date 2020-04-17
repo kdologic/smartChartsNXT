@@ -22,6 +22,11 @@ export const OPTIONS_TYPE = {
     HORIZONTAL: 'horizontal',
     VERTICAL: 'vertical'
   },
+  LABEL_ALIGN: {
+    RIGHT: 'right',
+    LEFT: 'left',
+    CENTER: 'center'
+  },
   DISPLAY: {
     INLINE: 'inline',
     BLOCK: 'block',

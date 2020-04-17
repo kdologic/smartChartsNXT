@@ -13,6 +13,7 @@ import LegendBox from './../../components/legendBox';
 import Heading from './../../components/heading';
 import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
+import AxisBar from './../../components/axisBar';
 import PointerCrosshair from './../../components/pointerCrosshair';
 import AreaFill from './areaFill';
 import VerticalLabels from './../../components/verticalLabels';
@@ -214,11 +215,24 @@ class AreaChart extends Component {
     }
     this.minWidth = this.CHART_DATA.minWidth;
     this.minHeight = this.CHART_DATA.minHeight;
+
+    const defaultMargins = {
+      left: 100,
+      right: 20,
+      top: 120,
+      bottom: this.CHART_OPTIONS.horizontalScroller.height + 90
+    };
+
     this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? ((-1) * this.CHART_DATA.scaleX / 2) + 100 : this.CHART_DATA.marginLeft;
-    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? ((-1) * this.CHART_DATA.scaleX / 2) + 20 : this.CHART_DATA.marginRight;
-    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? ((-1) * this.CHART_DATA.scaleY / 2) + 120 : this.CHART_DATA.marginTop;
-    this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? ((-1) * this.CHART_DATA.scaleY / 2) + this.CHART_OPTIONS.horizontalScroller.height + 90 : this.CHART_DATA.marginBottom;
+    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? defaultMargins.left : this.CHART_DATA.marginLeft;
+    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? defaultMargins.right : this.CHART_DATA.marginRight;
+    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
+    this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
+
+    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === $SC.ENUMS.LABEL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
+      this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth;
+    }
+
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
 
@@ -393,20 +407,10 @@ class AreaChart extends Component {
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
 
-        <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft - 10} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
-          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} >
-        </VerticalLabels>
-
-        <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
-          categorySet={this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
-          clip={{
-            x: this.state.offsetLeftChange,
-            width: this.CHART_DATA.gridBoxWidth
-          }} >
-        </HorizontalLabels>
+        <AxisBar xAxis={this.state.cs.dataSet.xAxis || {}} yAxis={this.state.cs.dataSet.yAxis || {}}
+          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+        </AxisBar>
 
         <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
           transform={`rotate(${-90})`} bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
@@ -434,6 +438,21 @@ class AreaChart extends Component {
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
         </g>
+
+        <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
+          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
+          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} >
+        </VerticalLabels>
+
+        <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
+          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
+          maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+          categorySet={this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
+          clip={{
+            x: this.state.offsetLeftChange,
+            width: this.CHART_DATA.gridBoxWidth
+          }} >
+        </HorizontalLabels>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           <Draggable instanceId='drag-135'>
