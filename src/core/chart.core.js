@@ -2,7 +2,7 @@
 
 import uiCore from './../core/ui.core';
 import font from './../styles/font-lato';
-import Morphing from './../plugIns/morph';
+//import Morphing from './../plugIns/morph';
 import '../plugIns/classList.shim.min';
 import Chart from './../charts/chart';
 import viewConfig from './../viewEngin/config';

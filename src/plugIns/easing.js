@@ -1,6 +1,6 @@
 'use strict';
 /**
- * morph.js
+ * easing.js
  * @createdOn: 05-Apr-2019
  * @author: Gaëtan Renaudeau && smartChartsNXT
  * @description: Simple Easing Functions in Javascript - see https://github.com/gre/bezier-easing

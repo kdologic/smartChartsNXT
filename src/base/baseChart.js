@@ -26,7 +26,7 @@ class BaseChart extends Component {
       this.chartType = this.props.opts.type;
       this.CHART_OPTIONS = utilCore.extends({
         menu: {
-          mainManu: {
+          mainMenu: {
             enable: true,
             itemSaveAsJPG: true,
             itemSaveAsPNG: true,
@@ -170,7 +170,7 @@ class BaseChart extends Component {
           <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
         }
 
-        {this.CHART_OPTIONS.menu.mainManu.enable && this.CHART_OPTIONS.showMenu !== false &&
+        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
           this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
         }
 
@@ -178,8 +178,8 @@ class BaseChart extends Component {
           <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
         </g>
 
-        {this.CHART_OPTIONS.menu.mainManu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
-          <Menu opts={this.CHART_OPTIONS.menu.mainManu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
+        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
+          <Menu opts={this.CHART_OPTIONS.menu.mainMenu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
         }
         <LoaderView></LoaderView>
       </svg>
