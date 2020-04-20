@@ -1,6 +1,7 @@
 'use strict';
 
 import Core from './core/chart.core';
+import utilCore from './core/util.core';
 import { OPTIONS_TYPE, CHART_TYPE } from './settings/globalEnums';
 import {COLOR_STRINGS, RAINBOW_COLOR_MODEL, COLOR_MODEL} from './core/fillColorModel';
 import defaultConfig from './settings/config';
@@ -14,12 +15,12 @@ import defaultConfig from './settings/config';
  */
 
 const SmartChartsNXT = new Core();
-SmartChartsNXT.CHART_TYPE = { ...CHART_TYPE };
-SmartChartsNXT.ENUMS = { ...OPTIONS_TYPE };
+SmartChartsNXT.CHART_TYPE = utilCore.deepFreeze({ ...CHART_TYPE });
+SmartChartsNXT.ENUMS = utilCore.deepFreeze({ ...OPTIONS_TYPE });
 SmartChartsNXT.GLOBAL = { ...defaultConfig };
-SmartChartsNXT.COLOR_STRINGS = {...COLOR_STRINGS};
-SmartChartsNXT.COLOR_MODEL = COLOR_MODEL;
-SmartChartsNXT.RAINBOW_COLOR_MODEL = RAINBOW_COLOR_MODEL;
+SmartChartsNXT.COLOR_STRINGS = utilCore.deepFreeze({...COLOR_STRINGS});
+SmartChartsNXT.COLOR_MODEL = utilCore.deepFreeze(COLOR_MODEL);
+SmartChartsNXT.RAINBOW_COLOR_MODEL = utilCore.deepFreeze(RAINBOW_COLOR_MODEL);
 
 export default SmartChartsNXT;
 

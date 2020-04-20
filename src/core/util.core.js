@@ -49,6 +49,22 @@ class UtilCore {
   }
 
   /**
+   * Deep Freeze object recursively.
+   * @param {Object} object Input object to be freeze.
+   * @returns {Object} Frozen object.
+   */
+  deepFreeze(object) {
+    let propNames = Object.getOwnPropertyNames(object);
+    for (let name of propNames) {
+      let value = object[name];
+      if(value && typeof value === 'object') {
+        this.deepFreeze(value);
+      }
+    }
+    return Object.freeze(object);
+  }
+
+  /**
    * Returns a number whose value is limited to the given range.
    * @param {Number} min The lower boundary of the output range.
    * @param {Number} max The upper boundary of the output range.
