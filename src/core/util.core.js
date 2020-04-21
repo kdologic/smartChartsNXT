@@ -168,6 +168,25 @@ class UtilCore {
     return chr4() + '-' + chr4() + '-' + chr4();
   }
 
+  /**
+   * Wrap a function to get execution time accurately.
+   * @param {*} fn input function of which we need a execution time.
+   * @param {*} mark The string which uniquely identify the time mark.
+   * @return {function} Returns the curry function.
+   */
+  timeLogSync(fn, mark) {
+    let that = this;
+    return function(...args) {
+      /* eslint-disable-next-line no-console */
+      console.time(mark);
+      if(typeof fn === 'function') {
+        fn.apply(that, args);
+      }
+      /* eslint-disable-next-line no-console */
+      console.timeEnd(mark);
+    };
+  }
+
 }
 
 export default new UtilCore();

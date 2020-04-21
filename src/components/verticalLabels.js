@@ -96,13 +96,6 @@ class VerticalLabels extends Component {
   }
 
   render() {
-    this.emitter.emit('onVerticalLabelsRender', {
-      intervalLen: this.props.intervalLen,
-      intervalValue: this.props.valueInterval,
-      zeroBaseIndex: this.zeroBaseIndex,
-      values: this.valueSet,
-      count: this.props.labelCount
-    });
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
         {this.getLabels()}
@@ -125,6 +118,13 @@ class VerticalLabels extends Component {
         this.zeroBaseIndex = lCount;
       }
     }
+    this.emitter.emitSync('onVerticalLabelsRender', {
+      intervalLen: this.props.intervalLen,
+      intervalValue: this.props.valueInterval,
+      zeroBaseIndex: this.zeroBaseIndex,
+      values: this.valueSet,
+      count: this.props.labelCount
+    });
     return labels;
   }
 

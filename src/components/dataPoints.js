@@ -2,6 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
+import CircleIcon from './../icons/circle.icon';
 
 /**
  * dataPoints.js
@@ -17,12 +18,19 @@ class DataPoints extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.state = {
-      highlitedIndex: null,
+      highlightedIndex: null,
       pointSet: this.props.opacity ? this.props.pointSet : [],
-      opacity: this.props.opacity
+      opacity: this.props.opacity,
+      icons:{}
     };
     this.doHighlight = this.doHighlight.bind(this);
     this.normalize = this.normalize.bind(this);
+  }
+
+  propsWillReceive(newProps) {
+    this.state.pointSet = newProps.opacity ? newProps.pointSet : [];
+    this.state.opacity = newProps.opacity;
+    this.state.icons = {};
   }
 
   componentWillMount() {
@@ -38,11 +46,7 @@ class DataPoints extends Component {
   componentWillUnmount() {
     this.emitter.removeListener('highlightPointMarker', this.doHighlight);
     this.emitter.removeListener('normalizeAllPointMarker', this.normalize);
-  }
-
-  propsWillReceive(newProps) {
-    this.state.pointSet = newProps.opacity ? newProps.pointSet : [];
-    this.state.opacity = newProps.opacity;
+    this.state.icons = {};
   }
 
   render() {
@@ -59,14 +63,15 @@ class DataPoints extends Component {
 
   drawPoint(point) {
     switch (this.props.type) {
-      case 'circle':
+      case $SC.ENUMS.ICON_TYPE.CIRCLE:
       default:
         return (
-          <g class={`sc-data-point-${point.index}`}>
-            <circle cx={point.x} cy={point.y} r={this.props.r + 2} class='outer-highliter' fill={this.props.fillColor} fill-opacity='0' stroke-width='1' stroke='#fff' stroke-opacity='0' style={{ 'transition': 'fill-opacity 0.2s linear' }} > </circle>
-            <circle cx={point.x} cy={point.y} r={this.props.r - 2} class='outer-offset' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
-            <circle cx={point.x} cy={point.y} r={this.props.r - 3} class='inner-dot' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
-          </g>);
+          <CircleIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} r={this.props.markerWidth/2} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
+            onRef={ref => {
+                    this.state.icons[point.index] = ref;
+                  }}>
+          </CircleIcon>
+        );
     }
   }
 
@@ -77,16 +82,11 @@ class DataPoints extends Component {
     if (this.props.opacity === 0) {
       this.setState({ pointSet: [] });
     } else {
-      let index = this.state.highlitedIndex || 0;
-      let fillOpacity = 0;
-      this.state.highlitedIndex = null;
-      let pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`);
-      if (pointDom) {
-        let highlighterElem = pointDom.querySelector('.outer-highliter');
-        highlighterElem.setAttribute('fill-opacity', fillOpacity);
-        highlighterElem.setAttribute('stroke-opacity', fillOpacity);
+      if(this.state.highlightedIndex !== undefined && this.state.highlightedIndex !== null) {
+        this.state.icons[this.state.highlightedIndex].normalize();
       }
     }
+    this.state.highlightedIndex = null;
   }
 
   doHighlight(e) {
@@ -94,19 +94,12 @@ class DataPoints extends Component {
     if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
       return;
     }
-    let fillOpacity = 1;
-    let pointDom;
     if (this.props.opacity === 0) {
-      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
+      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index};
       this.setState({ pointSet: [pData] });
     }
-    this.state.highlitedIndex = index;
-    pointDom = this.ref.node.querySelector(`.sc-data-point-${index}`);
-    if (pointDom) {
-      let highlighterElem = pointDom.querySelector('.outer-highliter');
-      highlighterElem.setAttribute('fill-opacity', fillOpacity);
-      highlighterElem.setAttribute('stroke-opacity', fillOpacity);
-    }
+    this.state.highlightedIndex = index;
+    this.state.icons[index].highlight();
   }
 }
 

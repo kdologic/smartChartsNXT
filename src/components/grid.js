@@ -101,7 +101,13 @@ class Grid extends Component {
   drawVGridLines() {
     let grids = [];
     for (let gridCount = 0; gridCount < this.state.vGridCount; gridCount++) {
-      grids.push(<line class={`sc-v-grid-line-${gridCount}`} x1={gridCount * this.state.vGridInterval} y1={0} x2={gridCount * this.state.vGridInterval} y2={this.props.height} fill='none' stroke={this.config.vertical.lineColor} stroke-opacity={this.config.vertical.lineOpacity} stroke-width={this.config.vertical.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.vLineDashArray} />);
+      grids.push(
+        <line instanceId={`vline-${gridCount}`} class={`sc-v-grid-line-${gridCount}`}
+          x1={gridCount * this.state.vGridInterval} y1={0} x2={gridCount * this.state.vGridInterval} y2={this.props.height}
+          fill='none' stroke={this.config.vertical.lineColor} stroke-opacity={this.config.vertical.lineOpacity}
+          stroke-width={this.config.vertical.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.vLineDashArray}>
+        </line>
+      );
     }
     return grids;
   }
@@ -109,7 +115,13 @@ class Grid extends Component {
   drawHGridLines() {
     let grids = [];
     for (let gridCount = 0; gridCount < this.state.hGridCount; gridCount++) {
-      grids.push(<line class={`sc-h-grid-line-${gridCount}`} x1={0} y1={gridCount * this.state.hGridInterval} x2={this.props.width} y2={gridCount * this.state.hGridInterval} fill='none' stroke={this.config.horizontal.lineColor} stroke-opacity={gridCount == this.state.zeroBaseGridIndex ? 1 : this.config.vertical.lineOpacity} stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray} />);
+      grids.push(
+        <line instanceId={`hline-${gridCount}`} class={`sc-h-grid-line-${gridCount}`}
+          x1={0} y1={gridCount * this.state.hGridInterval} x2={this.props.width} y2={gridCount * this.state.hGridInterval}
+          fill='none' stroke={this.config.horizontal.lineColor} stroke-opacity={gridCount == this.state.zeroBaseGridIndex ? 1 : this.config.vertical.lineOpacity}
+          stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
+        </line>
+      );
     }
     return grids;
   }

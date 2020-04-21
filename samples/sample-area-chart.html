@@ -51,23 +51,23 @@
           "targetElem": "chartContainer",
           "description": "A javascript area chart that visualize very large randomize dataset",
           "title": {
-            "text":"A javascript area chart that visualize very large randomize dataset",     // [ default : "" ]
-            "top": 20,                            // [ default : 20]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "90%",                       // [ default : 90%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "crimson",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
+            "text":"A javascript area chart that visualize very large randomize dataset",
+            "top": 20,              
+            "left": "50%",          
+            "width": "90%",         
+            "height": "",           
+            "textAlign": "center",  
+            "textColor": "crimson", 
+            "borderColor":"none",   
+            "fontFamily": "Lato",   
+            "bgColor": "none",      
+            "padding": 0,           
+            "fontSize": 20,         
             "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+              "opacity": 1.0                      
             },
             "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
+              "wrapText": true,
               "reducer": function(chartWidth, chartHeight) {
                 if(chartWidth < 500) {
                   return {
@@ -86,102 +86,102 @@
             }
           },
           "subtitle": {
-            "text":"SmartchartsNXT can able to process a very large dataset > 1000 points", // [ default : "" ]
-            "top": 50,                            // [ default : 50]  x % value accepted
-            "left": "50%",                        // [ default : 50%] x % value accepted
-            "width": "95%",                       // [ default : 95%] x % value accepted
-            "height": "",                         // [ default : ""]  x % value accepted
-            "textAlign": "center",                // [ left | default: center | right ]
-            "textColor": "#9c27b0",               // [ default : theme.fontColorDark ]
-            "borderColor":"none",                 // [ default : none ]
-            "fontFamily": "Lato",                 // [ default : Lato ]
-            "bgColor": "none",                    // [ default : none ]
-            "padding": 0,                         // [ default : 0 ]
-            "fontSize": 12,                       // [ default : theme.fontSizeSmall ]
+            "text":"SmartchartsNXT can able to process a very large dataset > 1000 points",
+            "top": 50,             
+            "left": "50%",         
+            "width": "95%",        
+            "height": "",          
+            "textAlign": "center", 
+            "textColor": "#9c27b0",
+            "borderColor":"none",  
+            "fontFamily": "Lato",  
+            "bgColor": "none",     
+            "padding": 0,          
+            "fontSize": 12,        
             "style": {
-              "opacity": 1.0                      // Support any style other than available config property. Must be a json object.
+              "opacity": 1.0
             },
             "responsive": {
-              "wrapText": true,                   // [ default: true | false ]
+              "wrapText": true,
               "reducer": function(chartWidth, chartHeight) {
                 // support reducer same as title property
               }
             }
           },
           "canvasBorder": false,
-          "bgColor": "#f7fdf7",                         //[default: white]
+          "bgColor": "#f7fdf7",                        
           "gridBox": {
             "vertical": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED, //[ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                          
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,
+              "lineColor": "#000",                     
+              "lineThickness": 1,                      
+              "lineOpacity": 0.2                       
             },
             "horizontal": {
-              "enable": true,                           //[default: true | false]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,  //[default: ENUMS.LINE_STYLE.SOLID | ENUMS.LINE_STYLE.DASHED]
-              "lineColor": "#000",                      //[$SC.theme.bgColorMedium]
-              "lineThickness": 1,                       //[default: 1]
-              "lineOpacity": 0.2                        //[default: 0.2]
+              "enable": true,                          
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID, 
+              "lineColor": "#000",                     
+              "lineThickness": 1,                      
+              "lineOpacity": 0.2                       
             },
-           "bgColor": 'skyblue',                           //[default: none]
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, //[default: none]
-           "bgOpacity": 0.2                             //[default: 0.1]   
+           "bgColor": 'skyblue',
+           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL,
+           "bgOpacity": 0.2
           },
           "pointerCrosshair": {
             "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "spread" : "full",              // [default: full | inPoint | none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,
+              "spread" : "full",            
+              "lineColor": "#000",          
+              "lineWidth": 1,               
+              "lineOpacity": 1,             
+              "labelTextColor": "#fff",     
+              "labelBackgroundColor":"#000",
+              "labelOpacity": 1             
             },
             "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED, // [ENUMS.LINE_STYLE.SOLID | default: ENUMS.LINE_STYLE.DASHED]
-              "spread" : "none",              // [full | inPoint | default: none]
-              "lineColor": "#000",            // [default: #000]
-              "lineWidth": 1,                 // [default: 1]
-              "lineOpacity": 1,               // [default: 1]
-              "labelTextColor": "#fff",       // [default: #fff]
-              "labelBackgroundColor":"#000",  // [default: #000]
-              "labelOpacity": 1               // [default: 1]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,
+              "spread" : "none",              
+              "lineColor": "#000",            
+              "lineWidth": 1,                 
+              "lineOpacity": 1,               
+              "labelTextColor": "#fff",       
+              "labelBackgroundColor":"#000",  
+              "labelOpacity": 1               
             }
           },
           "legends":{
-            "enable" : true,                              // [ default: true | false ]
-            "top": 70,                                    // [ default: 70 ]
-            "left": 100,                                  // [ default: 100 ]
-            "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
-            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
-            "textColor": "#000",                          // [ default: theme.fontColorDark ]
-            "bgColor": "none",                            // [ default: none ]
-            "hoverColor":"none",                          // [ default: none ]
-            "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
-            "fontFamily": "Lato",                         // [ default: Lato ]
-            "itemBorderWidth": 0,                         // [ default: 1 ]
-            "itemBorderColor": "#000",                    // [ default: #000 ]
-            "itemBorderOpacity": 1,                       // [ default: 1 ]
-            "itemBorderRadius": 10,                       // [ default: 10 ]
-            "borderColor": "none",                        // [ default: none ]
-            "borderWidth": 1,                             // [ default: 1 ]
-            "borderOpacity": 1,                           // [ default: 1 ]
-            "opacity": 0.9,                               // [ default: 0.9 ]
-            "toggleType": true,                           // [ default: true | false ]
-            "hideIcon": false,                            // [ true | default: false ]
-            "hideLabel": false,                           // [ true | default: false ]
-            "hideValue": false                            // [ true | default: false ]
+            "enable" : true,                              
+            "top": 70,                                    
+            "left": 100,                                  
+            "maxWidth": "90%",                           
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,
+            "display": $SC.ENUMS.DISPLAY.INLINE,         
+            "float": $SC.ENUMS.FLOAT.NONE,               
+            "textColor": "#000",                        
+            "bgColor": "none",                          
+            "hoverColor":"none",                          
+            "fontSize": 14,                               
+            "fontFamily": "Lato",                         
+            "itemBorderWidth": 0,                         
+            "itemBorderColor": "#000",                    
+            "itemBorderOpacity": 1,                       
+            "itemBorderRadius": 10,                       
+            "borderColor": "none",                        
+            "borderWidth": 1,                             
+            "borderOpacity": 1,                           
+            "opacity": 0.9,                               
+            "toggleType": true,                           
+            "hideIcon": false,                            
+            "hideLabel": false,                           
+            "hideValue": false                            
           },
           "tooltip": {
-            "enable": true,                   // [default: true | false ]
-            "followPointer": false,           // [true | default: false ] Note: This option only available when tooltip are grouped.
-            "grouped": true,                  // [default: true | false ]
-            "pointerVicinity": 50,            // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+            "enable": true,                   
+            "followPointer": false,           
+            "grouped": true,                  
+            "pointerVicinity": 50,            
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
@@ -209,19 +209,19 @@
                 );
               }
             },
-            "headerTextColor": "greenyellow",   // [ default: #fff ]
-            "headerBgColor": "#555",            // [ default: #555 ]
-            "textColor": "#000",                // [ default: #000 ]
-            "bgColor": "#e8f4f8",               // [ default: #fff ]
-            "footerTextColor": "#000",          // [ default: #fff ]
-            "footerBgColor": "#d4ebf2",         // [ default: #555 ]
-            "fontSize": 14,                     // [ default: 14 ]
-            "fontFamily": "Lato",               // [ default: Lato ]
-            "xPadding": 0,                      // [ default: 0 ] 
-            "yPadding": 0,                      // [ default: 0 ] 
-            "borderColor": "none",              // [ default: point.seriesColor ]
-            "borderWidth": 2,                   // [ default: 3 ]
-            "opacity": 0.8,                     // [ default: 0.8 ]
+            "headerTextColor": "greenyellow",
+            "headerBgColor": "#555",         
+            "textColor": "#000",             
+            "bgColor": "#e8f4f8",            
+            "footerTextColor": "#000",       
+            "footerBgColor": "#d4ebf2",      
+            "fontSize": 14,                  
+            "fontFamily": "Lato",            
+            "xPadding": 0,                   
+            "yPadding": 0,                   
+            "borderColor": "none",           
+            "borderWidth": 2,                
+            "opacity": 0.8,                  
           },
           "horizontalScroller": {
             "enable": true,
@@ -242,7 +242,7 @@
               "tickSpan": 6,
               "labelOpacity": 1,
               "labelColor": "#000",
-              "axisColor": "#000", // TODO
+              "axisColor": $SC.GLOBAL.theme.fontColorDark,
               "fontSize": 12,
               "fontFamily": "Lato"
             },
@@ -253,26 +253,27 @@
               "labelRotate": 0,
               "tickOpacity": 1,
               "tickColor": '#222',
-              "tickSpan": 5,
+              "tickSpan": 6,
               "labelOpacity": 1,
               "labelColor": "#000",
-              "axisColor": "#000", // TODO
+              "axisColor": $SC.GLOBAL.theme.fontColorDark,
               "fontSize": 14,
               "fontFamily": "Lato",
-              "zeroBase": false, // min label of y-axis always stick to zero if all value are positive and max label of y-axis always sitick to zero if all value are negative.
+              "zeroBase": false,
             },
             "series": [{
               "visible": true,
               "lineWidth": 1.5,
               "bgColor": "#009688",
               "marker": true,
-              "markerRadius": 6,
+              "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
+              "markerWidth": 8,
               "spline": false,
               "gradient": true,
               "areaOpacity": 0.5,
               "lineOpacity": 1,
               "name": 'Random Data',
-              "animated": true,      // [default: true | false ]
+              "animated": true,
               "data": generateData(5, 20, 1000) 
               //[{label:1, value:10}, {label:2, value:20},{label:3, value:20}, {label:4, value:30},{label:5, value:40}]
             }]

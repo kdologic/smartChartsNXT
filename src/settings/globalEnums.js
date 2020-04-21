@@ -8,6 +8,9 @@
  */
 
 export const OPTIONS_TYPE = {
+  ICON_TYPE: {
+    CIRCLE: 'circle'
+  },
   LINE_STYLE: {
     DASHED: 'dashed',
     SOLID: 'solid'

@@ -120,7 +120,7 @@ class AreaFill extends Component {
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 0} opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type='circle' opacity={this.state.marker} r={this.props.markerRadius} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
         }
       </g>
     );
@@ -193,7 +193,7 @@ class AreaFill extends Component {
     const mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
-    if (this.props.clip.offsetLeft > this.props.markerRadius) {
+    if (this.props.clip.offsetLeft > this.props.markerWidth/2) {
       pointSet = pointSet.slice(1);
     }
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
@@ -234,7 +234,7 @@ class AreaFill extends Component {
     let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
-      if (this.props.clip.offsetLeft > this.props.markerRadius) {
+      if (this.props.clip.offsetLeft > this.props.markerWidth/2) {
         pointSet = pointSet.slice(1);
       }
       if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {

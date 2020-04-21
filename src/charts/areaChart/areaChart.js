@@ -527,7 +527,7 @@ class AreaChart extends Component {
         <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker == 'undefined' ? true : series.marker} markerRadius={series.markerRadius || 6} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0}
+          marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || 8} markerHeight={series.markerHeight || 8} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0}
           maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
@@ -551,7 +551,7 @@ class AreaChart extends Component {
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#efefef'
             gradient={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
-            marker={false} markerRadius={0} centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
+            marker={false} markerWidth={0} markerHeight={0} centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
@@ -561,7 +561,7 @@ class AreaChart extends Component {
           <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#777' lineFillColor='#777'
             gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
-            marker={false} markerRadius='0' centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
+            marker={false} markerWidth={0} markerHeight={0} centerSinglePoint={false} lineStrokeWidth={0} areaStrokeWidth='1'
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={this.scrollWindowClipId}>
           </AreaFill>
