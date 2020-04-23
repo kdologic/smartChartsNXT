@@ -239,7 +239,7 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    if (objStyle[key].old && objStyle[key].new) {
+    if (objStyle[key].old !== undefined && objStyle[key].old !== null && objStyle[key].new !== undefined && objStyle[key].new !== null) {
       sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
     } else {
       sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
@@ -256,7 +256,7 @@ function parseStyleProps(objStyle) {
  */
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
-    if (events[e].new && events[e].old) {
+    if (events[e].new !== undefined && events[e].new !== null && events[e].old !== undefined && events[e].old !== null) {
       node._addEventListener(e, events[e].new, false);
       node.removeEventListener(e, events[e].old);
     } else {
