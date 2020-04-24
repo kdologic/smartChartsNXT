@@ -811,7 +811,12 @@ class AreaChart extends Component {
 
   getLegendData() {
     return this.state.cs.dataSet.series.map((data) => {
-      return { label: data.name, color: data.bgColor || utilCore.getColor(data.index), isToggled: !data.visible };
+      return {
+        label: data.name,
+        color: data.bgColor || utilCore.getColor(data.index),
+        icon: data.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE,
+        isToggled: !data.visible
+      };
     });
   }
 

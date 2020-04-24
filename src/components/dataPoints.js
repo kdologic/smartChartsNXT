@@ -2,7 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import CircleIcon from './../icons/circle.icon';
+import { CircleIcon } from './../icons/iconCollection';
 
 /**
  * dataPoints.js
