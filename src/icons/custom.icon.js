@@ -3,13 +3,13 @@
 import { Component } from './../viewEngin/pview';
 
 /**
- * circle.icon.js
- * @createdOn:24-Apr-2020
+ * custom.icon.js
+ * @createdOn:26-Apr-2020
  * @author:SmartChartsNXT
- * @description: Create circle icon.
+ * @description: Create User defined custom icon from URL.
  */
 
-class CircleIcon extends Component {
+class CustomIcon extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -37,10 +37,9 @@ class CircleIcon extends Component {
 
   render() {
     return (
-      <g class={`sc-icon-circle-${this.props.id || 0}`}>
-        <circle cx={this.props.x} cy={this.props.y} r={this.props.r + 4} class='sc-outer-highlighter' fill={this.props.fillColor} stroke-width='1' stroke='#fff' fill-opacity={this.state.highlighted} stroke-opacity={this.state.highlighted} style={{ 'transition': 'fill-opacity 0.2s linear' }} > </circle>
-        <circle cx={this.props.x} cy={this.props.y} r={this.props.r} class='sc-outer-offset' fill={this.props.fillColor} opacity='1' stroke-width='0'> </circle>
-        <circle cx={this.props.x} cy={this.props.y} r={this.props.r - 1} class='sc-inner-dot' fill={'#fff'} opacity='1' stroke-width='0'> </circle>
+      <g class={`sc-icon-custom-${this.props.id || 0}`} transform={`translate(${(-this.props.width/2)},${(-this.props.height/2)})`}>
+        <circle cx={this.props.x + (this.props.width/2)} cy={this.props.y + (this.props.width/2)} r={this.props.width/2} class='sc-outer-highlighter' fill={this.props.fillColor} stroke-width='1' stroke='#fff' fill-opacity={this.state.highlighted} stroke-opacity={this.state.highlighted} style={{ 'transition': 'fill-opacity 0.2s linear' }} > </circle>
+        <image x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} href={this.props.URL} />
       </g>
     );
   }
@@ -54,4 +53,4 @@ class CircleIcon extends Component {
   }
 }
 
-export default CircleIcon;
+export default CustomIcon;

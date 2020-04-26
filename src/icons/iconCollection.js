@@ -8,5 +8,15 @@
  */
 
 import CircleIcon from './circle.icon';
+import TriangleIcon from './triangle.icon';
+import DiamondIcon from './diamond.icon';
+import StarIcon from './star.icon';
+import CustomIcon from './custom.icon';
 
-export {CircleIcon};
+export {
+  CircleIcon,
+  TriangleIcon,
+  DiamondIcon,
+  StarIcon,
+  CustomIcon
+};

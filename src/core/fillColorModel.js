@@ -8,21 +8,21 @@
  */
 
 export const COLOR_STRINGS = {
-  'LIGHT-BLUE': '#95CEFF',
-  'LIGHT-ORANGE': '#ff9e01',
-  'OLIVE-GREEN': '#b0de09',
+  'LIGHT_BLUE': '#95CEFF',
+  'LIGHT_ORANGE': '#ff9e01',
+  'OLIVE_GREEN': '#b0de09',
   'CORAL': '#FF7F50',
-  'LIGHT-SEAGREEN': '#20B2AA',
+  'LIGHT_SEAGREEN': '#20B2AA',
   'GOLD': '#ffd700',
-  'LIGHT-SLATEGRAY': '#778899',
+  'LIGHT_SLATEGRAY': '#778899',
   'RUST': '#F56B19',
-  'MAT-VIOLET': '#B009DE',
+  'MAT_VIOLET': '#B009DE',
   'VIOLET': '#DE09B0',
-  'DARK-ORANGE': '#FF8C00',
-  'MAT-BLUE': '#09b0de',
-  'MAT-GREEN': '#09DEB0',
-  'RUSCLE-RED': '#d9534f',
-  'DARK-TURQUOISE': '#00CED1',
+  'DARK_ORANGE': '#FF8C00',
+  'MAT_BLUE': '#09b0de',
+  'MAT_GREEN': '#09DEB0',
+  'RUSCLE_RED': '#d9534f',
+  'DARK_TURQUOISE': '#00CED1',
   'ORCHID': '#DA70D6'
 };
 

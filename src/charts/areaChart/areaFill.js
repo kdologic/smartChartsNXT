@@ -120,7 +120,7 @@ class AreaFill extends Component {
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 0} opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
         }
       </g>
     );

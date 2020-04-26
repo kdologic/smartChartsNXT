@@ -5,6 +5,7 @@ import utilCore from './core/util.core';
 import { OPTIONS_TYPE, CHART_TYPE } from './settings/globalEnums';
 import {COLOR_STRINGS, RAINBOW_COLOR_MODEL, COLOR_MODEL} from './core/fillColorModel';
 import defaultConfig from './settings/config';
+import * as helperMethods from './globalMethods/helperMethods';
 
 /**
  * index.js
@@ -21,6 +22,7 @@ SmartChartsNXT.GLOBAL = { ...defaultConfig };
 SmartChartsNXT.COLOR_STRINGS = utilCore.deepFreeze({...COLOR_STRINGS});
 SmartChartsNXT.COLOR_MODEL = utilCore.deepFreeze(COLOR_MODEL);
 SmartChartsNXT.RAINBOW_COLOR_MODEL = utilCore.deepFreeze(RAINBOW_COLOR_MODEL);
+SmartChartsNXT.HELPER = {...helperMethods};
 
 export default SmartChartsNXT;
 

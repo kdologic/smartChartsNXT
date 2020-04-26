@@ -1,8 +1,9 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
-import { CircleIcon } from './../icons/iconCollection';
+import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from './../icons/iconCollection';
 
 /**
  * dataPoints.js
@@ -63,7 +64,7 @@ class DataPoints extends Component {
 
   drawPoint(point) {
     switch (this.props.type) {
-      case $SC.ENUMS.ICON_TYPE.CIRCLE:
+      case ENUMS.ICON_TYPE.CIRCLE:
       default:
         return (
           <CircleIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} r={this.props.markerWidth/2} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
@@ -72,6 +73,38 @@ class DataPoints extends Component {
                   }}>
           </CircleIcon>
         );
+      case ENUMS.ICON_TYPE.TRIANGLE:
+        return (
+          <TriangleIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
+            onRef={ref => {
+                    this.state.icons[point.index] = ref;
+                  }}>
+          </TriangleIcon>
+        );
+      case ENUMS.ICON_TYPE.DIAMOND:
+        return (
+          <DiamondIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
+            onRef={ref => {
+                    this.state.icons[point.index] = ref;
+                  }}>
+          </DiamondIcon>
+        );
+        case ENUMS.ICON_TYPE.STAR:
+          return (
+            <StarIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
+              onRef={ref => {
+                      this.state.icons[point.index] = ref;
+                    }}>
+            </StarIcon>
+          );
+        case ENUMS.ICON_TYPE.CUSTOM:
+          return (
+            <CustomIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth + 5} height={this.props.markerHeight + 5} fillColor={this.props.fillColor} URL={this.props.markerURL} highlighted={point.highlighted} strokeColor="#fff"
+              onRef={ref => {
+                      this.state.icons[point.index] = ref;
+                    }}>
+            </CustomIcon>
+          );
     }
   }
 

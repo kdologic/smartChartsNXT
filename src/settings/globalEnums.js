@@ -9,7 +9,11 @@
 
 export const OPTIONS_TYPE = {
   ICON_TYPE: {
-    CIRCLE: 'circle'
+    CIRCLE: 'circle',
+    TRIANGLE: 'triangle',
+    DIAMOND: 'diamond',
+    STAR: 'star',
+    CUSTOM: 'custom'
   },
   LINE_STYLE: {
     DASHED: 'dashed',

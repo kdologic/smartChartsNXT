@@ -7,7 +7,7 @@ import { Component } from './../viewEngin/pview';
 import uiCore from '../core/ui.core';
 import utilCore from '../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
-import {CircleIcon} from '../icons/iconCollection';
+import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../icons/iconCollection';
 
 /**
  * legendBox.js
@@ -100,6 +100,7 @@ class LegendBox extends Component {
     this.containerWidth = 0;
     this.containerHeight = 0;
     this.iconWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconHeight = this.config.hideIcon === true ? 0 : 15;
     this.hoverHeight = 15;
     this.lineHeight = 30;
     this.toggleColor = 'none';
@@ -141,6 +142,7 @@ class LegendBox extends Component {
       hideValue: props.opts.hideValue === 'undefined' ? (typeof props.hideValue === 'undefined' ? false : props.hideValue) : props.opts.hideValue
     };
     this.iconWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconHeight = this.config.hideIcon === true ? 0 : 15;
   }
 
   componentWillMount() {
@@ -216,6 +218,10 @@ class LegendBox extends Component {
         }
         {!this.props.opts.hideIcon &&
           <g class='sc-legend-icon-group' transform="translate(2,0)">
+          {/* <rect x={this.state.left + this.padding} y={this.state.top + this.padding}
+            width={this.iconWidth} height={this.iconHeight} fill={'none'}
+            shape-rendering='optimizeSpeed' stroke-width={2} stroke={'#000'} opacity='1'>
+          </rect> */}
             { this.selectIcon(index, data) }
             <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggled ? 1 : 0}
               d={[
@@ -247,11 +253,35 @@ class LegendBox extends Component {
 
   selectIcon(index, data) {
     let icon = [];
+    const line = <line x1={this.state.left + this.padding - (this.iconWidth/4)} y1={this.state.top + this.padding + (this.iconWidth/2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth/4)} y2={this.state.top + this.padding + (this.iconWidth/2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>;
     switch(data.icon) {
       case ENUMS.ICON_TYPE.CIRCLE:
         icon = [
-          <line x1={this.state.left + this.padding - (this.iconWidth/4)} y1={this.state.top + this.padding + (this.iconWidth/2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth/4)} y2={this.state.top + this.padding + (this.iconWidth/2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>,
+          line,
           <CircleIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconWidth/2)} r={this.iconWidth/2} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
+        ];
+        break;
+      case ENUMS.ICON_TYPE.TRIANGLE:
+        icon = [
+          line,
+          <TriangleIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
+        ];
+        break;
+      case ENUMS.ICON_TYPE.DIAMOND:
+        icon = [
+          line,
+          <DiamondIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
+        ];
+        break;
+      case ENUMS.ICON_TYPE.STAR:
+        icon = [
+          line,
+          <StarIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
+        ];
+        break;
+      case ENUMS.ICON_TYPE.CUSTOM:
+        icon = [
+          <CustomIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth + 5} height={this.iconHeight + 5} URL={data.iconURL || ''} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
         ];
         break;
       default:
