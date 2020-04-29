@@ -76,7 +76,7 @@ class LegendBox extends Component {
         lSet.transform = '';
         lSet.icon  = lSet.icon || 'default';
         lSet.bgFillOpacity = 0;
-        lSet.textStrokeWidth = 0;
+        lSet.strokeOpacity = 0.1;
         lSet.defaultIconStroke = 'none';
         lSet.iconHighlight = false;
 
@@ -240,7 +240,7 @@ class LegendBox extends Component {
 
   getLegendText(data, index) {
     return (
-      <text class={`sc-legend-${index} sc-legend-txt-${index}`} stroke-width={data.textStrokeWidth} stroke={this.config.textColor} font-size={this.config.fontSize} x={this.state.left + this.iconWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
+      <text class={`sc-legend-${index} sc-legend-txt-${index}`} stroke-width={0.5} stroke={this.config.textColor} stroke-opacity={data.strokeOpacity} font-size={this.config.fontSize} x={this.state.left + this.iconWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
         fill={this.config.textColor} font-family={this.config.fontFamily} pointer-events='none' >
         <tspan class={`sc-legend-${index} sc-legend-txt-label-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}>{!this.config.hideLabel && data.label}</tspan>
         <tspan class={`sc-legend-${index} sc-legend-txt-value-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}
@@ -414,7 +414,7 @@ class LegendBox extends Component {
 
   onHover(e, index) {
     this.state.legendSet[index].bgFillOpacity = 1;
-    this.state.legendSet[index].textStrokeWidth = 0.5;
+    this.state.legendSet[index].strokeOpacity = 1;
     this.state.legendSet[index].defaultIconStroke = '#000';
     this.state.legendSet[index].iconHighlight = true;
 
@@ -425,7 +425,7 @@ class LegendBox extends Component {
 
   onLeave(e, index) {
     this.state.legendSet[index].bgFillOpacity = 0;
-    this.state.legendSet[index].textStrokeWidth = 0;
+    this.state.legendSet[index].strokeOpacity = 0.1;
     this.state.legendSet[index].defaultIconStroke = 'none';
     this.state.legendSet[index].iconHighlight = false;
 
