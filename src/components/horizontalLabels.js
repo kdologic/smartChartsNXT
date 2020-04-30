@@ -150,9 +150,9 @@ class HorizontalLabels extends Component {
     let x = this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen;
     let y = 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
-    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ')' : '';
+    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
-      <text instanceId={`sc-text-hlabel-${index}`} font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} opacity
+      <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0} opacity
         transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
         <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
           {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}

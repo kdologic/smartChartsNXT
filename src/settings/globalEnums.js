@@ -50,6 +50,10 @@ export const OPTIONS_TYPE = {
     NONE: 'none',
     FULL: 'full',
     IN_POINT: 'inPoint'
+  },
+  TOOLTIP_POSITION: {
+    STATIC: 'static',
+    DYNAMIC: 'dynamic'
   }
 };
 

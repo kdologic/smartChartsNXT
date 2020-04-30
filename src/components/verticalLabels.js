@@ -132,11 +132,11 @@ class VerticalLabels extends Component {
     let x = this.config.labelAlign === 'end' ? - 10 : this.config.labelAlign === 'start' ? 5 : 0;
     let y = this.valueSet.length === 1 ? this.props.valueInterval : index * this.props.intervalLen;
     y = this.config.labelAlign === 'end' ? y : y - 10;
-    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ')' : '';
+    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
       <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
         font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={x} y={y} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
+        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
           {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '') }
         </tspan>
       </text>

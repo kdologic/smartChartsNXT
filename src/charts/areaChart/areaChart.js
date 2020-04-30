@@ -415,7 +415,7 @@ class AreaChart extends Component {
         </AxisBar>
 
         <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
-          transform={`rotate(${-90})`} bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
+          transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
           textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.yAxis.title}
           style={{
             '.sc-vertical-axis-title': {
@@ -424,18 +424,13 @@ class AreaChart extends Component {
           }} />
 
         <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight / 2) + 5)}
-          bgColor={'#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
+          bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
           textAnchor='middle' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.xAxis.title}
           style={{
             '.sc-horizontal-axis-title': {
               'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
             }
           }} />
-
-        <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth}
-          vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          opts={this.CHART_OPTIONS.pointerCrosshair || {}}>
-        </PointerCrosshair>
 
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
@@ -455,6 +450,11 @@ class AreaChart extends Component {
             width: this.CHART_DATA.gridBoxWidth
           }} >
         </HorizontalLabels>
+
+        <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth}
+          vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
+          opts={this.CHART_OPTIONS.pointerCrosshair || {}}>
+        </PointerCrosshair>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
           <Draggable instanceId='drag-135'>
