@@ -3,17 +3,33 @@
 <head>
   <title>Example of Shape Morphing with Animation</title>
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <!-- For morphing we need to add morphing script in library  -->
 </head>
 <body>
   <input id="add_point" type="button" value="Add a point" >
+  <input id="scale_down" type="button" value="Scale Down" >
+  <input id="scale_up" type="button" value="Scale Up" >
   <div id='container' style="width:100%; height:600px;">
     <svg xmlns="http://www.w3.org/2000/svg" id='svg_cont' role="application" version="1.1" width="847" height="600" viewbox="0, 0, 847, 600" style="transform:translate(50px, 100px); font-family:'Lato', sans-serif;background:transparent;-moz-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-tap-highlight-color:rgba(0, 0, 0, 0);-webkit-user-select:none;-html-user-select:none;-moz-user-select:none;-ms-user-select:none;-ouser-select:none;-user-select:none;">
       <path id="path-0" stroke="#009688" fill="#009688" stroke-width="2" fill-opacity="0.5" d="M 5 46.40357142857144 L 69.59084758219454 315.31607142857143 L 134.18169516438908 42.72678571428571 L 198.7725427465836 47.92500000000001 L 263.36339032877817 55.27857142857144 L 327.9542379109727 295.15714285714284 L 392.5450854931672 49.446428571428584 L 457.1359330753618 44.62857142857143 L 521.7267806575563 44.12142857142857 L 586.3176282397509 307.58214285714286 L 650.9084758219454 44.50178571428572 L 715.49932340414 45.1357142857143 L 780.0901709863344 60.22321428571429 L 780.0901709863344 177.5 "/>
     </svg>
   </div>
+
+  <script>
+    let posX = 20, posY = 100, scaleX = 50, scaleY = 100, points = 10;
+    function generatePath(x, y, scaleX, scaleY, points=10) {
+      let d = [
+        "M", x, y
+      ];
+      let p = new Array(points).fill(1).map((v, i) => {
+        return ["L", x + (scaleX * i), y + (i%2==0?-1:1)*scaleY];
+      }).flat();
+      return d.concat(p);
+    }
+    document.getElementById('path-0').setAttribute('d', generatePath(posX, posY, scaleX, scaleY, points).join(' '));
+  </script>
   
   <script>
-    const easeOutElastic = (t) => {let p = 0.3; return Math.pow(2,-10*t) * Math.sin((t-p/4)*(2*Math.PI)/p) + 1; }
     let svg = document.getElementById("svg_cont");
     let path = document.getElementById("path-0");
     document.getElementById("add_point").addEventListener('click', (e) => {
@@ -22,7 +38,7 @@
         x: Math.random()*500,
         y: Math.random()*500
       } 
-      let morph = path.morphTo(2000, d + "L" + point.x + " "+ point.y, easeOutElastic, () => {
+      let morph = path.morphTo(1000, d + "L" + point.x + " "+ point.y, $SC.EASING.easeOutQuart, () => {
         console.log('animation done!', morph);
       });
 
@@ -32,7 +48,23 @@
       // to check the animation is still playing or not 
       // check by morph.isPlaying flag
     });
-  
+
+    document.getElementById("scale_up").addEventListener('click', (e) => {
+      let d = path.getAttribute("d");
+      scaleX += 10;
+      let morph = path.morphTo(1000, generatePath(posX, posY, scaleX, scaleY, points).join(' '), $SC.EASING.easeOutQuart, () => {
+        console.log('animation done!', morph);
+      });
+    });
+
+    document.getElementById("scale_down").addEventListener('click', (e) => {
+      let d = path.getAttribute("d");
+      scaleX -= 10;
+      let morph = path.morphTo(1000, generatePath(posX, posY, scaleX, scaleY, points).join(' '), $SC.EASING.easeOutQuart, () => {
+        console.log('animation done!', morph);
+      });
+    });
+
   </script>
 </body>
 

@@ -7,6 +7,10 @@
  * @description: Animate a path by shape morphing technique.
  *
  * Note :
+ * Include following in package.json sideEffects array -
+ * "./src/plugIns/morph.js",
+ * "./src/viewEngin/shims/pathSegmentList.js"
+ *
  * It can automatically add the missing points if two paths have unequal number of points.
  * Corresponding command character must be match for both path. (i.e. 'C' can't be morph into 'L' etc.)
  */
@@ -17,7 +21,7 @@ import Easing from './easing';
 (function () {
 
   /**
-   * A morphing function that morph a path element from a defferent shape.
+   * A morphing function that morph a path element from a different shape.
    * @param {number} duration A string or number determining how long the morphing will run. default: 400 ms.
    * @param {string} fromPath A string value represent the path d attribute, that will be morphing from it.
    * @param {function} easing A function that calculate the easing value between [0 <==> 1] indicating which easing function to use for the transition.
@@ -48,7 +52,7 @@ import Easing from './easing';
     } else {
       /* eslint-disable-next-line no-console */
       console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
-      this.setAttribute('d', toPathClone.getAttribute('d'));
+      this.setAttribute('d', fromPath.getAttribute('d'));
     }
 
     let animObj = {
@@ -63,7 +67,7 @@ import Easing from './easing';
   };
 
   /**
-   * A morphing function that morph a path element into a defferent shape.
+   * A morphing function that morph a path element into a different shape.
    * @param {number} duration A string or number determining how long the morphing will run. default: 400 ms.
    * @param {string} toPath A string value represent the path d attribute, that will be morphing into it.
    * @param {function} easing A function that calculate the easing value between [0 <==> 1] indicating which easing function to use for the transition.
@@ -94,8 +98,8 @@ import Easing from './easing';
       });
     } else {
       /* eslint-disable-next-line no-console */
-      console.debug('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
-      this.setAttribute('d', fromPathClone.getAttribute('d'));
+      console.error('%cMorphing fails : %cPath sequence mis-match !!', 'color:#ff5722', 'color:#ffc107');
+      this.setAttribute('d', toPath.getAttribute('d'));
     }
 
     let animObj = {
@@ -170,7 +174,7 @@ import Easing from './easing';
         frameId.id = requestAnimationFrame(frame);
       }
     }
-    // reqest the first frame
+    // request the first frame
     frameId.id = requestAnimationFrame(frame);
     return frameId;
   }
