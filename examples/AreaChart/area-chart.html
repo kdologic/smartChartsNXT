@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Example of Basic Area Chart</title>
+  <title>Example of Basic Area Chart | SmartChartsNXT</title>
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+
   <script>
 	  function getData(n) {
       var arr = [], i, x = new Date(), a, b, c, spike;
@@ -86,7 +88,7 @@
             }
           },
           "subtitle": {
-            "text":"SmartchartsNXT can able to process a very large dataset > 1000 points",
+            "text":"SmartchartsNXT can efficiently process a very large dataset > 1000 points",
             "top": 50,             
             "left": "50%",         
             "width": "95%",        
@@ -185,8 +187,8 @@
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
-                '<p style="background-color:'+ (tipConfig.headerBgColor || "#555") + '; font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
-                    'Index: ' + pointSet[index].formattedLabel +
+                  '<p style="background-color:'+ (tipConfig.headerBgColor || "#555") + '; font-size: 14px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                    'Date: ' + pointSet[index].formattedLabel +
                   '</p>'
                 );
               },
@@ -195,9 +197,9 @@
                 return (
                   '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
                     '<td>' +
-                      '<span style="background-color:' + point.seriesColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +' Value - ' +
+                      '<span style="background-color:' + point.seriesColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +' Value : ' +
                     '</td>' +
-                    '<td>' + point.value + '</td>' +
+                    '<td>' + point.value.toFixed(3) + '</td>' +
                   '</tr>'
                 );
               },
@@ -230,7 +232,7 @@
           },
           "dataSet": {
             "xAxis": {
-              "title": "Index",
+              "title": "Date",
               "prepend": "",
               "append": "",
               "parseAsDate": true,
@@ -247,7 +249,7 @@
               "fontFamily": "Lato"
             },
             "yAxis": {
-              "title": "Total Sales",
+              "title": "Value",
               "prepend": "",
               "append": "",
               "labelRotate": 0,
