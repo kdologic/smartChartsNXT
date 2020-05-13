@@ -103,7 +103,7 @@ class HorizontalLabels extends Component {
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        intervalThreshold: typeof config.intervalThreshold ? 30 : config.intervalThreshold,
+        intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
         dateFormat: config.dateFormat || defaultConfig.formatting.dateFormat
       }
     };
