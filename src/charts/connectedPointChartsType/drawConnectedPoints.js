@@ -10,14 +10,14 @@ import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
 
 /**
- * areaFill.js
+ * drawConnectedPoints.js
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
  * @extends Component
  */
 
-class AreaFill extends Component {
+class DrawConnectedPoints extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
@@ -304,4 +304,4 @@ class AreaFill extends Component {
   }
 }
 
-export default AreaFill;
+export default DrawConnectedPoints;

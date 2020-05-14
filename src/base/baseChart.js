@@ -5,7 +5,7 @@ import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import { CHART_MODULES } from './../settings/componentMapper';
+import { CHART_MODULES } from '../settings/chartComponentMapper';
 import Validator from './../validators/validator';
 import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';

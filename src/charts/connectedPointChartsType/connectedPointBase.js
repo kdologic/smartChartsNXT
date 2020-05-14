@@ -15,7 +15,7 @@ import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
 import AxisBar from './../../components/axisBar';
 import PointerCrosshair from './../../components/pointerCrosshair';
-import AreaFill from './areaFill';
+import DrawConnectedPoints from './drawConnectedPoints';
 import VerticalLabels from './../../components/verticalLabels';
 import HorizontalLabels from './../../components/horizontalLabels';
 import HorizontalScroller from './../../components/horizontalScroller';
@@ -25,14 +25,14 @@ import InteractivePlane from './interactivePlane';
 import dateFormat from 'dateformat';
 
 /**
- * SVG Area Chart :: areaChart.js
+ * connectedPointBase.js
  * @createdOn:31-May-2016
  * @author:SmartChartsNXT
- * @description: SVG Area Chart, that support multiple series and zoom window.
+ * @description: Base component for connected point charts. Common component to draw area chart, line chart, step chart, etc.
  * @extends Component
  */
 
-class AreaChart extends Component {
+class ConnectedPointBase extends Component {
   constructor(props) {
     super(props);
     try {
@@ -179,7 +179,6 @@ class AreaChart extends Component {
         clipRightOffset: 100,
         offsetLeftChange: 0,
         offsetRightChange: 0,
-        areaFillMarginTop: 0,
         shouldFSRender: this.props.resizeComponent
       };
 
@@ -526,7 +525,7 @@ class AreaChart extends Component {
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
-        <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
+        <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
           gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || this.CHART_DATA.defaultMarkerWidth} markerHeight={series.markerHeight || this.CHART_DATA.defaultMarkerHeight} markerURL={series.markerURL || ''}
@@ -541,7 +540,7 @@ class AreaChart extends Component {
             offsetRight: this.state.offsetRightChange
           }}
         >
-        </AreaFill>
+        </DrawConnectedPoints>
       );
     });
   }
@@ -550,7 +549,7 @@ class AreaChart extends Component {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
         <g class='sc-fs-chart-area-container'>
-          <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
+          <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede'
             gradient={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
@@ -559,14 +558,14 @@ class AreaChart extends Component {
               this.state.fs.scaleX = scaleX;
             }}
             clipId={this.scrollOffsetClipId}>
-          </AreaFill>
-          <AreaFill dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
+          </DrawConnectedPoints>
+          <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777'
             gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={this.scrollWindowClipId}>
-          </AreaFill>
+          </DrawConnectedPoints>
         </g>
       );
     });
@@ -825,4 +824,4 @@ class AreaChart extends Component {
 
 }
 
-export default AreaChart;
+export default ConnectedPointBase;

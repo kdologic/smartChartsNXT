@@ -1,22 +1,23 @@
 'use strict';
 
 /**
- * componentMapper.js
+ * chartComponentMapper.js
  * @createdOn: 17-Jul-2019
  * @author: SmartChartsNXT
- * @description: Global enumeration values.
+ * @description: This is a configuration file to preload and map different chart components with chart type and its config file.
  */
 
 import { CHART_TYPE } from './globalEnums';
-import AreaChart from './../charts/areaChart/areaChart';
-import {config as areaChartConfig, validationRules as areaChartValidationRules} from './../charts/areaChart/config';
+import ConnectedPointBase from '../charts/connectedPointChartsType/connectedPointBase';
+import {config as areaChartConfig, validationRules as areaChartValidationRules} from '../charts/connectedPointChartsType/areaChart.config';
 
-/** ------- Requireing all chart types ------- */
+/** ------- Mapping components and config with respective chart types ------- */
+
 export const CHART_MODULES = {
   [CHART_TYPE.AREA_CHART]: {
     config: areaChartConfig,
     validationRules: areaChartValidationRules,
-    chart: AreaChart
+    chart: ConnectedPointBase
   }
   //,
   // LineChart: require('./../charts/lineChart/lineChart'),

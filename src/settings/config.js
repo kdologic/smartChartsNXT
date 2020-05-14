@@ -5,7 +5,7 @@
  * config.js
  * @createdOn:24-Nov-2017
  * @author:SmartChartsNXT
- * @description:This will be the Global default configureation for all charts.
+ * @description:This will be the Global default configuration for all charts.
  */
 
 export default {
