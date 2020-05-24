@@ -23,11 +23,6 @@
       });
     };
 
-    // window.onload = function () {
-    //   dataSet = prepareData(getStaticData());
-    //   displayChart('R-Com', dataSet);
-    // };
-
     function prepareData(data) {
       var dataSet = [];
       for (key in data['Time Series (Daily)']) {
@@ -40,11 +35,13 @@
       return dataSet.reverse();
     }
 
+    let areaChart;
     function displayChart(seriesName, dataSet) {
       console.log(dataSet);
+      
       SmartChartsNXT.ready(function () {
         SmartChartsNXT.debug = false;
-        let areaChart = new SmartChartsNXT.Chart({
+        areaChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "title": {
@@ -67,14 +64,30 @@
               "zeroBase": false,
             },
             "series": [{
-              "bgColor": "#2278b4",
+              "areaColor": "#2278b4",
               "name": seriesName,
               "areaOpacity": 0.3,
               "spline": false,
-              "data": dataSet
+              "data": [dataSet[0]]
             }]
+          },
+          "zoomWindow": {
+            "leftIndex": 1,
+            "rightIndex": 1
           }
         });
+
+        /* Added data asynchronously and render */
+        let intervalId = setInterval(addData, 100);
+        let currentIndex = 1;
+        function addData() {
+          areaChart.config._state.dataSet.series[0].data.push(dataSet[currentIndex++]);
+          areaChart.config._state.zoomWindow.rightIndex = areaChart.config._state.dataSet.series[0].data.length;
+          areaChart.render(); /* Re-draw the chart */
+          if(currentIndex >= dataSet.length) { 
+            clearInterval(intervalId);
+          }
+        }
       });
     }
 

@@ -10,6 +10,7 @@
 import { CHART_TYPE } from './globalEnums';
 import ConnectedPointBase from '../charts/connectedPointChartsType/connectedPointBase';
 import {config as areaChartConfig, validationRules as areaChartValidationRules} from '../charts/connectedPointChartsType/areaChart.config';
+import {config as lineChartConfig, validationRules as lineChartValidationRules} from '../charts/connectedPointChartsType/lineChart.config';
 
 /** ------- Mapping components and config with respective chart types ------- */
 
@@ -17,6 +18,11 @@ export const CHART_MODULES = {
   [CHART_TYPE.AREA_CHART]: {
     config: areaChartConfig,
     validationRules: areaChartValidationRules,
+    chart: ConnectedPointBase
+  },
+  [CHART_TYPE.LINE_CHART]: {
+    config: lineChartConfig,
+    validationRules: lineChartValidationRules,
     chart: ConnectedPointBase
   }
   //,

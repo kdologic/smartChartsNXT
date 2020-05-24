@@ -44,6 +44,7 @@
       return dataSet;
     }
 
+    let areaChart;
     window.onload = function () {
       SmartChartsNXT.ready(function () {
         SmartChartsNXT.debug = false;
@@ -197,7 +198,7 @@
                 return (
                   '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
                     '<td>' +
-                      '<span style="background-color:' + point.seriesColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +' Value : ' +
+                      '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +' Value : ' +
                     '</td>' +
                     '<td>' + point.value.toFixed(3) + '</td>' +
                   '</tr>'
@@ -266,7 +267,8 @@
             "series": [{
               "visible": true,
               "lineWidth": 1.5,
-              "bgColor": "#009688",
+              "lineColor": "#009688",
+              "areaColor": "#009688",
               "marker": true,
               "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
               "markerWidth": 8,

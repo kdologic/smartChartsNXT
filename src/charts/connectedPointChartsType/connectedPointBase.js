@@ -1,6 +1,6 @@
 'use strict';
 
-import { OPTIONS_TYPE as ENUMS } from './../../settings/globalEnums';
+import { OPTIONS_TYPE as ENUMS, CHART_TYPE } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import crossfilter from 'crossfilter2';
@@ -23,6 +23,7 @@ import ZoomoutBox from './../../components/zoomOutBox';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane';
 import dateFormat from 'dateformat';
+import StoreManager from './../../liveStore/storeManager';
 
 /**
  * connectedPointBase.js
@@ -93,18 +94,13 @@ class ConnectedPointBase extends Component {
           followPointer: false,
           grouped: true,
           pointerVicinity: 50
-        }
+        },
+        zoomWindow: {}
       }, this.props.chartOptions);
+
       this.CHART_CONST = utilCore.extends({}, this.props.chartConst);
 
-      for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
-        for (let j = 0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
-          this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
-        }
-        this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
-        this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d, i) => i);
-        this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d) => d.value);
-      }
+      this.processTurboData();
 
       this.state = {
         _maxSeriesLen: 0,
@@ -144,14 +140,14 @@ class ConnectedPointBase extends Component {
         },
         set windowLeftIndex(index) {
           this._windowLeftIndex = index;
-          this.leftOffset = index * 100 / (this.maxSeriesLenFS - 1);
+          this.leftOffset = this.maxSeriesLenFS <= 1 ?  0 : index * 100 / (this.maxSeriesLenFS - 1);
         },
         get windowLeftIndex() {
           return this._windowLeftIndex;
         },
         set windowRightIndex(index) {
           this._windowRightIndex = index;
-          this.rightOffset = index * 100 / (this.maxSeriesLenFS - 1);
+          this.rightOffset = this.maxSeriesLenFS <= 1 ?  0 : index * 100 / (this.maxSeriesLenFS - 1);
         },
         get windowRightIndex() {
           return this._windowRightIndex;
@@ -179,7 +175,7 @@ class ConnectedPointBase extends Component {
         clipRightOffset: 100,
         offsetLeftChange: 0,
         offsetRightChange: 0,
-        shouldFSRender: this.props.resizeComponent
+        shouldFSRender: this.props.globalRenderAll
       };
 
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
@@ -191,6 +187,7 @@ class ConnectedPointBase extends Component {
       this.scrollWindowClipId = utilCore.getRandomID();
       this.scrollOffsetClipId = utilCore.getRandomID();
       this.emitter = eventEmitter.getInstance(this.context.runId);
+      this.store = StoreManager.getStore(this.context.runId);
       this.onHScroll = this.onHScroll.bind(this);
       this.onHighlightPointMarker = this.onHighlightPointMarker.bind(this);
       this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -205,7 +202,7 @@ class ConnectedPointBase extends Component {
       this.init();
 
     } catch (ex) {
-      ex.errorIn = `Error in AreaChart with runId:${this.context.runId}`;
+      ex.errorIn = `Error in ${this.context.chartType} with runId:${this.context.runId}`;
       throw ex;
     }
   }
@@ -248,20 +245,7 @@ class ConnectedPointBase extends Component {
     }
 
     if (this.state.windowLeftIndex < 0 && this.state.windowRightIndex < 0) {
-      /* Will set initial zoom window */
-      if (this.CHART_OPTIONS.zoomWindow) {
-        if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
-          this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
-        }
-        if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLenFS) {
-          this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
-        } else {
-          this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
-        }
-      } else {
-        this.state.windowLeftIndex = 0;
-        this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
-      }
+      this.setWindowIndexes();
       this.state.clipLeftOffset = this.state.hScrollLeftOffset = this.state.leftOffset;
       this.state.clipRightOffset = this.state.hScrollRightOffset = this.state.rightOffset;
     }
@@ -270,6 +254,48 @@ class ConnectedPointBase extends Component {
     this.prepareDataSet(true);
     /* Prepare data set for chart area. */
     this.prepareDataSet();
+  }
+
+  setWindowIndexes() {
+    if (this.CHART_OPTIONS.zoomWindow) {
+      this.setLeftWindowIndex();
+      this.setRightWindowIndex();
+    } else {
+      if(!this.CHART_OPTIONS.zoomWindow.leftIndex) {
+        this.state.windowLeftIndex = 0;
+      }
+      if(!this.CHART_OPTIONS.zoomWindow.rightIndex) {
+        this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
+      }
+    }
+  }
+
+  setLeftWindowIndex() {
+    if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
+      this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
+    }else {
+      this.state.windowLeftIndex = 0;
+    }
+  }
+
+  setRightWindowIndex() {
+    if (this.CHART_OPTIONS.zoomWindow.rightIndex && this.CHART_OPTIONS.zoomWindow.rightIndex >= this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.rightIndex <= this.state.maxSeriesLenFS) {
+      this.state.windowRightIndex = this.CHART_OPTIONS.zoomWindow.rightIndex - 1;
+    } else {
+      this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
+    }
+  }
+
+  processTurboData() {
+    for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+      this.CHART_OPTIONS.dataSet.series[i].data = JSON.parse(JSON.stringify(this.CHART_OPTIONS.dataSet.series[i].data));
+      for (let j = 0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
+        this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
+      }
+      this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
+      this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d, i) => i);
+      this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d) => d.value);
+    }
   }
 
   prepareDataSet(isFS = false) {
@@ -305,9 +331,9 @@ class ConnectedPointBase extends Component {
       }
       maxSet.push(maxVal);
       minSet.push(minVal);
-      dataSet.series[i].color = dataSet.series[i].color || utilCore.getColor(i);
       dataSet.series[i].index = i;
       dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1.5 : dataSet.series[i].lineWidth;
+      this.setSeriesColor(i, dataSet.series[i]);
     }
     this.state[dataFor].dataSet = dataSet;
     this.state[dataFor].dataSet.xAxis.categories = categories;
@@ -316,6 +342,16 @@ class ConnectedPointBase extends Component {
     this.state[dataFor].yInterval = uiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
     ({ iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount } = this.state[dataFor].yInterval);
     this.state.gridHeight = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount);
+  }
+
+  setSeriesColor(index, series) {
+    if(!series.lineColor && !series.areaColor) {
+      series.lineColor = series.areaColor = utilCore.getColor(index);
+    }else if(!series.lineColor) {
+      series.lineColor = series.areaColor;
+    }else if(!series.areaColor) {
+      series.areaColor = series.lineColor;
+    }
   }
 
   copyDataset(dataSet) {
@@ -356,8 +392,22 @@ class ConnectedPointBase extends Component {
     this.CHART_CONST = utilCore.extends(this.CHART_CONST, nextProps.chartConst);
     this.CHART_DATA = utilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
-    this.state.shouldFSRender = nextProps.resizeComponent;
-    this.init();
+    this.state.shouldFSRender = nextProps.globalRenderAll;
+    if(this.store.getValue('globalRenderAll')) {
+      this.processTurboData();
+      this.init();
+      if(nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.leftIndex && nextProps.chartOptions.zoomWindow.leftIndex - 1 !== this.state.windowLeftIndex) {
+        this.setLeftWindowIndex();
+      }
+      if(nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.rightIndex && nextProps.chartOptions.zoomWindow.rightIndex - 1 !== this.state.windowRightIndex) {
+        this.setRightWindowIndex();
+      }
+      this.prepareDataSet();
+      this.state.clipLeftOffset = this.state.leftOffset = this.state.hScrollLeftOffset = this.state.windowLeftIndex * 100 / (this.state.maxSeriesLenFS - 1);
+      this.state.clipRightOffset = this.state.rightOffset = this.state.hScrollRightOffset = this.state.windowRightIndex * 100 / (this.state.maxSeriesLenFS - 1);
+    }else {
+      this.init();
+    }
   }
 
   componentDidMount() {
@@ -526,8 +576,8 @@ class ConnectedPointBase extends Component {
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       return (
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs' + series.index} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.bgColor || utilCore.getColor(series.index)} lineFillColor={series.bgColor || utilCore.getColor(series.index)}
-          gradient={typeof series.gradient == 'undefined' ? true : series.gradient} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
+          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor}
+          gradient={typeof series.gradient == 'undefined' ? true : series.gradient} lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || this.CHART_DATA.defaultMarkerWidth} markerHeight={series.markerHeight || this.CHART_DATA.defaultMarkerHeight} markerURL={series.markerURL || ''}
           centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
           getScaleX={(scaleX) => {
@@ -551,7 +601,7 @@ class ConnectedPointBase extends Component {
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede'
-            gradient={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
+            gradient={false} lineDropShadow={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             getScaleX={(scaleX) => {
@@ -561,7 +611,7 @@ class ConnectedPointBase extends Component {
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777'
-            gradient={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline}
+            gradient={false} lineDropShadow={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={this.scrollWindowClipId}>
@@ -663,7 +713,8 @@ class ConnectedPointBase extends Component {
       seriesName: series.name,
       seriesIndex: e.highlightedPoint.seriesIndex,
       pointIndex: e.highlightedPoint.pointIndex,
-      seriesColor: series.bgColor || utilCore.getColor(e.highlightedPoint.seriesIndex),
+      lineColor: series.lineColor,
+      areaColor: series.areaColor,
       dist: e.highlightedPoint.dist
     };
 
@@ -756,7 +807,7 @@ class ConnectedPointBase extends Component {
     return (
       `<tr  style='font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; color:${tipConfig.textColor || '#000'};'>
         <td>
-          <span style='background-color:${point.seriesColor}; display:inline-block; width:10px; height:10px;margin-right:5px;'></span>${point.seriesName}
+          <span style='background-color:${point.areaColor}; display:inline-block; width:10px; height:10px;margin-right:5px;'></span>${point.seriesName}
         </td>
         <td>${point.value}</td>
       </tr>`
@@ -814,7 +865,7 @@ class ConnectedPointBase extends Component {
     return this.state.cs.dataSet.series.map((data) => {
       return {
         label: data.name,
-        color: data.bgColor || utilCore.getColor(data.index),
+        color: data.areaColor,
         icon: data.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE,
         iconURL: data.markerURL || '',
         isToggled: !data.visible

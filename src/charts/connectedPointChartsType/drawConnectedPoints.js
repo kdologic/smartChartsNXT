@@ -1,5 +1,6 @@
 'use strict';
 
+import { CHART_TYPE } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import geom from './../../core/geom.core';
@@ -24,6 +25,7 @@ class DrawConnectedPoints extends Component {
     this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.gradId = 'sc-area-fill-grad-' + this.rid;
+    this.shadowId = 'sc-area-fill-shadow-' + this.rid;
     this.state = {
       marker: ~~this.props.marker,
       scaleX: 0,
@@ -110,14 +112,19 @@ class DrawConnectedPoints extends Component {
             </clipPath>
           </defs>
         }
-        {this.props.gradient &&
+        {this.props.lineDropShadow &&
+          uiCore.dropShadow(this.shadowId)
+        }
+        {this.context.chartType === CHART_TYPE.AREA_CHART && this.props.gradient &&
           this.createGradient(this.gradId)
         }
-        <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor}
-          d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
-        </path>
+        {this.context.chartType === CHART_TYPE.AREA_CHART &&
+          <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor}
+            d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
+          </path>
+        }
         {typeof this.props.lineStrokeWidth !== 'undefined'  &&
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} fill='none' d={this.state.linePath.join(' ')} stroke-width={this.props.lineStrokeWidth || 0} opacity='1'></path>
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.lineFillColor || this.props.areaFillColor} />

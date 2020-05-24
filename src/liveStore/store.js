@@ -19,6 +19,20 @@ class Store {
   setStore(state) {
     this._state = state;
   }
+
+  getValue(key) {
+    return this._state[key];
+  }
+
+  setValue(key, value) {
+    return this._state[key] = value;
+  }
+
+  removeValue(key) {
+    if(typeof key != 'undefined') {
+      delete this._state[key];
+    }
+  }
 }
 
 export default Store;

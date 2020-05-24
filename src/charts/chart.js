@@ -4,7 +4,7 @@ import Validator from './../validators/validator';
 import { validationRules } from './../settings/validationRules';
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
-import storeManager from './../liveStore/storeManager';
+import StoreManager from './../liveStore/storeManager';
 import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
@@ -39,7 +39,8 @@ class Chart {
 
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
-      this.config = storeManager.getStore(storeManager.createStore(this.runId, opts));
+      const storeId = StoreManager.createStore(this.runId, opts);
+      this.config = StoreManager.getStore(storeId);
       this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
       window.addEventListener('resize', this.onResize.bind(this), false);
       $SC.debug && console.debug(this.core);
@@ -61,7 +62,7 @@ class Chart {
     if (this.errors.length) {
       return this.logErrors(this.config._state);
     }
-    this.events.emit('render', this.config._state);
+    this.events.emitSync('render', this.config._state);
   }
 
   logErrors(opts, ex) {

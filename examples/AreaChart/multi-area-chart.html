@@ -35,7 +35,7 @@
             "width": "90%",                               // [ default : 90%] x % value accepted
             "height": "",                                 // [ default : ""]  x % value accepted
             "textAlign": "center",                        // [ left | default: center | right ]
-            "textColor": "crimson",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "textColor": "#0076A3",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
             "borderColor":"none",                         // [ default : none ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
             "bgColor": "none",                            // [ default : none ]
@@ -113,7 +113,7 @@
               "lineThickness": 1,                         // [ default: 1 ]
               "lineOpacity": 0.2                          // [ default: 0.2 ]
             },
-           "bgColor": 'skyblue',                          // [ default: none ]
+           "bgColor": '#9DE5FF',                          // [ default: none ]
            "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, // [ default: none ]
            "bgOpacity": 0.2                               // [ default: 0.1 ]   
           },
@@ -186,7 +186,7 @@
                 return (
                   '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
                     '<td>' + 
-                      '<span style="background-color:' + point.seriesColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                      '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
                        point.seriesName +
                     '</td>' +
                     '<td>' + (point.value) + '</td>' +
@@ -259,7 +259,8 @@
                 "name": 'Raphael',                        // [ required : string ]
                 "lineWidth": 1.5,                         // [ default: 1.5 ]
                 "lineOpacity": 1,                         // [ default: 1 ]
-                "bgColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ]
+                "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,  // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
+                "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,  // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
                 "areaOpacity": 0.3,                       // [ default: 0.2]
                 "marker": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
                 "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE, // [ default: $SC.ENUMS.ICON_TYPE.CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM]
@@ -279,7 +280,7 @@
                 "name": 'Clara',
                 "lineWidth": 1.5,
                 "lineOpacity": 1,
-                "bgColor": $SC.COLOR_STRINGS.RUSCLE_RED,
+                "areaColor": '#008000',
                 "areaOpacity": 0.5,
                 "marker": true,
                 "markerType": $SC.ENUMS.ICON_TYPE.DIAMOND,
@@ -327,7 +328,7 @@
   </script>
 </head>
 <!-- overflow:hidden; -->
-<body style='background: bisque;'>
+<body style='background: #0076A3;'>
   <div>
     <div id='chartContainer' style="width:100%; height:600px;">
     </div>

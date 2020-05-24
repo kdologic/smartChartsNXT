@@ -59,7 +59,7 @@ export const OPTIONS_TYPE = {
 
 export const CHART_TYPE = {
   AREA_CHART: 'AreaChart',
-  //LINE_CHART: 'LineChart',
+  LINE_CHART: 'LineChart',
   //STEP_CHART: 'StepChart',
   PIE_CHART: 'PieChart',
   DONUT_CHART: 'DonutChart'

@@ -7,6 +7,7 @@ import utilCore from '../core/util.core';
 import uiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import defaultConfig from './../settings/config';
+import StoreManager from './../liveStore/storeManager';
 
 /**
  * horizontalScroller.js
@@ -32,6 +33,7 @@ class HorizontalScroller extends Component {
     super(props);
     this.selectedHandler = undefined;
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.store = StoreManager.getStore(this.context.runId);
     let offset = this.calcOffset(props);
     this.rangeLabelTexPadding = 5;
     this.rangeLabelBoxHeight = 30;
@@ -83,11 +85,19 @@ class HorizontalScroller extends Component {
   }
 
   propsWillReceive(nextProps) {
+    const globalRenderAll = this.store.getValue('globalRenderAll');
     let widthChangePercent = ((nextProps.width - this.props.width) / this.props.width) * 100;
     if (widthChangePercent) {
       this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset * widthChangePercent / 100);
       this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth * widthChangePercent / 100);
       this.state.rangeTipPoints = [];
+    }else if(globalRenderAll) {
+      let offset = this.calcOffset(nextProps);
+      this.state.leftOffset = offset.leftOffset;
+      this.state.leftOffsetPercent = offset.leftOffsetPercent;
+      this.state.rightOffset = offset.rightOffset;
+      this.state.rightOffsetPercent = offset.rightOffsetPercent;
+      this.state.windowWidth = offset.windowWidth;
     }
   }
 

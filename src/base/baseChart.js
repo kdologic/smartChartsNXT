@@ -11,6 +11,7 @@ import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';
 import Menu from './../components/menu';
 import LoaderView from './../components/loaderView';
+import StoreManager from './../liveStore/storeManager';
 
 /**
  * baseChart.js
@@ -24,6 +25,7 @@ class BaseChart extends Component {
     try {
       super(props);
       this.chartType = this.props.opts.type;
+      this.store = StoreManager.getStore(this.props.runId);
       this.CHART_OPTIONS = utilCore.extends({
         menu: {
           mainMenu: {
@@ -57,7 +59,7 @@ class BaseChart extends Component {
         menuIconWidth: 10,
         menuExpanded: false,
         menuIconFocused: false,
-        resizeComponent: false
+        globalRenderAll: false
       };
       this.titleId = utilCore.getRandomID();
       this.descId = utilCore.getRandomID();
@@ -116,7 +118,8 @@ class BaseChart extends Component {
   }
 
   componentDidUpdate() {
-    this.state.resizeComponent = false;
+    this.state.globalRenderAll = false;
+    this.store.setValue('globalRenderAll', false);
   }
 
   render() {
@@ -175,7 +178,7 @@ class BaseChart extends Component {
         }
 
         <g id={`${this.getChartId()}_cont`}>
-          <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
+          <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
         </g>
 
         {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
@@ -328,7 +331,7 @@ class BaseChart extends Component {
   }
 
   onResizeComponent(e) {
-    this.setState({ resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight });
+    this.setState({ globalRenderAll: true, width: e.data.targetWidth, height: e.data.targetHeight });
   }
 
   onRenderComponent(newOpts) {
@@ -336,8 +339,9 @@ class BaseChart extends Component {
     if(this.validationErrors.length) {
       throw this.validationErrors;
     }
-    this.CHART_OPTIONS = utilCore.extends({}, newOpts, { width: 1, height: 1 });
-    this.update();
+    this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, newOpts, { width: 1, height: 1 });
+    this.store.setValue('globalRenderAll', true);
+    this.setState({ globalRenderAll: true});
   }
 }
 

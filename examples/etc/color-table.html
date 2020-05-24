@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
   <style>
     .color-cell {
       font-family: 'Roboto', sans-serif;
@@ -36,7 +35,7 @@
 
     <script>
       async function fetchColorData() {
-        const response = await fetch('./color_codes.json');
+        const response = await fetch('./../static/data/color_codes.json');
         const colors = await response.json();
         return colors;
       }
@@ -111,6 +110,7 @@
       </tbody>
     </table>
   </div>
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
     
 </body>
 </head>
