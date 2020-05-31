@@ -15,40 +15,9 @@ import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create tooltip area for the chart.
- * @extends Component.
- * @example
- config
-"tooltip": {
-  "enable": true,                   // [default: true | false ]
-  "followPointer": false,           // [true | default: false ]  Note: This option only available when tooltip are grouped.
-  "grouped": true,                  // [default: true | false ]
-  "pointerVicinity": 10,            // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
-  "content": {
-    "header": function(pointSet, index, tipConfig) {
-      return (...);
-    },
-    "body": function(pointSet, index, tipConfig) {
-      return (...);
-    },
-    "footer": function(pointSet, index, tipConfig) {
-      return (...);
-    }
-  },
-  "headerTextColor": "greenyellow",   // [ default: #fff ]
-  "headerBgColor": "#555",            // [ default: #555 ]
-  "textColor": "yellow",              // [ default: #000 ]
-  "bgColor": "green",                 // [ default: #fff ]
-  "footerTextColor": "greenyellow",   // [ default: #fff ]
-  "footerBgColor": "#555",            // [ default: #555 ]
-  "fontSize": 14,                     // [ default: 14 ]
-  "fontFamily": "Lato",               // [ default: Lato ]
-  "xPadding": 0,                      // [ default: 0 ]
-  "yPadding": 0,                      // [ default: 0 ]
-  "borderColor": "none",              // [ default: point.seriesColor ]
-  "borderWidth": 2,                   // [ default: 3 ]
-  "opacity": 0.8,                     // [ default: 0.8 ]
-}
+ * @extends Component
  */
+
 class Tooltip extends Component {
   constructor(props) {
     super(props);
@@ -94,7 +63,10 @@ class Tooltip extends Component {
       yPadding: Number(props.opts.yPadding) || 0,
       strokeWidth: typeof props.opts.borderWidth === 'undefined' ? 3 : props.opts.borderWidth,
       opacity: typeof props.opts.opacity === 'undefined' ? 0.8 : props.opts.opacity,
-      followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer
+      followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer,
+      borderRadius: typeof props.opts.borderRadius === 'undefined' ? 0 : props.opts.borderRadius,
+      anchorBaseWidth: typeof props.opts.anchorWidth === 'undefined' ? 8 : props.opts.anchorWidth, // width of the anchor
+      anchorHeight: typeof props.opts.anchorHeight === 'undefined' ? 10 : props.opts.anchorHeight  // height of the anchor
     };
   }
 
@@ -166,7 +138,8 @@ class Tooltip extends Component {
       tipContainer.push(<g instanceId={this.props.instanceId} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
         {this.getTipStyle(i)}
         <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
-          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} >
+          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}
+          anchorBaseWidth={this.config.anchorBaseWidth} cornerRadius={this.config.borderRadius}>
         </SpeechBox>
         <g class='sc-text-tooltip-grp'>
           {utilCore.isIE ?
@@ -182,7 +155,8 @@ class Tooltip extends Component {
               fontSize: this.config.fontSize + 'px',
               fontFamily: this.config.fontFamily,
               overflow: 'hidden',
-              opacity: this.config.opacity
+              opacity: this.config.opacity,
+              borderRadius: this.config.borderRadius + 'px'
             }}>
           </x-div>) :
           (
@@ -215,7 +189,8 @@ class Tooltip extends Component {
           fontSize: this.config.fontSize + 'px',
           fontFamily: this.config.fontFamily,
           overflow: 'hidden',
-          opacity: this.config.opacity
+          opacity: this.config.opacity,
+          borderRadius: this.config.borderRadius + 'px'
         }
       }}
     </Style>);
@@ -290,7 +265,7 @@ class Tooltip extends Component {
       let xPadding = this.config.xPadding;
       let yPadding = this.config.yPadding;
       let strContents = '';
-      let delta = 10; // is anchor height
+      let delta = this.config.anchorHeight; // this is anchor height
       let inst;
 
       if (pointData instanceof Array) {
@@ -387,11 +362,11 @@ class Tooltip extends Component {
               X2: newState.topLeft.x + newState.contentWidth,
               Y2: newState.topLeft.y + newState.contentHeight
             }, {
-                X1: oldTip.topLeft.x,
-                Y1: oldTip.topLeft.y,
-                X2: oldTip.topLeft.x + oldTip.contentWidth,
-                Y2: oldTip.topLeft.y + oldTip.contentHeight
-              });
+              X1: oldTip.topLeft.x,
+              Y1: oldTip.topLeft.y,
+              X2: oldTip.topLeft.x + oldTip.contentWidth,
+              Y2: oldTip.topLeft.y + oldTip.contentHeight
+            });
             if (ol) {
               if (newState.topLeft.y < oldTip.topLeft.y) {
                 newState.topLeft.y -= 10;

@@ -170,6 +170,8 @@
             "followPointer": false,                       // [true | default: false ] Note: This option only available when tooltip are grouped.
             "grouped": true,                              // [default: true | false ]
             "pointerVicinity": 50,                        // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+            "anchorWidth": 8,                             // [default: 8 ]
+            "anchorHeight": 10,                           // [default: 10 ]
             "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [default: $SC.ENUMS.TOOLTIP_POSITION.DYNAMIC | STATIC ] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
             "top": 120,                                   // [default: 0 ]
             "left": 100,                                  // [default: 0 ]
@@ -185,11 +187,11 @@
                 let point = pointSet[index];
                 return (
                   '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
-                    '<td>' + 
+                    '<td style="padding: 5px">' + 
                       '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
                        point.seriesName +
                     '</td>' +
-                    '<td>' + (point.value) + '</td>' +
+                    '<td style="padding: 5px">' + (point.value) + '</td>' +
                   '</tr>'
                 );
               },
@@ -213,6 +215,7 @@
             "yPadding": 0,                                // [ default: 0 ] 
             "borderColor": "none",                        // [ default: point.seriesColor ]
             "borderWidth": 2,                             // [ default: 3 ]
+            "borderRadius": 0,                            // [ default: 0 ]
             "opacity": 0.8,                               // [ default: 0.8 ]
           },
           "horizontalScroller": {

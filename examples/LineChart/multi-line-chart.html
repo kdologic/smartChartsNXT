@@ -7,8 +7,8 @@
 
   <script>
 	  function getData(n) {
-      var arr = [], i, x = new Date(), a, b, c, spike;
-      for (i = 0; i < n; i++, x.setDate(x.getDate() + i)) {
+      var arr = [], i, x = new Date(), a, b, c, spike, oneDay = 1000*60*60*24;
+      for (i = 0; i < n; i++, x.setDate(x.getDate() + 1)) {
         if (i % 100 === 0) {
           a = 2 * Math.random();
         }
@@ -89,7 +89,7 @@
             }
           },
           "subtitle": {
-            "text":"SmartchartsNXT can efficiently process a very large dataset > 1000 points",
+            "text":"Data generated with random data set",
             "top": 50,             
             "left": "50%",         
             "width": "95%",        
@@ -268,7 +268,7 @@
               "name": 'Dataset 1',
               "visible": true,
               "lineWidth": 1.5,
-              "lineColor": "#7CB0A1",
+              "lineColor": "#014B43",
               "marker": true,
               "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
               "markerWidth": 8,

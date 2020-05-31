@@ -24,7 +24,7 @@
           spike = 0;
         }
         arr.push({
-          label: x.getTime(), 
+          label: i, //x.getTime(), 
           value: 2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
         });
       }
@@ -236,7 +236,7 @@
               "title": "Date",
               "prepend": "",
               "append": "",
-              "parseAsDate": true,
+              "parseAsDate": false,
               "dateFormat": "dd mmm",
               "labelRotate": 0,
               "intervalThreshold": 70,
@@ -268,12 +268,12 @@
               "name": 'Random Data',
               "visible": true,
               "lineWidth": 1.5,
-              "lineColor": "#CAE00D",
+              "lineColor": "#E32636",
               "marker": true,
               "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
               "markerWidth": 8,
               "spline": false,
-              "dropShadow": true,
+              "dropShadow": false,
               "lineOpacity": 1,
               "animated": true,
               "data": getData(2000) 
