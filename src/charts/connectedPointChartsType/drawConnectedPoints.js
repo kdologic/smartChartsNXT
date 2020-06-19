@@ -54,8 +54,9 @@ class DrawConnectedPoints extends Component {
     this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
     this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
     this.prepareData(this.props);
-    this.state.linePath = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
-    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
+    this.state.lineSegments = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
+    this.state.linePath = this.state.lineSegments.path;
+    this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
   }
 
   shouldComponentUpdate() {
@@ -85,8 +86,9 @@ class DrawConnectedPoints extends Component {
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
-    this.state.linePath = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
-    this.state.areaPath = this.getAreaPath(this.state.linePath.slice());
+    this.state.lineSegments = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
+    this.state.linePath = this.state.lineSegments.path;
+    this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
@@ -127,47 +129,99 @@ class DrawConnectedPoints extends Component {
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.lineFillColor || this.props.areaFillColor} />
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.areaFillColor || this.props.lineFillColor} />
         }
       </g>
     );
   }
 
-  getAreaPath(linePath) {
-    linePath.push('L', this.state.pointSet[this.state.pointSet.length - 1].x, this.state.baseLine, 'L', this.state.pointSet[0].x, this.state.baseLine, 'Z');
+  getAreaPath(lineSegments) {
+    let linePath = [];
+    for(let i = 0;i<lineSegments.length;i++) {
+      let segment = lineSegments[i];
+      if(segment.length === 0) {
+        continue;
+      }
+      let startSegIndex = i === 0 ? 0 : this.state.lineSegments.segmentIndexes[i-1]+1;
+      let endSegIndex = this.state.lineSegments.segmentIndexes[i];
+      linePath.push(...segment);
+      linePath.push('L', this.state.pointSet[endSegIndex - 1].x, this.state.baseLine, 'L', this.state.pointSet[startSegIndex].x, this.state.baseLine, 'Z');
+    }
     return linePath;
   }
 
   getLinePath(props) {
     let path = [];
+    let pathSegment = [];
+    let segmentIndexes = [], sIndex = 0;
     this.state.pointSet = this.state.valueSet.map((data, i) => {
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
-      if (i > 0) {
-        path.push('L', point.x, point.y);
+      if(data === null) {
+        sIndex = -1;
+        segmentIndexes.push(i);
+        path.push(pathSegment.slice());
+        pathSegment = [];
+        point.isHidden = true;
+      }else {
+        if (sIndex === 0) {
+          pathSegment.push('M', point.x, point.y);
+        }else {
+          pathSegment.push('L', point.x, point.y);
+        }
       }
+      sIndex++;
       point.index = i;
       return point;
     });
-    path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
-    return path;
+    path.push(pathSegment);
+    segmentIndexes.push(this.state.pointSet.length);
+    return {
+      pathSegments: path,
+      path: path.flat(),
+      segmentIndexes
+    };
   }
 
   getCurvedLinePath(props) {
-    let path = [];
+    let path = [], pointSegments = [];
+    let pathSegment = [];
+    let segmentIndexes = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
+      if(data === null) {
+        segmentIndexes.push(i);
+        pointSegments.push(pathSegment.slice());
+        pathSegment = [];
+        point.isHidden = true;
+      }else {
+        pathSegment.push(point);
+      }
       point.index = i;
       return point;
     });
-    path = this.state.pointSet.length === 0 ? [] : (this.state.pointSet.length === 1 ? ['L', this.state.pointSet[0].x, this.state.pointSet[0].y] : geom.catmullRomFitting(this.state.pointSet, 0.1));
-    path.unshift('M', this.state.pointSet[0].x, this.state.pointSet[0].y);
-    return path;
+    pointSegments.push(pathSegment);
+    for(let i = 0; i < pointSegments.length; i++) {
+      let pointSegment = pointSegments[i];
+      if(pointSegment.length === 0) {
+        path.push([]);
+      }else if(pointSegment.length === 1) {
+        path.push(['M', this.state.pointSet[0].x, this.state.pointSet[0].y]);
+      }else {
+        path.push(geom.catmullRomFitting(pointSegment, 0.1)) ;
+      }
+    }
+    segmentIndexes.push(this.state.pointSet.length);
+    return {
+      pathSegments: path,
+      path: path.flat(),
+      segmentIndexes
+    };
   }
 
   createGradient(gardId) {

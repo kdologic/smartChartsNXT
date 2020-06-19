@@ -1,42 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Population Growth Analysis with Line Chart | SmartChartsNXT</title>
+  <title>Missing or null value - Area Chart | SmartChartsNXT</title>
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
   <script>
     window.onload = function () {
-    fetch('./../static/data/population-growth-data.json')
-      .then(function (response) {
-        return response.json();
-      })
-      .then(function (data) {
-        displayChart(data);
-      });
-    }
-  </script>
-  <script>
-    let lineChart;
+      displayChart();
+    };
+
+    let areaChart;
     function displayChart(dataSet) {
       SmartChartsNXT.ready(function () {
-        lineChart = new SmartChartsNXT.Chart({
-          "type": $SC.CHART_TYPE.LINE_CHART,
+        areaChart = new SmartChartsNXT.Chart({
+          "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "title": {
-            "text":"Population growth (annual %)",
-            "left": 100,
-            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT,
-            "textColor": "#0076A3",
+            "text":"Seasonal And Annual Rainfall (in mm)",
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
+            "textColor": "#54626F",
             "fontSize": 22
           },
           "subtitle": {
-            "text":"Data courtesy: THE WORLD BANK (www.worldbank.org)",
-            "left": 100,
-            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT,
+            "text":"*missing data will create discontinuous area",
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
             "textColor": "#B2BEB5",
             "fontSize": 12
           },
-          "bgColor": "#F3FFD8",
+          "bgColor": "#effeff",
           "gridBox": {
             "vertical": {
               "enable": false
@@ -53,6 +44,7 @@
             "anchorHeight": 10, 
             "borderWidth": 0,
             "borderRadius": 10,
+            "headerBgColor": "#54626F",
             "content": {
               "header": function(pointSet, index, tipConfig) {
                 return (
@@ -69,7 +61,7 @@
                       '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
                        point.seriesName +
                     '</td>' +
-                    '<td style="padding: 5px">' + (point.value.toFixed(3)) + '</td>' +
+                    '<td style="padding: 5px">' + (point.value === null ? '-' : point.value) + ' mm</td>' +
                   '</tr>'
                 );
               }
@@ -81,38 +73,42 @@
           "dataSet": {
             "xAxis": {
               "title": "Year",
-              "intervalThreshold": 80,
+              "intervalThreshold": 50,
             },
             "yAxis": {
-              "title": "Percent (%)",
-              "zeroBase": false,
+              "title": "Rainfall in (mm)",
+              "zeroBase": true,
             },
             "series": [{
-              "name": "World",
-              "lineWidth": 0.5,
+              "name": "Rainfall",
+              "lineWidth": 3,
               "lineColor": "#0076A3",
-              "areaOpacity": 0.3,
-              "markerWidth": 8,
+              "areaColor": '#800020',
+              "areaOpacity": 0.6,
+              "markerWidth": 10,
               "spline": false,
               "animated": true,
-              "data": dataSet[0]
-            },{
-              "name": "India",
-              "lineWidth": 1.5,
-              "areaOpacity": 0.3,
-              "markerWidth": 8,
-              "spline": false,
-              "animated": true,
-              "data": dataSet[1]
+              "gradient": false,
+              "data": [
+                {"label": '1999', "value": 1207.8}, {"label": '2000', "value": 1295.3}, {"label": '2001', "value": 1242.4}, {"label": '2002', "value": 1182.9},
+                {"label": '2003', "value": null}, {"label": '2004', "value": 1208.8}, {"label": '2005', "value": 1116.6}, {"label": '2006', "value": 1035.4},
+                {"label": '2007', "value": 1105.2}, {"label": '2008', "value": 981.9}, {"label": '2009', "value": 1243.6}, {"label": '2010', "value": 1080.5},
+                {"label": '2011', "value": 1208.3}, {"label": '2012', "value": 1161.6}, {"label": '2013', "value": null}, {"label": '2014', "value": 1118.0},
+                {"label": '2015', "value": 953.7}, {"label": '2016', "value": 1215.5}, {"label": '2017', "value": 1116.3}, {"label": '2018', "value": 1054.7},
+                {"label": '2019', "value": 1225.6}
+              ]
             }]
           }
         });
       });
     }
+        
+
+    
   </script>
 </head>
 
-<body style='background: #50595E;'>
+<body style='background: #54626F;'>
   <div>
     <div id='chartContainer' style="width:100%; height:600px;">
     </div>

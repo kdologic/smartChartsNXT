@@ -87,7 +87,7 @@ class VerticalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark
       }
     };
-    switch(config.labelAlign || $SC.ENUMS.LABEL_ALIGN.RIGHT) {
+    switch(config.labelAlign || $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT) {
       default:
       case 'right': this.config.labelAlign = 'end';break;
       case 'left': this.config.labelAlign = 'start';break;

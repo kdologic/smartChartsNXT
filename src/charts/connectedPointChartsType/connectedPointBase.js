@@ -227,7 +227,7 @@ class ConnectedPointBase extends Component {
     this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
     this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
 
-    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === $SC.ENUMS.LABEL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
+    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === $SC.ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
       this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth;
     }
 
@@ -601,7 +601,7 @@ class ConnectedPointBase extends Component {
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede'
-            gradient={false} lineDropShadow={false} opacity={1} spline={typeof series.spline === 'undefined' ? true : series.spline}
+            gradient={false} lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             getScaleX={(scaleX) => {
@@ -611,7 +611,7 @@ class ConnectedPointBase extends Component {
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777'
-            gradient={false} lineDropShadow={false} opacity='1' spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
+            gradient={false} lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={this.scrollWindowClipId}>

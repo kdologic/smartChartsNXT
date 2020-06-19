@@ -236,7 +236,7 @@ class GeomCore {
     } else {
       let p0, p1, p2, p3, bp1, bp2, d1, d2, d3, A, B, N, M;
       let d3powA, d2powA, d3pow2A, d2pow2A, d1pow2A, d1powA;
-      let d = [Math.round(data[0].x), Math.round(data[0].y)];
+      let d = ['M', Math.round(data[0].x), Math.round(data[0].y)];
 
       let length = data.length;
       for (let i = 0; i < length - 1; i++) {

@@ -2,7 +2,7 @@
  * lineChart.config.js
  * @createdOn:14-May-2020
  * @author:SmartChartsNXT
- * @description:This will be the default Line chart config for load in BaseChart.
+ * @description:This will be the default Line chart config and validation rule set.
  */
 
 import { CHART_TYPE } from '../../settings/globalEnums';
@@ -20,7 +20,7 @@ export const validationRules = {
     type: ['object'],
     values: '*',
     requiredErrMsg: 'Missing required field option.dataSet !',
-    typeErrMsg: 'Invalid type in option.dataSet ! Should be typeof object',
+    typeErrMsg: 'Invalid type in option.dataSet ! Should be typeof Object',
     valuesErrMsg:'',
     rules: {
       series: {
@@ -31,8 +31,8 @@ export const validationRules = {
             isRequired: true,
             type: ['string'],
             values: '*',
-            requiredErrMsg: 'Required field option.dataSet.series[[l1]].name is missing or blank string !',
-            typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].name ! Should be typeof string',
+            requiredErrMsg: 'Required field option.dataSet.series[[l1]].name is missing or blank String !',
+            typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].name ! Should be typeof String',
             valuesErrMsg:''
           },
           data: {
@@ -43,26 +43,26 @@ export const validationRules = {
                 isRequired: true,
                 type: ['string', 'number'],
                 values: '*',
-                requiredErrMsg: 'Required field option.dataSet.series[[l1]].data[[l2]].label is missing or blank string !',
-                typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data[[l2]].label ! Should be typeof string',
+                requiredErrMsg: 'Required field option.dataSet.series[[l1]].data[[l2]].label is missing or blank String !',
+                typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data[[l2]].label ! Should be typeof String or Number',
                 valuesErrMsg:''
               },
               value:{
                 isRequired: true,
-                type: ['string', 'number'],
+                type: ['string', 'number', 'null'],
                 values: '*',
                 requiredErrMsg: 'Required field option.dataSet.series[[l1]].data[[l2]].value is missing or blank string !',
-                typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data[[l2]].value ! Should be typeof string',
+                typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data[[l2]].value ! Should be typeof String, Number or null',
                 valuesErrMsg:''
               }
             },
-            requiredErrMsg: 'Required field option.dataSet.series[[l1]].data is missing or blank string !',
-            typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data ! Should be typeof array',
+            requiredErrMsg: 'Required field option.dataSet.series[[l1]].data is missing or blank String !',
+            typeErrMsg: 'Invalid type in option.dataSet.series[[l1]].data ! Should be typeof Array',
             valuesErrMsg:''
           }
         },
         requiredErrMsg: 'Missing required field option.dataSet.series !',
-        typeErrMsg: 'Invalid type in option.dataSet.series ! Should be typeof array',
+        typeErrMsg: 'Invalid type in option.dataSet.series ! Should be typeof Array',
         valuesErrMsg:''
       }
     }

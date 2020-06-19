@@ -55,6 +55,9 @@ class DataPoints extends Component {
       <g class='sc-data-points'>
         {
           this.state.pointSet.map((point) => {
+            if(point.isHidden) {
+              return (<g class='sc-icon sc-hide'></g>);
+            }
             return this.drawPoint(point);
           })
         }
@@ -109,7 +112,7 @@ class DataPoints extends Component {
   }
 
   normalize(e) {
-    if (this.props.instanceId !== e.seriesIndex) {
+    if (this.props.instanceId !== e.seriesIndex || !this.state.icons[this.state.highlightedIndex]) {
       return;
     }
     if (this.props.opacity === 0) {
@@ -124,7 +127,7 @@ class DataPoints extends Component {
 
   doHighlight(e) {
     let index = e.highlightedPoint.pointIndex;
-    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
+    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId || !this.state.icons[index]) {
       return;
     }
     if (this.props.opacity === 0) {

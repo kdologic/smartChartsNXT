@@ -15,12 +15,16 @@ class Validator {
     let errors = [];
     for (let prop in rules) {
       const rule = rules[prop];
-      if (rule.isRequired && (!opts.hasOwnProperty(prop) || opts[prop].toString() === '')) {
+      if (rule.isRequired && (!opts.hasOwnProperty(prop) || JSON.stringify(opts[prop]) === undefined || opts[prop] === '')) {
         errors.push(new CError(rule.requiredErrMsg));
       } else {
         if ((!Array.isArray(opts[prop]) && rule.type.indexOf(typeof opts[prop]) === -1 )|| (Array.isArray(opts[prop]) && rule.type.indexOf('array') === -1)) {
-          errors.push(new CError(rule.typeErrMsg));
-        } else if (rule.type.indexOf('object') > -1 && rule.hasOwnProperty('rules')) {
+          if(opts[prop] === null && rule.type.indexOf('null') === -1) {
+            errors.push(new CError(rule.typeErrMsg));
+          }else if(opts[prop] !== null) {
+            errors.push(new CError(rule.typeErrMsg));
+          }
+        }else if (rule.type.indexOf('object') > -1 && rule.hasOwnProperty('rules')) {
           errors.push.apply(errors, this.validate(rule['rules'], opts[prop], label));
         } else if (rule.type.indexOf('array') > -1) {
           for (let i = 0; i < opts[prop].length; i++) {

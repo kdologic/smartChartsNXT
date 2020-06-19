@@ -29,16 +29,16 @@
           "targetElem": "chartContainer",                 // [required]
           "description": "A javascript area chart that visualize the data of sales", // [default: ""]
           "title": {
-            "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales",     // [ default : "" ]
+            "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales", // [ default : "" ]
             "top": 20,                                    // [ default : 20]  x % value accepted
             "left": "50%",                                // [ default : 50%] x % value accepted
             "width": "90%",                               // [ default : 90%] x % value accepted
             "height": "",                                 // [ default : ""]  x % value accepted
-            "textAlign": "center",                        // [ left | default: center | right ]
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,// [ $SC.ENUMS.HORIZONTAL_ALIGN.(left | default: center | right) ]
             "textColor": "#0076A3",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
-            "borderColor":"none",                         // [ default : none ]
+            "borderColor":"none",                         // [ default : 'none' ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
-            "bgColor": "none",                            // [ default : none ]
+            "bgColor": "none",                            // [ default : 'none' ]
             "padding": 0,                                 // [ default : 0 ]
             "fontSize": 20,                               // [ default : $SC.GLOBAL.theme.fontSizeLarge ]
             "style": {        
@@ -69,7 +69,7 @@
             "left": "50%",                                // [ default : 50%] x % value accepted
             "width": "95%",                               // [ default : 95%] x % value accepted
             "height": "",                                 // [ default : ""]  x % value accepted
-            "textAlign": "center",                        // [ left | default: center | right ]
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,// [ $SC.ENUMS.HORIZONTAL_ALIGN.(left | default: center | right) ]
             "textColor": "#9c27b0",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
             "borderColor":"none",                         // [ default : none ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
@@ -101,26 +101,26 @@
           "gridBox": {
             "vertical": {
               "enable": true,                             // [ default: true | false ]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
               "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
               "lineThickness": 1,                         // [ default: 1 ]
               "lineOpacity": 0.2                          // [ default: 0.2 ]
             },
             "horizontal": {
               "enable": true,                             // [ default: true | false ]
-              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,    // [ default: $SC.ENUMS.LINE_STYLE.SOLID | $SC.ENUMS.LINE_STYLE.DASHED ]
+              "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,    // [ $SC.ENUMS.LINE_STYLE.(default: SOLID | DASHED) ]
               "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
               "lineThickness": 1,                         // [ default: 1 ]
               "lineOpacity": 0.2                          // [ default: 0.2 ]
             },
            "bgColor": '#9DE5FF',                          // [ default: none ]
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, // [ default: none ]
+           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, // [ $SC.ENUMS.GRADIENT_STYLE.(LINEAR_VERTICAL | default: NONE | LINEAR_HORIZONTAL | RADIAL) ]
            "bgOpacity": 0.2                               // [ default: 0.1 ]   
           },
           "pointerCrosshair": {
             "vertical": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
+              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(default: FULL | IN_POINT | NONE) ]
               "lineColor": "#000",                        // [ default: #000 ]
               "lineWidth": 1,                             // [ default: 1 ]
               "lineOpacity": 1,                           // [ default: 1 ]
@@ -129,8 +129,8 @@
               "labelOpacity": 1                           // [ default: 1 ]
             },
             "horizontal": {
-              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
+              "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
+              "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(default: FULL | IN_POINT | NONE) ]
               "lineColor": "#000",                        // [ default: #000 ]
               "lineWidth": 1,                             // [ default: 1 ]
               "lineOpacity": 1,                           // [ default: 1 ]
@@ -144,9 +144,9 @@
             "top": 70,                                    // [ default: 70 ]
             "left": 100,                                  // [ default: 100 ]
             "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: $SC.ENUMS.ALIGNMENT.HORIZONTAL | $SC.ENUMS.ALIGNMENT.VERTICAL ]
-            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: $SC.ENUMS.DISPLAY.INLINE | $SC.ENUMS.DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-            "float": $SC.ENUMS.FLOAT.NONE,                // [ $SC.ENUMS.FLOAT.TOP | $SC.ENUMS.FLOAT.BOTTOM | $SC.ENUMS.FLOAT.LEFT | $SC.ENUMS.FLOAT.RIGHT | default: $SC.ENUMS.FLOAT.NONE ]
+            "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ $SC.ENUMS.ALIGNMENT.(default: HORIZONTAL | VERTICAL) ]
+            "display": $SC.ENUMS.DISPLAY.INLINE,          // [ $SC.ENUMS.DISPLAY.(default: INLINE | BLOCK) ] Note: block will take entire row but inline only take space as much required
+            "float": $SC.ENUMS.FLOAT.NONE,                // [ $SC.ENUMS.FLOAT.(TOP | BOTTOM | LEFT | RIGHT | default: NONE) ]
             "textColor": "#000",                          // [ default: $SC.GLOBAL.theme.fontColorDark ]
             "bgColor": "none",                            // [ default: none ]
             "hoverColor":"#ddd",                          // [ default: none ]
@@ -172,7 +172,7 @@
             "pointerVicinity": 50,                        // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
             "anchorWidth": 8,                             // [default: 8 ]
             "anchorHeight": 10,                           // [default: 10 ]
-            "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [default: $SC.ENUMS.TOOLTIP_POSITION.DYNAMIC | STATIC ] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
+            "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [$SC.ENUMS.TOOLTIP_POSITION.(default: DYNAMIC | STATIC )] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
             "top": 120,                                   // [default: 0 ]
             "left": 100,                                  // [default: 0 ]
             "content": {
@@ -249,7 +249,7 @@
               "tickOpacity": 1,                           // [ default: 1 ]
               "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
               "tickSpan": 6,                              // [ default: 6 ]
-              "labelAlign": $SC.ENUMS.LABEL_ALIGN.RIGHT,  // [ default: $SC.ENUMS.LABEL_ALIGN.RIGHT | $SC.ENUMS.LABEL_ALIGN.LEFT | $SC.ENUMS.LABEL_ALIGN.CENTER] Text Anchor position of the text.
+              "labelAlign": $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT,  // [ $SC.ENUMS.HORIZONTAL_ALIGN.(default: RIGHT | LEFT | CENTER) ] Text Anchor position of the text.
               "labelOpacity": 1,                          // [ default: 1 ]
               "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
               "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
@@ -266,7 +266,7 @@
                 "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,  // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
                 "areaOpacity": 0.3,                       // [ default: 0.2]
                 "marker": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
-                "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE, // [ default: $SC.ENUMS.ICON_TYPE.CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM]
+                "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE, // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
                 "markerWidth": 12,                        // [ default: 12]
                 "markerHeight": 12,                       // [ default: 12]
                 "markerURL": '',                          // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
@@ -312,7 +312,7 @@
           // },
           zoomWindow: {
             "leftIndex": 2,                               // [ default: 1 ]
-            "rightIndex": 6                               // [ default: max data length ]
+            "rightIndex": 10                              // [ default: max data length ]
           }
         });
 

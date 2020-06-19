@@ -1,5 +1,6 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import defaultConfig from '../settings/config';
 import { Component } from '../viewEngin/pview';
 import Textbox from './textBox';
@@ -13,35 +14,6 @@ import uiCore from '../core/ui.core';
  * @author:SmartChartsNXT
  * @description: This components will create heading elements of chart.
  * @extends: Component
- * @example
- * config :
-  "title":{
-    "text":"heading text",                // [ default : "" ]
-    "top": 20,                            // [ default : 20]  x % value accepted
-    "left": "50%",                        // [ default : 50%] x % value accepted
-    "width": "90%",                       // [ default : 90%] x % value accepted
-    "height": "",                         // [ default : ""]  x % value accepted
-    "textAlign": "center",                // [ left | default: center | right ]
-    "textColor": "crimson",               // [ default : theme.fontColorDark ]
-    "borderColor":"none",                 // [ default : none ]
-    "fontFamily": "Lato",                 // [ default : Lato ]
-    "bgColor": "none",                    // [ default : none ]
-    "padding": 0,                         // [ default : 0 ]
-    "fontSize": 20,                       // [ default : theme.fontSizeLarge ]
-    "style": {
-      "opacity": 1.0                      // Support any style JSON other than available config property.
-    },
-    "responsive": {
-      "wrapText": false,                   // [ default: true | false ]
-      "reducer": function(chartWidth, chartHeight) {
-        if(chartWidth < 500) {
-          return {
-            "text": "modifited heading"
-          }
-        }
-      }
-    }
-  }
  */
 
 class heading extends Component {
@@ -56,7 +28,7 @@ class heading extends Component {
   }
 
   setConfig(props) {
-    let alignTextMap = { 'left': 'left', 'center': 'middle', 'right': 'right' };
+    let alignTextMap = { [ENUMS.HORIZONTAL_ALIGN.LEFT]: 'left', [ENUMS.HORIZONTAL_ALIGN.CENTER]: 'middle', [ENUMS.HORIZONTAL_ALIGN.RIGHT]: 'right' };
     this.config = {
       width: uiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
       height: uiCore.percentToPixel(this.context.svgWidth, props.opts.height),

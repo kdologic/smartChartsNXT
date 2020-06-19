@@ -29,7 +29,7 @@ export const OPTIONS_TYPE = {
     HORIZONTAL: 'horizontal',
     VERTICAL: 'vertical'
   },
-  LABEL_ALIGN: {
+  HORIZONTAL_ALIGN: {
     RIGHT: 'right',
     LEFT: 'left',
     CENTER: 'center'
