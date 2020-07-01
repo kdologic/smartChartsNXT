@@ -53,6 +53,8 @@
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "description": "A javascript area chart that visualize very large randomize dataset",
+          "canvasBorder": false,
+          "bgColor": "#f7fdf7",
           "title": {
             "text":"A javascript area chart that visualize very large randomize dataset",
             "top": 20,              
@@ -110,9 +112,7 @@
                 // support reducer same as title property
               }
             }
-          },
-          "canvasBorder": false,
-          "bgColor": "#f7fdf7",                        
+          },                      
           "gridBox": {
             "vertical": {
               "enable": true,                          
@@ -128,9 +128,11 @@
               "lineThickness": 1,                      
               "lineOpacity": 0.2                       
             },
-           "bgColor": 'skyblue',
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL,
-           "bgOpacity": 0.2
+            "bgColor": 'skyblue',
+            "fillOptions": {
+              "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
+            },
+            "bgOpacity": 0.2
           },
           "pointerCrosshair": {
             "vertical": {
@@ -273,14 +275,15 @@
               "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
               "markerWidth": 8,
               "spline": false,
-              "gradient": true,
+              "fillOptions": {
+                "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV
+              },
               "areaOpacity": 0.5,
               "lineOpacity": 1,
               "name": 'Random Data',
               "animated": true,
               "data": getData(2000) 
               //generateData(5, 20, 1000) 
-              //[{label:1, value:10}, {label:2, value:20},{label:3, value:20}, {label:4, value:30},{label:5, value:40}]
             }]
           },
           zoomWindow: {

@@ -24,7 +24,6 @@ class DrawConnectedPoints extends Component {
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
-    this.gradId = 'sc-area-fill-grad-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
     this.state = {
       marker: ~~this.props.marker,
@@ -38,7 +37,9 @@ class DrawConnectedPoints extends Component {
       currentHighlightedPoint: {
         pointIndex: null
       },
-      animated: this.props.animated
+      animated: this.props.animated,
+      fillType: 'solidColor',
+      fillBy: this.props.areaFillColor
     };
 
     this.state.clip = Object.assign({
@@ -48,6 +49,15 @@ class DrawConnectedPoints extends Component {
       height: this.props.height
     }, this.props.clip);
 
+    let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
+    if(this.state.fillBy === 'none') {
+      this.state.fillType = 'solidColor';
+      this.state.fillBy = this.props.areaFillColor;
+    }else {
+      this.state.fillType = fillOpt.fillType;
+      this.state.fillBy = fillOpt.fillBy;
+      this.state.fillId = fillOpt.fillId;
+    }
     this.subComp = {};
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
@@ -86,6 +96,15 @@ class DrawConnectedPoints extends Component {
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
+    let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
+    if(fillOpt.fillBy === 'none') {
+      this.state.fillType = 'solidColor';
+      this.state.fillBy = this.props.areaFillColor;
+    }else {
+      this.state.fillType = fillOpt.fillType;
+      this.state.fillBy = fillOpt.fillBy;
+      this.state.fillId = fillOpt.fillId;
+    }
     this.state.lineSegments = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
     this.state.linePath = this.state.lineSegments.path;
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
@@ -95,6 +114,17 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+  }
+
+  prepareData(props) {
+    this.state.valueSet = props.dataSet;
+    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
+    this.state.scaleY = props.height / (props.maxVal - props.minVal);
+    this.state.baseLine = props.maxVal * this.state.scaleY;
+    this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker;
+    if (typeof props.getScaleX === 'function') {
+      props.getScaleX(this.state.scaleX);
+    }
   }
 
   render() {
@@ -114,14 +144,14 @@ class DrawConnectedPoints extends Component {
             </clipPath>
           </defs>
         }
+        {this.context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== 'solidColor' &&
+          uiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
+        }
         {this.props.lineDropShadow &&
           uiCore.dropShadow(this.shadowId)
         }
-        {this.context.chartType === CHART_TYPE.AREA_CHART && this.props.gradient &&
-          this.createGradient(this.gradId)
-        }
         {this.context.chartType === CHART_TYPE.AREA_CHART &&
-          <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.props.gradient ? `url(#${this.gradId})` : this.props.areaFillColor}
+          <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>
         }
@@ -222,28 +252,6 @@ class DrawConnectedPoints extends Component {
       path: path.flat(),
       segmentIndexes
     };
-  }
-
-  createGradient(gardId) {
-    return (
-      <defs>
-        <linearGradient id={gardId} x1='0%' y1='0%' x2='0%' y2='100%' gradientUnits='objectBoundingBox'>
-          <stop offset='0%' stop-color={this.props.areaFillColor} stop-opacity='1' />
-          <stop offset='100%' stop-color='rgb(255,255,255)' stop-opacity='0' />
-        </linearGradient>
-      </defs>
-    );
-  }
-
-  prepareData(props) {
-    this.state.valueSet = props.dataSet;
-    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
-    this.state.scaleY = props.height / (props.maxVal - props.minVal);
-    this.state.baseLine = props.maxVal * this.state.scaleY;
-    this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker;
-    if (typeof props.getScaleX === 'function') {
-      props.getScaleX(this.state.scaleX);
-    }
   }
 
   interactiveMouseMove(e) {

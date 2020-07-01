@@ -22,6 +22,7 @@
         lineChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.LINE_CHART,
           "targetElem": "chartContainer",
+          "bgColor": "#FFFEEC",
           "title": {
             "text":"Population growth (annual %)",
             "left": 100,
@@ -36,7 +37,6 @@
             "textColor": "#B2BEB5",
             "fontSize": 12
           },
-          "bgColor": "#F3FFD8",
           "gridBox": {
             "vertical": {
               "enable": false
@@ -44,6 +44,8 @@
             "horizontal": {
               "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
             },
+            "bgColor": '#FFF',
+            "bgOpacity": 1 
           },
           "legends":{
             "itemBorderWidth": 0

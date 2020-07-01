@@ -32,6 +32,8 @@
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
           "description": "Browser Market Share Worldwide from June-2018 to June-2019",
+          "canvasBorder": false,
+          "bgColor": "#f7fdf7",
           "title": {
             "text":"Browser Market Share Worldwide",
             "top": 20,                            
@@ -72,8 +74,14 @@
               "wrapText": true,                  
             }
           },
-          "canvasBorder": false,
-          "bgColor": "#f7fdf7",                        
+          "defs": {
+            "imagesFill": [{
+              "id": "image-fill-1",
+              "src": "/smartchartsnxt/examples/static/images/geometricBGs43.jpg",
+              "width": "100%",
+              "height": "100%"
+            }]
+          },
           "gridBox": {
             "vertical": {
               "enable": true,                          
@@ -89,9 +97,11 @@
               "lineThickness": 1,                       
               "lineOpacity": 0.2                        
             },
-           "bgColor": 'skyblue',                        
-           "bgGradient": $SC.ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL, 
-           "bgOpacity": 0.2                             
+            "bgColor": "skyblue",                        
+            "fillOptions": {
+              "image": "image-fill-1"
+            },
+            "bgOpacity": 0.2                             
           },
           "pointerCrosshair": {
             "vertical": {

@@ -4,17 +4,21 @@
  * ui.core.js
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
- * @description:SmartChartsNXT Core Library components. This singletone class contains UI functionalities.
+ * @description:SmartChartsNXT Core Library components. This singleton class contains UI functionalities.
  */
 
 import { mountTo } from './../viewEngin/pview';
+import StoreManager from './../liveStore/storeManager';
+import utilCore from './../core/util.core';
+import patterns from './../styles/patterns';
+import gradients from './../styles/gradients';
 
 class UiCore {
   constructor() { }
 
   /**
    * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element.
-   * @param {String} shadowId Element ID of dropshadow Component.
+   * @param {String} shadowId Element ID of dropShadow Component.
    * @param {String} offsetX Offset value to shift shadow by x coordinate.
    * @param {String} offsetY Offset value to shift shadow by y coordinate.
    * @returns {Object} Virtual node of drop shadow component.
@@ -241,6 +245,62 @@ class UiCore {
    */
   prependStyle(parentNode, styleStr, position = 'afterbegin') {
     parentNode.insertAdjacentHTML(position, '<style>' + styleStr + '</style>');
+  }
+
+  /**
+   * Process fill options for pattern, gradient or image based on config
+   * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID
+   * @return {Object} Return {fillType, fillBy and fillId}
+   */
+  processFillOptions(fillOptions = {}) {
+    const globalDefMap = StoreManager.getStore('global').getValue('defMap');
+    const rid = utilCore.getRandomID();
+    const gradId = 'sc-fill-grad-' + rid;
+    const patternId = 'sc-fill-pattern-' + rid;
+    let fillType = 'solidColor';
+    let fillBy = 'none';
+    let fillId;
+    if(fillOptions.pattern && typeof fillOptions.pattern === 'string') {
+      if(fillOptions.pattern in globalDefMap) {
+        fillType = 'patternCustom';
+        fillBy = `url(#${globalDefMap[fillOptions.pattern]})`;
+        fillId = fillOptions.pattern;
+      }else {
+        fillType = 'patternPreset';
+        fillBy = `url(#${patternId})`;
+        fillId = patternId;
+      }
+    }else if(fillOptions.gradient && typeof fillOptions.gradient === 'string') {
+      if(fillOptions.gradient in globalDefMap) {
+        fillType = 'gradientCustom';
+        fillBy = `url(#${globalDefMap[fillOptions.gradient]})`;
+        fillId = fillOptions.gradient;
+      }else{
+        fillType = 'gradientPreset';
+        fillBy = `url(#${gradId})`;
+        fillId = gradId;
+      }
+    }else if(fillOptions.image && typeof fillOptions.image === 'string' && fillOptions.image in globalDefMap) {
+      fillType = 'patternImage';
+      fillBy = `url(#${globalDefMap[fillOptions.image]})`;
+      fillId = fillOptions.image;
+    }
+    return { fillType, fillBy, fillId};
+  }
+
+  /**
+   * Generate the fill type pattern or gradient element.
+   * @param {String} fillId Predefined ID that used refer the def element.
+   * @param {String} fillType Type of fill element will create pattern or gradient.
+   * @param {Object} fillOptions Configuration of fill option.
+   * @param {String} color Hex color code for pattern.
+   * @return {Void} void
+   */
+  generateFillElem(fillId, fillType, fillOptions, color) {
+    switch(fillType) {
+      case 'patternPreset': return patterns.getType(fillOptions.pattern, fillId, color);
+      case 'gradientPreset': return gradients.getType(fillOptions.gradient, fillId, color);
+    }
   }
 
 }

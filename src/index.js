@@ -1,5 +1,6 @@
 'use strict';
 
+import StoreManager from './liveStore/storeManager';
 import Core from './core/chart.core';
 import utilCore from './core/util.core';
 import { OPTIONS_TYPE, CHART_TYPE } from './settings/globalEnums';
@@ -16,6 +17,7 @@ import Easing from './plugIns/easing';
  * Using namespace SmartChartsNXT
  */
 
+StoreManager.createStore('global', {});
 const SmartChartsNXT = new Core();
 SmartChartsNXT.CHART_TYPE = utilCore.deepFreeze({ ...CHART_TYPE });
 SmartChartsNXT.ENUMS = utilCore.deepFreeze({ ...OPTIONS_TYPE });

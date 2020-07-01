@@ -1,5 +1,7 @@
 'use strict';
 
+import utilCore from './../core/util.core';
+
 /**
  * store.js
  * @createdOn:01-Jan-2020
@@ -25,7 +27,11 @@ class Store {
   }
 
   setValue(key, value) {
-    return this._state[key] = value;
+    if(typeof this._state[key] === 'object' && typeof value === 'object') {
+      this._state[key] = utilCore.extends({}, this._state[key], value);
+    }else {
+      this._state[key] = value;
+    }
   }
 
   removeValue(key) {

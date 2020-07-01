@@ -15,6 +15,7 @@
         areaChart = new SmartChartsNXT.Chart({
           "type": $SC.CHART_TYPE.AREA_CHART,
           "targetElem": "chartContainer",
+          "bgColor": "#FAFAFA",
           "title": {
             "text":"Seasonal And Annual Rainfall (in mm)",
             "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
@@ -27,7 +28,6 @@
             "textColor": "#B2BEB5",
             "fontSize": 12
           },
-          "bgColor": "#effeff",
           "gridBox": {
             "vertical": {
               "enable": false
@@ -35,6 +35,11 @@
             "horizontal": {
               "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
             },
+            "bgColor": '#FAFAFA',
+            "fillOptions": {
+              "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
+            },
+            "bgOpacity": 0.5 
           },
           "legends":{
             "itemBorderWidth": 0
@@ -88,7 +93,9 @@
               "markerWidth": 10,
               "spline": false,
               "animated": true,
-              "gradient": false,
+              "fillOptions": {
+                "pattern": $SC.ENUMS.PATTERN.BACK_DIAGONAL_1
+              },
               "data": [
                 {"label": '1999', "value": 1207.8}, {"label": '2000', "value": 1295.3}, {"label": '2001', "value": 1242.4}, {"label": '2002', "value": 1182.9},
                 {"label": '2003', "value": null}, {"label": '2004', "value": 1208.8}, {"label": '2005', "value": 1116.6}, {"label": '2006', "value": 1035.4},

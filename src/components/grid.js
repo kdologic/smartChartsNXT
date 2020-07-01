@@ -4,6 +4,7 @@ import defaultConfig from './../settings/config';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import utilCore from './../core/util.core';
+import uiCore from './../core/ui.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
@@ -19,7 +20,6 @@ class Grid extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.clipId = utilCore.getRandomID();
-    this.gradId = utilCore.getRandomID();
     this.config = {};
     this.state = {
       vGridCount: this.props.vGridCount,
@@ -28,8 +28,7 @@ class Grid extends Component {
       hGridCount: this.props.hGridCount,
       hGridInterval: this.props.hGridInterval,
       hLineDashArray: 0,
-      zeroBaseGridIndex: undefined,
-      showBgGradient: false
+      zeroBaseGridIndex: undefined
     };
     this.setConfig(this.props);
     this.updateVerticalGrid = this.updateVerticalGrid.bind(this);
@@ -59,12 +58,25 @@ class Grid extends Component {
         lineOpacity: typeof opts.horizontal.lineOpacity === 'undefined' ? 0.2 : opts.horizontal.lineOpacity
       },
       bgColor: props.opts.bgColor || 'none',
-      bgGradient: props.opts.bgGradient || ENUMS.GRADIENT_STYLE.NONE,
       bgOpacity: typeof props.opts.bgOpacity === 'undefined' ? 0.1 : props.opts.bgOpacity
     };
+
+    if(this.config.bgColor === 'none') {
+      this.state.fillBy = this.config.bgColor;
+      this.state.fillType = 'none';
+    }else {
+      let fillOpt = uiCore.processFillOptions(this.props.opts.fillOptions);
+      if(this.state.fillBy === 'none') {
+        this.state.fillType = 'solidColor';
+        this.state.fillBy = this.config.bgColor;
+      }else {
+        this.state.fillType = fillOpt.fillType;
+        this.state.fillBy = fillOpt.fillBy;
+        this.state.fillId = fillOpt.fillId;
+      }
+    }
     this.state.vLineDashArray = this.config.vertical.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
     this.state.hLineDashArray = this.config.horizontal.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
-    this.state.showBgGradient = this.config.bgColor !== 'none' && this.config.bgGradient !== ENUMS.GRADIENT_STYLE.NONE;
   }
 
   componentWillUpdate(nextProps) {
@@ -79,21 +91,21 @@ class Grid extends Component {
   render() {
     return (
       <g class='sc-chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
+        { this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
+          uiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
+        }
+        <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.fillBy} fill-opacity={this.config.bgOpacity} stroke-width='0' />
         <g class='sc-v-grid-lines' transform={`translate(${this.props.vTransformX}, 0)`} clip-path={`url(#${this.clipId})`} >
           <defs>
             <clipPath id={this.clipId}>
               <rect x={-this.props.vTransformX} y={0} width={this.props.width} height={this.props.height} />
             </clipPath>
           </defs>
-          {this.config.bgColor !== 'none' && this.config.bgGradient !== 'none' &&
-            this.createGradient(this.gradId, this.config.bgGradient, this.config.bgColor)
-          }
           {this.config.vertical.enable && this.drawVGridLines()}
         </g>
         <g class='sc-h-grid-lines'>
           {this.config.horizontal.enable && this.drawHGridLines()}
         </g>
-        <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.showBgGradient ? `url(#${this.gradId})` : this.config.bgColor} fill-opacity={this.config.bgOpacity} stroke-width='0' />
       </g>
     );
   }
@@ -124,42 +136,6 @@ class Grid extends Component {
       );
     }
     return grids;
-  }
-
-  createGradient(gardId, gradType, color) {
-    let gradHtml = '';
-    switch (gradType) {
-      case ENUMS.GRADIENT_STYLE.LINEAR_VERTICAL:
-        gradHtml =
-          (<defs>
-            <linearGradient id={gardId} x1="0%" y1="0%" x2="0%" y2="100%" gradientUnits="objectBoundingBox">
-              <stop offset="0%" stop-color="rgb(255,255,255)" stop-opacity="0" />
-              <stop offset="100%" stop-color={color} stop-opacity="1" />
-            </linearGradient>
-          </defs>);
-        break;
-      case ENUMS.GRADIENT_STYLE.LINEAR_HORIZONTAL:
-        gradHtml =
-          (<defs>
-            <linearGradient id={gardId} x1="0%" y1="0%" x2="100%" y2="0%" gradientUnits="objectBoundingBox">
-              <stop offset="0%" stop-color={color} stop-opacity="1" />
-              <stop offset="100%" stop-color="rgb(255,255,255)" stop-opacity="0" />
-            </linearGradient>
-          </defs>);
-        break;
-      case ENUMS.GRADIENT_STYLE.RADIAL:
-        gradHtml = (<defs>
-          <radialGradient id={gardId} cx="50%" cy="50%" r="50%" fx="50%" fy="50%" gradientUnits="objectBoundingBox">
-            <stop offset="0%" stop-color="rgb(255,255,255)" stop-opacity="0" />
-            <stop offset="100%" stop-color={color} stop-opacity="1" />
-          </radialGradient>
-        </defs>);
-        break;
-      case ENUMS.GRADIENT_STYLE.NONE:
-      default:
-        gradHtml = '';
-    }
-    return gradHtml;
   }
 
   updateVerticalGrid(vg) {

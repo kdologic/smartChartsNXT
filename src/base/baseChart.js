@@ -12,6 +12,7 @@ import Watermark from './../components/watermark';
 import Menu from './../components/menu';
 import LoaderView from './../components/loaderView';
 import StoreManager from './../liveStore/storeManager';
+import GlobalDefs from './../styles/globalDefs';
 
 /**
  * baseChart.js
@@ -50,7 +51,7 @@ class BaseChart extends Component {
       if(this.validationErrors.length) {
         throw this.validationErrors;
       }
-
+      this.globalDefs = new GlobalDefs(this.CHART_OPTIONS.defs);
       this.emitter = eventEmitter.getInstance(this.props.runId);
       this.state = {
         width: this.props.width || this.CHART_CONST.FIX_WIDTH,
@@ -155,6 +156,7 @@ class BaseChart extends Component {
         <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType) + ' -created using SmartChartsNXT chart library.'}</desc>
 
         <CommonStyles></CommonStyles>
+        { this.globalDefs.mapAll() }
 
         <g class='sc-canvas-border-container'>
           <rect x='1' y='1' class='sc-canvas-border' vector-effect='non-scaling-stroke'

@@ -16,6 +16,7 @@
       //^BSESN, RCOM.NS, GRAPHITE.NS
       getStock('RCOM.NS').then(data => {
         dataSet = prepareData(data);
+        if(!dataSet.length) throw new Error('invalid data');
         displayChart('R-COM', dataSet);
       }).catch(ex => {
         dataSet = prepareData(getStaticData());
@@ -38,7 +39,6 @@
     let areaChart;
     function displayChart(seriesName, dataSet) {
       console.log(dataSet);
-      
       SmartChartsNXT.ready(function () {
         SmartChartsNXT.debug = false;
         areaChart = new SmartChartsNXT.Chart({

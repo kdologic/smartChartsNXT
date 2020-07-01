@@ -7,8 +7,11 @@
     "graphs",
     "visualization",
     "data",
+    "dataviz",
+    "data visualization",
     "svg",
-    "responsive"
+    "responsive",
+    "visual"
   ],
   "main": "index.js",
   "sideEffects": [
@@ -24,7 +27,10 @@
     "type": "git",
     "url": "git+https://github.com/kausikongit/smartChartsNXT.git"
   },
-  "author": "SmartChartsNXT",
+  "author": {
+    "name": "Kausik Dey",
+    "email": "kausik008@gmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kausikongit/smartChartsNXT/issues"
