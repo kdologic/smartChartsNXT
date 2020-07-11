@@ -6,6 +6,7 @@ import utilCore from './../core/util.core';
 import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
 import dateFormat from 'dateformat';
+import uiCore from '../core/ui.core';
 
 /**
  * horizontalLabels.js
@@ -151,14 +152,21 @@ class HorizontalLabels extends Component {
     let y = 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
-    return (
-      <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0} opacity
-        transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
-        <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
-        </tspan>
-      </text>
-    );
+    let label = <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0} opacity
+      transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
+      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
+        {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
+      </tspan>
+    </text>;
+
+    if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
+      let labelWidth = uiCore.getComputedTextWidth(label);
+      if (x + (labelWidth / 2) > this.props.maxWidth) {
+        let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
+        label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
+      }
+    }
+    return label;
   }
 
   setIntervalLength() {

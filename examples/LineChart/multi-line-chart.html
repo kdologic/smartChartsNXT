@@ -4,46 +4,9 @@
   <title>Example of Multi Line Chart | SmartChartsNXT</title>
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
 
   <script>
-	  function getData(n) {
-      var arr = [], i, x = new Date(), a, b, c, spike, oneDay = 1000*60*60*24;
-      for (i = 0; i < n; i++, x.setDate(x.getDate() + 1)) {
-        if (i % 100 === 0) {
-          a = 2 * Math.random();
-        }
-        if (i % 1000 === 0) {
-          b = 2 * Math.random();
-        }
-        if (i % 10000 === 0) {
-          c = 2 * Math.random();
-        }
-        if (i % 50000 === 0) {
-          spike = 10;
-        } else {
-          spike = 0;
-        }
-        arr.push({
-          label: x.getTime(), 
-          value: 2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
-        });
-      }
-      return arr;
-    }
-    function generateData(x, y, count) {
-      var dataSet = [];
-      for (var i = 0; i < count; i++) {
-        var newDate = new Date();
-        newDate.setDate(newDate.getDate() + i);
-        var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
-        dataSet.push({
-          label: i+1, //newDate,//'k-'+(i+1),//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
-          value: (i % 4 === 0 ? -1 : 1 ) * datum
-        });
-      }
-      return dataSet;
-    }
-
     let lineChart;
     window.onload = function () {
       SmartChartsNXT.ready(function () {
@@ -53,6 +16,8 @@
           "type": $SC.CHART_TYPE.LINE_CHART,
           "targetElem": "chartContainer",
           "description": "A javascript Multi Line Chart, that can visualize multiple data line",
+          "canvasBorder": false,
+          "bgColor": "#f7fdf7",   
           "title": {
             "text":"A javascript Multi Line Chart, that can visualize multiple data line",
             "top": 20,              
@@ -110,9 +75,7 @@
                 // support reducer same as title property
               }
             }
-          },
-          "canvasBorder": false,
-          "bgColor": "#f7fdf7",                        
+          },                     
           "gridBox": {
             "vertical": {
               "enable": true,                          
@@ -278,7 +241,10 @@
               "dropShadow": true,
               "lineOpacity": 1,
               "animated": true,
-              "data": getData(20) 
+              "data": generateRandomTimeSeries(new Date().getTime(), 20, {
+                  "max": 1000,
+                  "min": -1000
+                }) 
             },{
               "name": 'Dataset 2',
               "visible": true,
@@ -291,7 +257,10 @@
               "dropShadow": true,
               "lineOpacity": 1,
               "animated": true,
-              "data": getData(20) 
+              "data": generateRandomTimeSeries(new Date().getTime(), 20, {
+                  "max": 1000,
+                  "min": -1000
+                }) 
             }]
           },
           zoomWindow: {

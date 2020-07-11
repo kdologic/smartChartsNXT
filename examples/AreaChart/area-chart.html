@@ -30,19 +30,6 @@
       }
       return arr;
     }
-    function generateData(x, y, count) {
-      var dataSet = [];
-      for (var i = 0; i < count; i++) {
-        var newDate = new Date();
-        newDate.setDate(newDate.getDate() + i);
-        var datum = Math.round(Math.random() * (y + i / x)) + 10 + i;
-        dataSet.push({
-          label: i+1, //newDate,//'k-'+(i+1),//newDate.getDate() + "-" + (newDate.getMonth() + 1) + "-" + newDate.getFullYear(),
-          value: (i % 4 === 0 ? -1 : 1 ) * datum
-        });
-      }
-      return dataSet;
-    }
 
     let areaChart;
     window.onload = function () {
@@ -283,7 +270,6 @@
               "name": 'Random Data',
               "animated": true,
               "data": getData(2000) 
-              //generateData(5, 20, 1000) 
             }]
           },
           zoomWindow: {

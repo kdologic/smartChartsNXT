@@ -37,6 +37,9 @@ class BaseChart extends Component {
             itemSaveAsPDF: true,
             itemPrint: true
           }
+        },
+        creditsWatermark: {
+          enable: true
         }
       }, this.props.opts, { width: 1, height: 1 });
       this.CHART_DATA = { scaleX: 0, scaleY: 0 };
@@ -171,7 +174,7 @@ class BaseChart extends Component {
           />
         </g>
 
-        {this.CHART_OPTIONS.watermark !== false &&
+        {this.CHART_OPTIONS.creditsWatermark.enable &&
           <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
         }
 
