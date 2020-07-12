@@ -88,7 +88,10 @@ function renderDOM(vnode) {
           default: return vnode.attributes[k];
         }
       })(key);
-      component.node.setAttribute(key, attrVal);
+
+      if(attrVal !== undefined) {
+        component.node.setAttribute(key, attrVal);
+      }
     });
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
@@ -644,6 +647,9 @@ class Component {
               });
               return evtNames.filter(v => !!v).join();
             default:
+              if(attrChanges[group][k] === undefined) {
+                return undefined;
+              }
               if (attrChanges[group][k].old !== undefined && attrChanges[group][k].new !== undefined) {
                 return attrChanges[group][k].new;
               } else {
@@ -651,7 +657,12 @@ class Component {
               }
           }
         })(key);
-        dom.setAttribute(key, attrVal);
+
+        if(attrVal === undefined) {
+          dom.removeAttribute(key);
+        }else {
+          dom.setAttribute(key, attrVal);
+        }
       });
     });
     Object.keys(attrChanges.$deleted).forEach(key => {
