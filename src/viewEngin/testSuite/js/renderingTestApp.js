@@ -1,11 +1,11 @@
 
-"use strict";
+'use strict';
 
 /**renderingTestApp.js */
 
-import { Component } from "./../../pview";
-import Button from "./button"; 
-import TextBox from "./textBox";
+import { Component } from './../../pview';
+import Button from './button'; 
+import TextBox from './textBox';
 
 class RenderingTestApp extends Component {
   constructor(props) {
@@ -31,28 +31,36 @@ class RenderingTestApp extends Component {
         version={1.1}
         width={this.props.width}
         height={this.props.height}
-        id="svgContainer"
+        id='svgContainer'
         style={{ background: 'none', MozTapHighlightColor: 'rgba(0, 0, 0, 0)', WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)', WebkitUserSelect: 'none', HtmlUserSelect: 'none', MozUserSelect: 'none',MsUserSelect: 'none', OUserSelect: 'none', UserSelect: 'none'
         }} >
           <g>
             <Button instanceId='plusBtn' posx={100} posy={150} width={100} height='40' bgColor='#28a745' borderColor='#1e7e34' borderRadius='5'
-              onClick= { (e) => { this.setState({boxCount: this.state.boxCount + 1});}} >
+              onClick= { (e) => {
+                this.setState({boxCount: this.state.boxCount + 1});
+              }} >
               <text x="35" y="35" fill="#fff" font-size="50" font-weight="bold"> + </text>
             </Button>
 
             <Button instanceId='resetBtn' posx='210' posy='150' width='100' height='40' bgColor='#e0a800' borderColor='#d39e00' borderRadius='5'
-              onClick= { (e) => { this.setState({boxCount: 0});}} >
+              onClick= { (e) => {
+                this.setState({boxCount: 0});
+              }} >
               <text x="23" y="37" fill="#fff" font-size="50" font-weight="bold">{"<>"}</text>
             </Button>
 
             <Button instanceId='minusBtn' posx='320' posy='150' width='100' height='40' bgColor='#c82333' borderColor='#bd2130' borderRadius='5'
-              onClick= { (e) => { this.state.boxCount > 0 && this.setState({boxCount: this.state.boxCount - 1});}} >
+              onClick= { (e) => {
+                this.state.boxCount > 0 && this.setState({boxCount: this.state.boxCount - 1});
+              }} >
               <text x="40" y="32" fill="#fff" font-size="50" font-weight="bold">-</text>
             </Button>
-            
+            <g class='null-test'>
+              {this.state.boxCount == 0 ? null : <text x={320} y={50}>{'box count:' + this.state.boxCount}</text>}
+            </g>
             {this.getBoxes()}
             {this.getRects()}
-            {/* { this.state.boxCount > 0 && 
+            {/* { this.state.boxCount > 0 &&
               <Rect id={'rect-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 130} color={this.state.boxCount % 2 == 0 ? '#03a9f4':'#cddc39'} >
                 <g>
                   <Rect id={'rect-child-'+this.state.boxCount} x={this.state.boxPosX} y={this.state.boxPosY + 160} color={this.state.boxCount % 2 == 1 ? '#03a9f4':'#cddc39'} ></Rect>
@@ -66,7 +74,7 @@ class RenderingTestApp extends Component {
   }
 
   getBoxes = () => {
-    let arrBoxes = []; 
+    let arrBoxes = [];
     for(let i = 0; i < this.state.boxCount; i++) {
       let color = this.state.boxCount%2==0?'#dd1199':'#009688';
       arrBoxes.push(
@@ -79,7 +87,7 @@ class RenderingTestApp extends Component {
   }
 
   getRects = () => {
-    let arrRects = []; 
+    let arrRects = [];
     for(let i = 0; i < this.state.boxCount; i++) {
       let color = this.state.boxCount%2==0?'#03a9f4':'#cddc39';
       arrRects.push(
@@ -152,7 +160,7 @@ class Box extends Component {
       <g class={'tbx-' + this.props.index} instanceId={'tbx-' + this.props.index} >
         <text x={this.props.x} y={this.props.y-20} >{this.context.runId+'_'+this.props.index}</text>
         <TextBox posx={this.props.x} posy={this.props.y} width='100' height='100' bgColor='#eee' borderColor='#999' borderRadius='5'>
-          {"container " + (this.props.index + 1)}
+          {'container ' + (this.props.index + 1)}
         </TextBox>
         {this.props.extChildren}
       </g>

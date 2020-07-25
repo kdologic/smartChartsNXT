@@ -170,22 +170,22 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
   try {
     for (let i = 0; i < subNodes.children.length; i++) {
       let subNode = subNodes.children[i];
-      let refChldObj = undefined;
+      let refChildObj = undefined;
       for (let c = 0; c < refs.children.length; c++) {
-        let refChld = refs.children[c];
-        if (refChld && refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
+        let refChild = refs.children[c];
+        if (refChild && refChild.self && typeof subNode.nodeName === 'function' && refChild.self instanceof subNode.nodeName) {
           /* Match instanceId for support multiple instance of same component type under same parent node */
-          if (refChld.self.props.instanceId === subNode.attributes.instanceId) {
+          if (refChild.self.props.instanceId === subNode.attributes.instanceId) {
             subNode.class = subNode.nodeName;
-            subNode.nodeName = refChld.self;
-            refChldObj = refChld;
+            subNode.nodeName = refChild.self;
+            refChildObj = refChild;
             break;
           }
         }
       }
       if (typeof subNode.nodeName === 'object') {
-        if (replaceChildren && subNode.nodeName.vnode.children && subNode.nodeName.vnode.children.length && refChldObj && refChldObj.self && refChldObj.self.ref && refChldObj.self.ref.children.length) {
-          _replaceClassWithObject(subNode.nodeName.vnode, refChldObj.self.ref, replaceChildren);
+        if (replaceChildren && subNode.nodeName.vnode.children && subNode.nodeName.vnode.children.length && refChildObj && refChildObj.self && refChildObj.self.ref && refChildObj.self.ref.children.length) {
+          _replaceClassWithObject(subNode.nodeName.vnode, refChildObj.self.ref, replaceChildren);
         }
       } else if (replaceChildren && subNode.children && subNode.children.length && refs.children && refs.children[i]) {
         _replaceClassWithObject(subNode, refs.children[i], replaceChildren);
@@ -232,7 +232,7 @@ function _extends(dest, ...args) {
 }
 
 /**
- * convert style JSON into string, gets called by transpiled JSX
+ * Convert style JSON into string, gets called by transpile JSX
  * @param {JSON} objStyle style json object
  * @returns {String} return string of css
  */
@@ -242,6 +242,9 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
+    if(!objStyle[key]) {
+      return;
+    }
     if (objStyle[key].old !== undefined && objStyle[key].old !== null && objStyle[key].new !== undefined && objStyle[key].new !== null) {
       sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
     } else {
