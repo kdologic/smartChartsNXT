@@ -175,6 +175,7 @@ class UiCore {
     let mid = (maxVal + minVal) / 2;
     let tMinVal = minVal;
     if (zeroBase) {
+      debugger;
       tMinVal = minVal > 0 ? 0 : minVal;
       maxVal = maxVal < 0 ? 0 : maxVal;
     }
@@ -199,8 +200,10 @@ class UiCore {
             tMinVal -= (2 * tInt);
             intv += 2;
           } else if (Math.floor(tMinVal) == Math.floor(minVal)) {
-            tMinVal -= tInt;
-            intv++;
+            if(!zeroBase) {
+              tMinVal -= tInt;
+              intv++;
+            }
           }
 
           return {
