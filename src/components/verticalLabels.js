@@ -12,23 +12,7 @@ import Ticks from './ticks';
  * @author:SmartChartsNXT
  * @description: This components will create a Vertical Labels and Tick marks for the chart.
  * @extends Component
- * @example
-  "yAxis": {
-    "title": "Usage %",
-    "prepend": "Rs.",
-    "append": " %",
-    "labelRotate": 0,
-    "tickOpacity": 1,
-    "tickColor": '#222',
-    "tickSpan": 5,
-    "labelOpacity": 1,
-    "labelColor": "#000",
-    "axisColor": "#000", // TODO
-    "fontSize": 14,
-    "fontFamily": "Lato",
-    "zeroBase": false,  // min label of y-axis always stick to zero if all value are positive and
-                        // max label of y-axis always stick to zero if all value are negative.
-  }
+ *
  * @events -
  * 1. onVerticalLabelRender : Fire when horizontal labels draws.
  */
@@ -87,10 +71,10 @@ class VerticalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark
       }
     };
-    switch(config.labelAlign || $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+    switch (config.labelAlign || $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT) {
       default:
-      case 'right': this.config.labelAlign = 'end';break;
-      case 'left': this.config.labelAlign = 'start';break;
+      case 'right': this.config.labelAlign = 'end'; break;
+      case 'left': this.config.labelAlign = 'start'; break;
       case 'center': this.config.labelAlign = 'middle';
     }
   }
@@ -134,17 +118,17 @@ class VerticalLabels extends Component {
     y = this.config.labelAlign === 'end' ? y : y - 10;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
-      <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
-        font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '') }
+      <text class="sc-vertical-label" font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
+        font-size={this.state.fontSize} transform={transform} text-rendering='geometricPrecision' >
+        <tspan class={`sc-vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
+          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
         </tspan>
       </text>
     );
   }
 
   onMouseEnter(e) {
-    let lblIndex = e.target.classList[0].replace('vlabel-', '');
+    let lblIndex = e.target.getAttribute('labelIndex');
     e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.valueSet[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('vLabelEnter', e);
   }

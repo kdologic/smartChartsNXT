@@ -365,13 +365,13 @@ class ConnectedPointBase extends Component {
             if (skey === 'data') {
               s[skey] = series.dataDimIndex.bottom(Infinity);
             } else if (['turboData', 'dataDimIndex', 'dataDimValue'].indexOf(skey) === -1) {
-              s[skey] = JSON.parse(JSON.stringify(series[skey]));
+              s[skey] = utilCore.deepCopy(series[skey]);
             }
           }
           data[key].push(s);
         }
       } else {
-        data[key] = JSON.parse(JSON.stringify(dataSet[key]));
+        data[key] = utilCore.deepCopy(dataSet[key]);
       }
     }
     return data;
@@ -579,7 +579,7 @@ class ConnectedPointBase extends Component {
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || this.CHART_DATA.defaultMarkerWidth} markerHeight={series.markerHeight || this.CHART_DATA.defaultMarkerHeight} markerURL={series.markerURL || ''}
-          centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
+          centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} dataLabels={series.dataLabels} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
           }}
@@ -603,7 +603,7 @@ class ConnectedPointBase extends Component {
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} animated={false} shouldRender={this.state.shouldFSRender}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
@@ -613,7 +613,7 @@ class ConnectedPointBase extends Component {
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} animated={false} shouldRender={this.state.shouldFSRender}
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} animated={false} shouldRender={this.state.shouldFSRender}
             clipId={this.scrollWindowClipId}>
           </DrawConnectedPoints>
         </g>

@@ -15,25 +15,6 @@ import uiCore from '../core/ui.core';
  * @description: This components will create a Horizontal Labels for the chart.
  * @extends Component
  *
- * @example
- * "xAxis": {
-      "title": "Month",
-      "prepend": "",
-      "append": "",
-      "parseAsDate": true,
-      "dateFormat": "mmm - yyyy",
-      "labelRotate": -45,
-      "intervalThreshold": 40,
-      "tickOpacity": 1,
-      "tickColor": '#222',
-      "tickSpan": 6,
-      "labelOpacity": 1,
-      "labelColor": "#000",
-      "axisColor": "#000", // TODO
-      "fontSize": 12,
-      "fontFamily": "Lato"
-    }
-
  * @event
  * onHorizontalLabelRender : Fire when horizontal labels draws.
  */
@@ -152,7 +133,7 @@ class HorizontalLabels extends Component {
     let y = 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
-    let label = <text font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0} opacity
+    let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
       transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
       <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
         {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}

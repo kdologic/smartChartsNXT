@@ -96,6 +96,33 @@
               "fillOptions": {
                 "pattern": $SC.ENUMS.PATTERN.BACK_DIAGONAL_1
               },
+              "dataLabels": {
+                "enable": true,
+                "float": $SC.ENUMS.FLOAT.TOP,
+                "labelOverlap": false,
+                "textColor": "#000",
+                "textOpacity": 1,
+                "bgColor": "#fff",
+                "bgOpacity": 0.5,
+                "borderColor": "#0076A3",
+                "borderWidth": 1,     
+                "borderRadius": 5,    
+                "filter": function(val, index) {
+                  return val !== null;
+                },
+                "formatter": function(val, index) {
+                  return val+ ' mm';
+                }, 
+                "xPadding": 5, 
+                "yPadding": 5,
+                "offsetX": 0, 
+                "offsetY": 0,
+                "shadow": true,
+                "classes": [],
+                "style": {
+                  "fontSize": "10px"
+                }
+              },
               "data": [
                 {"label": '1999', "value": 1207.8}, {"label": '2000', "value": 1295.3}, {"label": '2001', "value": 1242.4}, {"label": '2002', "value": 1182.9},
                 {"label": '2003', "value": null}, {"label": '2004', "value": 1208.8}, {"label": '2005', "value": 1116.6}, {"label": '2006', "value": 1035.4},

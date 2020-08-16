@@ -7,6 +7,7 @@ import geom from './../../core/geom.core';
 import uiCore from './../../core/ui.core';
 import utilCore from './../../core/util.core';
 import DataPoints from './../../components/dataPoints';
+import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
 
@@ -39,7 +40,8 @@ class DrawConnectedPoints extends Component {
       },
       animated: this.props.animated,
       fillType: 'solidColor',
-      fillBy: this.props.areaFillColor
+      fillBy: this.props.areaFillColor,
+      hasDataLabels: this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false
     };
 
     this.state.clip = Object.assign({
@@ -50,7 +52,7 @@ class DrawConnectedPoints extends Component {
     }, this.props.clip);
 
     let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
-    if(this.state.fillBy === 'none') {
+    if(fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
     }else {
@@ -114,6 +116,7 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+    this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
   }
 
   prepareData(props) {
@@ -161,6 +164,9 @@ class DrawConnectedPoints extends Component {
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.areaFillColor || this.props.lineFillColor} />
         }
+        {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
+          <DataLabels instanceId={'dl' + this.props.index} pointSet={this.state.pointSet} opts={this.props.dataLabels} clip={this.state.clip} />
+        }
       </g>
     );
   }
@@ -204,6 +210,7 @@ class DrawConnectedPoints extends Component {
       }
       sIndex++;
       point.index = i;
+      point.value = data;
       return point;
     });
     path.push(pathSegment);
@@ -233,6 +240,7 @@ class DrawConnectedPoints extends Component {
         pathSegment.push(point);
       }
       point.index = i;
+      point.value = data;
       return point;
     });
     pointSegments.push(pathSegment);

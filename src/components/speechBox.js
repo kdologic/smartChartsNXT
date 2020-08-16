@@ -49,7 +49,7 @@ class SpeechBox extends Component {
     return (
       <g id={this.props.id || ''} class='sc-speech-box' transform={`translate(${this.props.x},${this.props.y})`}>
         {this.props.shadow && uiCore.dropShadow('sc-speech-box-drop-shadow')}
-        <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={this.props.fillOpacity || 1}
+        <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity}
           filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''}
           stroke={this.props.strokeColor} stroke-width={typeof this.props.strokeWidth === 'undefined' ? 1 : this.props.strokeWidth } stroke-opacity={typeof this.props.strokeOpacity === 'undefined' ? 1 : this.props.strokeOpacity}
           shape-rendering='geometricPrecision' vector-effect='non-scaling-stroke' />

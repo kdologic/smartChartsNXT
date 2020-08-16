@@ -8,7 +8,7 @@ import utilCore from './../core/util.core';
 import uiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums'; 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
  * tooltip.js
