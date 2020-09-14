@@ -321,8 +321,26 @@
                 "markerURL": '',                          // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
                 "spline": true,                           // [ default: true | false ]
                 "animated": true,                         // [ default: true | false ]
+                "seriesLabel": {
+                  "enable": false,                        // [ true | default: false ]
+                  "labelOverlap": false,                  // [ true | default: false ]
+                  "textOnly": true,                       // [ true | default: false ] Note: Display only text without background.
+                  "showConnectorLine": false,             // [ default: true | false ] Note: Draw a connector line between label and series chart.
+                  //"textColor": "#000",                  // [ default : series.lineColor || series.areaColor ]
+                  "textOpacity": 1,                       // [ default: 1 ]
+                  "bgColor": "#fff",                      // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
+                  "bgOpacity": 0.5,                       // [ default: 0.5 ]
+                  //"borderColor": $SC.COLOR_STRINGS.MAT_BLUE, // [ default: series.lineColor || series.areaColor ]
+                  "borderWidth": 1,                       // [ default: 1 ]
+                  "borderRadius": 5,                      // [ default: 5 ]
+                  "xPadding": 5,                          // [ default: 5 ] Create left and right padding inside the label box
+                  "yPadding": 5,                          // [ default: 5 ] Create top and bottom padding inside the label box.
+                  "shadow": true,                         // [ default: true | false ] Create a drop shadow when background box is visible. No shadow for texOnly mode.
+                  "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
+                  "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
+                },
                 "dataLabels": {
-                  "enable": false,                         // [ true | default: false ]
+                  "enable": false,                        // [ true | default: false ]
                   "float": $SC.ENUMS.FLOAT.TOP,           // [ $SC.ENUMS.FLOAT.(default: TOP | BOTTOM | LEFT | RIGHT) ]
                   "labelOverlap": false,                  // [ true | default: false ]
                   "textColor": "#000",                    // [ default : $SC.GLOBAL.theme.fontColorDark ]
@@ -338,11 +356,12 @@
                   "formatter": function(val, index) {     // [ optional ] Formatter function of text value for data labels.
                     return "Rs. " + val;
                   }, 
+                  "anchorBaseWidth": 5,                   // [ default: 5 ] Width of anchor at base
                   "xPadding": 5,                          // [ default: 5 ] Create left and right padding inside the label box
                   "yPadding": 5,                          // [ default: 5 ] Create top and bottom padding inside the label box.
                   "offsetX": 0,                           // [ default: 0 ] Create margin left from it's relative position.
                   "offsetY": 0,                           // [ default: 0 ] Create margin bottom from it's relative position.
-                  "shadow": true,
+                  "shadow": true,                         // [ default: true | false ]
                   "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
                   "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
                 },

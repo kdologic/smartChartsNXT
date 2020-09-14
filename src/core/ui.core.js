@@ -131,8 +131,8 @@ class UiCore {
   /**
    * Convert Window screen coordinate into SVG point coordinate in global SVG space.
    * @param {String} targetElem SVG element in which point coordinate will be calculated.
-   * @param {Object} evt Ponter event related to screen like mouse or touch point.
-   * @return {Point} Returns a point which transform into SVG cordinate system.
+   * @param {Object} evt Pointer event related to screen like mouse or touch point.
+   * @return {Point} Returns a point which transform into SVG coordinate system.
    */
   cursorPoint(targetElem, evt) {
     if (typeof targetElem === 'string') {
@@ -175,7 +175,6 @@ class UiCore {
     let mid = (maxVal + minVal) / 2;
     let tMinVal = minVal;
     if (zeroBase) {
-      debugger;
       tMinVal = minVal > 0 ? 0 : minVal;
       maxVal = maxVal < 0 ? 0 : maxVal;
     }
@@ -200,7 +199,7 @@ class UiCore {
             tMinVal -= (2 * tInt);
             intv += 2;
           } else if (Math.floor(tMinVal) == Math.floor(minVal)) {
-            if(!zeroBase) {
+            if (!zeroBase) {
               tMinVal -= tInt;
               intv++;
             }
@@ -263,32 +262,32 @@ class UiCore {
     let fillType = 'solidColor';
     let fillBy = 'none';
     let fillId;
-    if(fillOptions.pattern && typeof fillOptions.pattern === 'string') {
-      if(fillOptions.pattern in globalDefMap) {
+    if (fillOptions.pattern && typeof fillOptions.pattern === 'string') {
+      if (fillOptions.pattern in globalDefMap) {
         fillType = 'patternCustom';
         fillBy = `url(#${globalDefMap[fillOptions.pattern]})`;
         fillId = fillOptions.pattern;
-      }else {
+      } else {
         fillType = 'patternPreset';
         fillBy = `url(#${patternId})`;
         fillId = patternId;
       }
-    }else if(fillOptions.gradient && typeof fillOptions.gradient === 'string') {
-      if(fillOptions.gradient in globalDefMap) {
+    } else if (fillOptions.gradient && typeof fillOptions.gradient === 'string') {
+      if (fillOptions.gradient in globalDefMap) {
         fillType = 'gradientCustom';
         fillBy = `url(#${globalDefMap[fillOptions.gradient]})`;
         fillId = fillOptions.gradient;
-      }else{
+      } else {
         fillType = 'gradientPreset';
         fillBy = `url(#${gradId})`;
         fillId = gradId;
       }
-    }else if(fillOptions.image && typeof fillOptions.image === 'string' && fillOptions.image in globalDefMap) {
+    } else if (fillOptions.image && typeof fillOptions.image === 'string' && fillOptions.image in globalDefMap) {
       fillType = 'patternImage';
       fillBy = `url(#${globalDefMap[fillOptions.image]})`;
       fillId = fillOptions.image;
     }
-    return { fillType, fillBy, fillId};
+    return { fillType, fillBy, fillId };
   }
 
   /**
@@ -300,7 +299,7 @@ class UiCore {
    * @return {Void} void
    */
   generateFillElem(fillId, fillType, fillOptions, color) {
-    switch(fillType) {
+    switch (fillType) {
       case 'patternPreset': return patterns.getType(fillOptions.pattern, fillId, color);
       case 'gradientPreset': return gradients.getType(fillOptions.gradient, fillId, color);
     }

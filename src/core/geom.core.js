@@ -33,7 +33,7 @@ class GeomCore {
     return c;
   }
 
-  createDot(center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
+  createDot(center, color, radius, opacity, cls, targetElem, stroke, strokeWidth) {
     let svg;
     if (targetElem) {
       if (typeof targetElem === 'object') {
@@ -47,7 +47,7 @@ class GeomCore {
     let newElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); //Create a path in SVG's namespace
     newElement.setAttribute('cx', center.x); //Set center x
     newElement.setAttribute('cy', center.y); //Set center y
-    newElement.setAttribute('r', radious || 3); //Set radious
+    newElement.setAttribute('r', radius || 3); //Set radius
     newElement.setAttribute('class', cls || 'dot'); //Set class
     newElement.setAttribute('stroke', stroke || 'none'); //Set border color
     newElement.setAttribute('fill', color); //Set fill colour
@@ -108,7 +108,12 @@ class GeomCore {
   xDist(p1, p2) {
     return Math.abs(p1.x - p2.x);
   }
-
+  /**
+   * Calculate distance between two point.
+   * @param {Point} p1 Starting point.
+   * @param {Point} p2 Ending point.
+   * @return {Number} Returns the distance between two points.
+   */
   getDistanceBetween(p1, p2) {
     return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)) || 0;
   }
@@ -120,7 +125,12 @@ class GeomCore {
       y: centerY + (radius * Math.sin(angleInRadians).toFixed(4))
     };
   }
-
+  /**
+   * Calculate the mid point value between two points.
+   * @param {Point} point1 Starting point value.
+   * @param {Point} point2 Ending point value.
+   * @return {Point} Returns mid point value between two points.
+   */
   getMidPoint(point1, point2) {
     return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
   }
@@ -140,10 +150,10 @@ class GeomCore {
    * @param {Number} cy Center y value of arc.
    * @param {Number} rx X radius of arc.
    * @param {Number} ry Y radius of arc.
-   * @param {Number} startAngle Arc strat angle.
+   * @param {Number} startAngle Arc start angle.
    * @param {Number} endAngle Arc end angle.
-   * @param {Boolean} sweepFlag Swip flag for clock or anti-clock.
-   * @returns {Object} Path of eliptical arc.
+   * @param {Boolean} sweepFlag Sweep flag for clock or anti-clock.
+   * @returns {Object} Path of elliptical arc.
    */
   describeEllipticalArc(cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
     let fullArc = false;
@@ -215,12 +225,12 @@ class GeomCore {
     }
     /* if line1 and line2 are segments, they intersect if both of the above are true*/
     return result;
-  } /*End checkLineIntersection()*/
+  }
 
   /**
    * https://gist.github.com/nicholaswmin/c2661eb11cad5671d816
    * Interpolates a Catmull-Rom Spline through a series of x/y points
-   * Converts the CR Spline to Cubic Beziers for use with SVG items
+   * Converts the CR Spline to Cubic Bezier for use with SVG items
    *
    * If 'alpha' is 0.5 then the 'Centripetal' variant is used
    * If 'alpha' is 1 then the 'Chordal' variant is used
@@ -300,6 +310,46 @@ class GeomCore {
 
       return d;
     }
+  }
+
+  /**
+   * Check Rectangle overlapping.
+   * @param {Object} rect1 First rect object with x, y, width and height.
+   * @param {Object} rect2 Second rect object with x, y, width and height.
+   * @returns {Boolean} Return true if the rect1 overlap with rect2 otherwise returns false.
+   */
+  isRectOverlapping(rect1, rect2) {
+    if (rect2.width > rect1.width) {
+      let r = { ...rect1 };
+      rect1 = { ...rect2 };
+      rect2 = r;
+    }
+    if (this.isPointInsideRect(rect1, new Point(rect2.x, rect2.y))) {
+      return true;
+    }
+    if (this.isPointInsideRect(rect1, new Point(rect2.x + rect2.width, rect2.y))) {
+      return true;
+    }
+    if (this.isPointInsideRect(rect1, new Point(rect2.x + rect2.width, rect2.y + rect2.height))) {
+      return true;
+    }
+    if (this.isPointInsideRect(rect1, new Point(rect2.x, rect2.y + rect2.height))) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Function that verify a point is inside or outside of a rectangle area.
+   * @param {Object} rect Rect object having x, y, width and height.
+   * @param {Object} point Point object which need check overlapping with the rect object.
+   * @returns {Boolean} Return true if the point is inside the rect otherwise returns false.
+   */
+  isPointInsideRect(rect, point) {
+    if (point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height) {
+      return true;
+    }
+    return false;
   }
 
 }

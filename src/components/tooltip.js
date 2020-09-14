@@ -135,7 +135,7 @@ class Tooltip extends Component {
       if (!this.instances[i].opacity) {
         continue;
       }
-      tipContainer.push(<g instanceId={this.props.instanceId} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
+      tipContainer.push(<g instanceId={this.props.instanceId +'-' + i} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
         {this.getTipStyle(i)}
         <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
           bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}

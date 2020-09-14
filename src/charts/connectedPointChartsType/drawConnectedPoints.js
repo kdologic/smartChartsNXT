@@ -6,6 +6,7 @@ import { Component } from './../../viewEngin/pview';
 import geom from './../../core/geom.core';
 import uiCore from './../../core/ui.core';
 import utilCore from './../../core/util.core';
+import StoreManager from './../../liveStore/storeManager';
 import DataPoints from './../../components/dataPoints';
 import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
@@ -23,6 +24,7 @@ class DrawConnectedPoints extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.store = StoreManager.getStore(this.context.runId);
     this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
@@ -60,6 +62,9 @@ class DrawConnectedPoints extends Component {
       this.state.fillBy = fillOpt.fillBy;
       this.state.fillId = fillOpt.fillId;
     }
+    if(typeof this.store.getValue('pointsData') === 'undefined') {
+      this.store.setValue('pointsData', {});
+    }
     this.subComp = {};
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
@@ -69,6 +74,7 @@ class DrawConnectedPoints extends Component {
     this.state.lineSegments = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
     this.state.linePath = this.state.lineSegments.path;
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
+    this.store.setValue('pointsData', {[this.props.instanceId]: this.state.pointSet});
   }
 
   shouldComponentUpdate() {
@@ -93,6 +99,7 @@ class DrawConnectedPoints extends Component {
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightnessBind);
+    this.store.setValue('pointsData', {[this.props.instanceId]: []});
   }
 
   propsWillReceive(nextProps) {
@@ -117,6 +124,7 @@ class DrawConnectedPoints extends Component {
       height: nextProps.height
     }, nextProps.clip);
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
+    this.store.setValue('pointsData', {[nextProps.instanceId]: this.state.pointSet});
   }
 
   prepareData(props) {

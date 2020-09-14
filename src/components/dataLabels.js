@@ -2,6 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import uiCore from './../core/ui.core';
+import geomCore from './../core/geom.core';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import SpeechBox from './../components/speechBox';
@@ -40,8 +41,6 @@ class DataLabels extends Component {
       offsetY: 0,
       shadow: true,
       anchorBaseWidth: 5,
-      fontSize: defaultConfig.theme.fontSizeMedium,
-      fontFamily: defaultConfig.theme.fontFamily,
       style: {}
     };
     this.state = {
@@ -220,25 +219,9 @@ class DataLabels extends Component {
   checkOverlapping(existingLabels, label) {
     for (let i = 0; i < existingLabels.length; i++) {
       let existingLabel = existingLabels[i];
-      if (this.pointInsideRect(existingLabel, new Point(label.x, label.y))) {
+      if(geomCore.isRectOverlapping(existingLabel, label)) {
         return true;
       }
-      if (this.pointInsideRect(existingLabel, new Point(label.x + label.width, label.y))) {
-        return true;
-      }
-      if (this.pointInsideRect(existingLabel, new Point(label.x + label.width, label.y + label.height))) {
-        return true;
-      }
-      if (this.pointInsideRect(existingLabel, new Point(label.x, label.y + label.height))) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  pointInsideRect(rect, point) {
-    if (point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height) {
-      return true;
     }
     return false;
   }
