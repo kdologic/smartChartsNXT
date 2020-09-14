@@ -196,6 +196,28 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
   }
 }
 
+function _rearrangeOldVNodes(oldVNode, newVNode, ref) {
+  if (oldVNode.children instanceof Array && newVNode.children instanceof Array) {
+    for (let c = 0; c < newVNode.children.length; c++) {
+      let nVNode = newVNode.children[c];
+      for (let i = 0; i < oldVNode.children.length; i++) {
+        let oVNode = oldVNode.children[i];
+        if (oVNode.attributes && oVNode.attributes.instanceId !== undefined && nVNode.attributes && oVNode.attributes.instanceId === nVNode.attributes.instanceId) {
+          if (Math.max(i, c) < oldVNode.children.length) {
+            let node = oldVNode.children[i];
+            oldVNode.children[i] = oldVNode.children[c];
+            oldVNode.children[c] = node;
+            let refChild = ref.children[i];
+            ref.children[i] = ref.children[c];
+            ref.children[c] = refChild;
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
 /**
  * Hyperscript generator, gets called by transpile JSX.
  * @param {String} nodeName Name of the element like: rect, path or <Custom-component>
@@ -430,6 +452,7 @@ class Component {
 
     if (newVNode.children && newVNode.children.length) {
       _replaceClassWithObject(newVNode, ref, true);
+      _rearrangeOldVNodes(oldVNode, newVNode, ref);
     }
 
     if (ref && ref.self && typeof ref.self.passContext === 'function') {
