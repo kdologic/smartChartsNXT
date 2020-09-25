@@ -8,7 +8,7 @@ import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import utilCore from './../core/util.core';
 import geomCore from './../core/geom.core';
-import ConnectorBox from './../components/ConnectorBox';
+import ConnectorBox from './connectorBox';
 
 
 /**
