@@ -4,11 +4,11 @@ import { Component } from './../viewEngin/pview';
 import uiCore from './../core/ui.core';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
-import ConnectorBox from './../components/ConnectorBox';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import utilCore from './../core/util.core';
 import geomCore from './../core/geom.core';
+import ConnectorBox from './../components/ConnectorBox';
 
 
 /**
