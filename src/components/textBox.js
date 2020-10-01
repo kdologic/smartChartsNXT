@@ -69,7 +69,7 @@ class TextBox extends Component {
     this.processBeforeRender();
     let textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
     return (
-      <g transform={`translate(${this.props.posX},${this.props.posY}) ${this.props.transform || ''}`} tabindex='-1'>
+      <g transform={`translate(${this.props.posX},${this.props.posY}) ${this.props.transform || ''}`} tabindex='-1' aria-hidden='true'>
         <rect class='sc-textbox-bg' x={(this.state.textAnchor === 'middle' ? -(this.state.textBBox.width / 2) : 0)} y={0}
           width={this.state.textBBox.width} height={this.state.textBBox.height}
           rx={this.props.borderRadius || 0} opacity={this.props.bgOpacity || 1} fill={this.props.bgColor || 'none'}>

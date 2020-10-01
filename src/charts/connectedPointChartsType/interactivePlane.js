@@ -39,7 +39,7 @@ class InteractivePlane extends Component {
 
   render() {
     return (
-      <g class='sc-interactive' transform={`translate(${this.props.posX},${this.props.posY})`}>
+      <g class='sc-interactive' transform={`translate(${this.props.posX},${this.props.posY})`} role="region" aria-label="Interactive chart. Use left arrow or right arrow to navigate between data points.">
         <rect class={'sc-interactive-plane' + (this.state.isFocused ? ' focus-in' : '')} width={this.props.width} height={this.props.height} fill='none' style={{ pointerEvents: 'all' }} tabindex='0'
           events={{
             mouseenter: this.onMouseEnter,

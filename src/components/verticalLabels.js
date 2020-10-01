@@ -2,9 +2,11 @@
 
 import { Component } from './../viewEngin/pview';
 import uiCore from './../core/ui.core';
+import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import Ticks from './ticks';
+import a11yFactory from './../core/a11y';
 
 /**
  * verticalLabels.js
@@ -21,6 +23,7 @@ class VerticalLabels extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
     this.config = {};
     this.resetConfig(this.props.opts);
     this.state = {
@@ -33,6 +36,15 @@ class VerticalLabels extends Component {
     this.maxLabelVal = this.props.maxVal;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
+
+    /* For accessibility */
+    this.accId = this.props.accessibilityId || utilCore.getRandomID();
+    this.a11yWriter.createSpace(this.accId);
+    this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
+      (this.props.opts.prepend || '') + this.minLabelVal + (this.props.opts.append || '')+
+      ' to ' +
+      (this.props.opts.prepend || '') + this.maxLabelVal + (this.props.opts.append || '')+
+      '.</div>', false);
   }
 
   componentWillMount() {
@@ -81,7 +93,7 @@ class VerticalLabels extends Component {
 
   render() {
     return (
-      <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
+      <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} aria-hidden='true'>
         {this.getLabels()}
         {this.config.labelAlign === 'end' &&
           <Ticks posX={-(this.props.opts.tickSpan || this.defaultTickSpan)} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>

@@ -119,7 +119,7 @@ class HorizontalScroller extends Component {
     };
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <defs>
+        <defs aria-hidden='true'>
           <clipPath id={this.props.windowClipId}>
             <rect x={clip.x} y={0} width={clip.width} height={this.props.height} />
           </clipPath>

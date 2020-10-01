@@ -11,6 +11,8 @@ import DataPoints from './../../components/dataPoints';
 import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
+import dateFormat from 'dateformat';
+import a11yFactory from './../../core/a11y';
 
 /**
  * drawConnectedPoints.js
@@ -25,6 +27,7 @@ class DrawConnectedPoints extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.store = StoreManager.getStore(this.context.runId);
+    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
     this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
@@ -75,6 +78,18 @@ class DrawConnectedPoints extends Component {
     this.state.linePath = this.state.lineSegments.path;
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
     this.store.setValue('pointsData', {[this.props.instanceId]: this.state.pointSet});
+
+    /* For accessibility */
+    if(this.props.accessibility) {
+      this.liveRegionId = utilCore.getRandomID();
+      this.a11yWriter.createSpace(this.liveRegionId)
+        .config({
+          attrs:{
+            'aria-live': 'polite',
+            'aria-atomic': true
+          }
+        });
+    }
   }
 
   shouldComponentUpdate() {
@@ -92,6 +107,21 @@ class DrawConnectedPoints extends Component {
     this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
     this.state.animated = false;
+  }
+
+  componentDidUpdate() {
+    let rangeStart = '', rangeEnd = '';
+    if(this.props.accessibility) {
+      rangeStart = this.props.xAxisInfo.categories[0];
+      if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeStart)) {
+        rangeStart = dateFormat(rangeStart, 'longDate');
+      }
+      rangeEnd = this.props.xAxisInfo.categories[this.props.xAxisInfo.categories.length-1];
+      if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeEnd)) {
+        rangeEnd = dateFormat(rangeEnd, 'longDate');
+      }
+      this.a11yWriter.write(this.liveRegionId, `<g>Series ${this.props.name}, displaying ${this.state.pointSet.length} data points. Range between ${this.props.xAxisInfo.title} : ${(this.props.xAxisInfo.prepend || '') + rangeStart + (this.props.xAxisInfo.append || '')} to ${(this.props.xAxisInfo.prepend || '') + rangeEnd + (this.props.xAxisInfo.append || '')}</g>`, true, 1000);
+    }
   }
 
   componentWillUnmount() {
@@ -139,8 +169,13 @@ class DrawConnectedPoints extends Component {
   }
 
   render() {
+    let ariaLabel = '';
+    if(this.props.accessibility){
+      ariaLabel = `Series ${this.props.name}, ${this.context.chartType.replace('Chart','')} ${this.props.index + 1} of ${this.props.totalSeriesCount} with ${this.props.totalDataCount} data points. ${this.props.accessibilityText || ''}`;
+    }
     return (
-      <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}>
+      <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}
+      role='region' tabindex='-1' aria-hidden={!this.props.accessibility} aria-label={ariaLabel}>
         <remove-before-save>
           {this.props.animated &&
             <style>
@@ -170,7 +205,7 @@ class DrawConnectedPoints extends Component {
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.areaFillColor || this.props.lineFillColor} />
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.areaFillColor || this.props.lineFillColor} />
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
           <DataLabels instanceId={'dl' + this.props.index} pointSet={this.state.pointSet} opts={this.props.dataLabels} clip={this.state.clip} />

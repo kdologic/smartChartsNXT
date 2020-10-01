@@ -91,7 +91,7 @@ class DataLabels extends Component {
 
   render() {
     return (
-      <g class={['sc-data-label-container', ...this.config.classes].join(' ')} style={{ pointerEvents: 'none' , ...this.config.style}}>
+      <g class={['sc-data-label-container', ...this.config.classes].join(' ')} style={{ pointerEvents: 'none' , ...this.config.style}} aria-hidden={true}>
         {this.getLabels()}
       </g>
     );

@@ -25,6 +25,7 @@ import InteractivePlane from './interactivePlane';
 import dateFormat from 'dateformat';
 import StoreManager from './../../liveStore/storeManager';
 import SeriesLabel from './../../components/seriesLabel';
+import a11yFactory from './../../core/a11y';
 
 /**
  * connectedPointBase.js
@@ -39,6 +40,7 @@ class ConnectedPointBase extends Component {
     super(props);
     try {
       let self = this;
+      this.a11yWriter = a11yFactory.getWriter(this.context.runId);
       this.CHART_DATA = utilCore.extends({
         chartCenter: 0,
         marginLeft: 0,
@@ -202,6 +204,14 @@ class ConnectedPointBase extends Component {
 
       this.init();
 
+      /* For accessibility */
+      this.srLenAccId = utilCore.getRandomID();
+      this.hLabelAccId = utilCore.getRandomID();
+      this.vLabelAccId = utilCore.getRandomID();
+      this.a11yWriter.createSpace(this.srLenAccId, this.hLabelAccId, this.vLabelAccId);
+      this.a11yWriter.write(this.srLenAccId, '<div aria-hidden="false">Chart draws ' +  this.CHART_OPTIONS.dataSet.series.length +' data series.</div>');
+      this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_OPTIONS.dataSet.xAxis.title || 'values') +'.</div>', false);
+      this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_OPTIONS.dataSet.yAxis.title || 'values') + '.</div>', false);
     } catch (ex) {
       ex.errorIn = `Error in ${this.context.chartType} with runId:${this.context.runId}`;
       throw ex;
@@ -488,13 +498,13 @@ class ConnectedPointBase extends Component {
 
         <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
           posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
-          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} >
+          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
         </VerticalLabels>
 
         <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
           maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
-          categorySet={this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX}
+          categorySet={this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
           clip={{
             x: this.state.offsetLeftChange,
             width: this.CHART_DATA.gridBoxWidth
@@ -577,12 +587,14 @@ class ConnectedPointBase extends Component {
       isBothSinglePoint = !!(isBothSinglePoint * (s.data.length == 1));
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
+      let seriesTotalDataCount = this.state.fs.dataSet.series.filter(s => s.index === series.index)[0].data.filter(v => v !== null).length;
       return (
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
-          lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
+          lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || this.CHART_DATA.defaultMarkerWidth} markerHeight={series.markerHeight || this.CHART_DATA.defaultMarkerHeight} markerURL={series.markerURL || ''}
-          centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip}
+          centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated}
+          shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
           }}
@@ -607,6 +619,7 @@ class ConnectedPointBase extends Component {
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender}
+            xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
@@ -617,7 +630,7 @@ class ConnectedPointBase extends Component {
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
             marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender}
-            clipId={this.scrollWindowClipId}>
+            clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
           </DrawConnectedPoints>
         </g>
       );

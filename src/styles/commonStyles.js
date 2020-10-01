@@ -24,7 +24,7 @@ class CommonStyles extends Component {
         <style>{fontFaceStatic}</style>
         <Style>
           {{
-            '*': {
+            '.smartcharts-nxt *': {
               'outline': 'none'
             },
             '.smartcharts-nxt .focus-in': {
@@ -35,6 +35,16 @@ class CommonStyles extends Component {
             },
             '.smartcharts-nxt .sc-hide': {
               'display': 'none'
+            },
+            '.sc-screen-reader-only': {
+              'position': 'absolute',
+              'width': '1px',
+              'height': '1px',
+              'overflow': 'hidden',
+              'whiteSpace': 'nowrap',
+              'clip': 'rect(1px, 1px, 1px, 1px)',
+              'marginTop': '-3px',
+              'opacity': '0.01'
             }
           }}
         </Style>

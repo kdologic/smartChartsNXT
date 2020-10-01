@@ -121,7 +121,7 @@ class Tooltip extends Component {
       this.createTipContainerHTML();
     }
     return (
-      <g class='sc-tooltip-container' pointer-events='none' aria-atomic='true' aria-live='assertive'>
+      <g class='sc-tooltip-container' pointer-events='none' aria-atomic='true' aria-live='polite'>
         {
           this.getTooltipContainer()
         }
@@ -217,7 +217,7 @@ class Tooltip extends Component {
     if(tipContainer) {
       tipContainer.parentNode.removeChild(tipContainer);
     }
-    strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='assertive' 
+    strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='polite' 
       style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
     </div>`;
     allTipContainer.insertAdjacentHTML('beforeend', strHtml);

@@ -70,7 +70,7 @@ class heading extends Component {
       }
     };
     return (
-      <g class={`sc-header-grp-${this.id}`}>
+      <g aria-hidden='true' class={`sc-header-grp-${this.id}`}>
         <Style>
           {{ [`.sc-header-grp-${this.id}`]: this.config.style }}
         </Style>

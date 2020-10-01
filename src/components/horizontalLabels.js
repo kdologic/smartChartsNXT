@@ -7,6 +7,7 @@ import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
 import dateFormat from 'dateformat';
 import uiCore from '../core/ui.core';
+import a11yFactory from './../core/a11y';
 
 /**
  * horizontalLabels.js
@@ -25,6 +26,7 @@ class HorizontalLabels extends Component {
     super(props);
     let self = this;
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
     this.rid = utilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
@@ -54,6 +56,15 @@ class HorizontalLabels extends Component {
     this.state.categories = this.props.categorySet;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
+
+    /* For accessibility */
+    this.accId = this.props.accessibilityId || utilCore.getRandomID();
+    this.a11yWriter.createSpace(this.accId);
+    this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
+      (this.props.opts.prepend || '') + (this.props.opts.parseAsDate && utilCore.isDate(this.props.categorySet[0]) ? dateFormat(this.props.categorySet[0], 'longDate') : this.props.categorySet[0]) + (this.props.opts.append || '') +
+      ' to ' +
+      (this.props.opts.prepend || '') + (this.props.opts.parseAsDate && utilCore.isDate(this.props.categorySet[this.props.categorySet.length-1]) ? dateFormat(this.props.categorySet[this.props.categorySet.length-1], 'longDate') : this.props.categorySet[this.props.categorySet.length-1]) + (this.props.opts.append || '') +
+      '</div>', false);
   }
 
   componentWillMount() {
@@ -99,7 +110,7 @@ class HorizontalLabels extends Component {
       count: this.state.categories.length
     });
     return (
-      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
+      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} aria-hidden='true'>
         <defs>
           <clipPath id={this.clipPathId}>
             <rect x={this.state.clip.x - 100} y={this.state.clip.y} width={this.state.clip.width + 100} height={this.state.clip.height} />

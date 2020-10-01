@@ -66,7 +66,7 @@ class Grid extends Component {
       this.state.fillType = 'none';
     }else {
       let fillOpt = uiCore.processFillOptions(this.props.opts.fillOptions);
-      if(this.state.fillBy === 'none') {
+      if(fillOpt.fillBy === 'none') {
         this.state.fillType = 'solidColor';
         this.state.fillBy = this.config.bgColor;
       }else {

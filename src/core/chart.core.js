@@ -27,19 +27,7 @@ class Core {
 
   loadFont() {
     uiCore.prependStyle(document.querySelector('head'), font);
-    let intervalId = setInterval(() => {
-      if (document.body) {
-        clearInterval(intervalId);
-        document.body.insertAdjacentHTML('beforeend', '<p id=\'sc-temp-font-loader\' aria-hidden=\'true\' style=\'visibility:hidden;position: absolute;left: -10000px;top: -10000px;font-family:Lato;\'>Loading...</p>');
-        setTimeout(() => {
-          this.namespaceReadyStatus = true;
-          setTimeout(() => {
-            let fLoader = document.getElementById('sc-temp-font-loader');
-            fLoader.parentNode.removeChild(fLoader);
-          }, 1000);
-        });
-      }
-    }, 10);
+    this.namespaceReadyStatus = true;
   }
 
   set debug(isEnable = true) {
@@ -84,24 +72,44 @@ class Core {
   // }
 
   ready(successBack) {
-    /* Start polling for the ready state*/
-    let statusCheck = setInterval(() => {
-      if (this.namespaceReadyStatus) {
-        clearInterval(statusCheck);
-        if (typeof successBack === 'function') {
-          let startTime = window.performance.now();
-          try {
-            successBack.call(this);
-          } catch (ex) {
-            this.handleError(ex);
-          }
+    if(typeof successBack === 'function') {
+      this.executeChart(successBack);
+      return;
+    }
+    return new Promise((resolve, reject) => {
+      this.executeChart(resolve, reject);
+    });
+  }
 
-          let endTime = window.performance.now();
-          /* eslint-disable-next-line no-console */
-          console.info('Time elapsed for chart: %c' + (endTime - startTime) + ' Ms', 'color:green');
+  executeChart(chart, error) {
+    if (this.namespaceReadyStatus) {
+      if (typeof chart === 'function') {
+        let startTime = window.performance.now();
+        try {
+          chart.call(this);
+        } catch (ex) {
+          this.handleError(ex);
         }
+        let endTime = window.performance.now();
+        /* eslint-disable-next-line no-console */
+        console.info('Time elapsed for chart: %c' + (endTime - startTime) + ' Ms', 'color:green');
+        return;
       }
-    }, 100);
+    }else {
+      /* Start polling for the ready state*/
+      let intervalCount = 0;
+      let statusCheck = setInterval(() => {
+        if (this.namespaceReadyStatus) {
+          clearInterval(statusCheck);
+          this.executeChart(chart);
+        }else {
+          intervalCount++;
+          if(intervalCount > 100) {
+            error();
+          }
+        }
+      }, 100);
+    }
   }
 
   handleError(ex) {

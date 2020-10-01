@@ -13,6 +13,7 @@ import Menu from './../components/menu';
 import LoaderView from './../components/loaderView';
 import StoreManager from './../liveStore/storeManager';
 import GlobalDefs from './../styles/globalDefs';
+import a11yFactory from './../core/a11y';
 
 /**
  * baseChart.js
@@ -27,7 +28,9 @@ class BaseChart extends Component {
       super(props);
       this.chartType = this.props.opts.type;
       this.store = StoreManager.getStore(this.props.runId);
+      this.a11yWriter = a11yFactory.getWriter(this.props.runId);
       this.CHART_OPTIONS = utilCore.extends({
+        a11y: {},
         menu: {
           mainMenu: {
             enable: true,
@@ -84,6 +87,14 @@ class BaseChart extends Component {
     this.hideBeforeSave = this.hideBeforeSave.bind(this);
     this.onResizeComponent = this.onResizeComponent.bind(this);
     this.onRenderComponent = this.onRenderComponent.bind(this);
+
+    this.a11yWriter.createSpace(this.titleId);
+    this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.title || {}).text || '') + '</div>');
+    this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.subtitle || {}).text || '') + '</div>', false);
+    if(this.CHART_OPTIONS.a11y.description) {
+      this.a11yWriter.createSpace(this.descId);
+      this.a11yWriter.write(this.descId, '<div aria-hidden="false">' + this.CHART_OPTIONS.a11y.description + '</div>');
+    }
   }
 
   passContext() {
@@ -132,14 +143,14 @@ class BaseChart extends Component {
     return (
       <svg
         //xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
-        role='application'
+        role="region"
         version={1.1}
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
         viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
         id={this.getChartId()}
         class='smartcharts-nxt'
-        aria-labelledby={this.titleId}
+        aria-label="Interactive chart."
         aria-describedby={this.descId}
         style={{
           fontFamily: defaultConfig.theme.fontFamily,
@@ -155,8 +166,7 @@ class BaseChart extends Component {
           overflow: 'hidden'
         }} >
 
-        <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '') + ' ' + ((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
-        <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType) + ' -created using SmartChartsNXT chart library.'}</desc>
+        <desc aria-hidden='true'>{(this.CHART_DATA.name) + ' - created using SmartChartsNXT chart library.'}</desc>
 
         <CommonStyles></CommonStyles>
         { this.globalDefs.mapAll() }
@@ -211,6 +221,7 @@ class BaseChart extends Component {
   getMenuIcon(posX, posY) {
     return (
       <g class='sc-menu-icon' transform={`translate(${posX},${posY})`}>
+        <title>Chart Options</title>
         <style>
           {`
             .sc-menu-icon-bg {

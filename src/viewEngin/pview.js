@@ -22,9 +22,10 @@ const merge = require('deepmerge');
  * @param {String} nodeType - This flag decide node variable having real node or virtual node ['vnode' | 'rnode'].
  * @param {Object} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node.
  * @param {Object} ctx Pass the existing context.
+ * @param {Boolean} emptyBeforeMount Empty the target node before mount when true.
  * @returns {Object} A component object.
  * */
-function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}) {
+function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}, emptyBeforeMount = true) {
 
   if (!node) {
     throw new TypeError('Invalid vnode in render component');
@@ -39,7 +40,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
   }
 
   if (!oldNode) {
-    if (nodeType === 'vnode') {
+    if (nodeType === 'vnode' && emptyBeforeMount) {
       targetNode.innerHTML = '';
     }
     targetNode.appendChild(component.node);
@@ -264,7 +265,7 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    if(!objStyle[key]) {
+    if(typeof objStyle[key] === 'undefined') {
       return;
     }
     if (objStyle[key].old !== undefined && objStyle[key].old !== null && objStyle[key].new !== undefined && objStyle[key].new !== null) {

@@ -4,6 +4,8 @@ import { Component } from './../viewEngin/pview';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
 import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from './../icons/iconCollection';
+import dateFormat from 'dateformat';
+import utilCore from './../core/util.core';
 
 /**
  * dataPoints.js
@@ -52,13 +54,21 @@ class DataPoints extends Component {
 
   render() {
     return (
-      <g class='sc-data-points'>
+      <g class='sc-data-points' aria-hidden={false}>
         {
           this.state.pointSet.map((point) => {
             if(point.isHidden) {
               return (<g class='sc-icon sc-hide'></g>);
             }
-            return this.drawPoint(point);
+            let category = this.props.xAxisInfo.categories[point.index];
+            if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(category)) {
+              category = dateFormat(category, 'longDate');
+            }
+            let ariaLabel=`${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + point.value.toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
+            return (
+              <g role='img' aria-label={ariaLabel}>
+                {this.drawPoint(point)}
+              </g>);
           })
         }
       </g>

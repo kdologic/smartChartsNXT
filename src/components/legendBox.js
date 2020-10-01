@@ -26,35 +26,6 @@ import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../
  * display - inline : inline only take space as much required. it wouldn't wrap the legends.
  * display - block: block will take entire row. It will wrap the legends if overflow.
  *
- * @example
- * config:
-"legends":{
-    "enable" : true,                              // [ default: true | false ]
-    "top": 70,                                    // [ default: 70 ]
-    "left": 100,                                  // [ default: 100 ]
-    "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-    "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
-    "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-    "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
-    "textColor": "#000",                          // [ default: theme.fontColorDark ]
-    "bgColor": "none",                            // [ default: none ]
-    "hoverColor":"none",                          // [ default: none ]
-    "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
-    "fontFamily": "Lato",                         // [ default: Lato ]
-    "itemBorderWidth": 1,                         // [ default: 1 ]
-    "itemBorderColor": "#000",                    // [ default: #000 ]
-    "itemBorderOpacity": 1,                       // [ default: 1 ]
-    "itemBorderRadius": 10,                       // [ default: 10 ]
-    "borderColor": "none",                        // [ default: none ]
-    "borderWidth": 1,                             // [ default: 1 ]
-    "borderOpacity": 1,                           // [ default: 1 ]
-    "opacity": 0.9,                               // [ default: 0.9 ]
-    "toggleType": true,                           // [ default: true | false ]
-    "hideIcon": false,                            // [ true | default: false ]
-    "hideLabel": false,                           // [ true | default: false ]
-    "hideValue": false                            // [ true | default: false ]
-  }
-
  * @event
  * 1. legendClicked - Triggered when clicked on a legend box.
  * 2. legendHovered - Triggered when mouse hover on a legend box.
@@ -184,11 +155,11 @@ class LegendBox extends Component {
     this.cumulativeWidth = 0;
     this.renderCount++;
     return (
-      <g transform={`translate(${this.state.legendBoxTrnsX},${this.state.legendBoxTrnsY})`}>
+      <g transform={`translate(${this.state.legendBoxTrnsX},${this.state.legendBoxTrnsY})`} role="region">
         <path class='legend-container-border' d={this.getContainerBorderPath()} fill={this.config.bgColor}
           opacity={this.config.opacity} stroke-width={this.config.strokeWidth} stroke={this.config.strokeColor} stroke-opacity={this.config.strokeOpacity}
         />
-        <g class='legend-set' transform={`translate(${this.state.legendSetTrnsX})`}>
+        <g class='sc-legend-set' transform={`translate(${this.state.legendSetTrnsX})`}>
           {this.getLegendSet()}
         </g>
       </g>
@@ -201,7 +172,8 @@ class LegendBox extends Component {
 
   getLegend(data, index, withContainer = true) {
     return (
-      <g class={`sc-legend-${index} sc-series-legend`} tabindex='0' transform={this.state.legendSet[index].transform || ''} style={{ cursor: 'pointer' }}
+      <g class={`sc-legend-${index} sc-series-legend`} transform={this.state.legendSet[index].transform || ''} style={{ cursor: 'pointer' }} tabindex='0'
+        role="button" aria-label={(data.isToggled ? 'Show' : 'Hide ') + data.label + ' series'} aria-pressed={data.isToggled}
         events={{
           click: (e) => this.onClick(e, index),
           keyup: (e) => this.onClick(e, index),
@@ -218,10 +190,6 @@ class LegendBox extends Component {
         }
         {!this.props.opts.hideIcon &&
           <g class='sc-legend-icon-group' transform="translate(2,0)">
-          {/* <rect x={this.state.left + this.padding} y={this.state.top + this.padding}
-            width={this.iconWidth} height={this.iconHeight} fill={'none'}
-            shape-rendering='optimizeSpeed' stroke-width={2} stroke={'#000'} opacity='1'>
-          </rect> */}
             { this.selectIcon(index, data) }
             <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggled ? 1 : 0}
               d={[
