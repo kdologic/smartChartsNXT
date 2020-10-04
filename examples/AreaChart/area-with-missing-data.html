@@ -2,151 +2,146 @@
 <html lang="en">
 <head>
   <title>Missing or null value - Area Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
-  <script>
-    window.onload = function () {
-      displayChart();
-    };
-
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+<body style='background: #54626F;'>
+  <div role='figure' class="chart-base">
+    <div id='chartContainer' style="width:100%; height:600px;"></div>
+  </div>
+  
+  <script type="text/javascript">
     let areaChart;
-    function displayChart(dataSet) {
-      SmartChartsNXT.ready(function () {
-        areaChart = new SmartChartsNXT.Chart({
-          "type": $SC.CHART_TYPE.AREA_CHART,
-          "targetElem": "chartContainer",
-          "bgColor": "#FAFAFA",
-          "title": {
-            "text":"Seasonal And Annual Rainfall (in mm)",
-            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
-            "textColor": "#54626F",
-            "fontSize": 22
+    SmartChartsNXT.ready(function () {
+      areaChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.AREA_CHART,
+        "targetElem": "chartContainer",
+        "bgColor": "#FAFAFA",
+        "title": {
+          "text":"Seasonal And Annual Rainfall (in mm)",
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
+          "textColor": "#54626F",
+          "fontSize": 22
+        },
+        "subtitle": {
+          "text":"*missing data will create discontinuous area",
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
+          "textColor": "#B2BEB5",
+          "fontSize": 12
+        },
+        "gridBox": {
+          "vertical": {
+            "enable": false
           },
-          "subtitle": {
-            "text":"*missing data will create discontinuous area",
-            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
-            "textColor": "#B2BEB5",
-            "fontSize": 12
+          "horizontal": {
+            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
           },
-          "gridBox": {
-            "vertical": {
-              "enable": false
+          "bgColor": '#FAFAFA',
+          "fillOptions": {
+            "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
+          },
+          "bgOpacity": 0.5 
+        },
+        "legends":{
+          "itemBorderWidth": 0
+        },
+        "tooltip": {
+          "anchorWidth": 0,
+          "anchorHeight": 10, 
+          "borderWidth": 0,
+          "borderRadius": 10,
+          "headerBgColor": "#54626F",
+          "content": {
+            "header": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  pointSet[index].formattedLabel +
+                '</p>'
+              );
             },
-            "horizontal": {
-              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
-            },
-            "bgColor": '#FAFAFA',
-            "fillOptions": {
-              "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
-            },
-            "bgOpacity": 0.5 
-          },
-          "legends":{
-            "itemBorderWidth": 0
-          },
-          "tooltip": {
-            "anchorWidth": 0,
-            "anchorHeight": 10, 
-            "borderWidth": 0,
-            "borderRadius": 10,
-            "headerBgColor": "#54626F",
-            "content": {
-              "header": function(pointSet, index, tipConfig) {
-                return (
-                  '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
-                    pointSet[index].formattedLabel +
-                  '</p>'
-                );
-              },
-              "body": function(pointSet, index, tipConfig) {
-                let point = pointSet[index];
-                return (
-                  '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
-                    '<td style="padding: 5px">' + 
-                      '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
-                       point.seriesName +
-                    '</td>' +
-                    '<td style="padding: 5px">' + (point.value === null ? '-' : point.value) + ' mm</td>' +
-                  '</tr>'
-                );
-              }
+            "body": function(pointSet, index, tipConfig) {
+              let point = pointSet[index];
+              return (
+                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                  '<td style="padding: 5px">' + 
+                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                      point.seriesName +
+                  '</td>' +
+                  '<td style="padding: 5px">' + (point.value === null ? '-' : point.value) + ' mm</td>' +
+                '</tr>'
+              );
             }
-          },
-          "horizontalScroller": {
-            "enable": false,   
-          },
-          "dataSet": {
-            "xAxis": {
-              "title": "Year",
-              "intervalThreshold": 50,
-            },
-            "yAxis": {
-              "title": "Rainfall in (mm)",
-              "zeroBase": true,
-            },
-            "series": [{
-              "name": "Rainfall",
-              "lineWidth": 3,
-              "lineColor": "#0076A3",
-              "areaColor": '#800020',
-              "areaOpacity": 0.6,
-              "markerWidth": 10,
-              "spline": false,
-              "animated": true,
-              "fillOptions": {
-                "pattern": $SC.ENUMS.PATTERN.BACK_DIAGONAL_1
-              },
-              "dataLabels": {
-                "enable": true,
-                "float": $SC.ENUMS.FLOAT.TOP,
-                "labelOverlap": false,
-                "textColor": "#000",
-                "textOpacity": 1,
-                "bgColor": "#fff",
-                "bgOpacity": 0.5,
-                "borderColor": "#0076A3",
-                "borderWidth": 1,     
-                "borderRadius": 5,    
-                "filter": function(val, index) {
-                  return val !== null;
-                },
-                "formatter": function(val, index) {
-                  return val+ ' mm';
-                }, 
-                "xPadding": 5, 
-                "yPadding": 5,
-                "offsetX": 0, 
-                "offsetY": 0,
-                "shadow": true,
-                "classes": [],
-                "style": {
-                  "fontSize": "10px"
-                }
-              },
-              "data": [
-                {"label": '1999', "value": 1207.8}, {"label": '2000', "value": 1295.3}, {"label": '2001', "value": 1242.4}, {"label": '2002', "value": 1182.9},
-                {"label": '2003', "value": null}, {"label": '2004', "value": 1208.8}, {"label": '2005', "value": 1116.6}, {"label": '2006', "value": 1035.4},
-                {"label": '2007', "value": 1105.2}, {"label": '2008', "value": 981.9}, {"label": '2009', "value": 1243.6}, {"label": '2010', "value": 1080.5},
-                {"label": '2011', "value": 1208.3}, {"label": '2012', "value": 1161.6}, {"label": '2013', "value": null}, {"label": '2014', "value": 1118.0},
-                {"label": '2015', "value": 953.7}, {"label": '2016', "value": 1215.5}, {"label": '2017', "value": 1116.3}, {"label": '2018', "value": 1054.7},
-                {"label": '2019', "value": 1225.6}
-              ]
-            }]
           }
-        });
+        },
+        "horizontalScroller": {
+          "enable": false,   
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "Year",
+            "intervalThreshold": 50,
+          },
+          "yAxis": {
+            "title": "Rainfall in (mm)",
+            "zeroBase": true,
+          },
+          "series": [{
+            "name": "Rainfall",
+            "lineWidth": 3,
+            "lineColor": "#0076A3",
+            "areaColor": '#800020',
+            "areaOpacity": 0.6,
+            "markerWidth": 10,
+            "spline": false,
+            "animated": true,
+            "fillOptions": {
+              "pattern": $SC.ENUMS.PATTERN.BACK_DIAGONAL_1
+            },
+            "dataLabels": {
+              "enable": true,
+              "float": $SC.ENUMS.FLOAT.TOP,
+              "labelOverlap": false,
+              "textColor": "#000",
+              "textOpacity": 1,
+              "bgColor": "#fff",
+              "bgOpacity": 0.5,
+              "borderColor": "#0076A3",
+              "borderWidth": 1,     
+              "borderRadius": 5,    
+              "filter": function(val, index) {
+                return val !== null;
+              },
+              "formatter": function(val, index) {
+                return val+ ' mm';
+              }, 
+              "xPadding": 5, 
+              "yPadding": 5,
+              "offsetX": 0, 
+              "offsetY": 0,
+              "shadow": true,
+              "classes": [],
+              "style": {
+                "fontSize": "10px"
+              }
+            },
+            "data": [
+              {"label": '1999', "value": 1207.8}, {"label": '2000', "value": 1295.3}, {"label": '2001', "value": 1242.4}, {"label": '2002', "value": 1182.9},
+              {"label": '2003', "value": null}, {"label": '2004', "value": 1208.8}, {"label": '2005', "value": 1116.6}, {"label": '2006', "value": 1035.4},
+              {"label": '2007', "value": 1105.2}, {"label": '2008', "value": 981.9}, {"label": '2009', "value": 1243.6}, {"label": '2010', "value": 1080.5},
+              {"label": '2011', "value": 1208.3}, {"label": '2012', "value": 1161.6}, {"label": '2013', "value": null}, {"label": '2014', "value": 1118.0},
+              {"label": '2015', "value": 953.7}, {"label": '2016', "value": 1215.5}, {"label": '2017', "value": 1116.3}, {"label": '2018', "value": 1054.7},
+              {"label": '2019', "value": 1225.6}
+            ]
+          }]
+        }
       });
-    }
-        
-
-    
+    });
   </script>
 </head>
 
-<body style='background: #54626F;'>
-  <div>
-    <div id='chartContainer' style="width:100%; height:600px;">
-    </div>
-  </div>
+
 </body>
 
 </html>

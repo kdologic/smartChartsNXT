@@ -57,15 +57,15 @@ class DrawConnectedPoints extends Component {
     }, this.props.clip);
 
     let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
-    if(fillOpt.fillBy === 'none') {
+    if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
-    }else {
+    } else {
       this.state.fillType = fillOpt.fillType;
       this.state.fillBy = fillOpt.fillBy;
       this.state.fillId = fillOpt.fillId;
     }
-    if(typeof this.store.getValue('pointsData') === 'undefined') {
+    if (typeof this.store.getValue('pointsData') === 'undefined') {
       this.store.setValue('pointsData', {});
     }
     this.subComp = {};
@@ -77,14 +77,14 @@ class DrawConnectedPoints extends Component {
     this.state.lineSegments = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
     this.state.linePath = this.state.lineSegments.path;
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
-    this.store.setValue('pointsData', {[this.props.instanceId]: this.state.pointSet});
+    this.store.setValue('pointsData', { [this.props.instanceId]: this.state.pointSet });
 
     /* For accessibility */
-    if(this.props.accessibility) {
+    if (this.props.accessibility) {
       this.liveRegionId = utilCore.getRandomID();
       this.a11yWriter.createSpace(this.liveRegionId)
         .config({
-          attrs:{
+          attrs: {
             'aria-live': 'polite',
             'aria-atomic': true
           }
@@ -111,13 +111,13 @@ class DrawConnectedPoints extends Component {
 
   componentDidUpdate() {
     let rangeStart = '', rangeEnd = '';
-    if(this.props.accessibility) {
+    if (this.props.accessibility) {
       rangeStart = this.props.xAxisInfo.categories[0];
-      if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeStart)) {
+      if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeStart)) {
         rangeStart = dateFormat(rangeStart, 'longDate');
       }
-      rangeEnd = this.props.xAxisInfo.categories[this.props.xAxisInfo.categories.length-1];
-      if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeEnd)) {
+      rangeEnd = this.props.xAxisInfo.categories[this.props.xAxisInfo.categories.length - 1];
+      if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeEnd)) {
         rangeEnd = dateFormat(rangeEnd, 'longDate');
       }
       this.a11yWriter.write(this.liveRegionId, `<g>Series ${this.props.name}, displaying ${this.state.pointSet.length} data points. Range between ${this.props.xAxisInfo.title} : ${(this.props.xAxisInfo.prepend || '') + rangeStart + (this.props.xAxisInfo.append || '')} to ${(this.props.xAxisInfo.prepend || '') + rangeEnd + (this.props.xAxisInfo.append || '')}</g>`, true, 1000);
@@ -129,17 +129,17 @@ class DrawConnectedPoints extends Component {
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightnessBind);
-    this.store.setValue('pointsData', {[this.props.instanceId]: []});
+    this.store.setValue('pointsData', { [this.props.instanceId]: [] });
   }
 
   propsWillReceive(nextProps) {
     this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
     let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
-    if(fillOpt.fillBy === 'none') {
+    if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
-    }else {
+    } else {
       this.state.fillType = fillOpt.fillType;
       this.state.fillBy = fillOpt.fillBy;
       this.state.fillId = fillOpt.fillId;
@@ -154,7 +154,7 @@ class DrawConnectedPoints extends Component {
       height: nextProps.height
     }, nextProps.clip);
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
-    this.store.setValue('pointsData', {[nextProps.instanceId]: this.state.pointSet});
+    this.store.setValue('pointsData', { [nextProps.instanceId]: this.state.pointSet });
   }
 
   prepareData(props) {
@@ -170,16 +170,16 @@ class DrawConnectedPoints extends Component {
 
   render() {
     let ariaLabel = '';
-    if(this.props.accessibility){
-      ariaLabel = `Series ${this.props.name}, ${this.context.chartType.replace('Chart','')} ${this.props.index + 1} of ${this.props.totalSeriesCount} with ${this.props.totalDataCount} data points. ${this.props.accessibilityText || ''}`;
+    if (this.props.accessibility) {
+      ariaLabel = `Series ${this.props.name}, ${this.context.chartType.replace('Chart', '')} ${this.props.index + 1} of ${this.props.totalSeriesCount} with ${this.props.totalDataCount} data points. ${this.props.accessibilityText || ''}`;
     }
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}
-      role='region' tabindex='-1' aria-hidden={!this.props.accessibility} aria-label={ariaLabel}>
+        role='region' tabindex='-1' aria-hidden={!this.props.accessibility} aria-label={ariaLabel}>
         <remove-before-save>
           {this.props.animated &&
             <style>
-              { this.getScaleKeyframe() }
+              {this.getScaleKeyframe()}
             </style>
           }
         </remove-before-save>
@@ -201,7 +201,7 @@ class DrawConnectedPoints extends Component {
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>
         }
-        {typeof this.props.lineStrokeWidth !== 'undefined'  &&
+        {typeof this.props.lineStrokeWidth !== 'undefined' &&
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying &&
@@ -216,14 +216,16 @@ class DrawConnectedPoints extends Component {
 
   getAreaPath(lineSegments) {
     let linePath = [];
-    for(let i = 0;i<lineSegments.length;i++) {
+    for (let i = 0; i < lineSegments.length; i++) {
       let segment = lineSegments[i];
-      if(segment.length === 0) {
+      if (segment.length === 0) {
         continue;
       }
-      let startSegIndex = i === 0 ? 0 : this.state.lineSegments.segmentIndexes[i-1]+1;
+      let startSegIndex = i === 0 ? 0 : this.state.lineSegments.segmentIndexes[i - 1] + 1;
       let endSegIndex = this.state.lineSegments.segmentIndexes[i];
-      linePath.push(...segment);
+      for (let s = 0; s < segment.length; s++) {
+        linePath.push(segment[s]);
+      }
       linePath.push('L', this.state.pointSet[endSegIndex - 1].x, this.state.baseLine, 'L', this.state.pointSet[startSegIndex].x, this.state.baseLine, 'Z');
     }
     return linePath;
@@ -238,16 +240,16 @@ class DrawConnectedPoints extends Component {
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
-      if(data === null) {
+      if (data === null) {
         sIndex = -1;
         segmentIndexes.push(i);
         path.push(pathSegment.slice());
         pathSegment = [];
         point.isHidden = true;
-      }else {
+      } else {
         if (sIndex === 0) {
           pathSegment.push('M', point.x, point.y);
-        }else {
+        } else {
           pathSegment.push('L', point.x, point.y);
         }
       }
@@ -274,12 +276,12 @@ class DrawConnectedPoints extends Component {
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
-      if(data === null) {
+      if (data === null) {
         segmentIndexes.push(i);
         pointSegments.push(pathSegment.slice());
         pathSegment = [];
         point.isHidden = true;
-      }else {
+      } else {
         pathSegment.push(point);
       }
       point.index = i;
@@ -287,14 +289,14 @@ class DrawConnectedPoints extends Component {
       return point;
     });
     pointSegments.push(pathSegment);
-    for(let i = 0; i < pointSegments.length; i++) {
+    for (let i = 0; i < pointSegments.length; i++) {
       let pointSegment = pointSegments[i];
-      if(pointSegment.length === 0) {
+      if (pointSegment.length === 0) {
         path.push([]);
-      }else if(pointSegment.length === 1) {
+      } else if (pointSegment.length === 1) {
         path.push(['M', this.state.pointSet[0].x, this.state.pointSet[0].y]);
-      }else {
-        path.push(geom.catmullRomFitting(pointSegment, 0.1)) ;
+      } else {
+        path.push(geom.catmullRomFitting(pointSegment, 0.1));
       }
     }
     segmentIndexes.push(this.state.pointSet.length);
@@ -313,7 +315,7 @@ class DrawConnectedPoints extends Component {
     const mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
-    if (this.props.clip.offsetLeft > this.props.markerWidth/2) {
+    if (this.props.clip.offsetLeft > this.props.markerWidth / 2) {
       pointSet = pointSet.slice(1);
     }
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
@@ -354,13 +356,13 @@ class DrawConnectedPoints extends Component {
     let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
-      if (this.props.clip.offsetLeft > this.props.markerWidth/2) {
+      if (this.props.clip.offsetLeft > this.props.markerWidth / 2) {
         pointSet = pointSet.slice(1);
       }
       if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
         pointSet = pointSet.slice(0, pointSet.length - 1);
       }
-      if(!pointSet.length) {
+      if (!pointSet.length) {
         return void 0;
       }
       let nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[0].index : this.state.currentHighlightedPoint.pointIndex + 1;

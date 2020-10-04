@@ -389,6 +389,9 @@ class ConnectedPointBase extends Component {
   }
 
   calcOffsetChanges() {
+    if(!this.state.fs.scaleX) {
+      this.state.fs.scaleX = (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)/(this.state.maxSeriesLenFS-1);
+    }
     let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
     let leftOffsetDiff = this.state.hScrollLeftOffset - this.state.clipLeftOffset;
     let fsOffsetLeft = fsWidth * leftOffsetDiff / 100;
