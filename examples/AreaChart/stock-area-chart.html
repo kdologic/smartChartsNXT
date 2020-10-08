@@ -53,10 +53,10 @@
           "targetElem": "chartContainer",
           "bgColor": "#f7fdf7",
           "title": {
-            "text":"Stock Area Chart [ RCOM ]"
+            "text":"Stock Area Chart - Dynamic data loading"
           },
           "subtitle": {
-            "text":"Time Series (Daily)"
+            "text":"Time Series"
           },
           "dataSet": {
             "xAxis": {
@@ -75,6 +75,9 @@
               "name": seriesName,
               "areaOpacity": 0.3,
               "spline": false,
+              "marker": {
+                "enable": false
+              },
               "data": [dataSet[0]]
             }]
           },

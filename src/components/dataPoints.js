@@ -1,11 +1,10 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
-import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from './../icons/iconCollection';
 import dateFormat from 'dateformat';
 import utilCore from './../core/util.core';
+import MarkerIcon from './markerIcon';
 
 /**
  * dataPoints.js
@@ -24,7 +23,7 @@ class DataPoints extends Component {
       highlightedIndex: null,
       pointSet: this.props.opacity ? this.props.pointSet : [],
       opacity: this.props.opacity,
-      icons:{}
+      icons: {}
     };
     this.doHighlight = this.doHighlight.bind(this);
     this.normalize = this.normalize.bind(this);
@@ -57,14 +56,14 @@ class DataPoints extends Component {
       <g class='sc-data-points' aria-hidden={false}>
         {
           this.state.pointSet.map((point) => {
-            if(point.isHidden) {
+            if (point.isHidden) {
               return (<g class='sc-icon sc-hide'></g>);
             }
             let category = this.props.xAxisInfo.categories[point.index];
-            if(this.props.xAxisInfo.parseAsDate && utilCore.isDate(category)) {
+            if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(category)) {
               category = dateFormat(category, 'longDate');
             }
-            let ariaLabel=`${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + point.value.toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
+            let ariaLabel = `${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + point.value.toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
             return (
               <g role='img' aria-label={ariaLabel}>
                 {this.drawPoint(point)}
@@ -76,49 +75,25 @@ class DataPoints extends Component {
   }
 
   drawPoint(point) {
-    switch (this.props.type) {
-      case ENUMS.ICON_TYPE.CIRCLE:
-      default:
-        return (
-          <CircleIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} r={this.props.markerWidth/2} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
-            onRef={ref => {
-                    this.state.icons[point.index] = ref;
-                  }}>
-          </CircleIcon>
-        );
-      case ENUMS.ICON_TYPE.TRIANGLE:
-        return (
-          <TriangleIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
-            onRef={ref => {
-                    this.state.icons[point.index] = ref;
-                  }}>
-          </TriangleIcon>
-        );
-      case ENUMS.ICON_TYPE.DIAMOND:
-        return (
-          <DiamondIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
-            onRef={ref => {
-                    this.state.icons[point.index] = ref;
-                  }}>
-          </DiamondIcon>
-        );
-        case ENUMS.ICON_TYPE.STAR:
-          return (
-            <StarIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth} height={this.props.markerHeight} fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff"
-              onRef={ref => {
-                      this.state.icons[point.index] = ref;
-                    }}>
-            </StarIcon>
-          );
-        case ENUMS.ICON_TYPE.CUSTOM:
-          return (
-            <CustomIcon instanceId={point.index} id={point.index} x={point.x} y={point.y} width={this.props.markerWidth + 5} height={this.props.markerHeight + 5} fillColor={this.props.fillColor} URL={this.props.markerURL} highlighted={point.highlighted} strokeColor="#fff"
-              onRef={ref => {
-                      this.state.icons[point.index] = ref;
-                    }}>
-            </CustomIcon>
-          );
+    let iconType = this.props.type;
+    let iconURL = this.props.markerURL;
+    let iconWidth = this.props.markerWidth;
+    let iconHeight = this.props.markerHeight;
+    if (this.props.customizedMarkers[point.index]) {
+      let marker = this.props.customizedMarkers[point.index];
+      iconType = marker.type;
+      iconURL = marker.URL;
+      iconWidth = marker.width;
+      iconHeight = marker.height;
     }
+    return (
+      <MarkerIcon type={iconType} instanceId={point.index} id={point.index} x={point.x} y={point.y} width={iconWidth} height={iconHeight}
+        fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff" URL={iconURL || ''}
+        onRef={ref => {
+          this.state.icons[point.index] = ref;
+        }}>
+      </MarkerIcon>
+    );
   }
 
   normalize(e) {
@@ -128,7 +103,7 @@ class DataPoints extends Component {
     if (this.props.opacity === 0) {
       this.setState({ pointSet: [] });
     } else {
-      if(this.state.highlightedIndex !== undefined && this.state.highlightedIndex !== null) {
+      if (this.state.highlightedIndex !== undefined && this.state.highlightedIndex !== null) {
         this.state.icons[this.state.highlightedIndex].normalize();
       }
     }
@@ -141,7 +116,7 @@ class DataPoints extends Component {
       return;
     }
     if (this.props.opacity === 0) {
-      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index};
+      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
       this.setState({ pointSet: [pData] });
     }
     this.state.highlightedIndex = index;

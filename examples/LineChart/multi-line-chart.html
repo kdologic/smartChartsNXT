@@ -244,16 +244,13 @@
             "visible": true,
             "lineWidth": 1.5,
             "lineColor": "#014B43",
-            "marker": true,
-            "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE,
-            "markerWidth": 8,
+            "marker": {
+              "width": 8
+            },
             "spline": false,
             "dropShadow": true,
             "lineOpacity": 1,
             "animated": true,
-            "seriesLabel": {
-              "enable": true
-            },
             "data": generateRandomTimeSeries(new Date().getTime(), 20, {
               "max": 1000,
               "min": -1000
@@ -263,16 +260,15 @@
             "visible": true,
             "lineWidth": 1.5,
             "lineColor": "#C46210",
-            "marker": true,
-            "markerType": $SC.ENUMS.ICON_TYPE.DIAMOND,
-            "markerWidth": 8,
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+              "width": 10,
+              "height": 10
+            },
             "spline": true,
             "dropShadow": true,
             "lineOpacity": 1,
             "animated": true,
-            "seriesLabel": {
-              "enable": true
-            },
             "data": generateRandomTimeSeries(new Date().getTime(), 20, {
               "max": 1000,
               "min": -1000

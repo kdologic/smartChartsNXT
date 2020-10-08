@@ -9,6 +9,7 @@ import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
 import a11yFactory from './../core/a11y';
+import resizeDetectorMaker from 'element-resize-detector';
 
 /*eslint-disable  no-console*/
 
@@ -48,17 +49,23 @@ class Chart {
       this.targetNode.setAttribute('aria-label', 'SmartchartsNXT interactive ' + this.config._state.type);
       this.a11yService = a11yFactory.createInstance(this.runId, this.targetNode);
       this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode, 'vnode', null, {}, false);
-      window.addEventListener('resize', this.onResize.bind(this), false);
+
+      /* Detect the element resize and re-draw accordingly */
+      const resizeDetector = resizeDetectorMaker()();
+      resizeDetector.listenTo(this.targetNode, this.onResize.bind(this));
+
       $SC.debug && console.debug(this.core);
     } catch (ex) {
       this.logErrors(this.config._state, ex);
     }
   }
 
-  onResize(e = {}) {
-    e.data = {
-      targetWidth: this.targetNode.offsetWidth,
-      targetHeight: this.targetNode.offsetHeight
+  onResize(element) {
+    const e = {
+      data: {
+        targetWidth: element.offsetWidth,
+        targetHeight: element.offsetHeight
+      }
     };
     this.events.emit('resize', e);
   }

@@ -1,6 +1,6 @@
 'use strict';
 
-import { CHART_TYPE } from './../../settings/globalEnums';
+import { CHART_TYPE, OPTIONS_TYPE as ENUMS } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import geom from './../../core/geom.core';
@@ -32,7 +32,6 @@ class DrawConnectedPoints extends Component {
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
     this.state = {
-      marker: ~~this.props.marker,
       scaleX: 0,
       scaleY: 0,
       baseLine: 0,
@@ -48,6 +47,9 @@ class DrawConnectedPoints extends Component {
       fillBy: this.props.areaFillColor,
       hasDataLabels: this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false
     };
+
+    this.defaultMarkerWidth = 12;
+    this.defaultMarkerHeight = 12;
 
     this.state.clip = Object.assign({
       x: 0,
@@ -68,16 +70,17 @@ class DrawConnectedPoints extends Component {
     if (typeof this.store.getValue('pointsData') === 'undefined') {
       this.store.setValue('pointsData', {});
     }
-    this.subComp = {};
-    this.mouseMoveBind = this.interactiveMouseMove.bind(this);
-    this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
-    this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
-    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
+
     this.prepareData(this.props);
     this.state.lineSegments = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
     this.state.linePath = this.state.lineSegments.path;
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
     this.store.setValue('pointsData', { [this.props.instanceId]: this.state.pointSet });
+
+    this.mouseMoveBind = this.interactiveMouseMove.bind(this);
+    this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
+    this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
+    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
 
     /* For accessibility */
     if (this.props.accessibility) {
@@ -133,7 +136,6 @@ class DrawConnectedPoints extends Component {
   }
 
   propsWillReceive(nextProps) {
-    this.state.marker = ~~nextProps.marker;
     this.prepareData(nextProps);
     let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
     if (fillOpt.fillBy === 'none') {
@@ -162,7 +164,18 @@ class DrawConnectedPoints extends Component {
     this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
     this.state.scaleY = props.height / (props.maxVal - props.minVal);
     this.state.baseLine = props.maxVal * this.state.scaleY;
-    this.state.marker = this.state.scaleX < 15 ? 0 : this.state.marker;
+    if (typeof props.marker === 'object') {
+      this.state.marker = {
+        ...{
+          enable: true,
+          type: ENUMS.ICON_TYPE.CIRCLE,
+          width: this.defaultMarkerWidth,
+          height: this.defaultMarkerHeight,
+          URL: ''
+        }, ...props.marker
+      };
+    }
+    this.state.marker.enable = this.state.scaleX < 15 ? false : this.state.marker.enable;
     if (typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
     }
@@ -204,8 +217,10 @@ class DrawConnectedPoints extends Component {
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
         }
-        {this.props.dataPoints && !this.state.isAnimationPlaying &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo} type={this.props.markerType} opacity={this.state.marker} markerWidth={this.props.markerWidth} markerHeight={this.props.markerHeight} markerURL={this.props.markerURL || ''} fillColor={this.props.areaFillColor || this.props.lineFillColor} />
+        {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
+          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
+            type={this.state.marker.type}  markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor}  opacity={1} >
+          </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
           <DataLabels instanceId={'dl' + this.props.index} pointSet={this.state.pointSet} opts={this.props.dataLabels} clip={this.state.clip} />

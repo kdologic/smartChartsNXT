@@ -66,7 +66,8 @@ class Tooltip extends Component {
       followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer,
       borderRadius: typeof props.opts.borderRadius === 'undefined' ? 0 : props.opts.borderRadius,
       anchorBaseWidth: typeof props.opts.anchorWidth === 'undefined' ? 8 : props.opts.anchorWidth, // width of the anchor
-      anchorHeight: typeof props.opts.anchorHeight === 'undefined' ? 10 : props.opts.anchorHeight  // height of the anchor
+      anchorHeight: typeof props.opts.anchorHeight === 'undefined' ? 10 : props.opts.anchorHeight, // height of the anchor
+      dropShadow: typeof props.opts.dropShadow === 'undefined' ? true : props.opts.dropShadow
     };
   }
 
@@ -138,7 +139,7 @@ class Tooltip extends Component {
       tipContainer.push(<g instanceId={this.props.instanceId +'-' + i} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
         {this.getTipStyle(i)}
         <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
-          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}
+          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={this.config.dropShadow} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}
           anchorBaseWidth={this.config.anchorBaseWidth} cornerRadius={this.config.borderRadius}>
         </SpeechBox>
         <g class='sc-text-tooltip-grp'>

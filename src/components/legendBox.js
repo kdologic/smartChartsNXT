@@ -7,7 +7,7 @@ import { Component } from './../viewEngin/pview';
 import uiCore from '../core/ui.core';
 import utilCore from '../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
-import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../icons/iconCollection';
+import MarkerIcon from './markerIcon';
 
 /**
  * legendBox.js
@@ -41,16 +41,24 @@ class LegendBox extends Component {
     this.setConfig(this.props);
     this.renderCount = 0;
     this.state = {
-      legendSet: this.props.legendSet.map(lSet => {
+      legendSet: this.props.legendSet.map((lSet) => {
         lSet.totalWidth = lSet.labelLength = 0;
         lSet.isToggled = lSet.isToggled === undefined ? false : lSet.isToggled;
         lSet.transform = '';
-        lSet.icon  = lSet.icon || 'default';
+        lSet.icon = {
+          ...{
+            enable: true,
+            type: ENUMS.ICON_TYPE.CIRCLE,
+            URL: ''
+          }, ...lSet.icon
+        };
         lSet.bgFillOpacity = 0;
         lSet.strokeOpacity = 0.1;
         lSet.defaultIconStroke = 'none';
         lSet.iconHighlight = false;
-
+        if (!lSet.icon.enable) {
+          lSet.icon.type = 'none';
+        }
         return lSet;
       }),
       left: 0,
@@ -108,9 +116,9 @@ class LegendBox extends Component {
       strokeOpacity: typeof props.opts.borderOpacity === 'undefined' ? (props.strokeOpacity || 1) : 1,
       opacity: typeof props.opts.opacity === 'undefined' ? (props.opacity || 0.9) : 0.9,
       toggleType: !!(props.opts.toggleType || props.toggleType || false),
-      hideIcon: props.opts.hideIcon === 'undefined' ? (typeof props.hideIcon === 'undefined' ? false : props.hideIcon) : props.opts.hideIcon,
-      hideLabel: props.opts.hideLabel === 'undefined' ? (typeof props.hideLabel === 'undefined' ? false : props.hideLabel) : props.opts.hideLabel,
-      hideValue: props.opts.hideValue === 'undefined' ? (typeof props.hideValue === 'undefined' ? false : props.hideValue) : props.opts.hideValue
+      hideIcon: typeof props.opts.hideIcon === 'undefined' ? (typeof props.hideIcon === 'undefined' ? false : props.hideIcon) : props.opts.hideIcon,
+      hideLabel: typeof props.opts.hideLabel === 'undefined' ? (typeof props.hideLabel === 'undefined' ? false : props.hideLabel) : props.opts.hideLabel,
+      hideValue: typeof props.opts.hideValue === 'undefined' ? (typeof props.hideValue === 'undefined' ? false : props.hideValue) : props.opts.hideValue
     };
     this.iconWidth = this.config.hideIcon === true ? 0 : 15;
     this.iconHeight = this.config.hideIcon === true ? 0 : 15;
@@ -188,9 +196,9 @@ class LegendBox extends Component {
             stroke={this.config.itemBorderColor} stroke-width={this.config.itemBorderWidth} style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': data.bgFillOpacity, 'pointerEvents': 'all' }}>
           </rect>
         }
-        {!this.props.opts.hideIcon &&
+        {!this.config.hideIcon &&
           <g class='sc-legend-icon-group' transform="translate(2,0)">
-            { this.selectIcon(index, data) }
+            {this.getIcon(index, data)}
             <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggled ? 1 : 0}
               d={[
                 'M', this.state.left + this.padding, this.state.top + this.padding,
@@ -219,46 +227,23 @@ class LegendBox extends Component {
     );
   }
 
-  selectIcon(index, data) {
-    let icon = [];
-    const line = <line x1={this.state.left + this.padding - (this.iconWidth/4)} y1={this.state.top + this.padding + (this.iconWidth/2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth/4)} y2={this.state.top + this.padding + (this.iconWidth/2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>;
-    switch(data.icon) {
-      case ENUMS.ICON_TYPE.CIRCLE:
-        icon = [
-          line,
-          <CircleIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconWidth/2)} r={this.iconWidth/2} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
-        ];
-        break;
-      case ENUMS.ICON_TYPE.TRIANGLE:
-        icon = [
-          line,
-          <TriangleIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
-        ];
-        break;
-      case ENUMS.ICON_TYPE.DIAMOND:
-        icon = [
-          line,
-          <DiamondIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
-        ];
-        break;
-      case ENUMS.ICON_TYPE.STAR:
-        icon = [
-          line,
-          <StarIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
-        ];
-        break;
-      case ENUMS.ICON_TYPE.CUSTOM:
-        icon = [
-          <CustomIcon id={index} x={this.state.left + this.padding + (this.iconWidth/2)} y={this.state.top + this.padding + (this.iconHeight/2)} width={this.iconWidth + 5} height={this.iconHeight + 5} URL={data.iconURL || ''} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" />
-        ];
-        break;
-      default:
-        icon = [<rect class={`sc-legend-${index} sc-legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding}
-          width={this.iconWidth} height={this.iconWidth} fill={data.isToggled ? this.toggleColor : data.color}
-          shape-rendering='optimizeSpeed' stroke-width={2} stroke={data.defaultIconStroke} opacity='1'>
-        </rect>];
+  getIcon(index, data) {
+    const line = <line x1={this.state.left + this.padding - (this.iconWidth / 4)} y1={this.state.top + this.padding + (this.iconWidth / 2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth / 4)} y2={this.state.top + this.padding + (this.iconWidth / 2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>;
+    if (!data.icon.enable) {
+      return line;
     }
-    return icon;
+    if (!data.icon.type) {
+      return [
+        line,
+        <rect x={this.state.left + this.padding} y={this.state.top + this.padding} width={this.iconWidth} height={this.iconWidth} fill={data.isToggled ? this.toggleColor : data.color}
+          shape-rendering='optimizeSpeed' stroke-width={2} stroke={data.defaultIconStroke} opacity='1'>
+        </rect>
+      ];
+    }
+    return [
+      line,
+      <MarkerIcon id={index} type={data.icon.type} x={this.state.left + this.padding + (this.iconWidth / 2)} y={this.state.top + this.padding + (this.iconHeight / 2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" URL={data.icon.URL || ''}></MarkerIcon>
+    ];
   }
 
   calcFloatingPosition() {

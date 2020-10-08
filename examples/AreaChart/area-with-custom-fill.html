@@ -154,9 +154,9 @@
               "fillOptions": {                         
                 "image":  "image-fill-1"               
               },
-              "markerType": $SC.ENUMS.ICON_TYPE.DIAMOND,
-              "markerWidth": 12,                       
-              "markerHeight": 12,                      
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.DIAMOND
+              },
               "spline": true,                          
               "animated": true,                        
               "data": generateRandomTimeSeries(new Date().getTime(), 10, {
@@ -169,7 +169,9 @@
             "lineColor": "#A4C639",
             "areaColor": '#A4C639',
             "areaOpacity": 0.6,
-            "markerWidth": 10,
+            "marker": {
+              "width": 10
+            },
             "spline": false,
             "animated": true,
             "fillOptions": {

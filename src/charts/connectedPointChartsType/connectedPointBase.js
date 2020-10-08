@@ -57,9 +57,7 @@ class ConnectedPointBase extends Component {
         paddingX: 5,
         longestSeries: 0,
         zoomOutBoxWidth: 40,
-        zoomOutBoxHeight: 40,
-        defaultMarkerWidth: 12,
-        defaultMarkerHeight: 12
+        zoomOutBoxHeight: 40
       }, this.props.chartData);
 
       this.CHART_OPTIONS = utilCore.extends({
@@ -78,7 +76,7 @@ class ConnectedPointBase extends Component {
           textColor: defaultConfig.theme.fontColorDark,
           borderColor: 'none',
           fontFamily: defaultConfig.theme.fontFamily,
-          fontSize: defaultConfig.theme.fontSizeLarge,
+          fontSize: defaultConfig.theme.fontSizeMedium,
           responsive: {
             wrapText: true
           }
@@ -238,7 +236,7 @@ class ConnectedPointBase extends Component {
     this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
     this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
 
-    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === $SC.ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
+    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
       this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth;
     }
 
@@ -330,6 +328,7 @@ class ConnectedPointBase extends Component {
       let data = dataSet.series[i].data;
       let minVal = data.length === 0 ? 0 : Number.MAX_SAFE_INTEGER;
       let maxVal = data.length === 0 ? 1 : Number.MIN_SAFE_INTEGER;
+      let customizedMarkers = {};
       dataSet.series[i].valueSet = [];
       for (let j = 0, len = data.length; j < len; j++) {
         let v = data[j].value;
@@ -338,6 +337,9 @@ class ConnectedPointBase extends Component {
         if (j > categories.length - 1) {
           categories.push(data[j].label);
         }
+        if(data[j].marker) {
+          customizedMarkers[j] = data[j].marker;
+        }
         dataSet.series[i].valueSet.push(v);
       }
       maxSet.push(maxVal);
@@ -345,6 +347,7 @@ class ConnectedPointBase extends Component {
       dataSet.series[i].index = i;
       dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1.5 : dataSet.series[i].lineWidth;
       this.setSeriesColor(i, dataSet.series[i]);
+      dataSet.series[i].customizedMarkers = customizedMarkers;
     }
     this.state[dataFor].dataSet = dataSet;
     this.state[dataFor].dataSet.xAxis.categories = categories;
@@ -595,9 +598,9 @@ class ConnectedPointBase extends Component {
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker == 'undefined' ? true : series.marker} markerType={series.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE} markerWidth={series.markerWidth || this.CHART_DATA.defaultMarkerWidth} markerHeight={series.markerHeight || this.CHART_DATA.defaultMarkerHeight} markerURL={series.markerURL || ''}
-          centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated}
-          shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
+          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} 
+          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} 
+          totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
           }}
@@ -619,10 +622,8 @@ class ConnectedPointBase extends Component {
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline}
-            marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender}
-            xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{enable:false}} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
@@ -630,10 +631,8 @@ class ConnectedPointBase extends Component {
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false}
-            marker={false} markerWidth={0} markerHeight={0} markerURL={''} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender}
-            clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{enable:false}} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
           </DrawConnectedPoints>
         </g>
       );
@@ -901,13 +900,12 @@ class ConnectedPointBase extends Component {
   }
 
   getLegendData() {
-    return this.state.cs.dataSet.series.map((data) => {
+    return this.state.cs.dataSet.series.map((series) => {
       return {
-        label: data.name,
-        color: data.areaColor,
-        icon: data.markerType || $SC.ENUMS.ICON_TYPE.CIRCLE,
-        iconURL: data.markerURL || '',
-        isToggled: !data.visible
+        label: series.name,
+        color: series.areaColor,
+        icon: typeof series.marker === 'object' ? series.marker : {},
+        isToggled: !series.visible
       };
     });
   }

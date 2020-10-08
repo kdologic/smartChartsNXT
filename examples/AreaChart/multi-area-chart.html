@@ -74,7 +74,7 @@
           "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
           "bgColor": "none",                            // [ default : none ]
           "padding": 0,                                 // [ default : 0 ]
-          "fontSize": 12,                               // [ default : $SC.GLOBAL.theme.fontSizeSmall ]
+          "fontSize": 12,                               // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
           "style": {        
             "opacity": 1.0                              // Support any style other than available config property. Must be a json object.
           },
@@ -271,6 +271,7 @@
           "borderWidth": 2,                             // [ default: 3 ]
           "borderRadius": 0,                            // [ default: 0 ]
           "opacity": 0.8,                               // [ default: 0.8 ]
+          "dropShadow": true                            // [ default: true | false ]
         },
         "horizontalScroller": {
           "enable": true,                               // [ default: true | false ]
@@ -293,7 +294,7 @@
             "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
-            "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily   // [ default: $SC.GLOBAL.theme.fontFamily ]
           },
           "yAxis": {
             "title": "Total Sales",                     // [ default: Value-axis ]
@@ -309,13 +310,13 @@
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
-            "zeroBase": false,                          // [ true : default: false ] min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+            "zeroBase": false                           // [ true : default: false ] min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
           },
           "series": [{
               "visible": true,                          // [ default: true | false ]
               "name": 'Raphael',                        // [ required : string ]
               "a11y": {
-                description: "Showing his performance as a sales representative", // [ default: '']
+                description: "Showing his performance as a sales representative"   // [ default: '']
               },
               "lineWidth": 1.5,                         // [ default: 1.5 ]
               "lineOpacity": 1,                         // [ default: 1 ]
@@ -327,12 +328,15 @@
                 //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
                 //"image":  "image-fill-1"              // [ no default value , only available which is defined defs field]
               },
-              "marker": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
-              "markerType": $SC.ENUMS.ICON_TYPE.CIRCLE, // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
-              "markerWidth": 12,                        // [ default: 12]
-              "markerHeight": 12,                       // [ default: 12]
-              "markerURL": '',                          // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
+              "marker": {
+                "enable": true,                         // [ default: true | false ] // Note: will hide when marker density < 15px
+                "type": $SC.ENUMS.ICON_TYPE.CIRCLE,     // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
+                "width": 12,                            // [ default: 12]
+                "height": 12,                           // [ default: 12]
+                "URL": ""                               // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
+              },
               "spline": true,                           // [ default: true | false ]
+              // "dropShadow": true,                    // [ default: true | false ] Note: Drop shadow only applicable for line charts.
               "animated": true,                         // [ default: true | false ]
               "seriesLabel": {
                 "enable": false,                         // [ true | default: false ]
@@ -396,10 +400,11 @@
               "fillOptions": { 
                 //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
               },
-              "marker": true,
-              "markerType": $SC.ENUMS.ICON_TYPE.DIAMOND,
-              //"markerType": $SC.ENUMS.ICON_TYPE.CUSTOM,
-              //"markerURL": 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAgAAAAIACAMAAADDpiTIAAAAA3NCSVQICAjb4U/gAAAACXBIWXMAAHovAAB6LwEf/fvJAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAsFQTFRF////Q0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtSFFyO2l5Q0xtJrmaVWCAQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtJrmaQ0xtVWCAJrmaQ0xtVWCAJrmaQ0xtVWCAJrmaQ0xtVWCAQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtJrmaQ0xtVWCAJrmaQ0xtVWCAQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtJrmaVWCAJrmaVWCAJrmaVWCAJrmaQ0xtVWCAQ0xtQ0xtQ0xtQ0xtQ0xtMJOKMJSLQ0xtT1l5MJSLMJWLQ0xtT1l6Q0xtQ0xtQ0xtQVNwQ0xtRE1uQVNwRE1uQVJwQVNwRE1uQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtQ0xtJrmaQ0xtVWCAJa/w+AAAAOh0Uk5TAAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8gISQlJicoKSwtLi8wMDExNDQ1Njc4OTo+P0BAQEFBQUJCQkND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',
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+                // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+              },
               "spline": false,
               "animated": true,
               "dataLabels": {
