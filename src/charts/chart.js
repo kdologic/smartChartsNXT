@@ -51,8 +51,18 @@ class Chart {
       this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode, 'vnode', null, {}, false);
 
       /* Detect the element resize and re-draw accordingly */
-      const resizeDetector = resizeDetectorMaker()();
-      resizeDetector.listenTo(this.targetNode, this.onResize.bind(this));
+      this.onResize = this.onResize.bind(this);
+      if(!utilCore.isIE) {
+        const resizeObserver = new ResizeObserver(entries => {
+          for (const entry of entries) {
+            this.onResize(entry.target);
+          }
+        });
+        resizeObserver.observe(this.targetNode);
+      }else {
+        const resizeDetector = resizeDetectorMaker();
+        resizeDetector.listenTo(this.targetNode, this.onResize);
+      }
 
       $SC.debug && console.debug(this.core);
     } catch (ex) {

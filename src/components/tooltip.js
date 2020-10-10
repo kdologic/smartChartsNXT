@@ -30,6 +30,7 @@ class Tooltip extends Component {
     this.hide = this.hide.bind(this);
     this.followMousePointer = this.followMousePointer.bind(this);
     this.rootContainer = document.getElementById(this.context.rootContainerId);
+    this.allTipContainer = null;
     this.containerIdIE = utilCore.getRandomID();
   }
 
@@ -77,6 +78,11 @@ class Tooltip extends Component {
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
+    if(utilCore.isIE && !this.allTipContainer) {
+      let strHtml = `<div class='sc-tooltip-container-html' style='position: relative; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: ${-this.context.svgHeight}px; margin-top: -5px;pointer-events: none;'></div>`;
+      this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
+      this.allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+    }
     this.emitter.on('updateTooltip', this.updateTip);
     this.emitter.on('hideTooltip', this.hide);
     if (this.props.grouped && this.config.followPointer) {
@@ -208,20 +214,17 @@ class Tooltip extends Component {
   }
 
   createTipContainerHTML() {
-    let strHtml = `<div class='sc-tooltip-container-html' style='position: relative; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: ${-this.context.svgHeight}px; margin-top: -5px;pointer-events: none;'></div>`;
-    let allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
-    if(allTipContainer === null) {
-      this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
-      allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+    if(!this.allTipContainer) {
+      return;
     }
-    let tipContainer = allTipContainer.querySelector('#sc-tooltip-container-' +  this.containerIdIE);
+    let tipContainer = this.allTipContainer.querySelector('#sc-tooltip-container-' +  this.containerIdIE);
     if(tipContainer) {
       tipContainer.parentNode.removeChild(tipContainer);
     }
-    strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='polite' 
+    let strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='polite' 
       style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
     </div>`;
-    allTipContainer.insertAdjacentHTML('beforeend', strHtml);
+    this.allTipContainer.insertAdjacentHTML('beforeend', strHtml);
   }
 
   createTipAsHTML(node) {

@@ -14,6 +14,7 @@
 const Polyfills = require('./shims/polyfills');
 const config = require('./config').default;
 const merge = require('deepmerge');
+const fastdom = require('fastdom');
 
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
@@ -686,9 +687,13 @@ class Component {
         })(key);
 
         if(attrVal === undefined) {
-          dom.removeAttribute(key);
+          fastdom.mutate(() => {
+            dom.removeAttribute(key);
+          });
         }else {
-          dom.setAttribute(key, attrVal);
+          fastdom.mutate(() => {
+            dom.setAttribute(key, attrVal);
+          });
         }
       });
     });
