@@ -23,10 +23,20 @@ import utilCore from './util.core';
  *
  */
 
+/*
+ Observations:
+   1.  IE11 was unable to convert the SVG into base64 data URL. So, using Canvg v3.0.5 (https://github.com/canvg/canvg) to achieve the same.
+
+   Found some limitation with Canvg usage -
+   2.  Canvg unable to handle filter properly, few filter attributed are still unsupported there.
+   3.  Canvg can't handle image inside filter it become blank.
+   4.  Canvg can't handle multiple level of transformations, after conversion elements are off-positioned. e.i noticed for title and subtitle.
+*/
+
 class SaveAs {
 
   mimeTypeMap = {
-    'jpg': 'image/jpg',
+    'jpg': 'image/jpeg',
     'jpeg': 'image/jpeg',
     'png': 'image/png',
     'bmp': 'image/bmp',
@@ -79,6 +89,7 @@ class SaveAs {
       elemNode.querySelectorAll('remove-before-save').forEach((node) => {
         node.parentNode.removeChild(node);
       });
+
       let allImages = elemNode.querySelectorAll('image');
       if (utilCore.isIE || allImages.length === 0) {
         resolve(new XMLSerializer().serializeToString(elemNode));
@@ -94,7 +105,7 @@ class SaveAs {
           allPromises.push(
             this.toDataURL(imgHref, this.mimeTypeMap[ext])
               .then((base64url) => {
-                image.insertAdjacentHTML('afterend', '<image class="image-before-save" x="' + (image.getAttribute('x') || 0) + '" y="' + (image.getAttribute('y') || 0) + '" width="' + (image.getAttribute('width') || 0) + '" height="' + (image.getAttribute('height') || 0) + '" href="' + base64url + '" preserveAspectRatio="' + (image.getAttribute('preserveAspectRatio') || 'none') + '"></image>');
+                image.insertAdjacentHTML('afterend', '<image class="image-converted" x="' + (image.getAttribute('x') || 0) + '" y="' + (image.getAttribute('y') || 0) + '" width="' + (image.getAttribute('width') || 0) + '" height="' + (image.getAttribute('height') || 0) + '" href="' + base64url + '" preserveAspectRatio="' + (image.getAttribute('preserveAspectRatio') || 'none') + '"></image>');
                 image.parentNode.removeChild(image);
               })
               .catch((ex) => {
@@ -129,8 +140,13 @@ class SaveAs {
     let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
     today = (new Date(Date.now() - tzoffset));
     const fileName = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
+    let svgRoot = document.querySelector(opts.srcElem);
 
-    this.serialize(document.querySelector(opts.srcElem).cloneNode(true))
+    /*
+      CloneNode in IE 11 create erroneous values on patterns elements that fails Canvg to work properly so remove for IE 11.
+      Also drop shadow filter, create distorted and faded canvas images. Better to avoid it for IE 11.
+    */
+    this.serialize(utilCore.isIE ? svgRoot : svgRoot.cloneNode(true))
       .then((serializedString) => {
         let svgString = this.normalizeCSS(serializedString);
         if (opts.type === 'print') {
@@ -180,78 +196,59 @@ class SaveAs {
           img.setAttribute('crossOrigin', 'anonymous');
           img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
           img.onload = () => {
-            let canvas, vector;
-            if (opts.type !== 'svg' && opts.type !== 'print') {
+            let imgAsURL;
+            if (opts.type === 'svg') {
               if (utilCore.isIE) {
-                if ($SC.IESupport && $SC.IESupport.Canvg) {
-                  canvas = document.createElement('canvas');
-                  canvas.style.position = 'absolute';
-                  canvas.style.display = 'none';
-                  document.body.appendChild(canvas);
-                  canvas.width = opts.width;
-                  canvas.height = opts.height;
-                  let ctx = this.setDPI(canvas, 1.5 * 96);
-                  vector = $SC.IESupport.Canvg.fromString(ctx, svgString);
-                  vector.start();
-                } else {
-                  /*eslint-disable-next-line  no-alert*/
-                  alert('Please include lib - SmartChartsNXT.IESupport for this feature !!');
-                  if (opts.emitter && typeof opts.emitter.emit === 'function') {
-                    opts.emitter.emit('afterSave', { type: opts.type });
-                  }
-                  return;
-                }
+                imgAsURL = svgString;
               } else {
-                canvas = document.createElement('canvas');
-                canvas.width = opts.width;
-                canvas.height = opts.height;
-                let ctx = this.setDPI(canvas, 1.5 * 96);
-                ctx.drawImage(img, 0, 0, opts.width, opts.height);
+                imgAsURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString);
               }
-            }
-
-            if (opts.type === 'pdf') {
-              if (opts.emitter && typeof opts.emitter.emit === 'function') {
-                opts.emitter.emit('showLoader');
-              }
-              let head = document.getElementsByTagName('head')[0];
-              let pdfLib = document.createElement('script');
-              pdfLib.type = 'text/javascript';
-              pdfLib.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js';
-              pdfLib.onload = () => {
-                let imgAsURL = canvas.toDataURL('image/jpeg');
-                let orientation = opts.width > opts.height ? 'landscape' : 'portrait';
-                /* eslint-disable-next-line new-cap, no-undef */
-                let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
-                doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
-                doc.output('save', fileName);
-                if (utilCore.isIE && vector) {
-                  vector.stop();
-                  canvas.parentElement.removeChild(canvas);
-                }
-                if (opts.emitter && typeof opts.emitter.emit === 'function') {
-                  opts.emitter.emit('afterSave', { type: opts.type });
-                }
-                if (opts.emitter && typeof opts.emitter.emit === 'function') {
-                  opts.emitter.emit('hideLoader');
-                }
-              };
-              head.appendChild(pdfLib);
-            } else {
-              let imgAsURL;
-              if (utilCore.isIE) {
-                imgAsURL = (opts.type === 'svg') ? (svgString) : canvas.toDataURL('image/' + opts.type);
-              } else {
-                imgAsURL = (opts.type === 'svg') ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString) : canvas.toDataURL('image/' + opts.type);
-              }
-              this.download(imgAsURL, fileName, 'image/' + opts.type);
-              if (utilCore.isIE && vector) {
-                vector.stop();
-                canvas.parentElement.removeChild(canvas);
-              }
+              this.download(imgAsURL, fileName, this.mimeTypeMap[opts.type]);
               if (opts.emitter && typeof opts.emitter.emit === 'function') {
                 opts.emitter.emit('afterSave', { type: opts.type });
               }
+            } else {
+              this.createCanvasForDownload(img, svgString, opts)
+                .then((data) => {
+                  let { canvas, vector } = data;
+                  if (opts.type === 'pdf') {
+                    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+                      opts.emitter.emit('showLoader');
+                    }
+                    let head = document.getElementsByTagName('head')[0];
+                    let pdfLib = document.createElement('script');
+                    pdfLib.type = 'text/javascript';
+                    pdfLib.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js';
+                    pdfLib.onload = () => {
+                      let imgAsURL = canvas.toDataURL('image/jpeg');
+                      let orientation = opts.width > opts.height ? 'landscape' : 'portrait';
+                      /* eslint-disable-next-line new-cap, no-undef */
+                      let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
+                      doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
+                      doc.output('save', fileName);
+                      if (utilCore.isIE && vector) {
+                        canvas.parentElement.removeChild(canvas);
+                      }
+                      if (opts.emitter && typeof opts.emitter.emit === 'function') {
+                        opts.emitter.emit('afterSave', { type: opts.type });
+                      }
+                      if (opts.emitter && typeof opts.emitter.emit === 'function') {
+                        opts.emitter.emit('hideLoader');
+                      }
+                    };
+                    head.appendChild(pdfLib);
+                  } else {
+                    /* For other image type JPEG, PNG */
+                    imgAsURL = canvas.toDataURL(this.mimeTypeMap[opts.type]);
+                    this.download(imgAsURL, fileName, this.mimeTypeMap[opts.type]);
+                    if (utilCore.isIE && vector) {
+                      canvas.parentElement.removeChild(canvas);
+                    }
+                    if (opts.emitter && typeof opts.emitter.emit === 'function') {
+                      opts.emitter.emit('afterSave', { type: opts.type });
+                    }
+                  }
+                });
             }
           };
         }
@@ -260,11 +257,50 @@ class SaveAs {
       });
   }
 
+  createCanvasForDownload(img, svgString, opts) {
+    let canvas;
+    return new Promise((resolve, reject) => {
+      if (utilCore.isIE) {
+        if ($SC.IESupport && $SC.IESupport.Canvg) {
+          canvas = document.createElement('canvas');
+          canvas.style.position = 'absolute';
+          canvas.style.display = 'none';
+          canvas.width = opts.width;
+          canvas.height = opts.height;
+          document.body.appendChild(canvas);
+          let ctx = this.setDPI(canvas, 1.5 * 96);
+          $SC.IESupport.Canvg.from(ctx, svgString, { anonymousCrossOrigin: true })
+            .then((v) => {
+              v.render().then(() => resolve({ canvas, vector: v }));
+            })
+            .catch((ex) => {
+              reject(ex);
+            });
+        } else {
+          /*eslint-disable-next-line  no-alert*/
+          alert('Please include lib - SmartChartsNXT.IESupport for this feature !!');
+          if (opts.emitter && typeof opts.emitter.emit === 'function') {
+            opts.emitter.emit('afterSave', { type: opts.type });
+          }
+          reject('Please include lib - SmartChartsNXT.IESupport for this feature !!');
+          return;
+        }
+      } else {
+        canvas = document.createElement('canvas');
+        canvas.width = opts.width;
+        canvas.height = opts.height;
+        let ctx = this.setDPI(canvas, 1.5 * 96);
+        ctx.drawImage(img, 0, 0, opts.width, opts.height);
+        resolve({ canvas });
+      }
+    });
+  }
+
   download(base64Data, fileName, mimeType) {
     const link = document.createElement('a');
     mimeType = mimeType || 'application/octet-stream';
     if (navigator.msSaveBlob) { // IE10, IE11
-      if (mimeType === 'image/svg') {
+      if (mimeType === 'image/svg+xml') {
         const blob = new Blob([base64Data], { type: 'image/svg+xml;charset=utf-8' });
         return navigator.msSaveBlob(blob, fileName);
       }

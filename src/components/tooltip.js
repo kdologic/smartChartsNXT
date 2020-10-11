@@ -78,10 +78,13 @@ class Tooltip extends Component {
 
   componentDidMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    if(utilCore.isIE && !this.allTipContainer) {
-      let strHtml = `<div class='sc-tooltip-container-html' style='position: relative; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: ${-this.context.svgHeight}px; margin-top: -5px;pointer-events: none;'></div>`;
+    if (utilCore.isIE && !this.allTipContainer) {
+      const containerID = utilCore.getRandomID();
+      let strHtml = `<div id='sc-tooltip-container-html-${containerID}' 
+            style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
+          </div>`;
       this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
-      this.allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+      this.allTipContainer = this.rootContainer.querySelector(`#sc-tooltip-container-html-${containerID}`);
     }
     this.emitter.on('updateTooltip', this.updateTip);
     this.emitter.on('hideTooltip', this.hide);
@@ -95,18 +98,22 @@ class Tooltip extends Component {
   }
 
   componentWillUpdate(nextProps) {
-    if(nextProps.instanceCount !== this.props.instanceCount) {
+    if (nextProps.instanceCount !== this.props.instanceCount) {
       this.initInstances(nextProps);
     }
   }
 
   componentDidUpdate() {
+    if (this.allTipContainer) {
+      this.allTipContainer.style.width = this.context.svgWidth + 'px';
+      this.allTipContainer.style.height = this.context.svgHeight + 'px';
+    }
     let nodeList = this.ref.node.querySelectorAll('.sc-tooltip-content');
     Array.prototype.forEach.call(nodeList, (node) => {
       let index = node.getAttribute('index');
-      if(!utilCore.isIE) {
+      if (!utilCore.isIE) {
         node && (node.innerHTML = this.instances[index].tooltipContent);
-      }else {
+      } else {
         this.createTipAsHTML(node);
       }
     });
@@ -124,7 +131,7 @@ class Tooltip extends Component {
     if (this.props.opts.enable === false) {
       return <tooltip-disabled></tooltip-disabled>;
     }
-    if(utilCore.isIE) {
+    if (utilCore.isIE) {
       this.createTipContainerHTML();
     }
     return (
@@ -142,7 +149,7 @@ class Tooltip extends Component {
       if (!this.instances[i].opacity) {
         continue;
       }
-      tipContainer.push(<g instanceId={this.props.instanceId +'-' + i} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
+      tipContainer.push(<g instanceId={this.props.instanceId + '-' + i} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
         {this.getTipStyle(i)}
         <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
           bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={this.config.dropShadow} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}
@@ -150,26 +157,26 @@ class Tooltip extends Component {
         </SpeechBox>
         <g class='sc-text-tooltip-grp'>
           {utilCore.isIE ?
-          (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
-            style={{
-              position: 'absolute',
-              width: this.instances[i].contentWidth - (2 * this.config.xPadding) + 1 + 'px',
-              height: this.instances[i].contentHeight - (2 * this.config.yPadding) + 'px',
-              transform: this.instances[i].transform,
-              top: this.instances[i].contentY + 'px',
-              left: this.instances[i].contentX + 'px',
-              color: this.config.textColor,
-              fontSize: this.config.fontSize + 'px',
-              fontFamily: this.config.fontFamily,
-              overflow: 'hidden',
-              opacity: this.config.opacity,
-              borderRadius: this.config.borderRadius + 'px'
-            }}>
-          </x-div>) :
-          (
-            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
-            </foreignObject>
-          )}
+            (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
+              style={{
+                position: 'absolute',
+                width: this.instances[i].contentWidth - (2 * this.config.xPadding) + 1 + 'px',
+                height: this.instances[i].contentHeight - (2 * this.config.yPadding) + 'px',
+                transform: this.instances[i].transform,
+                top: this.instances[i].contentY + 'px',
+                left: this.instances[i].contentX + 'px',
+                color: this.config.textColor,
+                fontSize: this.config.fontSize + 'px',
+                fontFamily: this.config.fontFamily,
+                overflow: 'hidden',
+                opacity: this.config.opacity,
+                borderRadius: this.config.borderRadius + 'px'
+              }}>
+            </x-div>) :
+            (
+              <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
+              </foreignObject>
+            )}
         </g>
       </g>);
     }
@@ -181,26 +188,29 @@ class Tooltip extends Component {
     if (this.props.grouped && this.config.followPointer) {
       transitionFunction = 'none';
     }
+    if (utilCore.isIE) {
+      transitionFunction = 'none';
+    }
     return (
-    <Style>
-      {{
-        ['.sc-tip-' + this.instances[i].tipId]: {
-          WebkitTransition: transitionFunction,
-          MozTransition: transitionFunction,
-          OTransition: transitionFunction,
-          transition: transitionFunction,
-          transform: this.instances[i].transform
-        },
-        ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
-          color: this.config.textColor,
-          fontSize: this.config.fontSize + 'px',
-          fontFamily: this.config.fontFamily,
-          overflow: 'hidden',
-          opacity: this.config.opacity,
-          borderRadius: this.config.borderRadius + 'px'
-        }
-      }}
-    </Style>);
+      <Style>
+        {{
+          ['.sc-tip-' + this.instances[i].tipId]: {
+            WebkitTransition: transitionFunction,
+            MozTransition: transitionFunction,
+            OTransition: transitionFunction,
+            transition: transitionFunction,
+            transform: this.instances[i].transform
+          },
+          ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
+            color: this.config.textColor,
+            fontSize: this.config.fontSize + 'px',
+            fontFamily: this.config.fontFamily,
+            overflow: 'hidden',
+            opacity: this.config.opacity,
+            borderRadius: this.config.borderRadius + 'px'
+          }
+        }}
+      </Style>);
   }
 
   createTooltipContent(line1, line2) {
@@ -214,24 +224,24 @@ class Tooltip extends Component {
   }
 
   createTipContainerHTML() {
-    if(!this.allTipContainer) {
+    if (!this.allTipContainer) {
       return;
     }
-    let tipContainer = this.allTipContainer.querySelector('#sc-tooltip-container-' +  this.containerIdIE);
-    if(tipContainer) {
+    let tipContainer = this.allTipContainer.querySelector('#sc-tooltip-container-' + this.containerIdIE);
+    if (tipContainer) {
       tipContainer.parentNode.removeChild(tipContainer);
     }
     let strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='polite' 
-      style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
-    </div>`;
+        style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
+      </div>`;
     this.allTipContainer.insertAdjacentHTML('beforeend', strHtml);
   }
 
   createTipAsHTML(node) {
-    if(node) {
+    if (node) {
       let instanceData = JSON.parse(node.dataset.instance);
       let tipContainer = document.getElementById(`sc-tooltip-container-${this.containerIdIE}`);
-      if(tipContainer) {
+      if (tipContainer) {
         node.innerHTML = instanceData.tooltipContent;
         tipContainer.appendChild(node);
       }
@@ -335,8 +345,8 @@ class Tooltip extends Component {
       let width = txtWidth + (2 * xPadding);
       let height = lineHeight + (2 * yPadding);
       let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
-      if(this.props.opts.position === ENUMS.TOOLTIP_POSITION.STATIC && this.props.grouped) {
-        topLeft  = cPoint = new Point(this.props.opts.left === undefined ? 0 : this.props.opts.left, this.props.opts.top === undefined ? 0 : this.props.opts.top);
+      if (this.props.opts.position === ENUMS.TOOLTIP_POSITION.STATIC && this.props.grouped) {
+        topLeft = cPoint = new Point(this.props.opts.left === undefined ? 0 : this.props.opts.left, this.props.opts.top === undefined ? 0 : this.props.opts.top);
       }
       let textPos = new Point(topLeft.x, topLeft.y);
 

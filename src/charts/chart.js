@@ -9,7 +9,6 @@ import utilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
 import a11yFactory from './../core/a11y';
-import resizeDetectorMaker from 'element-resize-detector';
 
 /*eslint-disable  no-console*/
 
@@ -52,16 +51,24 @@ class Chart {
 
       /* Detect the element resize and re-draw accordingly */
       this.onResize = this.onResize.bind(this);
-      if(!utilCore.isIE) {
+      if (!utilCore.isIE) {
         const resizeObserver = new ResizeObserver(entries => {
           for (const entry of entries) {
             this.onResize(entry.target);
           }
         });
         resizeObserver.observe(this.targetNode);
-      }else {
-        const resizeDetector = resizeDetectorMaker();
-        resizeDetector.listenTo(this.targetNode, this.onResize);
+      } else if($SC.IESupport && $SC.IESupport.ResizeObserver) {
+        const ro = new $SC.IESupport.ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            this.onResize({
+              offsetWidth: width,
+              offsetHeight: height
+            });
+          }
+        });
+        ro.observe(this.targetNode);
       }
 
       $SC.debug && console.debug(this.core);

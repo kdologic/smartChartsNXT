@@ -171,11 +171,16 @@ class DrawConnectedPoints extends Component {
           type: ENUMS.ICON_TYPE.CIRCLE,
           width: this.defaultMarkerWidth,
           height: this.defaultMarkerHeight,
-          URL: ''
+          URL: '',
+          opacity: 1
         }, ...props.marker
       };
     }
-    this.state.marker.enable = this.state.scaleX < 15 ? false : this.state.marker.enable;
+    /* Force disable marker for large dataset */
+    if(this.state.valueSet.length > 500) {
+      this.state.marker.enable = false;
+    }
+    this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
     if (typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
     }
@@ -219,7 +224,7 @@ class DrawConnectedPoints extends Component {
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
-            type={this.state.marker.type}  markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor}  opacity={1} >
+            type={this.state.marker.type}  markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor}  opacity={this.state.marker.opacity} >
           </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&

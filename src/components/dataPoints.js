@@ -63,7 +63,7 @@ class DataPoints extends Component {
             if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(category)) {
               category = dateFormat(category, 'longDate');
             }
-            let ariaLabel = `${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + point.value.toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
+            let ariaLabel = `${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + (point.value || 0).toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
             return (
               <g role='img' aria-label={ariaLabel}>
                 {this.drawPoint(point)}
@@ -112,15 +112,16 @@ class DataPoints extends Component {
 
   doHighlight(e) {
     let index = e.highlightedPoint.pointIndex;
-    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId || !this.state.icons[index]) {
+    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
       return;
     }
     if (this.props.opacity === 0) {
       let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
       this.setState({ pointSet: [pData] });
+    }else {
+      this.state.highlightedIndex = index;
+      this.state.icons[index].highlight();
     }
-    this.state.highlightedIndex = index;
-    this.state.icons[index].highlight();
   }
 }
 
