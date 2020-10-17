@@ -16,7 +16,7 @@
   </div>
 
   <script type="text/javascript">
-    let lineChart;
+    var lineChart;
     SmartChartsNXT.ready(function () {
       SmartChartsNXT.debug = false;
       SmartChartsNXT.debugRenderTime = false;
@@ -209,10 +209,12 @@
         "dataSet": {
           "xAxis": {
             "title": "Date",
+            "categories": {
+              "parseAsDate": true,
+              "displayDateFormat": "DD MMM, YY",
+            },
             "prepend": "",
             "append": "",
-            "parseAsDate": true,
-            "dateFormat": "dd mmm",
             "labelRotate": 0,
             "intervalThreshold": 70,
             "tickOpacity": 1,

@@ -5,7 +5,6 @@ import defaultConfig from './../settings/config';
 import utilCore from './../core/util.core';
 import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
-import dateFormat from 'dateformat';
 import uiCore from '../core/ui.core';
 import a11yFactory from './../core/a11y';
 
@@ -17,7 +16,9 @@ import a11yFactory from './../core/a11y';
  * @extends Component
  *
  * @event
- * onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 1. onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 2. hLabelEnter: Fire when mouse hover on label text.
+ * 3. hLabelExit: Fire mouse out of label text.
  */
 
 class HorizontalLabels extends Component {
@@ -37,7 +38,7 @@ class HorizontalLabels extends Component {
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
-            return self.props.opts.parseAsDate && utilCore.isDate(c) ? dateFormat(c, self.config.dateFormat) : c;
+            return self.props.opts.categories.parseAsDate && utilCore.isDate(c) ? utilCore.dateFormat(c).format(self.config.dateFormat) : c;
           });
         } else {
           this._categories = [];
@@ -61,9 +62,9 @@ class HorizontalLabels extends Component {
     this.accId = this.props.accessibilityId || utilCore.getRandomID();
     this.a11yWriter.createSpace(this.accId);
     this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
-      (this.props.opts.prepend || '') + (this.props.opts.parseAsDate && utilCore.isDate(this.props.categorySet[0]) ? dateFormat(this.props.categorySet[0], 'longDate') : this.props.categorySet[0]) + (this.props.opts.append || '') +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && utilCore.isDate(this.props.categorySet[0]) ? utilCore.dateFormat(this.props.categorySet[0]).format('LL') : this.props.categorySet[0]) + (this.props.opts.append || '') +
       ' to ' +
-      (this.props.opts.prepend || '') + (this.props.opts.parseAsDate && utilCore.isDate(this.props.categorySet[this.props.categorySet.length-1]) ? dateFormat(this.props.categorySet[this.props.categorySet.length-1], 'longDate') : this.props.categorySet[this.props.categorySet.length-1]) + (this.props.opts.append || '') +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && utilCore.isDate(this.props.categorySet[this.props.categorySet.length - 1]) ? utilCore.dateFormat(this.props.categorySet[this.props.categorySet.length - 1]).format('LL') : this.props.categorySet[this.props.categorySet.length - 1]) + (this.props.opts.append || '') +
       '</div>', false);
   }
 
@@ -97,7 +98,7 @@ class HorizontalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
-        dateFormat: config.dateFormat || defaultConfig.formatting.dateFormat
+        dateFormat: config.categories.dateFormat || defaultConfig.formatting.displayDateFormat
       }
     };
   }
@@ -146,7 +147,7 @@ class HorizontalLabels extends Component {
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
       transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
-      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
+      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: (e) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
         {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
       </tspan>
     </text>;
@@ -176,9 +177,13 @@ class HorizontalLabels extends Component {
     this.state.intervalLen = interval;
   }
 
-  onMouseEnter(e) {
-    let lblIndex = e.target.getAttribute('labelIndex');
-    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.state.categories[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
+  onMouseEnter(e, index) {
+    let lblIndex = index;
+    let lblText = this.state.categories[lblIndex];
+    if (utilCore.isDate(this.props.categorySet[lblIndex])) {
+      lblText = utilCore.dateFormat(this.props.categorySet[lblIndex]).format('lll');
+    }
+    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + lblText + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('hLabelEnter', e);
   }
 

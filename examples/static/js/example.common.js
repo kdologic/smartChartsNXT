@@ -14,3 +14,16 @@ function generateRandomTimeSeries(startDate, count, range) {
 	}
 	return dataSet
 }
+
+function generateRandomDataArray(count, range) {
+  for (var i = 0, dataSet = []; i < count;i++) {
+    var seed = Math.round(Math.random()*100) || 1, loop = 0;
+    var rval = Math.random();
+    for(var loop = 0; loop < seed; loop++) {
+      rval = Math.random();
+    }
+		var val = Math.floor(rval * (range.max - range.min + 1)) + range.min;
+    dataSet.push(val);
+	}
+  return dataSet;
+}

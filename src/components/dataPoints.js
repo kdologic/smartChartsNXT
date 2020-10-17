@@ -2,7 +2,6 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import dateFormat from 'dateformat';
 import utilCore from './../core/util.core';
 import MarkerIcon from './markerIcon';
 
@@ -59,9 +58,9 @@ class DataPoints extends Component {
             if (point.isHidden) {
               return (<g class='sc-icon sc-hide'></g>);
             }
-            let category = this.props.xAxisInfo.categories[point.index];
-            if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(category)) {
-              category = dateFormat(category, 'longDate');
+            let category = this.props.xAxisInfo.selectedCategories[point.index];
+            if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(category)) {
+              category = utilCore.dateFormat(category).format('LL');
             }
             let ariaLabel = `${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + (point.value || 0).toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
             return (
@@ -118,7 +117,7 @@ class DataPoints extends Component {
     if (this.props.opacity === 0) {
       let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
       this.setState({ pointSet: [pData] });
-    }else {
+    } else if (this.state.icons[index]) {
       this.state.highlightedIndex = index;
       this.state.icons[index].highlight();
     }

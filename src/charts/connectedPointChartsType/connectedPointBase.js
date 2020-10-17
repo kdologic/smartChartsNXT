@@ -22,10 +22,10 @@ import HorizontalScroller from './../../components/horizontalScroller';
 import ZoomoutBox from './../../components/zoomOutBox';
 import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane';
-import dateFormat from 'dateformat';
 import StoreManager from './../../liveStore/storeManager';
 import SeriesLabel from './../../components/seriesLabel';
 import a11yFactory from './../../core/a11y';
+
 
 /**
  * connectedPointBase.js
@@ -82,7 +82,7 @@ class ConnectedPointBase extends Component {
           }
         },
         dataSet: {
-          xAxis: { title: 'Label-axis', parseAsDate: false },
+          xAxis: { title: 'Label-axis' },
           yAxis: { title: 'Value-axis', zeroBase: false }
         },
         horizontalScroller: {
@@ -141,14 +141,14 @@ class ConnectedPointBase extends Component {
         },
         set windowLeftIndex(index) {
           this._windowLeftIndex = index;
-          this.leftOffset = this.maxSeriesLenFS <= 1 ?  0 : index * 100 / (this.maxSeriesLenFS - 1);
+          this.leftOffset = this.maxSeriesLenFS <= 1 ? 0 : index * 100 / (this.maxSeriesLenFS - 1);
         },
         get windowLeftIndex() {
           return this._windowLeftIndex;
         },
         set windowRightIndex(index) {
           this._windowRightIndex = index;
-          this.rightOffset = this.maxSeriesLenFS <= 1 ?  0 : index * 100 / (this.maxSeriesLenFS - 1);
+          this.rightOffset = this.maxSeriesLenFS <= 1 ? 0 : index * 100 / (this.maxSeriesLenFS - 1);
         },
         get windowRightIndex() {
           return this._windowRightIndex;
@@ -207,9 +207,9 @@ class ConnectedPointBase extends Component {
       this.hLabelAccId = utilCore.getRandomID();
       this.vLabelAccId = utilCore.getRandomID();
       this.a11yWriter.createSpace(this.srLenAccId, this.hLabelAccId, this.vLabelAccId);
-      this.a11yWriter.write(this.srLenAccId, '<div aria-hidden="false">Chart draws ' +  this.CHART_OPTIONS.dataSet.series.length +' data series.</div>');
-      this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_OPTIONS.dataSet.xAxis.title || 'values') +'.</div>', false);
-      this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_OPTIONS.dataSet.yAxis.title || 'values') + '.</div>', false);
+      this.a11yWriter.write(this.srLenAccId, '<div aria-hidden="false">Chart draws ' + this.CHART_DATA.dataSet.series.length + ' data series.</div>');
+      this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_DATA.dataSet.xAxis.title || 'values') + '.</div>', false);
+      this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_DATA.dataSet.yAxis.title || 'values') + '.</div>', false);
     } catch (ex) {
       ex.errorIn = `Error in ${this.context.chartType} with runId:${this.context.runId}`;
       throw ex;
@@ -236,16 +236,16 @@ class ConnectedPointBase extends Component {
     this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
     this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
 
-    if(this.CHART_OPTIONS.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
+    if (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
       this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth;
     }
 
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
     this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
 
-    for (let index = 0; index < this.CHART_OPTIONS.dataSet.series.length; index++) {
-      if (this.CHART_OPTIONS.dataSet.series[index].visible == undefined) {
-        this.CHART_OPTIONS.dataSet.series[index].visible = true;
+    for (let index = 0; index < this.CHART_DATA.dataSet.series.length; index++) {
+      if (this.CHART_DATA.dataSet.series[index].visible == undefined) {
+        this.CHART_DATA.dataSet.series[index].visible = true;
       }
     }
 
@@ -270,10 +270,10 @@ class ConnectedPointBase extends Component {
       this.setLeftWindowIndex();
       this.setRightWindowIndex();
     } else {
-      if(!this.CHART_OPTIONS.zoomWindow.leftIndex) {
+      if (!this.CHART_OPTIONS.zoomWindow.leftIndex) {
         this.state.windowLeftIndex = 0;
       }
-      if(!this.CHART_OPTIONS.zoomWindow.rightIndex) {
+      if (!this.CHART_OPTIONS.zoomWindow.rightIndex) {
         this.state.windowRightIndex = this.state.maxSeriesLenFS - 1;
       }
     }
@@ -282,7 +282,7 @@ class ConnectedPointBase extends Component {
   setLeftWindowIndex() {
     if (this.CHART_OPTIONS.zoomWindow.leftIndex && this.CHART_OPTIONS.zoomWindow.leftIndex >= 0 && this.CHART_OPTIONS.zoomWindow.leftIndex < this.state.maxSeriesLen) {
       this.state.windowLeftIndex = this.CHART_OPTIONS.zoomWindow.leftIndex - 1;
-    }else {
+    } else {
       this.state.windowLeftIndex = 0;
     }
   }
@@ -295,15 +295,96 @@ class ConnectedPointBase extends Component {
     }
   }
 
-  processTurboData() {
-    for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
-      this.CHART_OPTIONS.dataSet.series[i].data = JSON.parse(JSON.stringify(this.CHART_OPTIONS.dataSet.series[i].data));
-      for (let j = 0; j < this.CHART_OPTIONS.dataSet.series[i].data.length; j++) {
-        this.CHART_OPTIONS.dataSet.series[i].data[j].index = j;
+  beforeProcessTurboData() {
+    this.CHART_DATA.dataSet = this.CHART_OPTIONS.dataSet;
+    let categoryOpt = this.CHART_DATA.dataSet.xAxis.categories, categoryValues = [];
+    let startFrom = 1, increaseBy = 1;
+    let defaultOption = {
+      value: [],
+      startFrom: startFrom,
+      increaseBy: increaseBy,
+      parseAsDate: false,
+      parseDateFormat: defaultConfig.formatting.parseDateFormat,
+      displayDateFormat: defaultConfig.formatting.displayDateFormat
+    };
+    this.CHART_DATA.dataSet.xAxis.categories = { ...defaultOption };
+    if (categoryOpt && categoryOpt instanceof Array) {
+      this.CHART_DATA.dataSet.xAxis.categories.value = categoryValues = categoryOpt;
+    } else if (categoryOpt && typeof categoryOpt === 'object') {
+      this.CHART_DATA.dataSet.xAxis.categories = { ...defaultOption, ...categoryOpt };
+      if (categoryOpt.value instanceof Array) {
+        categoryValues = categoryOpt.value;
       }
-      this.CHART_OPTIONS.dataSet.series[i].turboData = crossfilter(this.CHART_OPTIONS.dataSet.series[i].data);
-      this.CHART_OPTIONS.dataSet.series[i].dataDimIndex = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d, i) => i);
-      this.CHART_OPTIONS.dataSet.series[i].dataDimValue = this.CHART_OPTIONS.dataSet.series[i].turboData.dimension((d) => d.value);
+      if (typeof categoryOpt.startFrom !== 'undefined') {
+        if (categoryOpt.parseAsDate && utilCore.isDate(categoryOpt.startFrom, categoryOpt.parseDateFormat)) {
+          startFrom = utilCore.dateFormat(categoryOpt.startFrom, categoryOpt.parseDateFormat || undefined);
+        } else {
+          startFrom = categoryOpt.startFrom;
+        }
+      }
+      increaseBy = typeof categoryOpt.increaseBy !== 'undefined' && !isNaN(Number.parseFloat(increaseBy)) ? categoryOpt.increaseBy : increaseBy;
+    }
+
+    const resolveCategory = (data, index) => {
+      let label, parseAsDate = this.CHART_DATA.dataSet.xAxis.categories.parseAsDate, parseDateFormat = this.CHART_DATA.dataSet.xAxis.categories.parseDateFormat;
+      if (data !== null && typeof data === 'object') {
+        if (typeof data.label !== 'undefined') {
+          if (parseAsDate && utilCore.isDate(data.label, parseDateFormat)) {
+            label = utilCore.dateFormat(data.label, parseDateFormat || undefined);
+          } else {
+            label = data.label;
+          }
+        }
+      }
+      if (label === undefined) {
+        for (let s = 0; s < this.CHART_OPTIONS.dataSet.series.length; s++) {
+          let series = this.CHART_OPTIONS.dataSet.series[s];
+          if (series.data && series.data[index] && typeof series.data[index] === 'object' && typeof series.data[index].label !== 'undefined') {
+            if (parseAsDate && utilCore.isDate(series.data[index].label, parseDateFormat)) {
+              label = utilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
+            } else {
+              label = series.data[index].label;
+            }
+            break;
+          }
+        }
+        if (label === undefined) {
+          if (typeof categoryValues[index] !== 'undefined') {
+            if (parseAsDate && utilCore.isDate(categoryValues[index], parseDateFormat)) {
+              label = utilCore.dateFormat(categoryValues[index], parseDateFormat || undefined);
+            } else {
+              label = categoryValues[index];
+            }
+          } else {
+            label = utilCore.isDate(startFrom) ? utilCore.dateFormat(startFrom + (index * increaseBy)) : startFrom + (index * increaseBy);
+          }
+        }
+      }
+      return label;
+    };
+
+    const dataMapFn = (data, index) => {
+      let d = {};
+      if (data !== null && typeof data === 'object') {
+        d.value = data.value;
+      } else {
+        d.value = data;
+      }
+      d.label = resolveCategory(data, index);
+      d.index = index;
+      return d;
+    };
+
+    return dataMapFn;
+  }
+
+  processTurboData() {
+    let dataMapFn = this.beforeProcessTurboData();
+    for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+      this.CHART_DATA.dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].data.map(dataMapFn);
+      this.CHART_DATA.dataSet.series[i].turboData = crossfilter(this.CHART_DATA.dataSet.series[i].data);
+      this.CHART_DATA.dataSet.series[i].dataDimIndex = this.CHART_DATA.dataSet.series[i].turboData.dimension((d) => d.index);
+      this.CHART_DATA.dataSet.series[i].dataDimValue = this.CHART_DATA.dataSet.series[i].turboData.dimension((d) => d.value);
     }
   }
 
@@ -312,15 +393,15 @@ class ConnectedPointBase extends Component {
     let minSet = [];
     let categories = [];
     let dataFor = isFS ? 'fs' : 'cs';
-    let dataSet = this.copyDataset(this.CHART_OPTIONS.dataSet);
+    let dataSet = this.copyDataset(this.CHART_DATA.dataSet);
     if (!isFS) {
-      for (let i = 0; i < this.CHART_OPTIONS.dataSet.series.length; i++) {
+      for (let i = 0; i < this.CHART_DATA.dataSet.series.length; i++) {
         if (!dataSet.series[i].data.length) {
           dataSet.series[i].visible = false;
         } else if (!dataSet.series[i].visible) {
           dataSet.series[i].data = [];
         } else {
-          dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].dataDimIndex.bottom(this.state.windowRightIndex - this.state.windowLeftIndex + 1, this.state.windowLeftIndex);
+          dataSet.series[i].data = this.CHART_DATA.dataSet.series[i].dataDimIndex.bottom(this.state.windowRightIndex - this.state.windowLeftIndex + 1, this.state.windowLeftIndex);
         }
       }
     }
@@ -337,7 +418,7 @@ class ConnectedPointBase extends Component {
         if (j > categories.length - 1) {
           categories.push(data[j].label);
         }
-        if(data[j].marker) {
+        if (data[j].marker) {
           customizedMarkers[j] = data[j].marker;
         }
         dataSet.series[i].valueSet.push(v);
@@ -350,7 +431,7 @@ class ConnectedPointBase extends Component {
       dataSet.series[i].customizedMarkers = customizedMarkers;
     }
     this.state[dataFor].dataSet = dataSet;
-    this.state[dataFor].dataSet.xAxis.categories = categories;
+    this.state[dataFor].dataSet.xAxis.selectedCategories = categories;
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
     this.state[dataFor].yInterval = uiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
@@ -359,11 +440,11 @@ class ConnectedPointBase extends Component {
   }
 
   setSeriesColor(index, series) {
-    if(!series.lineColor && !series.areaColor) {
+    if (!series.lineColor && !series.areaColor) {
       series.lineColor = series.areaColor = utilCore.getColor(index);
-    }else if(!series.lineColor) {
+    } else if (!series.lineColor) {
       series.lineColor = series.areaColor;
-    }else if(!series.areaColor) {
+    } else if (!series.areaColor) {
       series.areaColor = series.lineColor;
     }
   }
@@ -392,8 +473,8 @@ class ConnectedPointBase extends Component {
   }
 
   calcOffsetChanges() {
-    if(!this.state.fs.scaleX) {
-      this.state.fs.scaleX = (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth)/(this.state.maxSeriesLenFS-1);
+    if (!this.state.fs.scaleX) {
+      this.state.fs.scaleX = (this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth) / (this.state.maxSeriesLenFS - 1);
     }
     let fsWidth = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
     let leftOffsetDiff = this.state.hScrollLeftOffset - this.state.clipLeftOffset;
@@ -410,19 +491,19 @@ class ConnectedPointBase extends Component {
     this.CHART_DATA = utilCore.extends(this.CHART_DATA, nextProps.chartData);
     this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
     this.state.shouldFSRender = nextProps.globalRenderAll;
-    if(this.store.getValue('globalRenderAll')) {
+    if (this.store.getValue('globalRenderAll')) {
       this.processTurboData();
       this.init();
-      if(nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.leftIndex && nextProps.chartOptions.zoomWindow.leftIndex - 1 !== this.state.windowLeftIndex) {
+      if (nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.leftIndex && nextProps.chartOptions.zoomWindow.leftIndex - 1 !== this.state.windowLeftIndex) {
         this.setLeftWindowIndex();
       }
-      if(nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.rightIndex && nextProps.chartOptions.zoomWindow.rightIndex - 1 !== this.state.windowRightIndex) {
+      if (nextProps.chartOptions.zoomWindow && nextProps.chartOptions.zoomWindow.rightIndex && nextProps.chartOptions.zoomWindow.rightIndex - 1 !== this.state.windowRightIndex) {
         this.setRightWindowIndex();
       }
       this.prepareDataSet();
       this.state.clipLeftOffset = this.state.leftOffset = this.state.hScrollLeftOffset = this.state.windowLeftIndex * 100 / (this.state.maxSeriesLenFS - 1);
       this.state.clipRightOffset = this.state.rightOffset = this.state.hScrollRightOffset = this.state.windowRightIndex * 100 / (this.state.maxSeriesLenFS - 1);
-    }else {
+    } else {
       this.init();
     }
   }
@@ -482,7 +563,7 @@ class ConnectedPointBase extends Component {
 
         <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
           transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
-          textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.yAxis.title}
+          textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
           style={{
             '.sc-vertical-axis-title': {
               'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
@@ -491,7 +572,7 @@ class ConnectedPointBase extends Component {
 
         <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight / 2) + 5)}
           bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
-          textAnchor='middle' fontWeight='bold' text={this.CHART_OPTIONS.dataSet.xAxis.title}
+          textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
           style={{
             '.sc-horizontal-axis-title': {
               'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
@@ -510,7 +591,7 @@ class ConnectedPointBase extends Component {
         <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
           posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
           maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
-          categorySet={this.state.cs.dataSet.xAxis.categories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
+          categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
           clip={{
             x: this.state.offsetLeftChange,
             width: this.CHART_DATA.gridBoxWidth
@@ -598,8 +679,8 @@ class ConnectedPointBase extends Component {
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} 
-          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} 
+          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin}
+          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
           totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
@@ -622,7 +703,7 @@ class ConnectedPointBase extends Component {
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{enable:false}} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
@@ -631,7 +712,7 @@ class ConnectedPointBase extends Component {
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{enable:false}} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
           </DrawConnectedPoints>
         </g>
@@ -642,18 +723,18 @@ class ConnectedPointBase extends Component {
   getSeriesLabel() {
     this.store.removeValue('seriesLabelData');
     return this.state.cs.dataSet.series.map((series) => {
-      if(series.data.length > 0 && series.seriesLabel && (typeof series.seriesLabel.enable === 'undefined' || series.seriesLabel.enable === true )) {
+      if (series.data.length > 0 && series.seriesLabel && (typeof series.seriesLabel.enable === 'undefined' || series.seriesLabel.enable === true)) {
         return (
           <SeriesLabel instanceId={'sl-' + series.index} seriesName={series.name} seriesId={'cs-' + series.index} opts={series.seriesLabel}
-          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} textColor={series.lineColor || series.areaColor} borderColor={series.lineColor || series.areaColor}
-          clip={{
-            x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
-            width: this.CHART_DATA.gridBoxWidth - (2 * this.CHART_DATA.paddingX),
-            offsetLeft: this.state.offsetLeftChange,
-            offsetRight: this.state.offsetRightChange
-          }} />
+            posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} textColor={series.lineColor || series.areaColor} borderColor={series.lineColor || series.areaColor}
+            clip={{
+              x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
+              width: this.CHART_DATA.gridBoxWidth - (2 * this.CHART_DATA.paddingX),
+              offsetLeft: this.state.offsetLeftChange,
+              offsetRight: this.state.offsetRightChange
+            }} />
         );
-      }else {
+      } else {
         return <g></g>;
       }
     });
@@ -692,17 +773,17 @@ class ConnectedPointBase extends Component {
     const leftRangePoint = new Point(leftHandlePos.x - this.CHART_DATA.marginLeft, leftHandlePos.y - 5);
     const rightRangePoint = new Point(rightHandlePos.x - this.CHART_DATA.marginLeft, rightHandlePos.y - 5);
     const xAxis = this.state.cs.dataSet.xAxis;
-    if(!xAxis.categories.length) {
+    if (!xAxis.selectedCategories.length) {
       leftRangePoint.value = undefined;
       rightRangePoint.value = undefined;
       return [leftRangePoint, rightRangePoint];
     }
-    let lRangeVal = xAxis.categories[0];
-    lRangeVal = xAxis.parseAsDate && utilCore.isDate(lRangeVal) ? dateFormat(lRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : lRangeVal;
+    let lRangeVal = xAxis.selectedCategories[0];
+    lRangeVal = xAxis.categories.parseAsDate && utilCore.isDate(lRangeVal) ? utilCore.dateFormat(lRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : lRangeVal;
     leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
 
-    let rRangeVal = xAxis.categories[xAxis.categories.length - 1];
-    rRangeVal = xAxis.parseAsDate && utilCore.isDate(rRangeVal) ? dateFormat(rRangeVal, xAxis.dateFormat || defaultConfig.formatting.dateFormat) : rRangeVal;
+    let rRangeVal = xAxis.selectedCategories[xAxis.selectedCategories.length - 1];
+    rRangeVal = xAxis.categories.parseAsDate && utilCore.isDate(rRangeVal) ? utilCore.dateFormat(rRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : rRangeVal;
     rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
     return [leftRangePoint, rightRangePoint];
   }
@@ -738,8 +819,8 @@ class ConnectedPointBase extends Component {
     if (this.state.cs.dataSet.yAxis && this.state.cs.dataSet.yAxis.prefix) {
       formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
     }
-    if (this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.parseAsDate) {
-      formattedLabel = dateFormat(formattedLabel, this.state.cs.dataSet.xAxis.dateFormat || defaultConfig.formatting.dateFormat);
+    if (this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.categories.parseAsDate && utilCore.isDate(formattedLabel)) {
+      formattedLabel = utilCore.dateFormat(formattedLabel).format(this.state.cs.dataSet.xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat);
     }
     let hPoint = {
       x: e.highlightedPoint.x,
@@ -874,7 +955,7 @@ class ConnectedPointBase extends Component {
   }
 
   onLegendClick(e) {
-    this.CHART_OPTIONS.dataSet.series[e.index].visible = !this.CHART_OPTIONS.dataSet.series[e.index].visible;
+    this.CHART_DATA.dataSet.series[e.index].visible = !this.CHART_DATA.dataSet.series[e.index].visible;
     this.prepareDataSet();
     this.update();
   }
@@ -893,8 +974,8 @@ class ConnectedPointBase extends Component {
     this.state.cs.dataSet.series.forEach((s, i) => {
       this.emitter.emit('changeAreaBrightness', {
         instanceId: 'cs' + i,
-        strokeOpacity: this.CHART_OPTIONS.dataSet.series[i].lineOpacity || 1,
-        opacity: this.CHART_OPTIONS.dataSet.series[i].areaOpacity || 0.2
+        strokeOpacity: this.CHART_DATA.dataSet.series[i].lineOpacity || 1,
+        opacity: this.CHART_DATA.dataSet.series[i].areaOpacity || 0.2
       });
     });
   }

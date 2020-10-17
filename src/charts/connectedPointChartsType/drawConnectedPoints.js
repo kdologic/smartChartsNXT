@@ -11,7 +11,6 @@ import DataPoints from './../../components/dataPoints';
 import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
-import dateFormat from 'dateformat';
 import a11yFactory from './../../core/a11y';
 
 /**
@@ -115,13 +114,13 @@ class DrawConnectedPoints extends Component {
   componentDidUpdate() {
     let rangeStart = '', rangeEnd = '';
     if (this.props.accessibility) {
-      rangeStart = this.props.xAxisInfo.categories[0];
-      if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeStart)) {
-        rangeStart = dateFormat(rangeStart, 'longDate');
+      rangeStart = this.props.xAxisInfo.selectedCategories[0];
+      if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(rangeStart)) {
+        rangeStart = utilCore.dateFormat(rangeStart).format('LL');
       }
-      rangeEnd = this.props.xAxisInfo.categories[this.props.xAxisInfo.categories.length - 1];
-      if (this.props.xAxisInfo.parseAsDate && utilCore.isDate(rangeEnd)) {
-        rangeEnd = dateFormat(rangeEnd, 'longDate');
+      rangeEnd = this.props.xAxisInfo.selectedCategories[this.props.xAxisInfo.selectedCategories.length - 1];
+      if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(rangeEnd)) {
+        rangeEnd = utilCore.dateFormat(rangeEnd).format('LL');
       }
       this.a11yWriter.write(this.liveRegionId, `<g>Series ${this.props.name}, displaying ${this.state.pointSet.length} data points. Range between ${this.props.xAxisInfo.title} : ${(this.props.xAxisInfo.prepend || '') + rangeStart + (this.props.xAxisInfo.append || '')} to ${(this.props.xAxisInfo.prepend || '') + rangeEnd + (this.props.xAxisInfo.append || '')}</g>`, true, 1000);
     }
@@ -177,7 +176,7 @@ class DrawConnectedPoints extends Component {
       };
     }
     /* Force disable marker for large dataset */
-    if(this.state.valueSet.length > 500) {
+    if (this.state.valueSet.length > 500) {
       this.state.marker.enable = false;
     }
     this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
@@ -224,7 +223,7 @@ class DrawConnectedPoints extends Component {
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
-            type={this.state.marker.type}  markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor}  opacity={this.state.marker.opacity} >
+            type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor} opacity={this.state.marker.opacity} >
           </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&

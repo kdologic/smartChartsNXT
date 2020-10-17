@@ -9,6 +9,7 @@ const clean = require('gulp-clean');
 
 const minify = require('gulp-terser');
 const rename = require('gulp-rename');
+const replace = require('gulp-replace');
 
 const webpack = require('webpack-stream');
 const webpackConfig = require('./webpack.config.js');
@@ -40,6 +41,7 @@ const header = `/**
 function buildJSTask() {
   return src(srcDir)
     .pipe(webpack(webpackConfig))
+    .pipe(replace('__version__', pkg.version))
     .pipe(insert.prepend(header))
     .pipe(dest(buildDir));
 }

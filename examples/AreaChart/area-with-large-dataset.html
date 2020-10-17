@@ -36,40 +36,30 @@
     }
   </script>
 </head>
-<body style='background: rgb(132, 206, 255);'>
+<body>
   <div role='figure' class="chart-base">
-    <div id='chartContainer' style="width:100%; height:600px;"></div>
+    <div id='chartContainer' style="width:100%; height:550px;"></div>
   </div>
+  <p class="chart-caption" aria-hidden="true">
+    SmartchartsNXT can efficiently process large dataset with 50000 or more data points. Chart uses powerful data processing model, 
+    to ensure realtime processing of huge data set. The data marker are automatically get disabled when showing large data to reduce overhead and overlapping markers. 
+    Below there is a horizontal scroll bar. Which can be used to zoom in, or focus different parts of the chart.
+  </p>
 
   <script type="text/javascript">
-    let areaChart;
+    var areaChart;
     SmartChartsNXT.ready(function () {
-      SmartChartsNXT.debug = false;
-      SmartChartsNXT.debugRenderTime = false;
       areaChart = new SmartChartsNXT.Chart({
         "type": $SC.CHART_TYPE.AREA_CHART,
         "targetElem": "chartContainer",
         "a11y": {
-          "description": "SmartchartsNXT can efficiently process large dataset with 50000 or more data points"
+          "description": "SmartchartsNXT can efficiently process large dataset with 50000 or more data points. Chart uses powerful data processing model, to ensure realtime processing of huge data set. The data marker are automatically get disabled when showing large data to reduce overhead and overlapping markers. Below there is a horizontal scroll bar. Which can be used to zoom in, or focus different parts of the chart."
         },
-        "canvasBorder": false,
         "bgColor": "#f7fdf7",
         "title": {
           "text":"SmartchartsNXT visualizing 50000 data points",
-          "top": 20,              
-          "left": "50%",          
-          "width": "90%",         
-          "height": "",           
-          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,  
           "textColor": "crimson", 
           "borderColor":"none",   
-          "fontFamily": "Lato",   
-          "bgColor": "none",      
-          "padding": 0,           
-          "fontSize": 20,         
-          "style": {
-            "opacity": 1.0                      
-          },
           "responsive": {
             "wrapText": true,
             "reducer": function(chartWidth, chartHeight) {
@@ -91,101 +81,19 @@
         },
         "subtitle": {
           "text":"Using powerful data processing model",
-          "top": 50,             
-          "left": "50%",         
-          "width": "95%",        
-          "height": "",          
-          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER, 
-          "textColor": "#9c27b0",
-          "borderColor":"none",  
-          "fontFamily": "Lato",  
-          "bgColor": "none",     
-          "padding": 0,          
-          "fontSize": 12,        
-          "style": {
-            "opacity": 1.0
-          },
-          "responsive": {
-            "wrapText": true,
-            "reducer": function(chartWidth, chartHeight) {
-              // support reducer same as title property
-            }
-          }
+          "textColor": "#9c27b0"
         },                      
         "gridBox": {
-          "vertical": {
-            "enable": true,                          
-            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,
-            "lineColor": "#000",                     
-            "lineThickness": 1,                      
-            "lineOpacity": 0.2                       
-          },
-          "horizontal": {
-            "enable": true,                          
-            "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID, 
-            "lineColor": "#000",                     
-            "lineThickness": 1,                      
-            "lineOpacity": 0.2                       
-          },
           "bgColor": 'skyblue',
           "fillOptions": {
             "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
           },
           "bgOpacity": 0.2
         },
-        "pointerCrosshair": {
-          "vertical": {
-            "style": $SC.ENUMS.LINE_STYLE.DASHED,
-            "spread" : "full",            
-            "lineColor": "#000",          
-            "lineWidth": 1,               
-            "lineOpacity": 1,             
-            "labelTextColor": "#fff",     
-            "labelBackgroundColor":"#000",
-            "labelOpacity": 1             
-          },
-          "horizontal": {
-            "style": $SC.ENUMS.LINE_STYLE.DASHED,
-            "spread" : "none",              
-            "lineColor": "#000",            
-            "lineWidth": 1,                 
-            "lineOpacity": 1,               
-            "labelTextColor": "#fff",       
-            "labelBackgroundColor":"#000",  
-            "labelOpacity": 1               
-          }
-        },
         "legends":{
-          "enable" : true,                              
-          "top": 70,                                    
-          "left": 100,                                  
-          "maxWidth": "90%",                           
-          "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,
-          "display": $SC.ENUMS.DISPLAY.INLINE,         
-          "float": $SC.ENUMS.FLOAT.NONE,               
-          "textColor": "#000",                        
-          "bgColor": "none",                          
-          "hoverColor":"none",                          
-          "fontSize": 14,                               
-          "fontFamily": "Lato",                         
           "itemBorderWidth": 0,                         
-          "itemBorderColor": "#000",                    
-          "itemBorderOpacity": 1,                       
-          "itemBorderRadius": 10,                       
-          "borderColor": "none",                        
-          "borderWidth": 1,                             
-          "borderOpacity": 1,                           
-          "opacity": 0.9,                               
-          "toggleType": true,                           
-          "hideIcon": false,                            
-          "hideLabel": false,                           
-          "hideValue": false                            
         },
         "tooltip": {
-          "enable": true,                   
-          "followPointer": false,           
-          "grouped": true,                  
-          "pointerVicinity": 50,            
           "content": {
             "header": function(pointSet, index, tipConfig) {
               return (
@@ -219,55 +127,22 @@
           "bgColor": "#e8f4f8",            
           "footerTextColor": "#000",       
           "footerBgColor": "#d4ebf2",      
-          "fontSize": 14,                  
-          "fontFamily": "Lato",            
-          "xPadding": 0,                   
-          "yPadding": 0,                   
-          "borderColor": "none",           
-          "borderWidth": 2,                
-          "opacity": 0.8,                  
+          "borderWidth": 0              
         },
         "horizontalScroller": {
-          "enable": true,
           "height": 20,
           "chartInside": false
         },
         "dataSet": {
           "xAxis": {
             "title": "Date",
-            "prepend": "",
-            "append": "",
-            "parseAsDate": false,
-            "dateFormat": "dd mmm",
-            "labelRotate": 0,
-            "intervalThreshold": 70,
-            "tickOpacity": 1,
-            "tickColor": '#222',
-            "tickSpan": 6,
-            "labelOpacity": 1,
-            "labelColor": "#000",
-            "axisColor": $SC.GLOBAL.theme.fontColorDark,
-            "fontSize": 12,
-            "fontFamily": "Lato"
+            "intervalThreshold": 70
           },
           "yAxis": {
-            "title": "Value",
-            "prepend": "",
-            "append": "",
-            "labelRotate": 0,
-            "tickOpacity": 1,
-            "tickColor": '#222',
-            "tickSpan": 6,
-            "labelOpacity": 1,
-            "labelColor": "#000",
-            "axisColor": $SC.GLOBAL.theme.fontColorDark,
-            "fontSize": 14,
-            "fontFamily": "Lato",
-            "zeroBase": false,
+            "title": "Value"
           },
           "series": [{
-            "visible": true,
-            "lineWidth": 1.5,
+            "name": 'Random Data',
             "lineColor": "#009688",
             "areaColor": "#009688",
             "marker": {
@@ -278,8 +153,6 @@
               "pattern": "pattern-1"
             },
             "areaOpacity": 1,
-            "lineOpacity": 1,
-            "name": 'Random Data',
             "animated": false,
             "data": getData(50000) 
           }]

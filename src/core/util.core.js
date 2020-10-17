@@ -1,7 +1,10 @@
 'use strict';
 
 import deepmerge from 'deepmerge';
-import {COLOR_MODEL, RAINBOW_COLOR_MODEL} from './fillColorModel';
+import { COLOR_MODEL, RAINBOW_COLOR_MODEL } from './fillColorModel';
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
 
 /**
  * util.core.js
@@ -12,11 +15,18 @@ import {COLOR_MODEL, RAINBOW_COLOR_MODEL} from './fillColorModel';
 
 class UtilCore {
   constructor() {
-  /**
-   * Check if it is IE.
-   * @returns {Boolean} Return true or false.
-   */
+    /**
+     * Check if it is IE.
+     * @returns {Boolean} Return true or false.
+     */
     this.isIE = /MSIE|Trident/.test(window.navigator.userAgent);
+
+    /**
+     * Using DayJS for date formatting lib.
+     */
+    dayjs.extend(customParseFormat);
+    dayjs.extend(localizedFormat);
+    this.dateFormat = dayjs;
   }
   /**
    * https://github.com/TehShrike/deepmerge
@@ -28,11 +38,11 @@ class UtilCore {
    */
   extends(dest, ...args) {
     const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
-    if(!dest) {
+    if (!dest) {
       return {};
-    }else if(args.length === 0) {
+    } else if (args.length === 0) {
       return dest;
-    }else {
+    } else {
       return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
     }
   }
@@ -42,7 +52,7 @@ class UtilCore {
    * @return {Object} Returns new copied object.
    */
   deepCopy(src = {}) {
-    if(typeof src === 'object') {
+    if (typeof src === 'object') {
       return deepmerge.all([{}, src]);
     }
     return src;
@@ -57,7 +67,7 @@ class UtilCore {
     let propNames = Object.getOwnPropertyNames(object);
     for (let name of propNames) {
       let value = object[name];
-      if(value && typeof value === 'object') {
+      if (value && typeof value === 'object') {
         this.deepFreeze(value);
       }
     }
@@ -80,15 +90,18 @@ class UtilCore {
 
   /**
    * Check if it is a date.
-   * @param {Number} ms Milliseconds since Jan 1, 1970, 00:00:00.000 GMT
+   * @param {String | Number | Date} date Input date of date can be String, Number or Valid Date type object.
+   * @param {String} format Parsing format of input date.
    * @returns {Boolean} Return true or false.
    */
-  isDate(ms) {
-    try {
-      let d = new Date(ms);
-      return d instanceof Date && !isNaN(d);
-    } catch (e) {
+  isDate(date, format) {
+    if (!date) {
       return false;
+    }
+    if (format || format === '') {
+      return this.dateFormat(date, format || undefined).isValid();
+    } else {
+      return this.dateFormat.isDayjs(date);
     }
   }
 
@@ -122,7 +135,7 @@ class UtilCore {
     } else {
       colors = $SC.COLOR_MODEL.length ? $SC.COLOR_MODEL : COLOR_MODEL;
     }
-    return colors[index % colors.length ];
+    return colors[index % colors.length];
   }
 
   colorLuminance(hex, lum) {
@@ -176,10 +189,10 @@ class UtilCore {
    */
   timeLogSync(fn, mark) {
     let that = this;
-    return function(...args) {
+    return function (...args) {
       /* eslint-disable-next-line no-console */
       console.time(mark);
-      if(typeof fn === 'function') {
+      if (typeof fn === 'function') {
         fn.apply(that, args);
       }
       /* eslint-disable-next-line no-console */

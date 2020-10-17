@@ -23,6 +23,7 @@ export default {
     bgColorDark: "#000"
   },
   formatting: {
-    dateFormat: 'dd mmm, yy'
+    parseDateFormat: '',
+    displayDateFormat: "DD MMM, YY"
   }
 };

@@ -10,7 +10,7 @@
   <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
 </head>
 
-<body style='background: #0076A3;'>
+<body>
   <div role='figure' class="chart-base">
     <div id="chartContainer" style="width:100%; height:600px;"></div>
   </div>
@@ -63,7 +63,7 @@
           }
         },
         "subtitle": {
-          "text":"Data of company XYZ",         // [ default : "" ]
+          "text":"Data of company XYZ",                 // [ default : "" ]
           "top": 50,                                    // [ default : 50]  x % value accepted
           "left": "50%",                                // [ default : 50%] x % value accepted
           "width": "95%",                               // [ default : 95%] x % value accepted
@@ -184,7 +184,7 @@
           },
           "horizontal": {
             "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
-            "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(default: FULL | IN_POINT | NONE) ]
+            "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(FULL | IN_POINT | default: NONE) ]
             "lineColor": "#000",                        // [ default: #000 ]
             "lineWidth": 1,                             // [ default: 1 ]
             "lineOpacity": 1,                           // [ default: 1 ]
@@ -281,12 +281,24 @@
         "dataSet": {
           "xAxis": {
             "title": "Date",                            // [ default: Label-axis ]
+            // To resolve a category it uses multiple try-n-error logic. Categories inside series[i].data[j].label have the highest priority, 
+            // if not found then search the label on other series with same data index.
+            // if not found then search in xAxis.category or xAxis.category.value field, if not found then try to resolve it from category.startFrom along with category.increaseBy value.
+            // if still not found any value then assign the (index + 1) as a default value of the category.
+            // "categories": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'], // Note: Categories can be array of values.
+            "categories": {                             // Note: It can be an object with associate config. 
+              // "value": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'],
+              "value": ['12-10-2020', '13-10-2020', '14-10-2020', '15-10-2020', '16-10-2020'],
+              "startFrom": "12-10-2020",                // [ default: 1 ] Note: It's value will be consider when no appropriate category found on data filed or category value field. 
+              "increaseBy": 1000*60*60*24,              // [ default: 1 ] Note: It must be a Numeric value. For datetime it increase by 1 millisecond.
+              "parseAsDate": true,                      // [ true | default: false ] Note: It will parse a category only if it is a valid date.
+              "parseDateFormat": "DD-MM-YYYY",          // [ default: "" ] Note: This field help to parse a date with custom format. Format should be blank a string '' for timestamp (millisecond).
+              "displayDateFormat": "DD MMM, YY",        // [ default: $SC.GLOBAL.formatting.displayDateFormat ] Note: It will display category as the desired date format
+            },
             "prepend": "",                              // [ default: "" ]
             "append": "",                               // [ default: "" ]
-            "parseAsDate": true,                        // [ true | default: false ]
-            "dateFormat": "dd mmm",                     // [ default: dd mmm, yy ]
-            "labelRotate": -45,                         // [ default: 0 ]
-            "intervalThreshold": 40,                    // [ default: 30 ]
+            "labelRotate": 0,                           // [ default: 0 ]
+            "intervalThreshold": 80,                    // [ default: 30 ]
             "tickOpacity": 1,                           // [ default: 1 ]
             "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "tickSpan": 6,                              // [ default: 6 ]
@@ -310,7 +322,7 @@
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
-            "zeroBase": false                           // [ true : default: false ] min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+            "zeroBase": false                           // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
           },
           "series": [{
               "visible": true,                          // [ default: true | false ]
@@ -382,42 +394,44 @@
                 "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
                 "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
               },
-              "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
-                "max": 1000,
-                "min": -1000
-              })       
+              "data": 
+              // generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
+              //   "max": 1000,
+              //   "min": -1000
+              // })       
               // [
-              //   {label:1, value:1000},{label:2, value:-1000},{label:3, value:1000},{label:4, value:-1000},{label:5, value:1000},{label:7, value:-1000}, {label:6, value:2000}
+              //   {label:'jan', value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
               // ] 
+              [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
             },
-            {
-              "visible": true,
-              "name": 'Clara',
-              "lineWidth": 1.5,
-              "lineOpacity": 1,
-              "areaColor": '#008000',
-              "areaOpacity": 0.5,
-              "fillOptions": { 
-                //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
-              },
-              "marker": {
-                "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
-                // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
-              },
-              "spline": false,
-              "animated": true,
-              "dataLabels": {
-                "enable": false
-              },
-              "data": generateRandomTimeSeries(new Date().getTime(), 100, {
-                "max": 1000,
-                "min": -1000
-              })
-              // [
-              // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
-              // ]
-            }
+            // {
+            //   "visible": true,
+            //   "name": 'Clara',
+            //   "lineWidth": 1.5,
+            //   "lineOpacity": 1,
+            //   "areaColor": '#008000',
+            //   "areaOpacity": 0.5,
+            //   "fillOptions": { 
+            //     //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
+            //   },
+            //   "marker": {
+            //     "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+            //     // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+            //     // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+            //   },
+            //   "spline": false,
+            //   "animated": true,
+            //   "dataLabels": {
+            //     "enable": false
+            //   },
+            //   "data": generateRandomTimeSeries(new Date().getTime(), 100, {
+            //     "max": 1000,
+            //     "min": -1000
+            //   })
+            //   // [
+            //   // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
+            //   // ]
+            // }
           ]
         },
         // events: {
@@ -434,10 +448,10 @@
         //     console.log(e, "event afterParseData");
         //   }
         // },
-        zoomWindow: {
-          "leftIndex": 2,                               // [ default: 1 ]
-          "rightIndex": 10                              // [ default: max data length ]
-        }
+        // zoomWindow: {
+        //   "leftIndex": 3,                               // [ default: 1 ]
+        //   "rightIndex": 6                             // [ default: max data length ]
+        // }
       });
 
       /** add event listener **/

@@ -17,6 +17,8 @@ import a11yFactory from './../core/a11y';
  *
  * @events -
  * 1. onVerticalLabelRender : Fire when horizontal labels draws.
+ * 2. vLabelEnter: Fire when mouse hover on label text.
+ * 3. vLabelExit: Fire when mouse out of label text.
  */
 class VerticalLabels extends Component {
 
@@ -41,9 +43,9 @@ class VerticalLabels extends Component {
     this.accId = this.props.accessibilityId || utilCore.getRandomID();
     this.a11yWriter.createSpace(this.accId);
     this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
-      (this.props.opts.prepend || '') + this.minLabelVal + (this.props.opts.append || '')+
+      (this.props.opts.prepend || '') + this.minLabelVal + (this.props.opts.append || '') +
       ' to ' +
-      (this.props.opts.prepend || '') + this.maxLabelVal + (this.props.opts.append || '')+
+      (this.props.opts.prepend || '') + this.maxLabelVal + (this.props.opts.append || '') +
       '.</div>', false);
   }
 
@@ -132,15 +134,15 @@ class VerticalLabels extends Component {
     return (
       <text class="sc-vertical-label" font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
         font-size={this.state.fontSize} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`sc-vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
+        <tspan class={`sc-vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: (e) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
           {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
         </tspan>
       </text>
     );
   }
 
-  onMouseEnter(e) {
-    let lblIndex = e.target.getAttribute('labelIndex');
+  onMouseEnter(e, index) {
+    let lblIndex = index;
     e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.valueSet[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('vLabelEnter', e);
   }

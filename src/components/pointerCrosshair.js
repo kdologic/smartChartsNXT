@@ -15,31 +15,6 @@ import Style from './../viewEngin/style';
  * @author:SmartChartsNXT
  * @description: This components will create a vertical and horizontal cross line to follow the pointer or touch location.
  * @extends Component
- *
- * @example
- * config -
- "pointerCrosshair": {
-   "vertical": {
-     "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-     "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
-     "lineColor": "#000",                        // [ default: #000 ]
-     "lineWidth": 1,                             // [ default: 1 ]
-     "lineOpacity": 1,                           // [ default: 1 ]
-     "labelTextColor": "#fff",                   // [ default: #fff ]
-     "labelBackgroundColor":"#000",              // [ default: #000 ]
-     "labelOpacity": 1                           // [ default: 1 ]
-   },
-   "horizontal": {
-     "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-     "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
-     "lineColor": "#000",                        // [ default: #000 ]
-     "lineWidth": 1,                             // [ default: 1 ]
-     "lineOpacity": 1,                           // [ default: 1 ]
-     "labelTextColor": "#fff",                   // [ default: #fff ]
-     "labelBackgroundColor":"#000",              // [ default: #000 ]
-     "labelOpacity": 1                           // [ default: 1 ]
-   }
- }
  */
 
 class PointerCrosshair extends Component {

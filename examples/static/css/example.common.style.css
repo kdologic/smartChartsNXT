@@ -1,9 +1,12 @@
+body {
+  background: #61dcbf; /*rgb(132, 206, 255);*/
+}
 
 .chart-caption {
-  font-family: lato;
+  font-family: 'Lato', sans-serif;
   margin-top: 0px;
-  background: whitesmoke;
+  background: none;
   padding: 10px;
-  margin: 1px;
+  font-size: 14px;
   text-align: center;
 }

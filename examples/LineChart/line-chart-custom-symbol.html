@@ -21,7 +21,7 @@
   </div>
 
   <script type="text/javascript">
-    let lineChart;
+    var lineChart;
     SmartChartsNXT.ready(function () {
       lineChart = new SmartChartsNXT.Chart({
         "type": $SC.CHART_TYPE.LINE_CHART,
@@ -57,7 +57,7 @@
           "content": {
             "header": function(pointSet, index, tipConfig) {
               return (
-                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
                   pointSet[index].formattedLabel +
                 '</p>'
               );
