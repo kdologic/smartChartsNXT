@@ -236,8 +236,8 @@ class ConnectedPointBase extends Component {
     this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
     this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
 
-    if (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left) {
-      this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth;
+    if (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left && (!this.CHART_OPTIONS.pointerCrosshair || this.CHART_OPTIONS.pointerCrosshair.horizontal.spread === ENUMS.CROSSHAIR_SPREAD.NONE)) {
+      this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth + 2;
     }
 
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
@@ -766,6 +766,7 @@ class ConnectedPointBase extends Component {
       rangeTipPoints: this.getRangeVal(e.leftHandlePos, e.rightHandlePos)
     });
     this.calcOffsetChanges();
+    this.hideTip();
     this.update();
   }
 
@@ -957,6 +958,7 @@ class ConnectedPointBase extends Component {
   onLegendClick(e) {
     this.CHART_DATA.dataSet.series[e.index].visible = !this.CHART_DATA.dataSet.series[e.index].visible;
     this.prepareDataSet();
+    this.hideTip();
     this.update();
   }
 

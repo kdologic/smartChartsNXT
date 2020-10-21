@@ -175,10 +175,7 @@ class DrawConnectedPoints extends Component {
         }, ...props.marker
       };
     }
-    /* Force disable marker for large dataset */
-    if (this.state.valueSet.length > 500) {
-      this.state.marker.enable = false;
-    }
+
     this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
     if (typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
@@ -334,7 +331,7 @@ class DrawConnectedPoints extends Component {
     const mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
-    if (this.props.clip.offsetLeft > this.props.markerWidth / 2) {
+    if (this.props.clip.offsetLeft > this.state.marker.width / 2) {
       pointSet = pointSet.slice(1);
     }
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
@@ -375,7 +372,7 @@ class DrawConnectedPoints extends Component {
     let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
-      if (this.props.clip.offsetLeft > this.props.markerWidth / 2) {
+      if (this.props.clip.offsetLeft > this.state.marker.width / 2) {
         pointSet = pointSet.slice(1);
       }
       if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {

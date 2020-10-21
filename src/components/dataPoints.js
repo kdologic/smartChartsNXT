@@ -117,6 +117,7 @@ class DataPoints extends Component {
     if (this.props.opacity === 0) {
       let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
       this.setState({ pointSet: [pData] });
+      this.state.highlightedIndex = index;
     } else if (this.state.icons[index]) {
       this.state.highlightedIndex = index;
       this.state.icons[index].highlight();

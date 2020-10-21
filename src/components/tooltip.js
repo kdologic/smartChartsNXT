@@ -414,10 +414,20 @@ class Tooltip extends Component {
     let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
     if (this.instances[0] && this.instances[0].opacity) {
       let cPoint = this.instances[0].originPoint;
-      let shiftLeft = this.instances[0].contentWidth + 20;
-      let shiftTop = this.instances[0].contentHeight / 2;
-      this.instances[0].transform = `translate(${mousePos.x - shiftLeft}px,${mousePos.y - shiftTop}px)`;
-      this.instances[0].cPoint = new Point(cPoint.x - mousePos.x + shiftLeft, cPoint.y - mousePos.y + shiftTop);
+      let shiftX = this.instances[0].contentWidth + 20;
+      let shiftY = this.instances[0].contentHeight / 2;
+      let transX = mousePos.x - shiftX, transY = mousePos.y - shiftY;
+      let cTransX = cPoint.x - mousePos.x + shiftX, cTransY = cPoint.y - mousePos.y + shiftY;
+      if (transX < 0) {
+        transX = mousePos.x + 20;
+        cTransX = cPoint.x - mousePos.x - 20;
+      }
+      if (transY < 0) {
+        transY = 0;
+        cTransY = cPoint.y;
+      }
+      this.instances[0].transform = `translate(${transX}px,${transY}px)`;
+      this.instances[0].cPoint = new Point(cTransX, cTransY);
       this.update();
     }
   }

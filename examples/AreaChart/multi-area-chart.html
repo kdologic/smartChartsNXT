@@ -288,11 +288,11 @@
             // "categories": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'], // Note: Categories can be array of values.
             "categories": {                             // Note: It can be an object with associate config. 
               // "value": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'],
-              "value": ['12-10-2020', '13-10-2020', '14-10-2020', '15-10-2020', '16-10-2020'],
+              // "value": ['12-10-2020', '13-10-2020', '14-10-2020', '15-10-2020', '16-10-2020'],
               "startFrom": "12-10-2020",                // [ default: 1 ] Note: It's value will be consider when no appropriate category found on data filed or category value field. 
               "increaseBy": 1000*60*60*24,              // [ default: 1 ] Note: It must be a Numeric value. For datetime it increase by 1 millisecond.
               "parseAsDate": true,                      // [ true | default: false ] Note: It will parse a category only if it is a valid date.
-              "parseDateFormat": "DD-MM-YYYY",          // [ default: "" ] Note: This field help to parse a date with custom format. Format should be blank a string '' for timestamp (millisecond).
+              "parseDateFormat": "", //DD-MM-YYYY       // [ default: "" ] Note: This field help to parse a date with custom format. Format should be blank a string '' for timestamp (millisecond).
               "displayDateFormat": "DD MMM, YY",        // [ default: $SC.GLOBAL.formatting.displayDateFormat ] Note: It will display category as the desired date format
             },
             "prepend": "",                              // [ default: "" ]
@@ -394,44 +394,43 @@
                 "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
                 "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
               },
-              "data": 
-              // generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
-              //   "max": 1000,
-              //   "min": -1000
-              // })       
+              "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
+                "max": 1000,
+                "min": -1000
+              })       
               // [
-              //   {label:'jan', value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
+              //   {value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
               // ] 
-              [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
+              // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
             },
-            // {
-            //   "visible": true,
-            //   "name": 'Clara',
-            //   "lineWidth": 1.5,
-            //   "lineOpacity": 1,
-            //   "areaColor": '#008000',
-            //   "areaOpacity": 0.5,
-            //   "fillOptions": { 
-            //     //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
-            //   },
-            //   "marker": {
-            //     "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
-            //     // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-            //     // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
-            //   },
-            //   "spline": false,
-            //   "animated": true,
-            //   "dataLabels": {
-            //     "enable": false
-            //   },
-            //   "data": generateRandomTimeSeries(new Date().getTime(), 100, {
-            //     "max": 1000,
-            //     "min": -1000
-            //   })
-            //   // [
-            //   // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
-            //   // ]
-            // }
+            {
+              "visible": true,
+              "name": 'Clara',
+              "lineWidth": 1.5,
+              "lineOpacity": 1,
+              "areaColor": '#008000',
+              "areaOpacity": 0.5,
+              "fillOptions": { 
+                //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
+              },
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+                // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+              },
+              "spline": false,
+              "animated": true,
+              "dataLabels": {
+                "enable": false
+              },
+              "data": generateRandomTimeSeries(new Date().getTime(), 100, {
+                "max": 1000,
+                "min": -1000
+              })
+              // [
+              // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
+              // ]
+            }
           ]
         },
         // events: {
@@ -448,10 +447,10 @@
         //     console.log(e, "event afterParseData");
         //   }
         // },
-        // zoomWindow: {
-        //   "leftIndex": 3,                               // [ default: 1 ]
-        //   "rightIndex": 6                             // [ default: max data length ]
-        // }
+        zoomWindow: {
+          "leftIndex": 3,                               // [ default: 1 ]
+          "rightIndex": 10                              // [ default: max data length ]
+        }
       });
 
       /** add event listener **/

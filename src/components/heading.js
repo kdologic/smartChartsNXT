@@ -33,8 +33,8 @@ class heading extends Component {
       width: uiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
       height: uiCore.percentToPixel(this.context.svgWidth, props.opts.height),
       style: props.opts.style || '',
-      top: typeof props.opts.top === 'undefined' ? (this.props.posY || 0) : uiCore.percentToPixel(this.context.svgHeight, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (this.props.posX || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.left),
+      top: typeof props.opts.top === 'undefined' ? (props.posY || 0) : uiCore.percentToPixel(this.context.svgHeight, props.opts.top),
+      left: typeof props.opts.left === 'undefined' ? (props.posX || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.left),
       fontFamily: props.opts.fontFamily || props.fontFamily || defaultConfig.theme.fontFamily,
       fontSize: props.opts.fontSize || props.fontSize || defaultConfig.theme.fontSizeLarge,
       textColor: props.opts.textColor || props.textColor || defaultConfig.theme.fontColorDark,
@@ -51,7 +51,7 @@ class heading extends Component {
     let modifiedConfig = {};
     if (typeof this.config.responsive.reducer === 'function') {
       modifiedConfig = this.config.responsive.reducer(this.context.svgWidth, this.context.svgHeight) || {};
-      this.state.text = modifiedConfig.text || this.props.opts.text;
+      this.state.text = modifiedConfig.text || props.opts.text;
     }
   }
 

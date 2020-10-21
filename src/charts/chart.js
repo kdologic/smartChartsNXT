@@ -41,6 +41,7 @@ class Chart {
       }
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
+      this.targetNode.style.position = 'relative';
 
       /* For accessibility */
       this.targetNode.setAttribute('role', 'region');
@@ -58,7 +59,7 @@ class Chart {
           }
         });
         resizeObserver.observe(this.targetNode);
-      } else if($SC.IESupport && $SC.IESupport.ResizeObserver) {
+      } else if ($SC.IESupport && $SC.IESupport.ResizeObserver) {
         const ro = new $SC.IESupport.ResizeObserver((entries) => {
           for (const entry of entries) {
             const { width, height } = entry.contentRect;
