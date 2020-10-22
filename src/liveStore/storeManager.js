@@ -1,6 +1,6 @@
 'use strict';
 
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import Store from './store';
 
 /**
@@ -16,7 +16,7 @@ class StoreManager {
 
   constructor() { }
 
-  createStore(storeId = utilCore.uuidv4(), initialState = {}) {
+  createStore(storeId = UtilCore.uuidv4(), initialState = {}) {
     if (!storeId) {
       throw new Error('StoreManager: Invalid storeId !');
     }

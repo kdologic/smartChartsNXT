@@ -1,8 +1,8 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
-import utilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import Ticks from './ticks';
@@ -40,7 +40,7 @@ class VerticalLabels extends Component {
     this.onMouseLeave = this.onMouseLeave.bind(this);
 
     /* For accessibility */
-    this.accId = this.props.accessibilityId || utilCore.getRandomID();
+    this.accId = this.props.accessibilityId || UtilCore.getRandomID();
     this.a11yWriter.createSpace(this.accId);
     this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
       (this.props.opts.prepend || '') + this.minLabelVal + (this.props.opts.append || '') +
@@ -109,7 +109,7 @@ class VerticalLabels extends Component {
     this.zeroBaseIndex = -1;
     for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
       let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = uiCore.formatTextValue(labelVal);
+      this.maxLabelVal = UiCore.formatTextValue(labelVal);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {

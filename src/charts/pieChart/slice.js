@@ -10,7 +10,7 @@
 
 import defaultConfig from "./../../settings/config";
 import Point from "./../../core/point";
-import Geom from './../../core/geom.core'; 
+import GeomCore from './../../core/geom.core'; 
 import UiCore from './../../core/ui.core'; 
 import UtilCore from './../../core/util.core';
 import {Component} from "./../../viewEngin/pview";
@@ -111,11 +111,11 @@ class Slice extends Component {
   }
 
   getLowerOrbitalPoint() {
-    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
+    return GeomCore.polarToCartesian(this.props.cx, this.props.cy, GeomCore.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
   }
 
   getUpperOrbitalPoint() {
-    return Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
+    return GeomCore.polarToCartesian(this.props.cx, this.props.cy, GeomCore.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
   }
 
   getTextAnchor() {
@@ -145,12 +145,12 @@ class Slice extends Component {
     let shiftIndex = sliceOut ? 15 : 1;
     this.slicedOut = !this.slicedOut; 
     let shiftInterval = setInterval(() => {
-      let shiftedCentre = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(shiftIndex * 2, shiftIndex * 2, this.midAngle), this.midAngle);
+      let shiftedCentre = GeomCore.polarToCartesian(this.props.cx, this.props.cy, GeomCore.getEllipticalRadius(shiftIndex * 2, shiftIndex * 2, this.midAngle), this.midAngle);
       if (isNaN(shiftedCentre.x) || isNaN(shiftedCentre.y)) {
         shiftedCentre = new Point(this.props.cx, this.props.cy);
       }
-      let sPoint = Geom.polarToCartesian(shiftedCentre.x, shiftedCentre.y, Geom.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
-      let ePoint = Geom.polarToCartesian(this.props.cx, this.props.cy, Geom.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
+      let sPoint = GeomCore.polarToCartesian(shiftedCentre.x, shiftedCentre.y, GeomCore.getEllipticalRadius(this.props.width, this.props.height, this.midAngle), this.midAngle);
+      let ePoint = GeomCore.polarToCartesian(this.props.cx, this.props.cy, GeomCore.getEllipticalRadius(this.props.width + this.props.offsetWidth, this.props.height + this.props.offsetHeight, this.midAngle), this.midAngle);
       ePoint.x += (this.midAngle > 180 ? -shiftIndex : shiftIndex);
 
       reState.legendPath = this.getLegendPath(sPoint, ePoint);
@@ -172,10 +172,10 @@ class Slice extends Component {
       endAngle--;
       fullArc = true;
     }
-    let outerArcStart = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMaxX, rMaxY, endAngle), endAngle);
-    let outerArcEnd = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMaxX, rMaxY, startAngle), startAngle);
-    let innerArcStart = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMinX, rMinY, endAngle), endAngle);
-    let innerArcEnd = Geom.polarToCartesian(cx, cy, Geom.getEllipticalRadius(rMinX, rMinY, startAngle), startAngle);
+    let outerArcStart = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rMaxX, rMaxY, endAngle), endAngle);
+    let outerArcEnd = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rMaxX, rMaxY, startAngle), startAngle);
+    let innerArcStart = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rMinX, rMinY, endAngle), endAngle);
+    let innerArcEnd = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rMinX, rMinY, startAngle), startAngle);
     let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? "0" : "1";
 
     let d = [
@@ -229,7 +229,7 @@ class Slice extends Component {
     e.stopPropagation();
     if(this.props.parentCtx.mouseDown) {
       this.props.parentCtx.mouseDrag = true;
-      if(UiCore.isTouchDevice()){
+      if(UtilCore.isTouchDevice){
         let changedTouch = e.changedTouches[0];
         let elem = document.elementFromPoint(changedTouch.clientX, changedTouch.clientY);
         elem.dispatchEvent(new TouchEvent('mousemove', e)); 

@@ -6,6 +6,9 @@ import dayjs from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
 
+dayjs.extend(customParseFormat);
+dayjs.extend(localizedFormat);
+
 /**
  * util.core.js
  * @createdOn: 07-Apr-2016
@@ -14,20 +17,22 @@ import localizedFormat from 'dayjs/plugin/localizedFormat';
  */
 
 class UtilCore {
-  constructor() {
-    /**
-     * Check if it is IE.
-     * @returns {Boolean} Return true or false.
-     */
-    this.isIE = /MSIE|Trident/.test(window.navigator.userAgent);
 
-    /**
-     * Using DayJS for date formatting lib.
-     */
-    dayjs.extend(customParseFormat);
-    dayjs.extend(localizedFormat);
-    this.dateFormat = dayjs;
-  }
+  /**
+   * Check if it is IE.
+   */
+  static isIE = /MSIE|Trident/.test(window.navigator.userAgent);
+
+  /**
+   * Check if it is a touch device.
+   */
+  static isTouchDevice = 'ontouchstart' in document.documentElement;
+
+  /**
+   * Using DayJS for date formatting lib.
+   */
+  static dateFormat = dayjs;
+
   /**
    * https://github.com/TehShrike/deepmerge
    * Merges the enumerable properties of two or more objects deeply.
@@ -36,7 +41,7 @@ class UtilCore {
    * @param  {...any} args Array of source object.
    * @return {Object} Merged object.
    */
-  extends(dest, ...args) {
+  static extends = (dest, ...args) => {
     const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
     if (!dest) {
       return {};
@@ -45,34 +50,35 @@ class UtilCore {
     } else {
       return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
     }
-  }
+  };
+
   /**
    * Deep copy an object.
    * @param {Object} src Source object which needs deep copy.
    * @return {Object} Returns new copied object.
    */
-  deepCopy(src = {}) {
+  static deepCopy = (src = {}) => {
     if (typeof src === 'object') {
       return deepmerge.all([{}, src]);
     }
     return src;
-  }
+  };
 
   /**
    * Deep Freeze object recursively.
    * @param {Object} object Input object to be freeze.
    * @returns {Object} Frozen object.
    */
-  deepFreeze(object) {
+  static deepFreeze = (object) => {
     let propNames = Object.getOwnPropertyNames(object);
     for (let name of propNames) {
       let value = object[name];
       if (value && typeof value === 'object') {
-        this.deepFreeze(value);
+        UtilCore.deepFreeze(value);
       }
     }
     return Object.freeze(object);
-  }
+  };
 
   /**
    * Returns a number whose value is limited to the given range.
@@ -84,9 +90,9 @@ class UtilCore {
    * Example: limit the output of this computation to between 0 and 255
    * (x * 255).clamp(0, 255)
    */
-  clamp(min, max, val) {
+  static clamp = (min, max, val) => {
     return Math.min(Math.max(val, min), max);
-  }
+  };
 
   /**
    * Check if it is a date.
@@ -94,23 +100,23 @@ class UtilCore {
    * @param {String} format Parsing format of input date.
    * @returns {Boolean} Return true or false.
    */
-  isDate(date, format) {
+  static isDate = (date, format) => {
     if (!date) {
       return false;
     }
     if (format || format === '') {
-      return this.dateFormat(date, format || undefined).isValid();
+      return UtilCore.dateFormat(date, format || undefined).isValid();
     } else {
-      return this.dateFormat.isDayjs(date);
+      return UtilCore.dateFormat.isDayjs(date);
     }
-  }
+  };
 
   /**
    * Memoize version of a function for faster execution.
    * @param {Function} fn A function to memoize.
    * @returns {Function} Return a memoize version of the function.
    */
-  memoize = (fn) => {
+  static memoize = (fn) => {
     let cache = {};
     return (...args) => {
       if (args in cache) {
@@ -122,13 +128,14 @@ class UtilCore {
       }
     };
   }
+
   /**
    * Return a color HEX code from index.
    * @param {Number} index Index of color HEX code.
    * @param {Boolean} rainbowFlag Return rainbow color HEX code.
    * @returns {String} Color HEX code.
    */
-  getColor(index, rainbowFlag) {
+  static getColor = (index, rainbowFlag) => {
     let colors;
     if (rainbowFlag) {
       colors = $SC.RAINBOW_COLOR_MODEL.length ? $SC.RAINBOW_COLOR_MODEL : RAINBOW_COLOR_MODEL;
@@ -136,9 +143,9 @@ class UtilCore {
       colors = $SC.COLOR_MODEL.length ? $SC.COLOR_MODEL : COLOR_MODEL;
     }
     return colors[index % colors.length];
-  }
+  };
 
-  colorLuminance(hex, lum) {
+  static colorLuminance = (hex, lum) => {
     /* validate hex string*/
     hex = String(hex).replace(/[^0-9a-f]/gi, '');
     if (hex.length < 6) {
@@ -153,33 +160,33 @@ class UtilCore {
       rgb += ('00' + c).substr(c.length);
     }
     return rgb;
-  }
+  };
 
-  assemble(literal, params) {
+  static assemble = (literal, params) => {
     return new Function(params, 'return `' + literal + '`;'); // TODO: Proper escaping
-  }
+  };
 
   /**
    * Generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant.
    * @returns {string} Return a GUID.
    */
-  uuidv4() {
+  static uuidv4 = () => {
     const crypto = window.crypto || window.msCrypto;
     return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
-  }
+  };
 
   /**
    * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested up to 10,000 ids).
    * @returns {string} Returns a unique string.
    */
-  getRandomID() {
+  static getRandomID = () => {
     let chr4 = () => {
       return Math.random().toString(16).slice(-4);
     };
     return chr4() + '-' + chr4() + '-' + chr4();
-  }
+  };
 
   /**
    * Wrap a function to get execution time accurately.
@@ -187,9 +194,9 @@ class UtilCore {
    * @param {*} mark The string which uniquely identify the time mark.
    * @return {function} Returns the curry function.
    */
-  timeLogSync(fn, mark) {
+  static timeLogSync = (fn, mark) => {
     let that = this;
-    return function (...args) {
+    return (...args) => {
       /* eslint-disable-next-line no-console */
       console.time(mark);
       if (typeof fn === 'function') {
@@ -198,8 +205,7 @@ class UtilCore {
       /* eslint-disable-next-line no-console */
       console.timeEnd(mark);
     };
-  }
-
+  };
 }
 
-export default new UtilCore();
+export default UtilCore;

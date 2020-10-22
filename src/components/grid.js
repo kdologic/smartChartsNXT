@@ -3,8 +3,8 @@
 import defaultConfig from './../settings/config';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import utilCore from './../core/util.core';
-import uiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
@@ -19,7 +19,7 @@ class Grid extends Component {
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.clipId = utilCore.getRandomID();
+    this.clipId = UtilCore.getRandomID();
     this.config = {};
     this.state = {
       vGridCount: this.props.vGridCount,
@@ -65,7 +65,7 @@ class Grid extends Component {
       this.state.fillBy = this.config.bgColor;
       this.state.fillType = 'none';
     }else {
-      let fillOpt = uiCore.processFillOptions(this.props.opts.fillOptions);
+      let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions);
       if(fillOpt.fillBy === 'none') {
         this.state.fillType = 'solidColor';
         this.state.fillBy = this.config.bgColor;
@@ -92,7 +92,7 @@ class Grid extends Component {
     return (
       <g class='sc-chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
         { this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
-          uiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
+          UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
         }
         <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.fillBy} fill-opacity={this.config.bgOpacity} stroke-width='0' />
         <g class='sc-v-grid-lines' transform={`translate(${this.props.vTransformX}, 0)`} clip-path={`url(#${this.clipId})`} >

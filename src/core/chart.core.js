@@ -1,6 +1,6 @@
 'use strict';
 
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 import font from './../styles/font-lato';
 //import Morphing from './../plugIns/morph';
 import '../plugIns/classList.shim.min';
@@ -26,7 +26,7 @@ class Core {
   }
 
   loadFont() {
-    uiCore.prependStyle(document.querySelector('head'), font);
+    UiCore.prependStyle(document.querySelector('head'), font);
     this.namespaceReadyStatus = true;
   }
 

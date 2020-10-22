@@ -1,6 +1,6 @@
 'use strict';
 
-import utilCore from './util.core';
+import UtilCore from './util.core';
 
 /**
  * saveAs.js
@@ -91,7 +91,7 @@ class SaveAs {
       });
 
       let allImages = elemNode.querySelectorAll('image');
-      if (utilCore.isIE || allImages.length === 0) {
+      if (UtilCore.isIE || allImages.length === 0) {
         resolve(new XMLSerializer().serializeToString(elemNode));
         return;
       }
@@ -146,7 +146,7 @@ class SaveAs {
       CloneNode in IE 11 create erroneous values on patterns elements that fails Canvg to work properly so remove for IE 11.
       Also drop shadow filter, create distorted and faded canvas images. Better to avoid it for IE 11.
     */
-    this.serialize(utilCore.isIE ? svgRoot : svgRoot.cloneNode(true))
+    this.serialize(UtilCore.isIE ? svgRoot : svgRoot.cloneNode(true))
       .then((serializedString) => {
         let svgString = this.normalizeCSS(serializedString);
         if (opts.type === 'print') {
@@ -156,13 +156,13 @@ class SaveAs {
           iframe.width = opts.width;
           iframe.height = opts.height;
           iframe.frameBorder = 0;
-          if (!utilCore.isIE) {
+          if (!UtilCore.isIE) {
             iframe.srcdoc = svgString;
           }
 
           iframe.onload = () => {
             let frameDoc = iframe.contentDocument;
-            if (utilCore.isIE) {
+            if (UtilCore.isIE) {
               frameDoc.getElementsByTagName('body')[0].innerHTML = svgString;
             }
             if (opts.width > opts.height) {
@@ -198,7 +198,7 @@ class SaveAs {
           img.onload = () => {
             let imgAsURL;
             if (opts.type === 'svg') {
-              if (utilCore.isIE) {
+              if (UtilCore.isIE) {
                 imgAsURL = svgString;
               } else {
                 imgAsURL = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="utf-8"?>' + svgString);
@@ -226,7 +226,7 @@ class SaveAs {
                       let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
                       doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
                       doc.output('save', fileName);
-                      if (utilCore.isIE && vector) {
+                      if (UtilCore.isIE && vector) {
                         canvas.parentElement.removeChild(canvas);
                       }
                       if (opts.emitter && typeof opts.emitter.emit === 'function') {
@@ -241,7 +241,7 @@ class SaveAs {
                     /* For other image type JPEG, PNG */
                     imgAsURL = canvas.toDataURL(this.mimeTypeMap[opts.type]);
                     this.download(imgAsURL, fileName, this.mimeTypeMap[opts.type]);
-                    if (utilCore.isIE && vector) {
+                    if (UtilCore.isIE && vector) {
                       canvas.parentElement.removeChild(canvas);
                     }
                     if (opts.emitter && typeof opts.emitter.emit === 'function') {
@@ -260,7 +260,7 @@ class SaveAs {
   createCanvasForDownload(img, svgString, opts) {
     let canvas;
     return new Promise((resolve, reject) => {
-      if (utilCore.isIE) {
+      if (UtilCore.isIE) {
         if ($SC.IESupport && $SC.IESupport.Canvg) {
           canvas = document.createElement('canvas');
           canvas.style.position = 'absolute';

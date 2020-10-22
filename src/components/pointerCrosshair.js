@@ -5,7 +5,7 @@ import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
 
@@ -153,7 +153,7 @@ class PointerCrosshair extends Component {
       return;
     }
     this.state.verticalLabelText = '' + data[0].formattedLabel;
-    let textWidth = uiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
+    let textWidth = UiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = this.config.vertical.spread === ENUMS.CROSSHAIR_SPREAD.FULL ? this.props.vLineStart : Math.min(...data.map(d => d.y));
     let vState = {
       isVerticalCrosshairVisible: true,
@@ -185,7 +185,7 @@ class PointerCrosshair extends Component {
       return;
     }
     this.state.horizontalLabelText = '' + data[0].formattedValue;
-    let textWidth = uiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
+    let textWidth = UiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = Math.min(...data.map(d => d.y));
     this.setState({
       isHorizontalCrosshairVisible: true,

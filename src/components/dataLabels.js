@@ -1,14 +1,14 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
-import geomCore from './../core/geom.core';
+import UiCore from './../core/ui.core';
+import GeomCore from './../core/geom.core';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import SpeechBox from './../components/speechBox';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 
 
 /**
@@ -50,7 +50,7 @@ class DataLabels extends Component {
       this.store.setValue('labelsData', {});
     }
     this.allLabelsData = [];
-    let globalLabels = utilCore.deepCopy(this.store.getValue('labelsData'));
+    let globalLabels = UtilCore.deepCopy(this.store.getValue('labelsData'));
     for(let key in globalLabels) {
       if(key !== this.props.instanceId) {
         this.allLabelsData = [...globalLabels[key]];
@@ -73,7 +73,7 @@ class DataLabels extends Component {
 
   propsWillReceive(nextProps) {
     this.state.labelsData = [];
-    let globalLabels = utilCore.deepCopy(this.store.getValue('labelsData'));
+    let globalLabels = UtilCore.deepCopy(this.store.getValue('labelsData'));
     this.allLabelsData = [];
     for(let key in globalLabels) {
       if(key !== this.props.instanceId) {
@@ -151,7 +151,7 @@ class DataLabels extends Component {
           {value}
         </tspan>
       </text>;
-    let labelDim = uiCore.getComputedBBox(label);
+    let labelDim = UiCore.getComputedBBox(label);
     ({labelX, labelY, labelAlign} = this.adjustLabelPosition(label, labelDim, labelX, labelY, labelAlign));
     let speechBoxX, speechBoxY;
     let speechBoxWidth = labelDim.width + (2 * this.config.xPadding);
@@ -219,7 +219,7 @@ class DataLabels extends Component {
   checkOverlapping(existingLabels, label) {
     for (let i = 0; i < existingLabels.length; i++) {
       let existingLabel = existingLabels[i];
-      if(geomCore.isRectOverlapping(existingLabel, label)) {
+      if(GeomCore.isRectOverlapping(existingLabel, label)) {
         return true;
       }
     }

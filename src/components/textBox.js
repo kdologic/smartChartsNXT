@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 import Style from './../viewEngin/style';
 
 /**
@@ -44,7 +44,7 @@ class TextBox extends Component {
 
   processBeforeRender() {
     this.state.text = this.props.text;
-    const textBBox = uiCore.getComputedBBox(this.getTextNode([this.state.text]));
+    const textBBox = UiCore.getComputedBBox(this.getTextNode([this.state.text]));
     this.state.textWidth = textBBox.width;
     this.state.lineHeight = textBBox.height;
     this.state.splitText = textBBox.width > this.props.width && this.props.wrapText;
@@ -54,7 +54,7 @@ class TextBox extends Component {
 
   processAfterRender() {
     const textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
-    const textBBox = uiCore.getComputedBBox(textNode);
+    const textBBox = UiCore.getComputedBBox(textNode);
     this.state.textBBox.width = this.props.width || textBBox.width + (2 * this.props.padding || 0);
     this.state.textBBox.height = this.props.height || textBBox.height + (2 * this.props.padding || 0);
     const bgRect = this.ref.node.querySelector('.sc-textbox-bg');
@@ -103,7 +103,7 @@ class TextBox extends Component {
     let words = txt.split(/(\s+)/).filter(e => e.trim().length > 0);
     let lines = [], line = [];
     for (let w of words) {
-      let textWidth = uiCore.getComputedTextWidth(this.getTextNode([line.concat(w).join(' ')]));
+      let textWidth = UiCore.getComputedTextWidth(this.getTextNode([line.concat(w).join(' ')]));
       if (textWidth > this.state.textBBox.width) {
         lines.push(line.join(' '));
         line = [w];

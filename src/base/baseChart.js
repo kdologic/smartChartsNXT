@@ -1,7 +1,7 @@
 'use strict';
 
 import Point from './../core/point';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
@@ -29,7 +29,7 @@ class BaseChart extends Component {
       this.chartType = this.props.opts.type;
       this.store = StoreManager.getStore(this.props.runId);
       this.a11yWriter = a11yFactory.getWriter(this.props.runId);
-      this.CHART_OPTIONS = utilCore.extends({
+      this.CHART_OPTIONS = UtilCore.extends({
         a11y: {},
         menu: {
           mainMenu: {
@@ -68,10 +68,10 @@ class BaseChart extends Component {
         menuIconFocused: false,
         globalRenderAll: false
       };
-      this.titleId = utilCore.getRandomID();
-      this.descId = utilCore.getRandomID();
-      this.blurFilterId = utilCore.getRandomID();
-      this.menuIconGradId = utilCore.getRandomID();
+      this.titleId = UtilCore.getRandomID();
+      this.descId = UtilCore.getRandomID();
+      this.blurFilterId = UtilCore.getRandomID();
+      this.menuIconGradId = UtilCore.getRandomID();
       this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
         throw ex;
@@ -193,7 +193,7 @@ class BaseChart extends Component {
         }
 
         <g id={`${this.getChartId()}_cont`}>
-          <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
+          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
         </g>
 
         {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
@@ -209,8 +209,8 @@ class BaseChart extends Component {
   }
 
   initCanvasSize(width, height, minWidth = this.CHART_DATA.minWidth, minHeight = this.CHART_DATA.minHeight) {
-    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = utilCore.clamp(minWidth, Math.max(minWidth, width), width);
-    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = utilCore.clamp(minHeight, Math.max(minHeight, height), height);
+    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = UtilCore.clamp(minWidth, Math.max(minWidth, width), width);
+    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = UtilCore.clamp(minHeight, Math.max(minHeight, height), height);
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
   }
 
@@ -310,7 +310,7 @@ class BaseChart extends Component {
 
   onMenuIconMouseIn(e) {
     this.ref.node.querySelector('.dot-group').classList.add('active');
-    if(utilCore.isIE) {
+    if(UtilCore.isIE) {
       e.target.setAttribute('transform', 'scale(1.5)');
     }
   }
@@ -318,7 +318,7 @@ class BaseChart extends Component {
   onMenuIconMouseOut(e) {
     if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
-      if(utilCore.isIE) {
+      if(UtilCore.isIE) {
         e.target.setAttribute('transform', 'scale(1)');
       }
     }
@@ -355,7 +355,7 @@ class BaseChart extends Component {
     if(this.validationErrors.length) {
       throw this.validationErrors;
     }
-    this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, newOpts, { width: 1, height: 1 });
+    this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, newOpts, { width: 1, height: 1 });
     this.store.setValue('globalRenderAll', true);
     this.setState({ globalRenderAll: true});
   }

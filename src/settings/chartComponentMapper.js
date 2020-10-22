@@ -9,8 +9,8 @@
 
 import { CHART_TYPE } from './globalEnums';
 import ConnectedPointBase from '../charts/connectedPointChartsType/connectedPointBase';
-import {config as areaChartConfig, validationRules as areaChartValidationRules} from '../charts/connectedPointChartsType/areaChart.config';
-import {config as lineChartConfig, validationRules as lineChartValidationRules} from '../charts/connectedPointChartsType/lineChart.config';
+import {config as areaChartConfig, validationRules as areaChartValidationRules} from '../charts/connectedPointChartsType/areaChart/areaChart.config';
+import {config as lineChartConfig, validationRules as lineChartValidationRules} from '../charts/connectedPointChartsType/lineChart/lineChart.config';
 
 /** ------- Mapping components and config with respective chart types ------- */
 
@@ -26,7 +26,6 @@ export const CHART_MODULES = {
     chart: ConnectedPointBase
   }
   //,
-  // LineChart: require('./../charts/lineChart/lineChart'),
   // StepChart: require('./../charts/stepChart/stepChart'),
   // PieChart: {
   //   config: require('./../charts/pieChart/config').default,

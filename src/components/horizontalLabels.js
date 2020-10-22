@@ -2,10 +2,10 @@
 
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
-import uiCore from '../core/ui.core';
+import UiCore from '../core/ui.core';
 import a11yFactory from './../core/a11y';
 
 /**
@@ -28,7 +28,7 @@ class HorizontalLabels extends Component {
     let self = this;
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.a11yWriter = a11yFactory.getWriter(this.context.runId);
-    this.rid = utilCore.getRandomID();
+    this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
     this.resetConfig(this.props.opts);
@@ -38,7 +38,7 @@ class HorizontalLabels extends Component {
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
-            return self.props.opts.categories.parseAsDate && utilCore.isDate(c) ? utilCore.dateFormat(c).format(self.config.dateFormat) : c;
+            return self.props.opts.categories.parseAsDate && UtilCore.isDate(c) ? UtilCore.dateFormat(c).format(self.config.dateFormat) : c;
           });
         } else {
           this._categories = [];
@@ -59,12 +59,12 @@ class HorizontalLabels extends Component {
     this.onMouseLeave = this.onMouseLeave.bind(this);
 
     /* For accessibility */
-    this.accId = this.props.accessibilityId || utilCore.getRandomID();
+    this.accId = this.props.accessibilityId || UtilCore.getRandomID();
     this.a11yWriter.createSpace(this.accId);
     this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
-      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && utilCore.isDate(this.props.categorySet[0]) ? utilCore.dateFormat(this.props.categorySet[0]).format('LL') : this.props.categorySet[0]) + (this.props.opts.append || '') +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && UtilCore.isDate(this.props.categorySet[0]) ? UtilCore.dateFormat(this.props.categorySet[0]).format('LL') : this.props.categorySet[0]) + (this.props.opts.append || '') +
       ' to ' +
-      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && utilCore.isDate(this.props.categorySet[this.props.categorySet.length - 1]) ? utilCore.dateFormat(this.props.categorySet[this.props.categorySet.length - 1]).format('LL') : this.props.categorySet[this.props.categorySet.length - 1]) + (this.props.opts.append || '') +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && UtilCore.isDate(this.props.categorySet[this.props.categorySet.length - 1]) ? UtilCore.dateFormat(this.props.categorySet[this.props.categorySet.length - 1]).format('LL') : this.props.categorySet[this.props.categorySet.length - 1]) + (this.props.opts.append || '') +
       '</div>', false);
   }
 
@@ -153,7 +153,7 @@ class HorizontalLabels extends Component {
     </text>;
 
     if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
-      let labelWidth = uiCore.getComputedTextWidth(label);
+      let labelWidth = UiCore.getComputedTextWidth(label);
       if (x + (labelWidth / 2) > this.props.maxWidth) {
         let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
         label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
@@ -180,8 +180,8 @@ class HorizontalLabels extends Component {
   onMouseEnter(e, index) {
     let lblIndex = index;
     let lblText = this.state.categories[lblIndex];
-    if (utilCore.isDate(this.props.categorySet[lblIndex])) {
-      lblText = utilCore.dateFormat(this.props.categorySet[lblIndex]).format('lll');
+    if (UtilCore.isDate(this.props.categorySet[lblIndex])) {
+      lblText = UtilCore.dateFormat(this.props.categorySet[lblIndex]).format('lll');
     }
     e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + lblText + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('hLabelEnter', e);

@@ -2,7 +2,7 @@
 
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 
 /**
  * speechBox.js
@@ -48,7 +48,7 @@ class SpeechBox extends Component {
     this.cpoint = this.props.cpoint;
     return (
       <g id={this.props.id || ''} class='sc-speech-box' transform={`translate(${this.props.x},${this.props.y})`}>
-        {this.props.shadow && uiCore.dropShadow('sc-speech-box-drop-shadow')}
+        {this.props.shadow && UiCore.dropShadow('sc-speech-box-drop-shadow')}
         <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity}
           filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''}
           stroke={this.props.strokeColor} stroke-width={typeof this.props.strokeWidth === 'undefined' ? 1 : this.props.strokeWidth } stroke-opacity={typeof this.props.strokeOpacity === 'undefined' ? 1 : this.props.strokeOpacity}

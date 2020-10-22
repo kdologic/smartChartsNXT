@@ -3,9 +3,9 @@
 import { CHART_TYPE, OPTIONS_TYPE as ENUMS } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
-import geom from './../../core/geom.core';
-import uiCore from './../../core/ui.core';
-import utilCore from './../../core/util.core';
+import GeomCore from './../../core/geom.core';
+import UiCore from './../../core/ui.core';
+import UtilCore from './../../core/util.core';
 import StoreManager from './../../liveStore/storeManager';
 import DataPoints from './../../components/dataPoints';
 import DataLabels from './../../components/dataLabels';
@@ -27,7 +27,7 @@ class DrawConnectedPoints extends Component {
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.store = StoreManager.getStore(this.context.runId);
     this.a11yWriter = a11yFactory.getWriter(this.context.runId);
-    this.rid = utilCore.getRandomID();
+    this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
     this.state = {
@@ -57,7 +57,7 @@ class DrawConnectedPoints extends Component {
       height: this.props.height
     }, this.props.clip);
 
-    let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
+    let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
     if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
@@ -83,7 +83,7 @@ class DrawConnectedPoints extends Component {
 
     /* For accessibility */
     if (this.props.accessibility) {
-      this.liveRegionId = utilCore.getRandomID();
+      this.liveRegionId = UtilCore.getRandomID();
       this.a11yWriter.createSpace(this.liveRegionId)
         .config({
           attrs: {
@@ -115,12 +115,12 @@ class DrawConnectedPoints extends Component {
     let rangeStart = '', rangeEnd = '';
     if (this.props.accessibility) {
       rangeStart = this.props.xAxisInfo.selectedCategories[0];
-      if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(rangeStart)) {
-        rangeStart = utilCore.dateFormat(rangeStart).format('LL');
+      if (this.props.xAxisInfo.categories.parseAsDate && UtilCore.isDate(rangeStart)) {
+        rangeStart = UtilCore.dateFormat(rangeStart).format('LL');
       }
       rangeEnd = this.props.xAxisInfo.selectedCategories[this.props.xAxisInfo.selectedCategories.length - 1];
-      if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(rangeEnd)) {
-        rangeEnd = utilCore.dateFormat(rangeEnd).format('LL');
+      if (this.props.xAxisInfo.categories.parseAsDate && UtilCore.isDate(rangeEnd)) {
+        rangeEnd = UtilCore.dateFormat(rangeEnd).format('LL');
       }
       this.a11yWriter.write(this.liveRegionId, `<g>Series ${this.props.name}, displaying ${this.state.pointSet.length} data points. Range between ${this.props.xAxisInfo.title} : ${(this.props.xAxisInfo.prepend || '') + rangeStart + (this.props.xAxisInfo.append || '')} to ${(this.props.xAxisInfo.prepend || '') + rangeEnd + (this.props.xAxisInfo.append || '')}</g>`, true, 1000);
     }
@@ -136,7 +136,7 @@ class DrawConnectedPoints extends Component {
 
   propsWillReceive(nextProps) {
     this.prepareData(nextProps);
-    let fillOpt = uiCore.processFillOptions(this.props.fillOptions);
+    let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
     if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
@@ -205,10 +205,10 @@ class DrawConnectedPoints extends Component {
           </defs>
         }
         {this.context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== 'solidColor' &&
-          uiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
+          UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
         }
         {this.props.lineDropShadow &&
-          uiCore.dropShadow(this.shadowId)
+          UiCore.dropShadow(this.shadowId)
         }
         {this.context.chartType === CHART_TYPE.AREA_CHART &&
           <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
@@ -312,7 +312,7 @@ class DrawConnectedPoints extends Component {
       } else if (pointSegment.length === 1) {
         path.push(['M', this.state.pointSet[0].x, this.state.pointSet[0].y]);
       } else {
-        path.push(geom.catmullRomFitting(pointSegment, 0.1));
+        path.push(GeomCore.catmullRomFitting(pointSegment, 0.1));
       }
     }
     segmentIndexes.push(this.state.pointSet.length);
@@ -327,8 +327,8 @@ class DrawConnectedPoints extends Component {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
     }
-    let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    const mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    let evt = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    const mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
     if (this.props.clip.offsetLeft > this.state.marker.width / 2) {
@@ -337,7 +337,7 @@ class DrawConnectedPoints extends Component {
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length - 1);
     }
-    const nearPoint = geom.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
+    const nearPoint = GeomCore.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
     this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
     const pointerVicinity = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
     if (nearPoint.dist <= pointerVicinity) {
@@ -369,7 +369,7 @@ class DrawConnectedPoints extends Component {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return void 0;
     }
-    let evt = utilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
+    let evt = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
     if (e.which == 37 || e.which == 39) {
       let pointSet = this.state.pointSet;
       if (this.props.clip.offsetLeft > this.state.marker.width / 2) {

@@ -5,8 +5,8 @@ import defaultConfig from '../settings/config';
 import { Component } from '../viewEngin/pview';
 import Textbox from './textBox';
 import Style from '../viewEngin/style';
-import utilCore from '../core/util.core';
-import uiCore from '../core/ui.core';
+import UtilCore from '../core/util.core';
+import UiCore from '../core/ui.core';
 
 /**
  * heading.js
@@ -19,7 +19,7 @@ import uiCore from '../core/ui.core';
 class heading extends Component {
   constructor(props) {
     super(props);
-    this.id = utilCore.getRandomID();
+    this.id = UtilCore.getRandomID();
     this.state = {
       text: this.props.opts.text
     };
@@ -30,11 +30,11 @@ class heading extends Component {
   setConfig(props) {
     let alignTextMap = { [ENUMS.HORIZONTAL_ALIGN.LEFT]: 'left', [ENUMS.HORIZONTAL_ALIGN.CENTER]: 'middle', [ENUMS.HORIZONTAL_ALIGN.RIGHT]: 'right' };
     this.config = {
-      width: uiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
-      height: uiCore.percentToPixel(this.context.svgWidth, props.opts.height),
+      width: UiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
+      height: UiCore.percentToPixel(this.context.svgWidth, props.opts.height),
       style: props.opts.style || '',
-      top: typeof props.opts.top === 'undefined' ? (props.posY || 0) : uiCore.percentToPixel(this.context.svgHeight, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (props.posX || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.left),
+      top: typeof props.opts.top === 'undefined' ? (props.posY || 0) : UiCore.percentToPixel(this.context.svgHeight, props.opts.top),
+      left: typeof props.opts.left === 'undefined' ? (props.posX || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
       fontFamily: props.opts.fontFamily || props.fontFamily || defaultConfig.theme.fontFamily,
       fontSize: props.opts.fontSize || props.fontSize || defaultConfig.theme.fontSizeLarge,
       textColor: props.opts.textColor || props.textColor || defaultConfig.theme.fontColorDark,

@@ -3,8 +3,8 @@
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import utilCore from '../core/util.core';
-import uiCore from './../core/ui.core';
+import UtilCore from '../core/util.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import defaultConfig from './../settings/config';
 import StoreManager from './../liveStore/storeManager';
@@ -241,7 +241,7 @@ class HorizontalScroller extends Component {
   }
 
   onMouseDown(e) {
-    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let classList = Array.prototype.slice.call(e.target.classList);
     if (classList.includes('sc-slider-left-sel')) {
       this.selectedHandler = 'left';
@@ -261,7 +261,7 @@ class HorizontalScroller extends Component {
 
   onScrollMove(e) {
     if (this.selectedHandler) {
-      let mousePosNow = uiCore.cursorPoint(this.context.rootContainerId, e);
+      let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
       switch (this.selectedHandler) {
         case 'left':
@@ -333,7 +333,7 @@ class HorizontalScroller extends Component {
   onUpdateRangeVal(e) {
     this.state.rangeTipPoints = e.rangeTipPoints;
     this.state.rangeTipPoints.forEach((point) => {
-      let textDim = uiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value));
+      let textDim = UiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value));
       textDim.width = textDim.width < 25 ? 25 : textDim.width;
       point.textDim = textDim;
     });
@@ -465,7 +465,7 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -497,8 +497,8 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
-    this.gradId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
@@ -562,8 +562,8 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
-    this.gradId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {

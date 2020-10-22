@@ -1,8 +1,8 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
-import utilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 import defaultConfig from './../settings/config';
 
 /**
@@ -24,7 +24,7 @@ class Watermark extends Component {
       highlight: false
     };
 
-    this.titleId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
     this.onClick = this.onClick.bind(this);
     this.onHover = this.onHover.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -86,7 +86,7 @@ class Watermark extends Component {
     return (`
       .sc-watermark .watermark-text {
         font-family: ${defaultConfig.theme.fontFamily};
-        font-size: ${uiCore.getScaledFontSize(this.props.svgWidth, 20, 10) + 'px'};
+        font-size: ${UiCore.getScaledFontSize(this.props.svgWidth, 20, 10) + 'px'};
         stroke: none;
         stroke-width: 0;
       }

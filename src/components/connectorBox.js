@@ -2,7 +2,7 @@
 
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 
 /**
  * connectorBox.js
@@ -30,7 +30,7 @@ class ConnectorBox extends Component {
     let showConnectorLine = this.props.showConnectorLine || typeof this.props.showConnectorLine === 'undefined';
     return (
       <g id={this.props.id || ''} class='sc-connector-box' >
-        {this.props.shadow && uiCore.dropShadow('sc-connector-box-drop-shadow')}
+        {this.props.shadow && UiCore.dropShadow('sc-connector-box-drop-shadow')}
         {showConnectorLine &&
         <path class='sc-connector-box-path' d={this.getConnectorLinePath()} fill="none" fill-opacity={0}
           stroke="#555" stroke-width={1} stroke-opacity={1}

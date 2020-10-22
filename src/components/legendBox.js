@@ -1,11 +1,11 @@
 'use strict';
 
 import defaultConfig from './../settings/config';
-import geom from './../core/geom.core';
+import GeomCore from './../core/geom.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
-import uiCore from '../core/ui.core';
-import utilCore from '../core/util.core';
+import UiCore from '../core/ui.core';
+import UtilCore from '../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import MarkerIcon from './markerIcon';
 
@@ -89,16 +89,16 @@ class LegendBox extends Component {
     this.onLeave = this.onLeave.bind(this);
 
     this.calcFloatingPosition();
-    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
 
   setConfig(props) {
     this.config = {
-      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.left),
-      maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : uiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
+      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.top),
+      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
+      maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : UiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
       type: props.opts.alignment || props.type || ENUMS.ALIGNMENT.HORIZONTAL,
       float: props.opts.float || props.float || ENUMS.FLOAT.NONE,
       display: props.opts.display || props.display || ENUMS.DISPLAY.INLINE,
@@ -135,7 +135,7 @@ class LegendBox extends Component {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       setTimeout(() => this.emitter.emit('legendRendered', configData));
     }
   }
@@ -143,7 +143,7 @@ class LegendBox extends Component {
   beforeUpdate(nextProps) {
     this.setConfig(nextProps);
     this.calcFloatingPosition();
-    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
@@ -154,7 +154,7 @@ class LegendBox extends Component {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       this.emitter.emit('legendRendered', configData);
     }
   }
@@ -311,8 +311,8 @@ class LegendBox extends Component {
       labelLength: []
     };
     this.state.legendSet.forEach((lSet, index) => {
-      lengthSet.totalWidth.push(lSet.totalWidth = uiCore.getComputedBBox(this.getLegend(lSet, index, false)).width + this.padding);
-      lengthSet.labelLength.push(lSet.labelLength = uiCore.getComputedTextWidth(this.getLegendText(lSet, index)));
+      lengthSet.totalWidth.push(lSet.totalWidth = UiCore.getComputedBBox(this.getLegend(lSet, index, false)).width + this.padding);
+      lengthSet.labelLength.push(lSet.labelLength = UiCore.getComputedTextWidth(this.getLegendText(lSet, index)));
     });
     lengthSet.max = {
       width: Math.max(...lengthSet.totalWidth),
@@ -331,7 +331,7 @@ class LegendBox extends Component {
   }
 
   getContainerBorderPath() {
-    return geom.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
+    return GeomCore.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
   }
 
   getBBox() {

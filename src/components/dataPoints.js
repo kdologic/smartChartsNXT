@@ -2,7 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import MarkerIcon from './markerIcon';
 
 /**
@@ -59,8 +59,8 @@ class DataPoints extends Component {
               return (<g class='sc-icon sc-hide'></g>);
             }
             let category = this.props.xAxisInfo.selectedCategories[point.index];
-            if (this.props.xAxisInfo.categories.parseAsDate && utilCore.isDate(category)) {
-              category = utilCore.dateFormat(category).format('LL');
+            if (this.props.xAxisInfo.categories.parseAsDate && UtilCore.isDate(category)) {
+              category = UtilCore.dateFormat(category).format('LL');
             }
             let ariaLabel = `${point.index + 1}. ${(this.props.xAxisInfo.prepend || '') + category + (this.props.xAxisInfo.append || '')}, ${(this.props.yAxisInfo.prepend || '') + (point.value || 0).toFixed(2) + (this.props.yAxisInfo.append || '')}. ${this.props.seriesName}.`;
             return (

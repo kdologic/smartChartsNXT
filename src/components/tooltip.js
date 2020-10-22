@@ -4,8 +4,8 @@ import defaultConfig from './../settings/config';
 import Point from './../core/point';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
-import utilCore from './../core/util.core';
-import uiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
@@ -31,14 +31,14 @@ class Tooltip extends Component {
     this.followMousePointer = this.followMousePointer.bind(this);
     this.rootContainer = document.getElementById(this.context.rootContainerId);
     this.allTipContainer = null;
-    this.containerIdIE = utilCore.getRandomID();
+    this.containerIdIE = UtilCore.getRandomID();
   }
 
   initInstances(props) {
     this.instances = [];
     for (let i = 0; i < props.instanceCount; i++) {
       this.instances.push({
-        tipId: utilCore.getRandomID(),
+        tipId: UtilCore.getRandomID(),
         originPoint: new Point(0, 0),
         cPoint: new Point(0, 0),
         topLeft: new Point(0, 0),
@@ -78,8 +78,8 @@ class Tooltip extends Component {
 
   afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    if (utilCore.isIE && !this.allTipContainer) {
-      const containerID = utilCore.getRandomID();
+    if (UtilCore.isIE && !this.allTipContainer) {
+      const containerID = UtilCore.getRandomID();
       let strHtml = `<div id='sc-tooltip-container-html-${containerID}' 
             style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
           </div>`;
@@ -111,7 +111,7 @@ class Tooltip extends Component {
     let nodeList = this.ref.node.querySelectorAll('.sc-tooltip-content');
     Array.prototype.forEach.call(nodeList, (node) => {
       let index = node.getAttribute('index');
-      if (!utilCore.isIE) {
+      if (!UtilCore.isIE) {
         node && (node.innerHTML = this.instances[index].tooltipContent);
       } else {
         this.createTipAsHTML(node);
@@ -131,7 +131,7 @@ class Tooltip extends Component {
     if (this.props.opts.enable === false) {
       return <tooltip-disabled></tooltip-disabled>;
     }
-    if (utilCore.isIE) {
+    if (UtilCore.isIE) {
       this.createTipContainerHTML();
     }
     return (
@@ -156,7 +156,7 @@ class Tooltip extends Component {
           anchorBaseWidth={this.config.anchorBaseWidth} cornerRadius={this.config.borderRadius}>
         </SpeechBox>
         <g class='sc-text-tooltip-grp'>
-          {utilCore.isIE ?
+          {UtilCore.isIE ?
             (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
               style={{
                 position: 'absolute',
@@ -188,7 +188,7 @@ class Tooltip extends Component {
     if (this.props.grouped && this.config.followPointer) {
       transitionFunction = 'none';
     }
-    if (utilCore.isIE) {
+    if (UtilCore.isIE) {
       transitionFunction = 'none';
     }
     return (
@@ -319,7 +319,7 @@ class Tooltip extends Component {
           line2 = 'html';
         } else if (typeof event.content === 'string') {
           let tooltipContent = event.content.replace(/{{/g, '${').replace(/}}/g, '}');
-          line1 = utilCore.assemble(tooltipContent, 'point')(pointData);
+          line1 = UtilCore.assemble(tooltipContent, 'point')(pointData);
           line2 = 'html';
         }
       }
@@ -411,7 +411,7 @@ class Tooltip extends Component {
   }
 
   followMousePointer(e) {
-    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     if (this.instances[0] && this.instances[0].opacity) {
       let cPoint = this.instances[0].originPoint;
       let shiftX = this.instances[0].contentWidth + 20;

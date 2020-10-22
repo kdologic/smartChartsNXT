@@ -5,7 +5,7 @@ import { validationRules } from './../settings/validationRules';
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
 import StoreManager from './../liveStore/storeManager';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
 import a11yFactory from './../core/a11y';
@@ -26,7 +26,7 @@ class Chart {
       if (!opts) {
         throw new CError('No configuration option found !');
       }
-      this.runId = utilCore.uuidv4();
+      this.runId = UtilCore.uuidv4();
       const storeId = StoreManager.createStore(this.runId, opts);
       this.config = StoreManager.getStore(storeId);
       this.validator = new Validator();
@@ -52,7 +52,7 @@ class Chart {
 
       /* Detect the element resize and re-draw accordingly */
       this.onResize = this.onResize.bind(this);
-      if (!utilCore.isIE) {
+      if (!UtilCore.isIE) {
         const resizeObserver = new ResizeObserver(entries => {
           for (const entry of entries) {
             this.onResize(entry.target);

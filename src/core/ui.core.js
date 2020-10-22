@@ -1,5 +1,11 @@
 'use strict';
 
+import { mountTo } from './../viewEngin/pview';
+import StoreManager from './../liveStore/storeManager';
+import UtilCore from './../core/util.core';
+import patterns from './../styles/patterns';
+import gradients from './../styles/gradients';
+
 /**
  * ui.core.js
  * @createdOn: 07-Apr-2016
@@ -7,14 +13,7 @@
  * @description:SmartChartsNXT Core Library components. This singleton class contains UI functionalities.
  */
 
-import { mountTo } from './../viewEngin/pview';
-import StoreManager from './../liveStore/storeManager';
-import utilCore from './../core/util.core';
-import patterns from './../styles/patterns';
-import gradients from './../styles/gradients';
-
 class UiCore {
-  constructor() { }
 
   /**
    * Create a drop shadow over SVG component. Need to pass the ID of the drop shadow element.
@@ -23,7 +22,7 @@ class UiCore {
    * @param {String} offsetY Offset value to shift shadow by y coordinate.
    * @returns {Object} Virtual node of drop shadow component.
    */
-  dropShadow(shadowId, offsetX, offsetY) {
+  static dropShadow = (shadowId, offsetX, offsetY) => {
     return (
       <defs>
         <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
@@ -39,10 +38,11 @@ class UiCore {
         </filter>
       </defs>
     );
-  }
+  };
 
-  /** Create radial gradient
-   * @param {string} gradId - Identifire of this gradient.
+  /**
+   * Create radial gradient
+   * @param {string} gradId - Identifier of this gradient.
    * @param {number} cx - Center x.
    * @param {number} cy - Center y.
    * @param {number} fx - Offset x.
@@ -56,7 +56,7 @@ class UiCore {
    * (-) negative indicates darker shades
    *
   */
-  radialGradient(gradId, cx, cy, fx, fy, r, gradArr) {
+  static radialGradient = (gradId, cx, cy, fx, fy, r, gradArr) => {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
@@ -77,7 +77,7 @@ class UiCore {
         </radialGradient>
       </defs>
     );
-  }
+  };
 
   /**
    * Calculate font size according to scale and max size.
@@ -86,10 +86,10 @@ class UiCore {
    * @param {Number} maxSize Max font size bound.
    * @return {Number} Calculated font size.
    */
-  getScaledFontSize(totalWidth, scale, maxSize) {
+  static getScaledFontSize = (totalWidth, scale, maxSize) => {
     let fSize = totalWidth / scale;
     return fSize < maxSize ? fSize : maxSize;
-  }
+  };
 
   /**
    * Get text width in svg pixel.
@@ -97,16 +97,16 @@ class UiCore {
    * @return {Number} Text width in Pixel.
    */
 
-  getComputedTextWidth(textNode) {
-    return this.getComputedBBox(textNode).width;
-  }
+  static getComputedTextWidth = (textNode) => {
+    return UiCore.getComputedBBox(textNode).width;
+  };
 
   /**
    * Get text bounding box {width, height} before rendering.
    * @param {Object} vnode - JSX of text node.
    * @return {Object} Text bounding Box
    */
-  getComputedBBox(vnode) {
+  static getComputedBBox = (vnode) => {
     let bbox = {};
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.style.visibility = 'hidden';
@@ -119,14 +119,7 @@ class UiCore {
     }
     svg.parentNode.removeChild(svg);
     return { width: bbox.width, height: bbox.height };
-  }
-
-  /** Returns true if it is a touch device
-   * @return {boolean} Returns 'true' for touch device otherwise return 'false'.
-   */
-  isTouchDevice() {
-    return 'ontouchstart' in document.documentElement;
-  }
+  };
 
   /**
    * Convert Window screen coordinate into SVG point coordinate in global SVG space.
@@ -134,7 +127,7 @@ class UiCore {
    * @param {Object} evt Pointer event related to screen like mouse or touch point.
    * @return {Point} Returns a point which transform into SVG coordinate system.
    */
-  cursorPoint(targetElem, evt) {
+  static cursorPoint = (targetElem, evt) => {
     if (typeof targetElem === 'string') {
       targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt');
     }
@@ -142,7 +135,7 @@ class UiCore {
     pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
     pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches[0] ? evt.touches[0].clientY : 0;
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
-  }
+  };
 
   /**
    * Convert pixel value into pixel value.
@@ -150,7 +143,7 @@ class UiCore {
    * @param {Number} percent Percent value out of total pixel
    * @return {Number} Calculated percent value.
    */
-  percentToPixel(total, percent = '') {
+  static percentToPixel = (total, percent = '') => {
     if (percent.toString().indexOf('%') === -1) {
       return percent;
     }
@@ -158,7 +151,7 @@ class UiCore {
       return total * percent / 100;
     }
     return 0;
-  }
+  };
 
   /**
    * Calculate interval value and also interval count for a given range.
@@ -167,7 +160,7 @@ class UiCore {
    * @return {Object} Returns interval object.
    */
 
-  calcIntervalByMinMax(minVal, maxVal, zeroBase) {
+  static calcIntervalByMinMax = (minVal, maxVal, zeroBase) => {
     let arrWeight = [0.01, 0.02, 0.05];
     let weightDecimalLevel = 1;
     let minIntvCount = 6;
@@ -214,7 +207,7 @@ class UiCore {
         }
       }
     }
-  }
+  };
 
   /**
    * Format a text value base in Billion, Million, Thousand etc.
@@ -222,7 +215,7 @@ class UiCore {
    * @returns String of formatted value.
    */
 
-  formatTextValue(value) {
+  static formatTextValue = (value) => {
     if (Math.abs(Number(value)) >= 1000000000000) {
       return (Number(value) / 1000000000000).toFixed(2) + ' T';
     } else if (Math.abs(Number(value)) >= 1000000000) {
@@ -234,7 +227,7 @@ class UiCore {
     } else {
       return Number(value).toFixed(2);
     }
-  }
+  };
 
   /**
    * Insert and style tag in DOM
@@ -245,18 +238,18 @@ class UiCore {
    * @config
    * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
    */
-  prependStyle(parentNode, styleStr, position = 'afterbegin') {
+  static prependStyle = (parentNode, styleStr, position = 'afterbegin') => {
     parentNode.insertAdjacentHTML(position, '<style>' + styleStr + '</style>');
-  }
+  };
 
   /**
    * Process fill options for pattern, gradient or image based on config
    * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID
    * @return {Object} Return {fillType, fillBy and fillId}
    */
-  processFillOptions(fillOptions = {}) {
+  static processFillOptions = (fillOptions = {}) => {
     const globalDefMap = StoreManager.getStore('global').getValue('defMap');
-    const rid = utilCore.getRandomID();
+    const rid = UtilCore.getRandomID();
     const gradId = 'sc-fill-grad-' + rid;
     const patternId = 'sc-fill-pattern-' + rid;
     let fillType = 'solidColor';
@@ -288,7 +281,7 @@ class UiCore {
       fillId = fillOptions.image;
     }
     return { fillType, fillBy, fillId };
-  }
+  };
 
   /**
    * Generate the fill type pattern or gradient element.
@@ -298,13 +291,13 @@ class UiCore {
    * @param {String} color Hex color code for pattern.
    * @return {Void} void
    */
-  generateFillElem(fillId, fillType, fillOptions, color) {
+  static generateFillElem = (fillId, fillType, fillOptions, color) => {
     switch (fillType) {
       case 'patternPreset': return patterns.getType(fillOptions.pattern, fillId, color);
       case 'gradientPreset': return gradients.getType(fillOptions.gradient, fillId, color);
     }
-  }
+  };
 
 }
 
-export default new UiCore();
+export default UiCore;

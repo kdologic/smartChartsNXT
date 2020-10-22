@@ -2,7 +2,7 @@
 
 import transformer from './../core/transformer';
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 
 /**
  * draggable.js
@@ -162,7 +162,7 @@ class Draggable extends Component {
       height: contBBox.height + (2 * this.padding)
     };
     this.setState({ showHandler: !this.state.showHandler, hBBox: hBBox });
-    if (uiCore.isTouchDevice()) {
+    if (UtilCore.isTouchDevice) {
       this.onMouseDownHandler(e);
     }
   }

@@ -5,8 +5,8 @@ import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import crossfilter from 'crossfilter2';
 import defaultConfig from './../../settings/config';
-import utilCore from './../../core/util.core';
-import uiCore from './../../core/ui.core';
+import UtilCore from './../../core/util.core';
+import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
 import Draggable from './../../components/draggable';
 import LegendBox from './../../components/legendBox';
@@ -41,7 +41,7 @@ class ConnectedPointBase extends Component {
     try {
       let self = this;
       this.a11yWriter = a11yFactory.getWriter(this.context.runId);
-      this.CHART_DATA = utilCore.extends({
+      this.CHART_DATA = UtilCore.extends({
         chartCenter: 0,
         marginLeft: 0,
         marginRight: 0,
@@ -60,7 +60,7 @@ class ConnectedPointBase extends Component {
         zoomOutBoxHeight: 40
       }, this.props.chartData);
 
-      this.CHART_OPTIONS = utilCore.extends({
+      this.CHART_OPTIONS = UtilCore.extends({
         title: {
           top: this.CHART_DATA.titleTop,
           textColor: defaultConfig.theme.fontColorDark,
@@ -99,7 +99,7 @@ class ConnectedPointBase extends Component {
         zoomWindow: {}
       }, this.props.chartOptions);
 
-      this.CHART_CONST = utilCore.extends({}, this.props.chartConst);
+      this.CHART_CONST = UtilCore.extends({}, this.props.chartConst);
 
       this.processTurboData();
 
@@ -185,8 +185,8 @@ class ConnectedPointBase extends Component {
       this.originPoint;
       this.prevOriginPoint;
       this.eventStream = {};
-      this.scrollWindowClipId = utilCore.getRandomID();
-      this.scrollOffsetClipId = utilCore.getRandomID();
+      this.scrollWindowClipId = UtilCore.getRandomID();
+      this.scrollOffsetClipId = UtilCore.getRandomID();
       this.emitter = eventEmitter.getInstance(this.context.runId);
       this.store = StoreManager.getStore(this.context.runId);
       this.onHScroll = this.onHScroll.bind(this);
@@ -203,9 +203,9 @@ class ConnectedPointBase extends Component {
       this.init();
 
       /* For accessibility */
-      this.srLenAccId = utilCore.getRandomID();
-      this.hLabelAccId = utilCore.getRandomID();
-      this.vLabelAccId = utilCore.getRandomID();
+      this.srLenAccId = UtilCore.getRandomID();
+      this.hLabelAccId = UtilCore.getRandomID();
+      this.vLabelAccId = UtilCore.getRandomID();
       this.a11yWriter.createSpace(this.srLenAccId, this.hLabelAccId, this.vLabelAccId);
       this.a11yWriter.write(this.srLenAccId, '<div aria-hidden="false">Chart draws ' + this.CHART_DATA.dataSet.series.length + ' data series.</div>');
       this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_DATA.dataSet.xAxis.title || 'values') + '.</div>', false);
@@ -316,8 +316,8 @@ class ConnectedPointBase extends Component {
         categoryValues = categoryOpt.value;
       }
       if (typeof categoryOpt.startFrom !== 'undefined') {
-        if (categoryOpt.parseAsDate && utilCore.isDate(categoryOpt.startFrom, categoryOpt.parseDateFormat)) {
-          startFrom = utilCore.dateFormat(categoryOpt.startFrom, categoryOpt.parseDateFormat || undefined);
+        if (categoryOpt.parseAsDate && UtilCore.isDate(categoryOpt.startFrom, categoryOpt.parseDateFormat)) {
+          startFrom = UtilCore.dateFormat(categoryOpt.startFrom, categoryOpt.parseDateFormat || undefined);
         } else {
           startFrom = categoryOpt.startFrom;
         }
@@ -329,8 +329,8 @@ class ConnectedPointBase extends Component {
       let label, parseAsDate = this.CHART_DATA.dataSet.xAxis.categories.parseAsDate, parseDateFormat = this.CHART_DATA.dataSet.xAxis.categories.parseDateFormat;
       if (data !== null && typeof data === 'object') {
         if (typeof data.label !== 'undefined') {
-          if (parseAsDate && utilCore.isDate(data.label, parseDateFormat)) {
-            label = utilCore.dateFormat(data.label, parseDateFormat || undefined);
+          if (parseAsDate && UtilCore.isDate(data.label, parseDateFormat)) {
+            label = UtilCore.dateFormat(data.label, parseDateFormat || undefined);
           } else {
             label = data.label;
           }
@@ -340,8 +340,8 @@ class ConnectedPointBase extends Component {
         for (let s = 0; s < this.CHART_OPTIONS.dataSet.series.length; s++) {
           let series = this.CHART_OPTIONS.dataSet.series[s];
           if (series.data && series.data[index] && typeof series.data[index] === 'object' && typeof series.data[index].label !== 'undefined') {
-            if (parseAsDate && utilCore.isDate(series.data[index].label, parseDateFormat)) {
-              label = utilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
+            if (parseAsDate && UtilCore.isDate(series.data[index].label, parseDateFormat)) {
+              label = UtilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
             } else {
               label = series.data[index].label;
             }
@@ -350,13 +350,13 @@ class ConnectedPointBase extends Component {
         }
         if (label === undefined) {
           if (typeof categoryValues[index] !== 'undefined') {
-            if (parseAsDate && utilCore.isDate(categoryValues[index], parseDateFormat)) {
-              label = utilCore.dateFormat(categoryValues[index], parseDateFormat || undefined);
+            if (parseAsDate && UtilCore.isDate(categoryValues[index], parseDateFormat)) {
+              label = UtilCore.dateFormat(categoryValues[index], parseDateFormat || undefined);
             } else {
               label = categoryValues[index];
             }
           } else {
-            label = utilCore.isDate(startFrom) ? utilCore.dateFormat(startFrom + (index * increaseBy)) : startFrom + (index * increaseBy);
+            label = UtilCore.isDate(startFrom) ? UtilCore.dateFormat(startFrom + (index * increaseBy)) : startFrom + (index * increaseBy);
           }
         }
       }
@@ -434,14 +434,14 @@ class ConnectedPointBase extends Component {
     this.state[dataFor].dataSet.xAxis.selectedCategories = categories;
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].yInterval = uiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
+    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
     ({ iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount } = this.state[dataFor].yInterval);
     this.state.gridHeight = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount);
   }
 
   setSeriesColor(index, series) {
     if (!series.lineColor && !series.areaColor) {
-      series.lineColor = series.areaColor = utilCore.getColor(index);
+      series.lineColor = series.areaColor = UtilCore.getColor(index);
     } else if (!series.lineColor) {
       series.lineColor = series.areaColor;
     } else if (!series.areaColor) {
@@ -460,13 +460,13 @@ class ConnectedPointBase extends Component {
             if (skey === 'data') {
               s[skey] = series.dataDimIndex.bottom(Infinity);
             } else if (['turboData', 'dataDimIndex', 'dataDimValue'].indexOf(skey) === -1) {
-              s[skey] = utilCore.deepCopy(series[skey]);
+              s[skey] = UtilCore.deepCopy(series[skey]);
             }
           }
           data[key].push(s);
         }
       } else {
-        data[key] = utilCore.deepCopy(dataSet[key]);
+        data[key] = UtilCore.deepCopy(dataSet[key]);
       }
     }
     return data;
@@ -487,9 +487,9 @@ class ConnectedPointBase extends Component {
   }
 
   propsWillReceive(nextProps) {
-    this.CHART_CONST = utilCore.extends(this.CHART_CONST, nextProps.chartConst);
-    this.CHART_DATA = utilCore.extends(this.CHART_DATA, nextProps.chartData);
-    this.CHART_OPTIONS = utilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
+    this.CHART_CONST = UtilCore.extends(this.CHART_CONST, nextProps.chartConst);
+    this.CHART_DATA = UtilCore.extends(this.CHART_DATA, nextProps.chartData);
+    this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, nextProps.chartOptions);
     this.state.shouldFSRender = nextProps.globalRenderAll;
     if (this.store.getValue('globalRenderAll')) {
       this.processTurboData();
@@ -547,8 +547,8 @@ class ConnectedPointBase extends Component {
     return (
       <g>
         <Draggable instanceId='drag-132'>
-          <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
-          <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={uiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
+          <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+          <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
         </Draggable>
 
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
@@ -566,7 +566,7 @@ class ConnectedPointBase extends Component {
           textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
           style={{
             '.sc-vertical-axis-title': {
-              'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
             }
           }} />
 
@@ -575,7 +575,7 @@ class ConnectedPointBase extends Component {
           textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
           style={{
             '.sc-horizontal-axis-title': {
-              'font-size': uiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
             }
           }} />
 
@@ -780,11 +780,11 @@ class ConnectedPointBase extends Component {
       return [leftRangePoint, rightRangePoint];
     }
     let lRangeVal = xAxis.selectedCategories[0];
-    lRangeVal = xAxis.categories.parseAsDate && utilCore.isDate(lRangeVal) ? utilCore.dateFormat(lRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : lRangeVal;
+    lRangeVal = xAxis.categories.parseAsDate && UtilCore.isDate(lRangeVal) ? UtilCore.dateFormat(lRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : lRangeVal;
     leftRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + lRangeVal + (xAxis.append ? xAxis.append : '');
 
     let rRangeVal = xAxis.selectedCategories[xAxis.selectedCategories.length - 1];
-    rRangeVal = xAxis.categories.parseAsDate && utilCore.isDate(rRangeVal) ? utilCore.dateFormat(rRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : rRangeVal;
+    rRangeVal = xAxis.categories.parseAsDate && UtilCore.isDate(rRangeVal) ? UtilCore.dateFormat(rRangeVal).format(xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat) : rRangeVal;
     rightRangePoint.value = (xAxis.prepend ? xAxis.prepend : '') + rRangeVal + (xAxis.append ? xAxis.append : '');
     return [leftRangePoint, rightRangePoint];
   }
@@ -805,7 +805,7 @@ class ConnectedPointBase extends Component {
   updateLabelTip(e) {
     this.emitter.emitSync('updateTooltip', {
       instanceId: 'label-tooltip',
-      originPoint: uiCore.cursorPoint(this.context.rootContainerId, e),
+      originPoint: UiCore.cursorPoint(this.context.rootContainerId, e),
       pointData: undefined,
       line1: e.labelText,
       line2: undefined
@@ -816,12 +816,12 @@ class ConnectedPointBase extends Component {
     let series = this.state.cs.dataSet.series[e.highlightedPoint.seriesIndex];
     let point = series.data[e.highlightedPoint.pointIndex];
     let formattedLabel = point.label;
-    let formattedValue = uiCore.formatTextValue(point.value);
+    let formattedValue = UiCore.formatTextValue(point.value);
     if (this.state.cs.dataSet.yAxis && this.state.cs.dataSet.yAxis.prefix) {
       formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
     }
-    if (this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.categories.parseAsDate && utilCore.isDate(formattedLabel)) {
-      formattedLabel = utilCore.dateFormat(formattedLabel).format(this.state.cs.dataSet.xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat);
+    if (this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.categories.parseAsDate && UtilCore.isDate(formattedLabel)) {
+      formattedLabel = UtilCore.dateFormat(formattedLabel).format(this.state.cs.dataSet.xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat);
     }
     let hPoint = {
       x: e.highlightedPoint.x,

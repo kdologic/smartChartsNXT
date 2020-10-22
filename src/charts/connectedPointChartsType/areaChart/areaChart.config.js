@@ -1,15 +1,15 @@
 /**
- * lineChart.config.js
- * @createdOn:14-May-2020
+ * areaChart.config.js
+ * @createdOn:12-Dec-2017
  * @author:SmartChartsNXT
- * @description:This will be the default Line chart config and validation rule set.
+ * @description:This will be the default Area chart config and validation rule set.
  */
 
-import { CHART_TYPE } from '../../settings/globalEnums';
+import { CHART_TYPE } from '../../../settings/globalEnums';
 
 export const config = {
-  name: 'Line Chart',
-  type: CHART_TYPE.LINE_CHART,
+  name: 'Area Chart',
+  type: CHART_TYPE.AREA_CHART,
   minWidth: 250,
   minHeight: 400
 };
