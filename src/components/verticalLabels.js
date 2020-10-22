@@ -1,10 +1,12 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import Ticks from './ticks';
+import a11yFactory from './../core/a11y';
 
 /**
  * verticalLabels.js
@@ -12,50 +14,46 @@ import Ticks from './ticks';
  * @author:SmartChartsNXT
  * @description: This components will create a Vertical Labels and Tick marks for the chart.
  * @extends Component
- * @example
-  "yAxis": {
-    "title": "Usage %",
-    "prepend": "Rs.",
-    "append": " %",
-    "labelRotate": 0,
-    "tickOpacity": 1,
-    "tickColor": '#222',
-    "tickSpan": 5,
-    "labelOpacity": 1,
-    "labelColor": "#000",
-    "axisColor": "#000", // TODO
-    "fontSize": 14,
-    "fontFamily": "Lato",
-    "zeroBase": false,  // min label of y-axis always stick to zero if all value are positive and
-                        // max label of y-axis always stick to zero if all value are negative.
-  }
+ *
  * @events -
  * 1. onVerticalLabelRender : Fire when horizontal labels draws.
+ * 2. vLabelEnter: Fire when mouse hover on label text.
+ * 3. vLabelExit: Fire when mouse out of label text.
  */
 class VerticalLabels extends Component {
 
   constructor(props) {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
     this.config = {};
     this.resetConfig(this.props.opts);
-    this.defaultTickSpan = 6;
     this.state = {
       fontSize: this.config.fontSize
     };
+    this.defaultTickSpan = 6;
     this.valueSet = [];
     this.zeroBaseIndex = -1;
     this.minLabelVal = this.props.minVal;
     this.maxLabelVal = this.props.maxVal;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
+
+    /* For accessibility */
+    this.accId = this.props.accessibilityId || UtilCore.getRandomID();
+    this.a11yWriter.createSpace(this.accId);
+    this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
+      (this.props.opts.prepend || '') + this.minLabelVal + (this.props.opts.append || '') +
+      ' to ' +
+      (this.props.opts.prepend || '') + this.maxLabelVal + (this.props.opts.append || '') +
+      '.</div>', false);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.intervalId = setInterval(() => {
       if (this.ref.node.getBoundingClientRect().width > this.props.maxWidth) {
         this.setState({ fontSize: this.state.fontSize - 1 });
@@ -68,6 +66,9 @@ class VerticalLabels extends Component {
 
   propsWillReceive(nextProps) {
     this.resetConfig(nextProps.opts);
+    this.state = {
+      fontSize: this.config.fontSize
+    };
     this.minLabelVal = nextProps.minVal;
     this.maxLabelVal = nextProps.maxVal;
   }
@@ -84,21 +85,21 @@ class VerticalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark
       }
     };
+    switch (config.labelAlign || $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+      default:
+      case 'right': this.config.labelAlign = 'end'; break;
+      case 'left': this.config.labelAlign = 'start'; break;
+      case 'center': this.config.labelAlign = 'middle';
+    }
   }
 
   render() {
-    let labels = this.getLabels();
-    this.emitter.emit('onVerticalLabelsRender', {
-      intervalLen: this.props.intervalLen,
-      intervarValue: this.props.valueInterval,
-      zeroBaseIndex: this.zeroBaseIndex,
-      values: this.valueSet,
-      count: this.props.labelCount
-    });
     return (
-      <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        {labels}
-        <Ticks posX={5} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
+      <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} aria-hidden='true'>
+        {this.getLabels()}
+        {this.config.labelAlign === 'end' &&
+          <Ticks posX={-(this.props.opts.tickSpan || this.defaultTickSpan)} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
+        }
       </g>
     );
   }
@@ -108,32 +109,40 @@ class VerticalLabels extends Component {
     this.zeroBaseIndex = -1;
     for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
       let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = uiCore.formatTextValue(labelVal);
+      this.maxLabelVal = UiCore.formatTextValue(labelVal);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {
         this.zeroBaseIndex = lCount;
       }
     }
+    this.emitter.emitSync('onVerticalLabelsRender', {
+      intervalLen: this.props.intervalLen,
+      intervalValue: this.props.valueInterval,
+      zeroBaseIndex: this.zeroBaseIndex,
+      values: this.valueSet,
+      count: this.props.labelCount
+    });
     return labels;
   }
 
   getEachLabel(val, index) {
-    let x = 0;
+    let x = this.config.labelAlign === 'end' ? - 10 : this.config.labelAlign === 'start' ? 5 : 0;
     let y = this.valueSet.length === 1 ? this.props.valueInterval : index * this.props.intervalLen;
-    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ')' : '';
+    y = this.config.labelAlign === 'end' ? y : y - 10;
+    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
-      <text font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
-        font-size={this.state.fontSize} opacity={this.config.tickOpacity} transform={transform} text-rendering='geometricPrecision' >
-        <tspan class={`vlabel-${index}`} labelIndex={index} text-anchor='end' x={0} y={index * this.props.intervalLen} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '') }
+      <text class="sc-vertical-label" font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
+        font-size={this.state.fontSize} transform={transform} text-rendering='geometricPrecision' >
+        <tspan class={`sc-vlabel-${index}`} labelIndex={index} text-anchor={this.config.labelAlign} x={0} y={0} dy='0.4em' events={{ mouseenter: (e) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
+          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
         </tspan>
       </text>
     );
   }
 
-  onMouseEnter(e) {
-    let lblIndex = e.target.classList[0].replace('vlabel-', '');
+  onMouseEnter(e, index) {
+    let lblIndex = index;
     e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.valueSet[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('vLabelEnter', e);
   }

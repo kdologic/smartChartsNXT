@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Example of Multi Series Area Chart  | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <div role='figure' class="chart-base">
+    <div id="chartContainer" style="width:100%; height:600px;"></div>
+  </div>
+
+  <script type="text/javascript">
+    var areaChart;
+    SmartChartsNXT.debug = false;
+    SmartChartsNXT.ready(function () {
+      areaChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.AREA_CHART,              // [required]
+        "targetElem": "chartContainer",                 // [required]
+        "a11y": {
+          "description": "An area chart is a type of chart which displays information as a series of data points. Called 'markers'; those connected by line segments. Connected area which filled by color." // [default: ""]
+        },
+        "canvasBorder": false,                          // [ true | default: false]
+        "bgColor": "#f7fdf7",                           // [ default: #ffffff]
+        "title": {
+          "text":"Multi Series Area Chart - A javascript area chart that visualize the data of sales", // [ default : "" ]
+          "top": 20,                                    // [ default : 20]  x % value accepted
+          "left": "50%",                                // [ default : 50%] x % value accepted
+          "width": "90%",                               // [ default : 90%] x % value accepted
+          "height": "",                                 // [ default : ""]  x % value accepted
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,// [ $SC.ENUMS.HORIZONTAL_ALIGN.(left | default: center | right) ]
+          "textColor": "#0076A3",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+          "borderColor":"none",                         // [ default : 'none' ]
+          "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
+          "bgColor": "none",                            // [ default : 'none' ]
+          "padding": 0,                                 // [ default : 0 ]
+          "fontSize": 20,                               // [ default : $SC.GLOBAL.theme.fontSizeLarge ]
+          "style": {        
+            "opacity": 1.0                              // Support any style other than available config property. Must be a json object.
+          },        
+          "responsive": {         
+            "wrapText": true,                           // [ default: true | false ]
+            "reducer": function(chartWidth, chartHeight) { // [optional]
+              if(chartWidth < 500) {
+                return {
+                  "text": "Multi Area Chart"
+                }
+              }else if(chartWidth < 600) {
+                return {
+                  "text": "Multi Series Area Chart for sales report"
+                }
+              }else if(chartWidth < 800) {
+                return {
+                  "text": "Multi Series Area Chart for sales report with SmartChartsNXT"
+                }
+              }
+            }
+          }
+        },
+        "subtitle": {
+          "text":"Data of company XYZ",                 // [ default : "" ]
+          "top": 50,                                    // [ default : 50]  x % value accepted
+          "left": "50%",                                // [ default : 50%] x % value accepted
+          "width": "95%",                               // [ default : 95%] x % value accepted
+          "height": "",                                 // [ default : ""]  x % value accepted
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,// [ $SC.ENUMS.HORIZONTAL_ALIGN.(left | default: center | right) ]
+          "textColor": "#9c27b0",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+          "borderColor":"none",                         // [ default : none ]
+          "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default : $SC.GLOBAL.theme.fontFamily ]
+          "bgColor": "none",                            // [ default : none ]
+          "padding": 0,                                 // [ default : 0 ]
+          "fontSize": 12,                               // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+          "style": {        
+            "opacity": 1.0                              // Support any style other than available config property. Must be a json object.
+          },
+          "responsive": {
+            "wrapText": true,                           // [ default: true | false ]
+            "reducer": function(chartWidth, chartHeight) {
+              // support reducer same as title property
+            }
+          }
+        },
+        "defs": {                                       // Defs field is used to define global definition of patterns, gradients, images
+          "patterns": [{
+            "tagName": "pattern",                       // Name of the tag i.e. pattern
+            "id": "pattern-1",                          // Global id of the pattern to refer from other config
+            "attrs": {                                  // Required attributes
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 12,
+              "patternUnits": "userSpaceOnUse"
+            },
+            "children":[{                               // Array elements which create the pattern
+              "tagName": "path",
+              "attrs": {
+                "d": "M 10 1 L 5 1 L 5 9 L 0 9",
+                "stroke-width": 2,
+                "stroke": "red",
+                "fill": "none"
+              }
+            }]
+          }],
+          "gradients": [{
+            "tagName": "linearGradient",                // Tag name of gradient type i.e. linearGradient, radialGradient
+            "id": "grad-1",                             // Global id of the gradient to refer from other config
+            "attrs": {                                  // Required attributes
+              "x1": 0,
+              "x2": 0,
+              "y1": 0,
+              "y2": 1,
+              "gradientUnits": "objectBoundingBox"
+            },
+            "stops": [{                                 // Define array of stops inside the gradient
+              "offset": "0%", 
+              "stop-color": "red"
+            },{
+              "offset": "50%", 
+              "stop-color": "black",
+              "stop-opacity": "0"
+            },{
+              "offset": "100%", 
+              "stop-color": "blue",
+            }] 
+          }],
+          "imagesFill": [{                              // Support fill with background images
+            "id": "image-fill-1",                       // Global identifier of image fill that used in other config 
+            "src": "/smartchartsnxt/examples/static/images/geometricBGs43.jpg", // Source of the image
+            "width": "100%",                            // Width of the image used
+            "height": "100%"                            // Height of the image used
+          }]
+        },
+        "creditsWatermark": {                           // Create a credits watermark for smartchartsNXT
+          "enable": true                                // [ default:true | false]
+        },
+        "menu": {
+          "mainMenu": {
+            "enable": true,                             // [ default:true | false]
+            "itemSaveAsJPG": true,                      // [ default:true | false]
+            "itemSaveAsPNG": true,                      // [ default:true | false]
+            "itemSaveAsSVG": true,                      // [ default:true | false]
+            "itemSaveAsPDF": true,                      // [ default:true | false]
+            "itemPrint": true                           // [ default:true | false]
+          }
+        },
+        "gridBox": {
+          "vertical": {
+            "enable": true,                             // [ default: true | false ]
+            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
+            "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
+            "lineThickness": 1,                         // [ default: 1 ]
+            "lineOpacity": 0.2                          // [ default: 0.2 ]
+          },
+          "horizontal": {
+            "enable": true,                             // [ default: true | false ]
+            "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,    // [ $SC.ENUMS.LINE_STYLE.(default: SOLID | DASHED) ]
+            "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
+            "lineThickness": 1,                         // [ default: 1 ]
+            "lineOpacity": 0.2                          // [ default: 0.2 ]
+          },
+          "bgColor": '#9DE5FF',                         // [ default: none ]
+          "fillOptions": {                              // pattern have and highest priority then gradient and image has the lowest priority.
+            //"pattern": "pattern-1",                   // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
+            "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
+            //"image":  "image-fill-1"                  // [ no default value , only available which is defined defs field]
+          },
+          "bgOpacity": 0.2                              // [ default: 0.1 ]   
+        },
+        "pointerCrosshair": {
+          "vertical": {
+            "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
+            "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(default: FULL | IN_POINT | NONE) ]
+            "lineColor": "#000",                        // [ default: #000 ]
+            "lineWidth": 1,                             // [ default: 1 ]
+            "lineOpacity": 1,                           // [ default: 1 ]
+            "labelTextColor": "#fff",                   // [ default: #fff ]
+            "labelBackgroundColor":"#000",              // [ default: #000 ]
+            "labelOpacity": 1                           // [ default: 1 ]
+          },
+          "horizontal": {
+            "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
+            "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ $SC.ENUMS.CROSSHAIR_SPREAD.(FULL | IN_POINT | default: NONE) ]
+            "lineColor": "#000",                        // [ default: #000 ]
+            "lineWidth": 1,                             // [ default: 1 ]
+            "lineOpacity": 1,                           // [ default: 1 ]
+            "labelTextColor": "#fff",                   // [ default: #fff ]
+            "labelBackgroundColor":"#000",              // [ default: #000 ]
+            "labelOpacity": 1                           // [ default: 1 ]
+          }
+        },
+        "legends":{
+          "enable" : true,                              // [ default: true | false ]
+          "top": 70,                                    // [ default: 70 ]
+          "left": 100,                                  // [ default: 100 ]
+          "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
+          "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ $SC.ENUMS.ALIGNMENT.(default: HORIZONTAL | VERTICAL) ]
+          "display": $SC.ENUMS.DISPLAY.INLINE,          // [ $SC.ENUMS.DISPLAY.(default: INLINE | BLOCK) ] Note: block will take entire row but inline only take space as much required
+          "float": $SC.ENUMS.FLOAT.NONE,                // [ $SC.ENUMS.FLOAT.(TOP | BOTTOM | LEFT | RIGHT | default: NONE) ]
+          "textColor": "#000",                          // [ default: $SC.GLOBAL.theme.fontColorDark ]
+          "bgColor": "none",                            // [ default: none ]
+          "hoverColor":"#ddd",                          // [ default: none ]
+          "fontSize": 14,                               // [ default: $SC.GLOBAL.theme.fontSizeMedium ]
+          "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default: $SC.GLOBAL.theme.fontFamily ]
+          "itemBorderWidth": 0,                         // [ default: 1 ]
+          "itemBorderColor": "#000",                    // [ default: #000 ]
+          "itemBorderOpacity": 1,                       // [ default: 1 ]
+          "itemBorderRadius": 10,                       // [ default: 10 ]
+          "borderColor": "none",                        // [ default: none ]
+          "borderWidth": 1,                             // [ default: 1 ]
+          "borderOpacity": 1,                           // [ default: 1 ]
+          "opacity": 0.9,                               // [ default: 0.9 ]
+          "toggleType": true,                           // [ default: true | false ]
+          "hideIcon": false,                            // [ true | default: false ]
+          "hideLabel": false,                           // [ true | default: false ]
+          "hideValue": false                            // [ true | default: false ]
+        },
+        "tooltip": {
+          "enable": true,                               // [default: true | false ]
+          "followPointer": false,                       // [true | default: false ] Note: This option only available when tooltip are grouped.
+          "grouped": true,                              // [default: true | false ]
+          "pointerVicinity": 50,                        // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+          "anchorWidth": 8,                             // [default: 8 ]
+          "anchorHeight": 10,                           // [default: 10 ]
+          "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [$SC.ENUMS.TOOLTIP_POSITION.(default: DYNAMIC | STATIC )] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
+          "top": 120,                                   // [default: 0 ] DYNAMIC tip, top value will be ignored.
+          "left": 100,                                  // [default: 0 ] DYNAMIC tip, left value will be ignored.
+          "content": {
+            "header": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  pointSet[index].formattedLabel +
+                '</p>'
+              );
+            },
+            "body": function(pointSet, index, tipConfig) {
+              let point = pointSet[index];
+              return (
+                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                  '<td style="padding: 5px">' + 
+                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                      point.seriesName +
+                  '</td>' +
+                  '<td style="padding: 5px">' + (point.value) + '</td>' +
+                '</tr>'
+              );
+            },
+            "footer": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.footerBgColor || "#555") + '; font-size: 10px; text-align: left; color: ' + (tipConfig.footerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  'Units are in \u20B9' +
+                '</p>'
+              );
+            }
+          },
+          "headerTextColor": "greenyellow",             // [ default: #fff ]
+          "headerBgColor": "#555",                      // [ default: #555 ]
+          "textColor": "#000",                          // [ default: #000 ]
+          "bgColor": "#e8f4f8",                         // [ default: #fff ]
+          "footerTextColor": "#000",                    // [ default: #fff ]
+          "footerBgColor": "#d4ebf2",                   // [ default: #555 ]
+          "fontSize": 14,                               // [ default: 14 ]
+          "fontFamily": $SC.GLOBAL.theme.fontFamily,    // [ default: $SC.GLOBAL.theme.fontFamily ]
+          "xPadding": 0,                                // [ default: 0 ] 
+          "yPadding": 0,                                // [ default: 0 ] 
+          "borderColor": "none",                        // [ default: point.seriesColor ]
+          "borderWidth": 2,                             // [ default: 3 ]
+          "borderRadius": 0,                            // [ default: 0 ]
+          "opacity": 0.8,                               // [ default: 0.8 ]
+          "dropShadow": true                            // [ default: true | false ]
+        },
+        "horizontalScroller": {
+          "enable": true,                               // [ default: true | false ]
+          "height": 35,                                 // [ default: 35 ]
+          "chartInside": true                           // [ default: true | false ]
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "Date",                            // [ default: Label-axis ]
+            // To resolve a category it uses multiple try-n-error logic. Categories inside series[i].data[j].label have the highest priority, 
+            // if not found then search the label on other series with same data index.
+            // if not found then search in xAxis.category or xAxis.category.value field, if not found then try to resolve it from category.startFrom along with category.increaseBy value.
+            // if still not found any value then assign the (index + 1) as a default value of the category.
+            // "categories": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'], // Note: Categories can be array of values.
+            "categories": {                             // Note: It can be an object with associate config. 
+              // "value": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'],
+              // "value": ['12-10-2020', '13-10-2020', '14-10-2020', '15-10-2020', '16-10-2020'],
+              "startFrom": "12-10-2020",                // [ default: 1 ] Note: It's value will be consider when no appropriate category found on data filed or category value field. 
+              "increaseBy": 1000*60*60*24,              // [ default: 1 ] Note: It must be a Numeric value. For datetime it increase by 1 millisecond.
+              "parseAsDate": true,                      // [ true | default: false ] Note: It will parse a category only if it is a valid date.
+              "parseDateFormat": "", //DD-MM-YYYY       // [ default: "" ] Note: This field help to parse a date with custom format. Format should be blank a string '' for timestamp (millisecond).
+              "displayDateFormat": "DD MMM, YY",        // [ default: $SC.GLOBAL.formatting.displayDateFormat ] Note: It will display category as the desired date format
+            },
+            "prepend": "",                              // [ default: "" ]
+            "append": "",                               // [ default: "" ]
+            "labelRotate": 0,                           // [ default: 0 ]
+            "intervalThreshold": 80,                    // [ default: 30 ]
+            "tickOpacity": 1,                           // [ default: 1 ]
+            "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "tickSpan": 6,                              // [ default: 6 ]
+            "labelOpacity": 1,                          // [ default: 1 ]
+            "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily   // [ default: $SC.GLOBAL.theme.fontFamily ]
+          },
+          "yAxis": {
+            "title": "Total Sales",                     // [ default: Value-axis ]
+            "prepend": "\u20B9 ",                       // [ default: "" ]
+            "append": "",                               // [ default: "" ]
+            "labelRotate": 0,                           // [ default: 0 ]
+            "tickOpacity": 1,                           // [ default: 1 ]
+            "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "tickSpan": 6,                              // [ default: 6 ]
+            "labelAlign": $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT,  // [ $SC.ENUMS.HORIZONTAL_ALIGN.(default: RIGHT | LEFT | CENTER) ] Text Anchor position of the text.
+            "labelOpacity": 1,                          // [ default: 1 ]
+            "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
+            "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "zeroBase": false                           // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+          },
+          "series": [{
+            "visible": true,                            // [ default: true | false ]
+            "name": 'Raphael',                          // [ required : string ]
+            "a11y": {
+              description: "Showing his performance as a sales representative"   // [ default: '']
+            },
+            "lineWidth": 1.5,                           // [ default: 1.5 ]
+            "lineOpacity": 1,                           // [ default: 1 ]
+            "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
+            "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
+            "areaOpacity": 0.5,                         // [ default: 0.2]
+            "fillOptions": {                            // pattern have and highest priority then gradient and image has the lowest priority.
+              //"pattern": "pattern-1",                 // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
+              //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
+              //"image":  "image-fill-1"                // [ no default value , only available which is defined defs field]
+            },
+            "marker": {
+              "enable": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
+              "type": $SC.ENUMS.ICON_TYPE.CIRCLE,       // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
+              "width": 12,                              // [ default: 12]
+              "height": 12,                             // [ default: 12]
+              "URL": ""                                 // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
+            },
+            "spline": true,                             // [ default: true | false ]
+            // "dropShadow": true,                      // [ default: true | false ] Note: Drop shadow only applicable for line charts.
+            "animated": true,                           // [ default: true | false ]
+            "seriesLabel": {
+              "enable": false,                          // [ true | default: false ]
+              "labelOverlap": false,                    // [ true | default: false ]
+              "textOnly": false,                        // [ true | default: false ] Note: Display only text without background.
+              "showConnectorLine": true,                // [ default: true | false ] Note: Draw a connector line between label and series chart.
+              //"textColor": "",                        // [ default : series.lineColor || series.areaColor ]
+              "textOpacity": 1,                         // [ default: 1 ]
+              "bgColor": "#fff",                        // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
+              "bgOpacity": 0.5,                         // [ default: 0.5 ]
+              //"borderColor": "",                      // [ default: series.lineColor || series.areaColor ]
+              "borderWidth": 1,                         // [ default: 1 ]
+              "borderRadius": 5,                        // [ default: 5 ]
+              "xPadding": 5,                            // [ default: 5 ] Create left and right padding inside the label box
+              "yPadding": 5,                            // [ default: 5 ] Create top and bottom padding inside the label box.
+              "shadow": true,                           // [ default: true | false ] Create a drop shadow when background box is visible. No shadow for texOnly mode.
+              "classes": [],                            // [ default: empty array ] Array of classes that will be added into main container of data labels.         
+              "style": {}                               // [ default: empty object ] CSS Styles that will be added into each data label.
+            },
+            "dataLabels": {
+              "enable": false,                          // [ true | default: false ]
+              "float": $SC.ENUMS.FLOAT.TOP,             // [ $SC.ENUMS.FLOAT.(default: TOP | BOTTOM | LEFT | RIGHT) ]
+              "labelOverlap": false,                    // [ true | default: false ]
+              "textColor": "#000",                      // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "textOpacity": 1,                         // [ default: 1 ]
+              "bgColor": "#fff",                        // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
+              "bgOpacity": 0.5,                         // [ default: 0.5 ]
+              "borderColor": $SC.COLOR_STRINGS.MAT_BLUE,// [ default: $SC.GLOBAL.theme.bgColorMedium ]
+              "borderWidth": 1,                         // [ default: 1 ]
+              "borderRadius": 5,                        // [ default: 5 ]
+              "filter": function(val, index) {          // [ optional ] Reducer function for data labels.
+                return true;
+              },
+              "formatter": function(val, index) {       // [ optional ] Formatter function of text value for data labels.
+                return "Rs. " + val;
+              }, 
+              "anchorBaseWidth": 5,                     // [ default: 5 ] Width of anchor at base
+              "xPadding": 5,                            // [ default: 5 ] Create left and right padding inside the label box
+              "yPadding": 5,                            // [ default: 5 ] Create top and bottom padding inside the label box.
+              "offsetX": 0,                             // [ default: 0 ] Create margin left from it's relative position.
+              "offsetY": 0,                             // [ default: 0 ] Create margin bottom from it's relative position.
+              "shadow": true,                           // [ default: true | false ]
+              "classes": [],                            // [ default: empty array ] Array of classes that will be added into main container of data labels.         
+              "style": {}                               // [ default: empty object ] CSS Styles that will be added into each data label.
+            },
+            "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
+              "max": 1000,
+              "min": -1000
+            })       
+            // [
+            //   {value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
+            // ] 
+            // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
+          },
+          {
+            "visible": true,
+            "name": 'Clara',
+            "lineWidth": 1.5,
+            "lineOpacity": 1,
+            "areaColor": '#008000',
+            "areaOpacity": 0.5,
+            "fillOptions": { 
+              //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
+            },
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+              // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+              // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+            },
+            "spline": false,
+            "animated": true,
+            "dataLabels": {
+              "enable": false
+            },
+            "data": generateRandomTimeSeries(new Date().getTime(), 100, {
+              "max": 1000,
+              "min": -1000
+            })
+            // [
+            // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
+            // ]
+          }]
+        },
+        // events: {
+        //   beforeRender: function (e) {
+        //     console.log(e, "event before rendering");
+        //   },
+        //   afterRender: function (e) {
+        //     console.log(e, "event after rendering complete");
+        //   },
+        //   onInit: function (e) {
+        //     console.log(e, "event onInit");
+        //   },
+        //   afterParseData: function (e) {
+        //     console.log(e, "event afterParseData");
+        //   }
+        // },
+        zoomWindow: {
+          "leftIndex": 3,                               // [ default: 1 ]
+          "rightIndex": 10                              // [ default: max data length ]
+        }
+      });
+
+      /** add event listener **/
+      // areaChart.events.on('hScroll', function(e) {console.log(e)});
+      // areaChart.events.on('beforeSave', () => {console.log('before save!');});
+      // areaChart.events.on('afterSave', () => {console.log('after save!');});
+      // areaChart.events.on('beforePrint', () => {console.log('before print!');});
+      // areaChart.events.on('afterPrint', () => {console.log('after print!');});
+
+      /* To change config */ 
+      // areaChart.config._state.dataSet.xAxis.title = 'changed x title';
+      // areaChart.render(); /* Re-draw the chart */
+    });
+  </script>
+</body>
+
+</html>

@@ -41,7 +41,7 @@ class TransitionGroup extends Component {
     this.removedChildNodes = [];
   }
 
-  componentWillMount() {
+  beforeMount() {
     this.newExtChildren = this.findNewChildren();
     this.removedExtChildren = this.findRemovedChildren();
     this.mergedExtChildren = this.mergeChildren();
@@ -65,7 +65,7 @@ class TransitionGroup extends Component {
     }
   }
 
-  componentDidMount() {
+  afterMount() {
     let childNodes = this.ref.node.childNodes;
     window.requestNextAnimationFrame(() => {
 
@@ -99,7 +99,7 @@ class TransitionGroup extends Component {
     this.prevExtChildren = this.props.extChildren || [];
   }
 
-  componentWillUpdate() {
+  beforeUpdate() {
     this.newExtChildren = this.findNewChildren();
     this.removedExtChildren = this.findRemovedChildren();
     this.mergedExtChildren = this.mergeChildren();
@@ -109,7 +109,7 @@ class TransitionGroup extends Component {
     this.removedChildNodes = this.findRemoveChildNodes();
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     let childNodes = this.ref.node.childNodes;
     for (let i = 0; i < childNodes.length; i++) {
       let childInstId = childNodes[i].getAttribute('instanceId');

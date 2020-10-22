@@ -3,10 +3,11 @@
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
-import utilCore from '../core/util.core';
-import uiCore from './../core/ui.core';
+import UtilCore from '../core/util.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import defaultConfig from './../settings/config';
+import StoreManager from './../liveStore/storeManager';
 
 /**
  * horizontalScroller.js
@@ -32,6 +33,7 @@ class HorizontalScroller extends Component {
     super(props);
     this.selectedHandler = undefined;
     this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.store = StoreManager.getStore(this.context.runId);
     let offset = this.calcOffset(props);
     this.rangeLabelTexPadding = 5;
     this.rangeLabelBoxHeight = 30;
@@ -83,20 +85,28 @@ class HorizontalScroller extends Component {
   }
 
   propsWillReceive(nextProps) {
+    const globalRenderAll = this.store.getValue('globalRenderAll');
     let widthChangePercent = ((nextProps.width - this.props.width) / this.props.width) * 100;
     if (widthChangePercent) {
       this.state.leftOffset = this.state.leftOffset + (this.state.leftOffset * widthChangePercent / 100);
       this.state.windowWidth = this.state.windowWidth + (this.state.windowWidth * widthChangePercent / 100);
       this.state.rangeTipPoints = [];
+    }else if(globalRenderAll) {
+      let offset = this.calcOffset(nextProps);
+      this.state.leftOffset = offset.leftOffset;
+      this.state.leftOffsetPercent = offset.leftOffsetPercent;
+      this.state.rightOffset = offset.rightOffset;
+      this.state.rightOffsetPercent = offset.rightOffsetPercent;
+      this.state.windowWidth = offset.windowWidth;
     }
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('onScrollReset', this.onScrollReset);
     this.emitter.on('onUpdateRangeVal', this.onUpdateRangeVal);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('onScrollReset', this.onScrollReset);
     this.emitter.removeListener('onUpdateRangeVal', this.onUpdateRangeVal);
     this.onScrollEnd();
@@ -109,7 +119,7 @@ class HorizontalScroller extends Component {
     };
     return (
       <g class='sc-horizontal-scroll-cont' transform={`translate(${this.props.posX},${this.props.posY})`}>
-        <defs>
+        <defs aria-hidden='true'>
           <clipPath id={this.props.windowClipId}>
             <rect x={clip.x} y={0} width={clip.width} height={this.props.height} />
           </clipPath>
@@ -231,7 +241,7 @@ class HorizontalScroller extends Component {
   }
 
   onMouseDown(e) {
-    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     let classList = Array.prototype.slice.call(e.target.classList);
     if (classList.includes('sc-slider-left-sel')) {
       this.selectedHandler = 'left';
@@ -251,7 +261,7 @@ class HorizontalScroller extends Component {
 
   onScrollMove(e) {
     if (this.selectedHandler) {
-      let mousePosNow = uiCore.cursorPoint(this.context.rootContainerId, e);
+      let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
       let winWidth = 0, lOffset = this.state.leftOffset;
       switch (this.selectedHandler) {
         case 'left':
@@ -323,7 +333,7 @@ class HorizontalScroller extends Component {
   onUpdateRangeVal(e) {
     this.state.rangeTipPoints = e.rangeTipPoints;
     this.state.rangeTipPoints.forEach((point) => {
-      let textDim = uiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value));
+      let textDim = UiCore.getComputedBBox(this.getRangeLabelText(new Point(0, 0), point.value));
       textDim.width = textDim.width < 25 ? 25 : textDim.width;
       point.textDim = textDim;
     });
@@ -455,18 +465,18 @@ class SliderWindow extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
     this.state = Object.assign({}, this.state, nextProps);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -487,19 +497,19 @@ class SliderLeftHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
-    this.gradId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
     this.state = { ...this.state, ...nextProps };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -552,19 +562,19 @@ class SliderRightHandle extends Component {
   constructor(props) {
     super(props);
     this.state = { ...this.props };
-    this.titleId = utilCore.getRandomID();
-    this.gradId = utilCore.getRandomID();
+    this.titleId = UtilCore.getRandomID();
+    this.gradId = UtilCore.getRandomID();
   }
 
   propsWillReceive(nextProps) {
     this.state = { ...this.state, ...nextProps };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 

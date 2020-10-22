@@ -2,10 +2,11 @@
 
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import { Component } from './../viewEngin/pview';
 import Ticks from './ticks';
-import dateFormat from 'dateformat';
+import UiCore from '../core/ui.core';
+import a11yFactory from './../core/a11y';
 
 /**
  * horizontalLabels.js
@@ -14,27 +15,10 @@ import dateFormat from 'dateformat';
  * @description: This components will create a Horizontal Labels for the chart.
  * @extends Component
  *
- * @example
- * "xAxis": {
-      "title": "Month",
-      "prepend": "",
-      "append": "",
-      "parseAsDate": true,
-      "dateFormat": "mmm - yyyy",
-      "labelRotate": -45,
-      "intervalThreshold": 40,
-      "tickOpacity": 1,
-      "tickColor": '#222',
-      "tickSpan": 6,
-      "labelOpacity": 1,
-      "labelColor": "#000",
-      "axisColor": "#000", // TODO
-      "fontSize": 12,
-      "fontFamily": "Lato"
-    }
-
  * @event
- * onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 1. onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 2. hLabelEnter: Fire when mouse hover on label text.
+ * 3. hLabelExit: Fire mouse out of label text.
  */
 
 class HorizontalLabels extends Component {
@@ -43,7 +27,8 @@ class HorizontalLabels extends Component {
     super(props);
     let self = this;
     this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.rid = utilCore.getRandomID();
+    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
+    this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {};
     this.resetConfig(this.props.opts);
@@ -53,7 +38,7 @@ class HorizontalLabels extends Component {
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
-            return self.props.opts.parseAsDate && utilCore.isDate(c) ? dateFormat(c, self.config.dateFormat) : c;
+            return self.props.opts.categories.parseAsDate && UtilCore.isDate(c) ? UtilCore.dateFormat(c).format(self.config.dateFormat) : c;
           });
         } else {
           this._categories = [];
@@ -72,13 +57,22 @@ class HorizontalLabels extends Component {
     this.state.categories = this.props.categorySet;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
+
+    /* For accessibility */
+    this.accId = this.props.accessibilityId || UtilCore.getRandomID();
+    this.a11yWriter.createSpace(this.accId);
+    this.a11yWriter.write(this.accId, '<div aria-hidden="false">Range: ' +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && UtilCore.isDate(this.props.categorySet[0]) ? UtilCore.dateFormat(this.props.categorySet[0]).format('LL') : this.props.categorySet[0]) + (this.props.opts.append || '') +
+      ' to ' +
+      (this.props.opts.prepend || '') + (this.props.opts.categories.parseAsDate && UtilCore.isDate(this.props.categorySet[this.props.categorySet.length - 1]) ? UtilCore.dateFormat(this.props.categorySet[this.props.categorySet.length - 1]).format('LL') : this.props.categorySet[this.props.categorySet.length - 1]) + (this.props.opts.append || '') +
+      '</div>', false);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -103,8 +97,8 @@ class HorizontalLabels extends Component {
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        intervalThreshold: typeof config.intervalThreshold ? 30 : config.intervalThreshold,
-        dateFormat: config.dateFormat || defaultConfig.formatting.dateFormat
+        intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
+        dateFormat: config.categories.dateFormat || defaultConfig.formatting.displayDateFormat
       }
     };
   }
@@ -117,7 +111,7 @@ class HorizontalLabels extends Component {
       count: this.state.categories.length
     });
     return (
-      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
+      <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} aria-hidden='true'>
         <defs>
           <clipPath id={this.clipPathId}>
             <rect x={this.state.clip.x - 100} y={this.state.clip.y} width={this.state.clip.width + 100} height={this.state.clip.height} />
@@ -150,15 +144,22 @@ class HorizontalLabels extends Component {
     let x = this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen;
     let y = 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
-    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ')' : '';
-    return (
-      <text instanceId={`sc-text-hlabel-${index}`} font-family={this.config.fontFamily} fill={this.config.labelColor} x={x} y={y} opacity
-        transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
-        <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: this.onMouseEnter, mouseleave: this.onMouseLeave }}>
-          {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
-        </tspan>
-      </text>
-    );
+    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
+    let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
+      transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
+      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: (e) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
+        {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
+      </tspan>
+    </text>;
+
+    if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
+      let labelWidth = UiCore.getComputedTextWidth(label);
+      if (x + (labelWidth / 2) > this.props.maxWidth) {
+        let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
+        label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
+      }
+    }
+    return label;
   }
 
   setIntervalLength() {
@@ -176,9 +177,13 @@ class HorizontalLabels extends Component {
     this.state.intervalLen = interval;
   }
 
-  onMouseEnter(e) {
-    let lblIndex = e.target.getAttribute('labelIndex');
-    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + this.state.categories[lblIndex] + (this.props.opts.append ? this.props.opts.append : '');
+  onMouseEnter(e, index) {
+    let lblIndex = index;
+    let lblText = this.state.categories[lblIndex];
+    if (UtilCore.isDate(this.props.categorySet[lblIndex])) {
+      lblText = UtilCore.dateFormat(this.props.categorySet[lblIndex]).format('lll');
+    }
+    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + lblText + (this.props.opts.append ? this.props.opts.append : '');
     this.emitter.emit('hLabelEnter', e);
   }
 

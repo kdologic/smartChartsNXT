@@ -14,7 +14,7 @@ export default class TextBox extends Component {
     this.txtbxUID = 'txtbx-' + Math.round(Math.random() * 100000);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.ref.node.querySelector('.text-area').innerHTML = "<p style='margin: 0 auto; font-size: 20px;'>" + this.props.extChildren +"</p>"; 
   }
 

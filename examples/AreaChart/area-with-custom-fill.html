@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fill Area with custom pattern, gradient and image - Area Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+<body>
+  <div role='figure' class="chart-base">
+    <div id='chartContainer' style="width:100%; height:550px;"></div>
+  </div>
+  <p class="chart-caption" aria-hidden="true">
+    SmartchartsNXT can support different fill option types. e.i., Pattern, Gradient or Images. Custom fill types can defined as globally to use it multiple positions. 
+    SmartChartsNXT also have some predefined Patterns and Gradient styles. These custom or preset fill can be used in fillOption settings.
+  </p>
+  <script type="text/javascript">
+    var areaChart;
+    SmartChartsNXT.ready(function () {
+      areaChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.AREA_CHART,
+        "targetElem": "chartContainer",
+        "a11y": {
+          "description": "SmartchartsNXT can support different fill option types. e.i., Pattern, Gradient or Images. Custom fill types can defined as globally to use it multiple positions. SmartChartsNXT also have some predefined Patterns and Gradient styles. These custom or preset fill can be used in fillOption settings."
+        },
+        "bgColor": "#FAFAFA",
+        "title": {
+          "text": "Fill Area with custom pattern, gradient and image",
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
+          "textColor": "#54626F",
+          "fontSize": 22
+        },
+        "subtitle": {
+          "text": "Using global defs to create custom fill",
+          "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
+          "textColor": "#B2BEB5",
+          "fontSize": 12
+        },
+        "defs": {                                       
+          "patterns": [{
+            "tagName": "pattern",                       
+            "id": "pattern-1",                          
+            "attrs": {                                  
+              "x": 0,
+              "y": 0,
+              "width": 12,
+              "height": 12,
+              "patternUnits": "userSpaceOnUse"
+            },
+            "children":[{                               
+              "tagName": "path",
+              "attrs": {
+                "d": "M 10 1 L 5 1 L 5 9 L 0 9",
+                "stroke-width": 2,
+                "stroke": "red",
+                "fill": "none"
+              }
+            }]
+          }],
+          "gradients": [{
+            "tagName": "linearGradient",                
+            "id": "grad-1",                             
+            "attrs": {                                  
+              "x1": 0,
+              "x2": 0,
+              "y1": 0,
+              "y2": 1,
+              "gradientUnits": "objectBoundingBox"
+            },
+            "stops": [{                                 
+              "offset": "0%", 
+              "stop-color": "red"
+            },{
+              "offset": "50%", 
+              "stop-color": "black",
+              "stop-opacity": "0"
+            },{
+              "offset": "100%", 
+              "stop-color": "blue",
+            }] 
+          }],
+          "imagesFill": [{                              
+            "id": "image-fill-1",                       
+            "src": "/smartchartsnxt/examples/static/images/geometricBGs43.jpg", 
+            "width": "100%",                            
+            "height": "100%"                            
+          },{                              
+            "id": "image-fill-2",                       
+            "src": "/smartchartsnxt/examples/static/images/gemstones.jpg", 
+            "width": "100%",                            
+            "height": "100%"                            
+          }]
+        },
+        "gridBox": {
+          "vertical": {
+            "enable": false
+          },
+          "horizontal": {
+            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
+          },
+          "bgColor": '#FAFAFA',
+          "fillOptions": {
+            "image": "image-fill-2"
+          },
+          "bgOpacity": 0.2 
+        },
+        "legends":{
+          "itemBorderWidth": 0
+        },
+        "tooltip": {
+          "anchorWidth": 0,
+          "anchorHeight": 10, 
+          "borderWidth": 0,
+          "borderRadius": 10,
+          "headerBgColor": "#54626F",
+          "content": {
+            "header": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  pointSet[index].formattedLabel +
+                '</p>'
+              );
+            },
+            "body": function(pointSet, index, tipConfig) {
+              let point = pointSet[index];
+              return (
+                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                  '<td style="padding: 5px">' + 
+                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                      point.seriesName +
+                  '</td>' +
+                  '<td style="padding: 5px">' + (point.value === null ? '-' : point.value) + '</td>' +
+                '</tr>'
+              );
+            }
+          }
+        },
+        "horizontalScroller": {
+          "enable": false
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "Date",        
+            "intervalThreshold": 40
+          },
+          "yAxis": {
+            "title": "value"
+          },
+          "series": [{
+              "name": 'Image fill',                    
+              "lineWidth": 1.5,                        
+              "lineOpacity": 1,                        
+              "lineColor": $SC.COLOR_STRINGS.MAT_BLUE, 
+              "areaColor": $SC.COLOR_STRINGS.MAT_BLUE, 
+              "areaOpacity": 1,                        
+              "fillOptions": {                         
+                "image":  "image-fill-1"               
+              },
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.DIAMOND
+              },
+              "spline": true,                          
+              "animated": true,                        
+              "data": generateRandomDataArray(10, {
+                "max": 100,
+                "min": 0
+              })        
+            },{
+            "name": "Predefined Pattern",
+            "lineWidth": 3,
+            "lineColor": "#A4C639",
+            "areaColor": '#A4C639',
+            "areaOpacity": 0.6,
+            "marker": {
+              "width": 10
+            },
+            "spline": false,
+            "animated": true,
+            "fillOptions": {
+              "pattern": $SC.ENUMS.PATTERN.VERTICAL_2
+              //"pattern": "pattern-1", // for custom pattern
+              //"gradient": "grad-1" // for custom gradient
+            },
+            "data": generateRandomDataArray(10, {
+                "max": 0,
+                "min": -100
+              })
+          }]
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

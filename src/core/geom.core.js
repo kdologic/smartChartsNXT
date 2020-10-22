@@ -10,68 +10,21 @@ import Point from './point';
  */
 
 class GeomCore {
-  constructor() { }
 
-  describeRoundedRect(x, y, width, height, radius) {
+  /**
+   * Create a rect with corner radius.
+   * @param {Number} x x coordinate of rect.
+   * @param {Number} y y coordinate of rect.
+   * @param {Number} width Width of the rect.
+   * @param {Number} height Height of the rect.
+   * @param {Number} radius Corner radius of the rect.
+   * @returns {Array} Returns path of the rounded rect in array.
+   */
+  static describeRoundedRect = (x, y, width, height, radius) => {
     return [
       'M', (x + radius), y, 'h', (width - (2 * radius)), 'a', radius, radius, ' 0 0 1 ', radius, radius, 'v', (height - (2 * radius)), 'a', radius, radius, ' 0 0 1 ', -radius, radius, 'h', ((2 * radius) - width), 'a', radius, radius, ' 0 0 1 ', -radius, -radius, 'v', ((2 * radius) - height), 'a', radius, radius, ' 0 0 1 ', radius, -radius, 'z'
     ];
-  }
-
-  describeBezireArc(point1, point2, point3) {
-    let mid2 = this.getMidPoint(point2, point3);
-
-    let c = [
-      'C',
-      point2.x,
-      point2.y,
-      point2.x,
-      point2.y,
-      mid2.x,
-      mid2.y
-    ];
-    return c;
-  }
-
-  createDot(center, color, radious, opacity, cls, targetElem, stroke, strokeWidth) {
-    let svg;
-    if (targetElem) {
-      if (typeof targetElem === 'object') {
-        svg = targetElem;
-      } else if (typeof targetElem === 'string') {
-        svg = document.getElementById(targetElem);
-      }
-    } else {
-      svg = document.getElementsByTagName('svg')[0]; //Get svg element
-    }
-    let newElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); //Create a path in SVG's namespace
-    newElement.setAttribute('cx', center.x); //Set center x
-    newElement.setAttribute('cy', center.y); //Set center y
-    newElement.setAttribute('r', radious || 3); //Set radious
-    newElement.setAttribute('class', cls || 'dot'); //Set class
-    newElement.setAttribute('stroke', stroke || 'none'); //Set border color
-    newElement.setAttribute('fill', color); //Set fill colour
-    newElement.setAttribute('opacity', opacity || 1);
-    newElement.setAttribute('stroke-width', strokeWidth || 1); //Set stroke width
-    newElement.setAttribute('pointer-events', 'none'); //set no pointer event for dot
-    svg.appendChild(newElement);
-  }
-
-
-  createRect(left, top, width, height, color, cls, opacity, stroke, strokeWidth) {
-    let svg = document.getElementsByTagName('svg')[0]; //Get svg element
-    let newElement = document.createElementNS('http://www.w3.org/2000/svg', 'rect'); //Create a path in SVG's namespace
-    newElement.setAttribute('x', left); //Set left position
-    newElement.setAttribute('y', top); //Set top position
-    newElement.setAttribute('width', width); //Set width
-    newElement.setAttribute('height', height); //Set height
-    newElement.setAttribute('stroke', stroke || 'none'); //Set border color
-    newElement.setAttribute('fill', color); //Set fill colour
-    newElement.setAttribute('opacity', opacity || 1);
-    newElement.setAttribute('stroke-width', strokeWidth || 1); //Set stroke width
-    newElement.setAttribute('class', cls || 'bbox'); //Set class
-    svg.appendChild(newElement);
-  }
+  };
 
   /**
    * Find the closest point from a set of Points.
@@ -80,7 +33,7 @@ class GeomCore {
    * @param {Boolean} ignoreY if --true then only consider the x axis distance, y axis distance will be ignored.
    * @return {Point} Return the closest point by distance.
    */
-  findClosestPoint(pSet, pt, ignoreY) {
+  static findClosestPoint = (pSet, pt, ignoreY) => {
     let halfLen = Math.ceil(pSet.length / 2);
     let lSet = pSet.slice(0, halfLen);
     let rSet = pSet.slice(halfLen);
@@ -88,7 +41,7 @@ class GeomCore {
     if (halfLen < 3) {
       let min = Number.MAX_SAFE_INTEGER;
       for (let p of pSet) {
-        let d = ignoreY ? this.xDist(p, pt) : this.getDistanceBetween(p, pt);
+        let d = ignoreY ? GeomCore.xDist(p, pt) : GeomCore.getDistanceBetween(p, pt);
         if (d < min) {
           nearPoint = p;
           nearPoint.dist = min = d;
@@ -96,63 +49,89 @@ class GeomCore {
       }
       return nearPoint;
     } else {
-      if (this.xDist(lSet[halfLen - 1], pt) <= this.xDist(rSet[0], pt)) {
-        nearPoint = this.findClosestPoint(lSet, pt, ignoreY);
+      if (GeomCore.xDist(lSet[halfLen - 1], pt) <= GeomCore.xDist(rSet[0], pt)) {
+        nearPoint = GeomCore.findClosestPoint(lSet, pt, ignoreY);
       } else {
-        nearPoint = this.findClosestPoint(rSet, pt, ignoreY);
+        nearPoint = GeomCore.findClosestPoint(rSet, pt, ignoreY);
       }
       return nearPoint;
     }
-  }
+  };
 
-  xDist(p1, p2) {
+  /**
+   * Find distance between two point by x-axis, where y is constant.
+   * @param {Point} p1 Input point 1.
+   * @param {Point} p2 Input point 2.
+   * @returns {Number} Returns distance.
+   */
+  static xDist = (p1, p2) => {
     return Math.abs(p1.x - p2.x);
-  }
+  };
 
-  getDistanceBetween(p1, p2) {
+  /**
+   * Calculate distance between two point.
+   * @param {Point} p1 Starting point.
+   * @param {Point} p2 Ending point.
+   * @return {Number} Returns the distance between two points.
+   */
+  static getDistanceBetween = (p1, p2) => {
     return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)) || 0;
   }
 
-  polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+  /**
+   * Convert polar coordinate to cartesian coordinate.
+   * @param {Number} centerX Center x of polar coordinate.
+   * @param {Number} centerY Center y of polar coordinate.
+   * @param {Number} radius Radius of polar coordinate.
+   * @param {Number} angleInDegrees Angle of polar coordinate in degree.
+   * @returns {Point} Returns point(x,y) in cartesian coordinate.
+   */
+  static polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-    return {
-      x: centerX + (radius * Math.cos(angleInRadians).toFixed(4)),
-      y: centerY + (radius * Math.sin(angleInRadians).toFixed(4))
-    };
-  }
+    return new Point(
+      centerX + (radius * Math.cos(angleInRadians).toFixed(4)),
+      centerY + (radius * Math.sin(angleInRadians).toFixed(4))
+    );
+  };
 
-  getMidPoint(point1, point2) {
+  /**
+   * Calculate the mid point value between two points.
+   * @param {Point} point1 Starting point value.
+   * @param {Point} point2 Ending point value.
+   * @return {Point} Returns mid point value between two points.
+   */
+  static getMidPoint = (point1, point2) => {
     return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
-  }
+  };
 
-  getEllipticalRadius(rx, ry, angleInDegrees) {
+  static getEllipticalRadius = (rx, ry, angleInDegrees) => {
     if (!rx || !ry) {
       return 0;
     }
     let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
-  }
+  };
 
   /**
-   * Return path of an Elliptical Arc.
+   * Create an Elliptical Arc.
    * @param {Number} cx - Center x value of arc.
    * @param {Number} cy Center y value of arc.
    * @param {Number} rx X radius of arc.
    * @param {Number} ry Y radius of arc.
-   * @param {Number} startAngle Arc strat angle.
+   * @param {Number} startAngle Arc start angle.
    * @param {Number} endAngle Arc end angle.
-   * @param {Boolean} sweepFlag Swip flag for clock or anti-clock.
-   * @returns {Object} Path of eliptical arc.
+   * @param {Boolean} sweepFlag Sweep flag for clock or anti-clock.
+   * @returns {Object} Path of elliptical arc.
    */
-  describeEllipticalArc(cx, cy, rx, ry, startAngle, endAngle, sweepFlag) {
+  static describeEllipticalArc = (cx, cy, rx, ry, startAngle, endAngle, sweepFlag) => {
     let fullArc = false;
     if (startAngle % 360 === endAngle % 360) {
       endAngle--;
       fullArc = true;
     }
-    let start = this.polarToCartesian(cx, cy, this.getEllipticalRadius(rx, ry, endAngle), endAngle);
-    let end = this.polarToCartesian(cx, cy, this.getEllipticalRadius(rx, ry, startAngle), startAngle);
+    let start = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rx, ry, endAngle), endAngle);
+    let end = GeomCore.polarToCartesian(cx, cy, GeomCore.getEllipticalRadius(rx, ry, startAngle), startAngle);
     let largeArcFlag = Math.abs(endAngle - startAngle) <= 180 ? '0' : '1';
 
     let d = [
@@ -176,9 +155,9 @@ class GeomCore {
       endAngle: endAngle
     };
     return path;
-  }
+  };
 
-  checkLineIntersection(line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) {
+  static checkLineIntersection = (line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) => {
     /* if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point*/
     let denominator, a, b, numerator1, numerator2, result = {
       x: null,
@@ -215,12 +194,12 @@ class GeomCore {
     }
     /* if line1 and line2 are segments, they intersect if both of the above are true*/
     return result;
-  } /*End checkLineIntersection()*/
+  };
 
   /**
    * https://gist.github.com/nicholaswmin/c2661eb11cad5671d816
    * Interpolates a Catmull-Rom Spline through a series of x/y points
-   * Converts the CR Spline to Cubic Beziers for use with SVG items
+   * Converts the CR Spline to Cubic Bezier for use with SVG items
    *
    * If 'alpha' is 0.5 then the 'Centripetal' variant is used
    * If 'alpha' is 1 then the 'Chordal' variant is used
@@ -230,13 +209,13 @@ class GeomCore {
    * @param {Number} alpha - Alpha value[ 0 ~ 1]. If 'alpha' is 0.5 then the 'Centripetal' variant is used and 1 for 'Chordal'.
    * @return {String} d - SVG string with cubic bezier curves representing the Catmull-Rom Spline
    */
-  catmullRomFitting(data, alpha) {
+  static catmullRomFitting = (data, alpha) => {
     if (alpha == 0 || alpha === undefined) {
       return false;
     } else {
       let p0, p1, p2, p3, bp1, bp2, d1, d2, d3, A, B, N, M;
       let d3powA, d2powA, d3pow2A, d2pow2A, d1pow2A, d1powA;
-      let d = [Math.round(data[0].x), Math.round(data[0].y)];
+      let d = ['M', Math.round(data[0].x), Math.round(data[0].y)];
 
       let length = data.length;
       for (let i = 0; i < length - 1; i++) {
@@ -300,8 +279,48 @@ class GeomCore {
 
       return d;
     }
-  }
+  };
+
+  /**
+   * Check Rectangle overlapping.
+   * @param {Object} rect1 First rect object with x, y, width and height.
+   * @param {Object} rect2 Second rect object with x, y, width and height.
+   * @returns {Boolean} Return true if the rect1 overlap with rect2 otherwise returns false.
+   */
+  static isRectOverlapping = (rect1, rect2) => {
+    if (rect2.width > rect1.width) {
+      let r = { ...rect1 };
+      rect1 = { ...rect2 };
+      rect2 = r;
+    }
+    if (GeomCore.isPointInsideRect(rect1, new Point(rect2.x, rect2.y))) {
+      return true;
+    }
+    if (GeomCore.isPointInsideRect(rect1, new Point(rect2.x + rect2.width, rect2.y))) {
+      return true;
+    }
+    if (GeomCore.isPointInsideRect(rect1, new Point(rect2.x + rect2.width, rect2.y + rect2.height))) {
+      return true;
+    }
+    if (GeomCore.isPointInsideRect(rect1, new Point(rect2.x, rect2.y + rect2.height))) {
+      return true;
+    }
+    return false;
+  };
+
+  /**
+   * Function that verify a point is inside or outside of a rectangle area.
+   * @param {Object} rect Rect object having x, y, width and height.
+   * @param {Object} point Point object which need check overlapping with the rect object.
+   * @returns {Boolean} Return true if the point is inside the rect otherwise returns false.
+   */
+  static isPointInsideRect = (rect, point) => {
+    if (point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height) {
+      return true;
+    }
+    return false;
+  };
 
 }
 
-export default new GeomCore();
+export default GeomCore;

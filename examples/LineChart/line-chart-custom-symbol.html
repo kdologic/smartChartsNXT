@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Line Chart with custom symbol | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body style='background: #f0f9a5;'>
+  <div role='figure' class="chart-base">
+    <div id='chartContainer' style="width:100%; height:550px;"></div>
+    <p class="chart-caption" aria-hidden="true">
+      This chart shows how we can use customized marker symbols. SmartChartsNXT already supports common symbols like circle, diamond, triangle, star etc. 
+      In this chart we have used custom weather symbols to indicate specific weather seasons like Summer, Winter, Monsoons.
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    var lineChart;
+    SmartChartsNXT.ready(function () {
+      lineChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.LINE_CHART,
+        "targetElem": "chartContainer",
+        "a11y": {
+          "description": "This chart shows how we can use customized marker symbols. SmartChartsNXT already supports common symbols like circle, diamond, triangle, star etc. In this chart we have used custom weather symbols to indicate specific weather seasons like Summer, Winter, Monsoon."
+        },
+        "bgColor": "#f7fdf7",
+        "title": {
+          "text": "Climate Graph - Average Temperature by Month",
+          "textColor": "#4B5320"
+        },
+        "subtitle": {
+          "text": "Source: climate-data.org",
+          "textColor": "#8F9779"
+        },
+        "gridBox": {
+          "bgColor": '#FFF',
+          "bgOpacity": 0.2
+        },
+        "legends": {
+          "itemBorderWidth": 0
+        },
+        "tooltip": {
+          "followPointer": true,
+          "grouped": true,
+          "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,
+          "anchorWidth": 0,
+          "borderColor": "none",
+          "borderWidth": 0,
+          "borderRadius": 10,
+          "dropShadow": false,
+          "content": {
+            "header": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  pointSet[index].formattedLabel +
+                '</p>'
+              );
+            },
+            "body": function(pointSet, index, tipConfig) {
+              let point = pointSet[index];
+              return (
+                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                  '<td style="padding: 5px">' + 
+                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                      point.seriesName +
+                  '</td>' +
+                  '<td style="padding: 5px">' + (point.value) + ' \u00BAC</td>' +
+                '</tr>'
+              );
+            }
+          }
+        },
+        "horizontalScroller": {
+          "enable": false
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "MONTHS"
+          },
+          "yAxis": {
+            "title": "TEMPERATURE (\u00BAC)",
+            "append": " \u00BAC"
+          },
+          "series": [{
+            "name": 'Kolkata',
+            "lineColor": "#3B7A57",
+            "seriesLabel": {
+              "textOnly": false,
+              "showConnectorLine": false,
+            },
+            "dataLabels": {
+              "offsetY": -10,
+              "bgColor": "#A1DAD7",
+              "borderWidth": 0,
+              "filter": function (val, index) {
+                if ([4, 6].indexOf(index) !== -1) {
+                  return true;
+                }
+                return false;
+              },
+              "formatter": function (val, index) {
+                return val + " \u00BAC";
+              },
+              "anchorBaseWidth": 0,
+              "style": {
+                "fontSize": "12px"
+              }
+            },
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.CIRCLE,
+              "width": 10
+            },
+            "dropShadow": true,
+            "data": [
+              { "label": "Jan", "value": 19.5 }, { "label": "Feb", "value": 22 }, { "label": "Mar", "value": 27 }, { "label": "Apr", "value": 29.9 },
+              {
+                "label": "May", "value": 30.4,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 25,
+                  "height": 25,
+                  "URL": "/smartchartsnxt/examples/static/images/icon_sunshine.png"
+                }
+              }, { "label": "Jun", "value": 29.7 },
+              {
+                "label": "Jul", "value": 28.7,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 25,
+                  "height": 25,
+                  "URL": "/smartchartsnxt/examples/static/images/icon_cloudy_rainfall.png"
+                }
+              }, { "label": "Aug", "value": 28.6 },
+              { "label": "Sep", "value": 28.9 }, { "label": "Oct", "value": 27.4 }, { "label": "Nov", "value": 23.3 }, { "label": "Dec", "value": 19.5 }
+            ]
+          }, {
+            "name": 'New York',
+            "lineColor": "#AF002A",
+            "seriesLabel": {
+              "textOnly": false,
+              "showConnectorLine": false,
+            },
+            "dataLabels": {
+              "float": $SC.ENUMS.FLOAT.BOTTOM,
+              "offsetY": 10,
+              "bgColor": "#FAEBD7",
+              "borderWidth": 0,
+              "filter": function (val, index) {
+                if ([0, 1, 4].indexOf(index) !== -1) {
+                  return true;
+                }
+                return false;
+              },
+              "formatter": function (val, index) {
+                return val + " \u00BAC";
+              },
+              "anchorBaseWidth": 0,
+              "style": {
+                "fontSize": "12px"
+              }
+            },
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+              "width": 12
+            },
+            "dropShadow": true,
+            "data": [
+              {
+                "label": "Jan", "value": -0.6,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 25,
+                  "height": 25,
+                  "URL": "/smartchartsnxt/examples/static/images/icon_winter_cold.png"
+                }
+              }, {
+                "label": "Feb", "value": -0.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 25,
+                  "height": 25,
+                  "URL": "/smartchartsnxt/examples/static/images/icon_winter_cold.png"
+                }
+              }, { "label": "Mar", "value": 4.9 }, { "label": "Apr", "value": 10.6 },
+              {
+                "label": "May", "value": 16.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 25,
+                  "height": 25,
+                  "URL": "/smartchartsnxt/examples/static/images/icon_snow_cloudy.png"
+                }
+              }, { "label": "Jun", "value": 21.5 }, { "label": "Jul", "value": 24.5 }, { "label": "Aug", "value": 23.8 },
+              { "label": "Sep", "value": 19.5 }, { "label": "Oct", "value": 13.5 }, { "label": "Nov", "value": 7.9 }, { "label": "Dec", "value": 2.2 }
+            ]
+          }]
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

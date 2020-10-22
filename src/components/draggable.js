@@ -2,7 +2,7 @@
 
 import transformer from './../core/transformer';
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
 
 /**
  * draggable.js
@@ -55,11 +55,11 @@ class Draggable extends Component {
     this.onMouseDownHandler = this.onMouseDownHandler.bind(this);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.rootSVG = document.getElementById(this.context.rootSvgId);
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     if (this.initialIntersectElems && this.mouseDrag) {
       let intersectedElemsNow = this.getIntersectedElems();
 
@@ -162,7 +162,7 @@ class Draggable extends Component {
       height: contBBox.height + (2 * this.padding)
     };
     this.setState({ showHandler: !this.state.showHandler, hBBox: hBBox });
-    if (uiCore.isTouchDevice()) {
+    if (UtilCore.isTouchDevice) {
       this.onMouseDownHandler(e);
     }
   }

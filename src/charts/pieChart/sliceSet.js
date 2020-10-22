@@ -47,13 +47,13 @@ class SliceSet extends Component {
     this.renderCounter = 0; 
   }
 
-  componentWillMount() {
+  beforeMount() {
     this.state.startAngle = 0; 
     this.state.endAngle = 0;
     this.state.showSliceMarker = true;  
   }
 
-  componentDidMount() {
+  afterMount() {
     this.renderCounter++; 
     let sliceSetBBox = this.ref.node.getBBox(); 
     if(sliceSetBBox.width > this.props.areaWidth) {

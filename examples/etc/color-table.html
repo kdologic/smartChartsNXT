@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .color-cell {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+    }
+    .color-box {
+      position: relative;
+      width: 130px;
+      height: 100px;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .color-name-cont {
+      background: #EEEEEE;
+      padding: 5px 0;
+      border-radius: 0 0 5px 5px;
+      margin-top: 2px;
+      font-size: 12px;
+      width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .color-code {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-50%);
+    }
+  </style>
+
+    <script>
+      async function fetchColorData() {
+        const response = await fetch('./../static/data/color_codes.json');
+        const colors = await response.json();
+        return colors;
+      }
+      
+      async function generateTable() {
+        const colors = await fetchColorData();
+        let strHTML = '';
+        strHTML = '<table role="table">'
+        strHTML +=  '<tbody role="rowgroup">';
+        if(colors) {
+          let columnCount = 0, tdHTML = '';
+          for(let color in colors) {
+            tdHTML += createTD(color, colors[color]);
+            columnCount++;
+            if(columnCount === 5) {
+              strHTML += '<tr role="row">';
+              strHTML += tdHTML;
+              strHTML += '</tr>';
+              columnCount = 0;
+              tdHTML = '';
+            }
+          }
+        }
+        strHTML +=   '</tbody>'
+        strHTML += '</table>';
+        document.getElementById('colorTableCont').innerHTML = strHTML;
+      }
+
+      function createTD(colorName, colorCode) {
+        let strHTML = '';
+        strHTML += '<td class="color-cell" role="cell">';
+        strHTML +=    '<div class="color-box" style="background-color:' + colorCode + ';">';
+        strHTML +=      '<span class="color-code">' + colorCode + '</span>';
+        strHTML +=    '</div>';
+        strHTML +=    '<div class="color-name-cont">';
+        strHTML +=      '<span>' + colorName + '</span>';
+        strHTML +=    '</div>';
+        strHTML += '</td>';
+        return strHTML;
+      }
+
+      function bindEvents() {
+
+      }
+
+      generateTable();
+    </script>
+</head>
+
+<body>
+  <div id="colorTableCont">
+    <table role="table">
+      <tbody role="rowgroup">
+        <tr role="row">
+          <td class="color-cell" role="cell">
+            <div class="color-box" style="background-color:bisque;">
+              <span class='color-code'>#99664A</span>
+            </div>
+            <div class="color-name-cont">
+              <span>BISQUE</span>
+            </div>
+          </td>
+          <td class="color-cell" role="cell">
+            <div class="color-box" style="background-color:brown;">
+              <span class='color-code'>#99664A</span>
+            </div>
+            <div class="color-name-cont">
+              <span>BROWN</span>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+    
+</body>
+</head>

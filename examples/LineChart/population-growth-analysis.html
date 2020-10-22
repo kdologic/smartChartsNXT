@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Population Growth Analysis with Line Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body style='background: #f1d589;'>
+  <div role="figure" class="chart-base">
+    <div id="chartContainer" style="width:100%; height:550px;"></div>
+    <p class="chart-caption" aria-hidden="true">
+      Population growth is the increase in the number of individuals in a population. This chart visualize the
+      population growth of India in % in comparison with World population growth.
+      It show's growth percentage from year 1960 to 2018. India's growth rate was at peak on 70's and 80's then declined
+      gradually. In recent years it's declined further below world's growth rate.
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    var lineChart;
+    SmartChartsNXT.ready()
+      .then(function () {
+        lineChart = new SmartChartsNXT.Chart({
+          "type": $SC.CHART_TYPE.LINE_CHART,
+          "targetElem": "chartContainer",
+          "bgColor": "#FFFEEC",
+          "a11y": {
+            "description": "Population growth is the increase in the number of individuals in a population. This chart visualize the population growth of India in % in comparison with World population growth. It show's growth percentage from year 1960 to 2018. India's growth rate was at peak on 70's and 80's then declined gradually. In recent years it's declined further below world's growth rate."
+          },
+          "title": {
+            "text": "Population growth (annual %)",
+            "left": 100,
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT,
+            "textColor": "#0076A3",
+            "fontSize": 22
+          },
+          "subtitle": {
+            "text": "Data courtesy: THE WORLD BANK (www.worldbank.org)",
+            "left": 100,
+            "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT,
+            "textColor": "#B2BEB5",
+            "fontSize": 12
+          },
+          "gridBox": {
+            "vertical": {
+              "enable": false
+            },
+            "horizontal": {
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
+            },
+            "bgColor": '#FFF',
+            "bgOpacity": 1
+          },
+          "legends": {
+            "itemBorderWidth": 0
+          },
+          "tooltip": {
+            "anchorWidth": 0,
+            "anchorHeight": 10,
+            "borderWidth": 0,
+            "borderRadius": 10,
+            "content": {
+              "header": function (pointSet, index, tipConfig) {
+                return (
+                  '<p style="background-color:' + (tipConfig.headerBgColor || "#555") + ';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                    pointSet[index].formattedLabel +
+                  '</p>'
+                );
+              },
+              "body": function (pointSet, index, tipConfig) {
+                let point = pointSet[index];
+                return (
+                  '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                    '<td style="padding: 5px">' +
+                      '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                        point.seriesName +
+                    '</td>' +
+                    '<td style="padding: 5px">' + (point.value.toFixed(2)) + '%</td>' +
+                  '</tr>'
+                );
+              }
+            }
+          },
+          "horizontalScroller": {
+            "enable": false
+          },
+          "dataSet": {
+            "xAxis": {
+              "title": "Year",
+              "intervalThreshold": 90,
+              "categories": {
+                "startFrom": 1960
+              }
+            },
+            "yAxis": {
+              "title": "Percent (%)",
+              "append": " %",
+              "zeroBase": false
+            },
+            "series": [{
+              "name": "World",
+              "lineWidth": 0.5,
+              "lineColor": "#0076A3",
+              "areaOpacity": 0.3,
+              "marker": {
+                "width": 8
+              },
+              "spline": false,
+              "animated": true,
+              "seriesLabel": {
+                "enable": true
+              },
+              "data": [1.06543, 1.353960813, 1.724197276, 2.083119517, 2.052979533, 2.054988077, 2.108475147, 2.046462287, 2.032621157, 2.114123793, 2.090899259, 2.10753866, 2.031815105, 1.967191672, 1.946509982, 1.865605943, 1.786293586, 1.749921427, 1.748172977, 1.762082756, 1.748561027, 1.764226175, 1.799850904, 1.783635803, 1.74636095, 1.748072997, 1.769627024, 1.78254066, 1.769680738, 1.738046969, 1.741188922, 1.663981816, 1.568105807, 1.559893164, 1.519196443, 1.51125586, 1.453047125, 1.427012486, 1.391930489, 1.351586604, 1.322807199, 1.297817883, 1.276572304, 1.261846174, 1.25471411, 1.247415768, 1.244219803, 1.236309141, 1.239928038, 1.223960727, 1.203995403, 1.170799557, 1.184620518, 1.184654521, 1.180668832, 1.169001823, 1.163679288, 1.14288364, 1.104579633]
+            }, {
+              "name": "India",
+              "lineWidth": 1.5,
+              "areaOpacity": 0.3,
+              "marker": {
+                "width": 8
+              },
+              "spline": false,
+              "animated": true,
+              "seriesLabel": {
+                "enable": true
+              },
+              "data": [1.960983486, 1.99843774, 2.031905454, 2.056911684, 2.071542291, 2.080132863, 2.083470803, 2.091093794, 2.113035337, 2.153541594, 2.204540007, 2.257900619, 2.301189898, 2.327407347, 2.331907575, 2.321759164, 2.304664538, 2.291300827, 2.286777711, 2.294895757, 2.309522066, 2.323757166, 2.328680217, 2.320387549, 2.295805371, 2.259852793, 2.220963073, 2.183884504, 2.14675799, 2.11086641, 2.076088739, 2.039729635, 2.003177618, 1.97063456, 1.943244886, 1.918940549, 1.89521886, 1.869172711, 1.839658073, 1.80556042, 1.768125412, 1.728767638, 1.689562681, 1.651490906, 1.61530759, 1.57971029, 1.545696178, 1.50922207, 1.46489008, 1.4105823, 1.350339045, 1.28857558, 1.231622928, 1.18301607, 1.145623988, 1.116633091, 1.08988008, 1.062597394, 1.03732336]
+            }]
+          }
+        });
+      });
+  </script>
+</body>
+
+</html>

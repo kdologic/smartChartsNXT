@@ -5,7 +5,7 @@ import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
 
@@ -15,31 +15,6 @@ import Style from './../viewEngin/style';
  * @author:SmartChartsNXT
  * @description: This components will create a vertical and horizontal cross line to follow the pointer or touch location.
  * @extends Component
- *
- * @example
- * config -
- "pointerCrosshair": {
-   "vertical": {
-     "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-     "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.FULL, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
-     "lineColor": "#000",                        // [ default: #000 ]
-     "lineWidth": 1,                             // [ default: 1 ]
-     "lineOpacity": 1,                           // [ default: 1 ]
-     "labelTextColor": "#fff",                   // [ default: #fff ]
-     "labelBackgroundColor":"#000",              // [ default: #000 ]
-     "labelOpacity": 1                           // [ default: 1 ]
-   },
-   "horizontal": {
-     "style": $SC.ENUMS.LINE_STYLE.DASHED,       // [ $SC.ENUMS.LINE_STYLE.SOLID | default: $SC.ENUMS.LINE_STYLE.DASHED ]
-     "spread" : $SC.ENUMS.CROSSHAIR_SPREAD.NONE, // [ default: $SC.ENUMS.CROSSHAIR_SPREAD.FULL | $SC.ENUMS.CROSSHAIR_SPREAD.IN_POINT | $SC.ENUMS.CROSSHAIR_SPREAD.NONE ]
-     "lineColor": "#000",                        // [ default: #000 ]
-     "lineWidth": 1,                             // [ default: 1 ]
-     "lineOpacity": 1,                           // [ default: 1 ]
-     "labelTextColor": "#fff",                   // [ default: #fff ]
-     "labelBackgroundColor":"#000",              // [ default: #000 ]
-     "labelOpacity": 1                           // [ default: 1 ]
-   }
- }
  */
 
 class PointerCrosshair extends Component {
@@ -58,6 +33,7 @@ class PointerCrosshair extends Component {
       hy1: 0,
       hx2: 0,
       hy2: 0,
+      overflow: 0,
       labelTextPadding: 5,
       verticalLabelText: '',
       verticalLabelWidth: this.config.vertical.labelMinWidth,
@@ -92,17 +68,17 @@ class PointerCrosshair extends Component {
     });
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('setVerticalCrosshair', this.setVCrosshairBind);
     this.emitter.on('setHorizontalCrosshair', this.setHCrosshairBind);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('setVerticalCrosshair', this.setVCrosshairBind);
     this.emitter.removeListener('setHorizontalCrosshair', this.setHCrosshairBind);
   }
@@ -144,7 +120,7 @@ class PointerCrosshair extends Component {
             <g class='sc-crosshair-group sc-v-crosshair' transform={`translate(${this.state.vx1},0)`}>
               <line x1={0} y1={this.state.vy1} x2={0} y2={this.state.vy2}
                 fill='none' stroke={this.config.vertical.lineColor} stroke-width={this.config.vertical.strokeWidth} opacity={this.config.vertical.lineOpacity} stroke-dasharray={this.config.vertical.dashArray} shape-rendering='optimizeSpeed' />
-              <SpeechBox x={-(this.state.verticalLabelWidth / 2)} y={this.state.vy2 + 5} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy2)}
+              <SpeechBox x={this.state.boxLeft} y={this.state.boxTop} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy2)}
                 anchorBaseWidth={5} bgColor={this.config.vertical.labelBackgroundColor} fillOpacity={this.config.vertical.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
               </SpeechBox>
               {this.getVerticalLabelText()}
@@ -158,7 +134,7 @@ class PointerCrosshair extends Component {
   getVerticalLabelText() {
     return (
       <text fill={this.config.vertical.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
-        <tspan x='0' y={this.state.vy2 + 25}>{this.state.verticalLabelText}</tspan>
+        <tspan x={-this.state.overflow} y={this.state.vy2 + 25}>{this.state.verticalLabelText}</tspan>
       </text>
     );
   }
@@ -176,17 +152,31 @@ class PointerCrosshair extends Component {
       this.setState({ isVerticalCrosshairVisible: false, verticalLabelText: '' });
       return;
     }
-    this.state.verticalLabelText = data[0].formattedLabel;
-    let textWidth = uiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
+    this.state.verticalLabelText = '' + data[0].formattedLabel;
+    let textWidth = UiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = this.config.vertical.spread === ENUMS.CROSSHAIR_SPREAD.FULL ? this.props.vLineStart : Math.min(...data.map(d => d.y));
-    this.setState({
+    let vState = {
       isVerticalCrosshairVisible: true,
       vx1: data[0].x,
       vy1: topY,
       vx2: data[0].x,
       vy2: this.props.vLineEnd,
-      verticalLabelWidth: textWidth > this.config.vertical.labelMinWidth ? textWidth : this.config.vertical.labelMinWidth
-    });
+      verticalLabelWidth: textWidth > this.config.vertical.labelMinWidth ? textWidth : this.config.vertical.labelMinWidth,
+      overflow: 0
+    };
+    vState.boxLeft = -(vState.verticalLabelWidth / 2);
+    vState.boxTop = vState.vy2 + 5;
+    if (vState.vx1 - (vState.verticalLabelWidth / 2) < 0) {
+      let overflow = vState.vx1 - (vState.verticalLabelWidth / 2) - 5;
+      vState.boxLeft = vState.boxLeft - overflow;
+      vState.overflow = overflow;
+    }
+    if (vState.vx1 + (vState.verticalLabelWidth / 2) > this.context.svgWidth) {
+      let overflow = (vState.vx1 + (vState.verticalLabelWidth / 2)) - this.context.svgWidth + 5;
+      vState.boxLeft = vState.boxLeft - overflow;
+      vState.overflow = overflow;
+    }
+    this.setState(vState);
   }
 
   setHCrosshair(data) {
@@ -194,8 +184,8 @@ class PointerCrosshair extends Component {
       this.setState({ isHorizontalCrosshairVisible: false, horizontalLabelText: '' });
       return;
     }
-    this.state.horizontalLabelText = data[0].formattedValue;
-    let textWidth = uiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
+    this.state.horizontalLabelText = '' + data[0].formattedValue;
+    let textWidth = UiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = Math.min(...data.map(d => d.y));
     this.setState({
       isHorizontalCrosshairVisible: true,

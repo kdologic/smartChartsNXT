@@ -1,16 +1,19 @@
 'use strict';
 
 import Point from './../core/point';
-import utilCore from './../core/util.core';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import { CHART_MODULES } from './../settings/componentMapper';
+import { CHART_MODULES } from '../settings/chartComponentMapper';
 import Validator from './../validators/validator';
 import CommonStyles from './../styles/commonStyles';
 import Watermark from './../components/watermark';
 import Menu from './../components/menu';
 import LoaderView from './../components/loaderView';
+import StoreManager from './../liveStore/storeManager';
+import GlobalDefs from './../styles/globalDefs';
+import a11yFactory from './../core/a11y';
 
 /**
  * baseChart.js
@@ -24,9 +27,12 @@ class BaseChart extends Component {
     try {
       super(props);
       this.chartType = this.props.opts.type;
-      this.CHART_OPTIONS = utilCore.extends({
+      this.store = StoreManager.getStore(this.props.runId);
+      this.a11yWriter = a11yFactory.getWriter(this.props.runId);
+      this.CHART_OPTIONS = UtilCore.extends({
+        a11y: {},
         menu: {
-          mainManu: {
+          mainMenu: {
             enable: true,
             itemSaveAsJPG: true,
             itemSaveAsPNG: true,
@@ -34,6 +40,9 @@ class BaseChart extends Component {
             itemSaveAsPDF: true,
             itemPrint: true
           }
+        },
+        creditsWatermark: {
+          enable: true
         }
       }, this.props.opts, { width: 1, height: 1 });
       this.CHART_DATA = { scaleX: 0, scaleY: 0 };
@@ -48,7 +57,7 @@ class BaseChart extends Component {
       if(this.validationErrors.length) {
         throw this.validationErrors;
       }
-
+      this.globalDefs = new GlobalDefs(this.CHART_OPTIONS.defs);
       this.emitter = eventEmitter.getInstance(this.props.runId);
       this.state = {
         width: this.props.width || this.CHART_CONST.FIX_WIDTH,
@@ -57,12 +66,12 @@ class BaseChart extends Component {
         menuIconWidth: 10,
         menuExpanded: false,
         menuIconFocused: false,
-        resizeComponent: false
+        globalRenderAll: false
       };
-      this.titleId = utilCore.getRandomID();
-      this.descId = utilCore.getRandomID();
-      this.blurFilterId = utilCore.getRandomID();
-      this.menuIconGradId = utilCore.getRandomID();
+      this.titleId = UtilCore.getRandomID();
+      this.descId = UtilCore.getRandomID();
+      this.blurFilterId = UtilCore.getRandomID();
+      this.menuIconGradId = UtilCore.getRandomID();
       this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
         throw ex;
@@ -78,6 +87,14 @@ class BaseChart extends Component {
     this.hideBeforeSave = this.hideBeforeSave.bind(this);
     this.onResizeComponent = this.onResizeComponent.bind(this);
     this.onRenderComponent = this.onRenderComponent.bind(this);
+
+    this.a11yWriter.createSpace(this.titleId);
+    this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.title || {}).text || '') + '</div>');
+    this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.subtitle || {}).text || '') + '</div>', false);
+    if(this.CHART_OPTIONS.a11y.description) {
+      this.a11yWriter.createSpace(this.descId);
+      this.a11yWriter.write(this.descId, '<div aria-hidden="false">' + this.CHART_OPTIONS.a11y.description + '</div>');
+    }
   }
 
   passContext() {
@@ -96,7 +113,7 @@ class BaseChart extends Component {
     this.CHART_DATA = { ...this.CHART_DATA, ...config };
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('menuClosed', this.hideMenuPopup);
     this.emitter.on('beforePrint', this.hideBeforeSave);
     this.emitter.on('afterPrint', this.showAfterSave);
@@ -106,7 +123,7 @@ class BaseChart extends Component {
     this.emitter.on('render', this.onRenderComponent);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('menuClosed', this.hideMenuPopup);
     this.emitter.removeListener('beforePrint', this.hideBeforeSave);
     this.emitter.removeListener('afterPrint', this.showAfterSave);
@@ -115,8 +132,9 @@ class BaseChart extends Component {
     this.emitter.removeListener('resize', this.onResizeComponent);
   }
 
-  componentDidUpdate() {
-    this.state.resizeComponent = false;
+  afterUpdate() {
+    this.state.globalRenderAll = false;
+    this.store.setValue('globalRenderAll', false);
   }
 
   render() {
@@ -125,14 +143,14 @@ class BaseChart extends Component {
     return (
       <svg
         //xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
-        role='application'
+        role="region"
         version={1.1}
         width={this.CHART_OPTIONS.width}
         height={this.CHART_OPTIONS.height}
         viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
         id={this.getChartId()}
         class='smartcharts-nxt'
-        aria-labelledby={this.titleId}
+        aria-label="Interactive chart."
         aria-describedby={this.descId}
         style={{
           fontFamily: defaultConfig.theme.fontFamily,
@@ -148,10 +166,10 @@ class BaseChart extends Component {
           overflow: 'hidden'
         }} >
 
-        <text class='sc-title' id={this.titleId} style='display:none;'>{((this.CHART_OPTIONS.title || {}).text || '') + ' ' + ((this.CHART_OPTIONS.subtitle || {}).text || '')}</text>
-        <desc id={this.descId}>{(this.CHART_OPTIONS.description || this.CHART_DATA.chartType) + ' -created using SmartChartsNXT chart library.'}</desc>
+        <desc aria-hidden='true'>{(this.CHART_DATA.name) + ' - created using SmartChartsNXT chart library.'}</desc>
 
         <CommonStyles></CommonStyles>
+        { this.globalDefs.mapAll() }
 
         <g class='sc-canvas-border-container'>
           <rect x='1' y='1' class='sc-canvas-border' vector-effect='non-scaling-stroke'
@@ -166,20 +184,20 @@ class BaseChart extends Component {
           />
         </g>
 
-        {this.CHART_OPTIONS.watermark !== false &&
+        {this.CHART_OPTIONS.creditsWatermark.enable &&
           <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
         }
 
-        {this.CHART_OPTIONS.menu.mainManu.enable && this.CHART_OPTIONS.showMenu !== false &&
+        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
           this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
         }
 
         <g id={`${this.getChartId()}_cont`}>
-          <Chart chartOptions={utilCore.extends({}, this.CHART_OPTIONS)} chartData={utilCore.extends({}, this.CHART_DATA)} chartConst={utilCore.extends({}, this.CHART_CONST)} resizeComponent={this.state.resizeComponent}></Chart>
+          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
         </g>
 
-        {this.CHART_OPTIONS.menu.mainManu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
-          <Menu opts={this.CHART_OPTIONS.menu.mainManu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
+        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
+          <Menu opts={this.CHART_OPTIONS.menu.mainMenu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
         }
         <LoaderView></LoaderView>
       </svg>
@@ -191,8 +209,8 @@ class BaseChart extends Component {
   }
 
   initCanvasSize(width, height, minWidth = this.CHART_DATA.minWidth, minHeight = this.CHART_DATA.minHeight) {
-    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = utilCore.clamp(minWidth, Math.max(minWidth, width), width);
-    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = utilCore.clamp(minHeight, Math.max(minHeight, height), height);
+    this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = UtilCore.clamp(minWidth, Math.max(minWidth, width), width);
+    this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = UtilCore.clamp(minHeight, Math.max(minHeight, height), height);
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
   }
 
@@ -203,6 +221,7 @@ class BaseChart extends Component {
   getMenuIcon(posX, posY) {
     return (
       <g class='sc-menu-icon' transform={`translate(${posX},${posY})`}>
+        <title>Chart Options</title>
         <style>
           {`
             .sc-menu-icon-bg {
@@ -291,7 +310,7 @@ class BaseChart extends Component {
 
   onMenuIconMouseIn(e) {
     this.ref.node.querySelector('.dot-group').classList.add('active');
-    if(utilCore.isIE) {
+    if(UtilCore.isIE) {
       e.target.setAttribute('transform', 'scale(1.5)');
     }
   }
@@ -299,7 +318,7 @@ class BaseChart extends Component {
   onMenuIconMouseOut(e) {
     if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
-      if(utilCore.isIE) {
+      if(UtilCore.isIE) {
         e.target.setAttribute('transform', 'scale(1)');
       }
     }
@@ -328,7 +347,7 @@ class BaseChart extends Component {
   }
 
   onResizeComponent(e) {
-    this.setState({ resizeComponent: true, width: e.data.targetWidth, height: e.data.targetHeight });
+    this.setState({ globalRenderAll: true, width: e.data.targetWidth, height: e.data.targetHeight });
   }
 
   onRenderComponent(newOpts) {
@@ -336,8 +355,9 @@ class BaseChart extends Component {
     if(this.validationErrors.length) {
       throw this.validationErrors;
     }
-    this.CHART_OPTIONS = utilCore.extends({}, newOpts, { width: 1, height: 1 });
-    this.update();
+    this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, newOpts, { width: 1, height: 1 });
+    this.store.setValue('globalRenderAll', true);
+    this.setState({ globalRenderAll: true});
   }
 }
 

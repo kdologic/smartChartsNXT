@@ -118,13 +118,13 @@ class Menu extends Component {
     this.configureMenuItems(this.props.opts);
   }
 
-  componentDidMount() {
+  afterMount() {
     if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
       this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
     }
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.configureMenuItems(nextProps.opts);
   }
 
@@ -170,7 +170,7 @@ class Menu extends Component {
     let yPos = (index * this.menuItemHeight) + this.menuPaddingTop;
     let txtPLeft = 12;
     return (
-      <g class={'menu-item' + ' ' + 'item-' + index} data-item-index={index} role='menuitem' aria-label={menu.label} tabindex='-1'
+      <g class={'menu-item' + ' ' + 'item-' + index} data-item-index={index} role='menuitem' aria-label={menu.label} aria-haspopup="true" tabindex='-1'
         events={
           Object.assign({}, menu.events, {
             keyup: this.onMenuItemKeyUp,
@@ -208,6 +208,7 @@ class Menu extends Component {
   getCloseIcon() {
     return (
       <g class='sc-menu-close-icon' transform={`translate(${this.props.svgWidth},${0})`} >
+        <title>Close</title>
         <style>
           {`
             .sc-menu-close-icon-bg {

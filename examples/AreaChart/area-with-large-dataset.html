@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Process large data set - Area Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+
+  <script type="text/javascript">
+	  function getData(n) {
+      var arr = [], i, x = new Date(), a, b, c, spike;
+      for (i = 0; i < n; i++, x.setDate(x.getDate() + i)) {
+        if (i % 100 === 0) {
+          a = 2 * Math.random();
+        }
+        if (i % 1000 === 0) {
+          b = 2 * Math.random();
+        }
+        if (i % 10000 === 0) {
+          c = 2 * Math.random();
+        }
+        if (i % 50000 === 0) {
+          spike = 10;
+        } else {
+          spike = 0;
+        }
+        arr.push({
+          label: i, //x.getTime(), 
+          value: 2 * Math.sin(i / 100) + a + b + c + spike + Math.random()
+        });
+      }
+      return arr;
+    }
+  </script>
+</head>
+<body>
+  <div role='figure' class="chart-base">
+    <div id='chartContainer' style="width:100%; height:550px;"></div>
+  </div>
+  <p class="chart-caption" aria-hidden="true">
+    SmartchartsNXT can efficiently process large dataset with 50000 or more data points. Chart uses powerful data processing model, 
+    to ensure realtime processing of huge data set. The data marker are automatically get disabled when showing large data to reduce overhead and overlapping markers. 
+    Below there is a horizontal scroll bar. Which can be used to zoom in, or focus different parts of the chart.
+  </p>
+
+  <script type="text/javascript">
+    var areaChart;
+    SmartChartsNXT.ready(function () {
+      areaChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.AREA_CHART,
+        "targetElem": "chartContainer",
+        "a11y": {
+          "description": "SmartchartsNXT can efficiently process large dataset with 50000 or more data points. Chart uses powerful data processing model, to ensure realtime processing of huge data set. The data marker are automatically get disabled when showing large data to reduce overhead and overlapping markers. Below there is a horizontal scroll bar. Which can be used to zoom in, or focus different parts of the chart."
+        },
+        "bgColor": "#f7fdf7",
+        "title": {
+          "text":"SmartchartsNXT visualizing 50000 data points",
+          "textColor": "crimson", 
+          "borderColor":"none",   
+          "responsive": {
+            "wrapText": true,
+            "reducer": function(chartWidth, chartHeight) {
+              if(chartWidth < 500) {
+                return {
+                  "text": "Visualize dataset"
+                }
+              }else if(chartWidth < 600) {
+                return {
+                  "text": "Visualize very large dataset"
+                }
+              }else if(chartWidth < 800) {
+                return {
+                  "text": "Visualize very large randomize dataset"
+                }
+              }
+            }
+          }
+        },
+        "subtitle": {
+          "text":"Using powerful data processing model",
+          "textColor": "#9c27b0"
+        },                      
+        "gridBox": {
+          "bgColor": 'skyblue',
+          "fillOptions": {
+            "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
+          },
+          "bgOpacity": 0.2
+        },
+        "legends":{
+          "itemBorderWidth": 0,                         
+        },
+        "tooltip": {
+          "content": {
+            "header": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:'+ (tipConfig.headerBgColor || "#555") + '; font-size: 14px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  'Index: ' + pointSet[index].formattedLabel +
+                '</p>'
+              );
+            },
+            "body": function(pointSet, index, tipConfig) {
+              let point = pointSet[index];
+              return (
+                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; padding: 3px 6px; color:' + (tipConfig.textColor || "#000") + ';">' +
+                  '<td>' +
+                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' + point.seriesName +' Value : ' +
+                  '</td>' +
+                  '<td>' + point.value.toFixed(2) + '</td>' +
+                '</tr>'
+              );
+            },
+            "footer": function(pointSet, index, tipConfig) {
+              return (
+                '<p style="background-color:' + (tipConfig.footerBgColor || "#555") + '; font-size: 10px; text-align: left; color: ' + (tipConfig.footerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                  'All data are randomly generated' +
+                '</p>'
+              );
+            }
+          },
+          "headerTextColor": "greenyellow",
+          "headerBgColor": "#555",         
+          "textColor": "#000",             
+          "bgColor": "#e8f4f8",            
+          "footerTextColor": "#000",       
+          "footerBgColor": "#d4ebf2",      
+          "borderWidth": 0              
+        },
+        "horizontalScroller": {
+          "height": 20,
+          "chartInside": false
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "Date",
+            "intervalThreshold": 70
+          },
+          "yAxis": {
+            "title": "Value"
+          },
+          "series": [{
+            "name": 'Random Data',
+            "lineColor": "#009688",
+            "areaColor": "#009688",
+            "marker": {
+              "width": 8
+            },
+            "spline": false,
+            "fillOptions": {
+              "pattern": "pattern-1"
+            },
+            "areaOpacity": 1,
+            "animated": false,
+            "data": getData(50000) 
+          }]
+        }
+      });
+    });
+  </script>
+</body>
+</html>

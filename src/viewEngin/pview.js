@@ -14,6 +14,7 @@
 const Polyfills = require('./shims/polyfills');
 const config = require('./config').default;
 const merge = require('deepmerge');
+const fastdom = require('fastdom');
 
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
@@ -22,9 +23,10 @@ const merge = require('deepmerge');
  * @param {String} nodeType - This flag decide node variable having real node or virtual node ['vnode' | 'rnode'].
  * @param {Object} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node.
  * @param {Object} ctx Pass the existing context.
+ * @param {Boolean} emptyBeforeMount Empty the target node before mount when true.
  * @returns {Object} A component object.
  * */
-function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}) {
+function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}, emptyBeforeMount = true) {
 
   if (!node) {
     throw new TypeError('Invalid vnode in render component');
@@ -34,12 +36,12 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
 
   let component = (nodeType === 'rnode' ? node : renderDOM.call({ context: ctx }, node));
 
-  if (component.self && typeof component.self.componentWillMount === 'function') {
-    component.self.componentWillMount.call(component.self);
+  if (component.self && typeof component.self.beforeMount === 'function') {
+    component.self.beforeMount.call(component.self);
   }
 
   if (!oldNode) {
-    if (nodeType === 'vnode') {
+    if (nodeType === 'vnode' && emptyBeforeMount) {
       targetNode.innerHTML = '';
     }
     targetNode.appendChild(component.node);
@@ -52,8 +54,8 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {})
     delete component.eventStack;
   }
 
-  if (component.self && typeof component.self.componentDidMount === 'function') {
-    component.self.componentDidMount.call(component.self);
+  if (component.self && typeof component.self.afterMount === 'function') {
+    component.self.afterMount.call(component.self);
   }
 
   return component;
@@ -88,7 +90,10 @@ function renderDOM(vnode) {
           default: return vnode.attributes[k];
         }
       })(key);
-      component.node.setAttribute(key, attrVal);
+
+      if (attrVal !== undefined) {
+        component.node.setAttribute(key, attrVal);
+      }
     });
   } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
@@ -135,8 +140,8 @@ function renderDOM(vnode) {
     /* eslint-disable-next-line babel/no-invalid-this */
     let childComp = renderDOM.call(({ context: this.context } || {}), c);
 
-    if (childComp.self && typeof childComp.self.componentWillMount === 'function') {
-      childComp.self.componentWillMount.call(childComp.self);
+    if (childComp.self && typeof childComp.self.beforeMount === 'function') {
+      childComp.self.beforeMount.call(childComp.self);
     }
 
     component.children.push(childComp);
@@ -147,8 +152,8 @@ function renderDOM(vnode) {
       delete childComp.eventStack;
     }
 
-    if (childComp.self && typeof childComp.self.componentDidMount === 'function') {
-      component.eventStack.push(childComp.self.componentDidMount.bind(childComp.self));
+    if (childComp.self && typeof childComp.self.afterMount === 'function') {
+      component.eventStack.push(childComp.self.afterMount.bind(childComp.self));
     }
   });
 
@@ -167,22 +172,22 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
   try {
     for (let i = 0; i < subNodes.children.length; i++) {
       let subNode = subNodes.children[i];
-      let refChldObj = undefined;
+      let refChildObj = undefined;
       for (let c = 0; c < refs.children.length; c++) {
-        let refChld = refs.children[c];
-        if (refChld && refChld.self && typeof subNode.nodeName === 'function' && refChld.self instanceof subNode.nodeName) {
+        let refChild = refs.children[c];
+        if (refChild && refChild.self && typeof subNode.nodeName === 'function' && refChild.self instanceof subNode.nodeName) {
           /* Match instanceId for support multiple instance of same component type under same parent node */
-          if (refChld.self.props.instanceId === subNode.attributes.instanceId) {
+          if (refChild.self.props.instanceId === subNode.attributes.instanceId) {
             subNode.class = subNode.nodeName;
-            subNode.nodeName = refChld.self;
-            refChldObj = refChld;
+            subNode.nodeName = refChild.self;
+            refChildObj = refChild;
             break;
           }
         }
       }
       if (typeof subNode.nodeName === 'object') {
-        if (replaceChildren && subNode.nodeName.vnode.children && subNode.nodeName.vnode.children.length && refChldObj && refChldObj.self && refChldObj.self.ref && refChldObj.self.ref.children.length) {
-          _replaceClassWithObject(subNode.nodeName.vnode, refChldObj.self.ref, replaceChildren);
+        if (replaceChildren && subNode.nodeName.vnode.children && subNode.nodeName.vnode.children.length && refChildObj && refChildObj.self && refChildObj.self.ref && refChildObj.self.ref.children.length) {
+          _replaceClassWithObject(subNode.nodeName.vnode, refChildObj.self.ref, replaceChildren);
         }
       } else if (replaceChildren && subNode.children && subNode.children.length && refs.children && refs.children[i]) {
         _replaceClassWithObject(subNode, refs.children[i], replaceChildren);
@@ -190,6 +195,28 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
     }
   } catch (ex) {
     throw ex;
+  }
+}
+
+function _rearrangeOldVNodes(oldVNode, newVNode, ref) {
+  if (oldVNode.children instanceof Array && newVNode.children instanceof Array) {
+    for (let c = 0; c < newVNode.children.length; c++) {
+      let nVNode = newVNode.children[c];
+      for (let i = 0; i < oldVNode.children.length; i++) {
+        let oVNode = oldVNode.children[i];
+        if (oVNode.attributes && oVNode.attributes.instanceId !== undefined && nVNode.attributes && oVNode.attributes.instanceId === nVNode.attributes.instanceId) {
+          if (Math.max(i, c) < oldVNode.children.length) {
+            let node = oldVNode.children[i];
+            oldVNode.children[i] = oldVNode.children[c];
+            oldVNode.children[c] = node;
+            let refChild = ref.children[i];
+            ref.children[i] = ref.children[c];
+            ref.children[c] = refChild;
+            break;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -219,17 +246,17 @@ window.__h__ = window.__h__ || __h__;
  */
 function _extends(dest, ...args) {
   const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
-  if(!dest) {
+  if (!dest) {
     return {};
-  }else if(args.length === 0) {
+  } else if (args.length === 0) {
     return dest;
-  }else {
+  } else {
     return dest = merge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
   }
 }
 
 /**
- * convert style JSON into string, gets called by transpiled JSX
+ * Convert style JSON into string, gets called by transpile JSX
  * @param {JSON} objStyle style json object
  * @returns {String} return string of css
  */
@@ -239,7 +266,10 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    if (objStyle[key].old && objStyle[key].new) {
+    if (typeof objStyle[key] === 'undefined') {
+      return;
+    }
+    if (objStyle[key].old !== undefined && objStyle[key].old !== null && objStyle[key].new !== undefined && objStyle[key].new !== null) {
       sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key].new};`);
     } else {
       sArr.push(`${key.replace(/([A-Z])/g, $1 => '-' + $1.toLowerCase())}:${objStyle[key]};`);
@@ -256,7 +286,7 @@ function parseStyleProps(objStyle) {
  */
 function parseEventsProps(events, node) {
   Object.keys(events).forEach((e) => {
-    if (events[e].new && events[e].old) {
+    if (events[e].new !== undefined && events[e].new !== null && events[e].old !== undefined && events[e].old !== null) {
       node._addEventListener(e, events[e].new, false);
       node.removeEventListener(e, events[e].old);
     } else {
@@ -424,6 +454,7 @@ class Component {
 
     if (newVNode.children && newVNode.children.length) {
       _replaceClassWithObject(newVNode, ref, true);
+      _rearrangeOldVNodes(oldVNode, newVNode, ref);
     }
 
     if (ref && ref.self && typeof ref.self.passContext === 'function') {
@@ -438,8 +469,8 @@ class Component {
         ref.self.propsWillReceive.call(ref.self, newProps);
       }
 
-      if (ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
-        let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
+      if (ref && ref.self && typeof ref.self.shouldUpdate === 'function') {
+        let shouldUpdate = ref.self.shouldUpdate(newProps);
         if (!shouldUpdate) {
           ref.self.props = newProps;
           return false;
@@ -450,8 +481,8 @@ class Component {
         ref.self.__proto__.context = context;
       }
 
-      if (ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
-        ref.self.componentWillUpdate.call(ref.self, newProps);
+      if (ref && ref.self && typeof ref.self.beforeUpdate === 'function') {
+        ref.self.beforeUpdate.call(ref.self, newProps);
       }
 
       if (ref && ref.self) {
@@ -472,8 +503,8 @@ class Component {
           this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
           newVNode.nodeName.vnode = newRenderedVnode;
           ref.children = ref.self.ref.children;
-          if (ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
-            ref.self.componentDidUpdate(oldVNode.attributes);
+          if (ref && ref.self && typeof ref.self.afterUpdate === 'function') {
+            ref.self.afterUpdate(oldVNode.attributes);
           }
           return;
         } else if (typeof newVNode.nodeName === 'string') {
@@ -536,8 +567,8 @@ class Component {
     }
     if (typeof newVNode.nodeName === 'object') {
       newVNode.nodeName.vnode = newRenderedVnode;
-      if (typeof ref.self.componentDidUpdate === 'function') {
-        ref.self.componentDidUpdate(oldVNode.nodeName.props);
+      if (typeof ref.self.afterUpdate === 'function') {
+        ref.self.afterUpdate(oldVNode.nodeName.props);
       }
     }
   }
@@ -593,8 +624,8 @@ class Component {
       }
     }
 
-    if (destroyableObj && typeof destroyableObj.componentWillUnmount === 'function') {
-      destroyableObj.componentWillUnmount.call(destroyableObj);
+    if (destroyableObj && typeof destroyableObj.beforeUnmount === 'function') {
+      destroyableObj.beforeUnmount.call(destroyableObj);
     }
 
     if (typeof destroyableNode.nodeName === 'object') {
@@ -644,6 +675,9 @@ class Component {
               });
               return evtNames.filter(v => !!v).join();
             default:
+              if (attrChanges[group][k] === undefined) {
+                return undefined;
+              }
               if (attrChanges[group][k].old !== undefined && attrChanges[group][k].new !== undefined) {
                 return attrChanges[group][k].new;
               } else {
@@ -651,7 +685,16 @@ class Component {
               }
           }
         })(key);
-        dom.setAttribute(key, attrVal);
+
+        if (attrVal === undefined) {
+          fastdom.mutate(() => {
+            dom.removeAttribute(key);
+          });
+        } else {
+          fastdom.mutate(() => {
+            dom.setAttribute(key, attrVal);
+          });
+        }
       });
     });
     Object.keys(attrChanges.$deleted).forEach(key => {
@@ -679,12 +722,12 @@ class Component {
       console.time(compName + ' update');
     }
 
-    if (!this.shouldComponentUpdate(this.props)) {
+    if (!this.shouldUpdate(this.props)) {
       return false;
     }
 
-    if (typeof this.componentWillUpdate === 'function') {
-      this.componentWillUpdate(this.props);
+    if (typeof this.beforeUpdate === 'function') {
+      this.beforeUpdate(this.props);
     }
 
     let vnodeNow = this.render();
@@ -694,8 +737,8 @@ class Component {
     }
     this._reconcile(this.vnode, vnodeNow, this.ref, objContext);
 
-    if (typeof this.componentDidUpdate === 'function') {
-      this.componentDidUpdate(this.props);
+    if (typeof this.afterUpdate === 'function') {
+      this.afterUpdate(this.props);
     }
 
     if (config.debug && config.debugRenderTime) {
@@ -735,21 +778,21 @@ class Component {
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentWillMount(nextProps) { }
+  beforeMount(nextProps) { }
 
   /**
    * Lifecycle event - fires after the component mounted on parent DOM.
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentDidMount(nextProps) { }
+  afterMount(nextProps) { }
 
   /**
    * Call before render and determine component update
    * @param {Object} nextProps Next set of props that will receive by component.
    * @returns {boolean} Return boolean true or false.
    */
-  shouldComponentUpdate(nextProps = {}) {
+  shouldUpdate(nextProps = {}) {
     return true;
   }
 
@@ -758,20 +801,20 @@ class Component {
    * @param {Object} nextProps set of props that was there before update that component.
    * @returns {undefined} void.
    */
-  componentWillUpdate(nextProps = {}) { }
+  beforeUpdate(nextProps = {}) { }
 
   /**
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {Object} prevProps set of props that was there before update that component.
    * @returns {undefined} void.
    */
-  componentDidUpdate(prevProps) { }
+  afterUpdate(prevProps) { }
 
   /**
    * Lifecycle event - fires before the component unmounted from parent DOM.
    * @returns {undefined} void.
    */
-  componentWillUnmount() { }
+  beforeUnmount() { }
 }
 
 export { mountTo, renderDOM, Component, parseStyleProps };

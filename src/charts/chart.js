@@ -4,10 +4,11 @@ import Validator from './../validators/validator';
 import { validationRules } from './../settings/validationRules';
 import { mountTo } from './../viewEngin/pview';
 import BaseChart from './../base/baseChart';
-import storeManager from './../liveStore/storeManager';
-import utilCore from './../core/util.core';
+import StoreManager from './../liveStore/storeManager';
+import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import ErrorView from './../components/errorView';
+import a11yFactory from './../core/a11y';
 
 /*eslint-disable  no-console*/
 
@@ -25,33 +26,64 @@ class Chart {
       if (!opts) {
         throw new CError('No configuration option found !');
       }
+      this.runId = UtilCore.uuidv4();
+      const storeId = StoreManager.createStore(this.runId, opts);
+      this.config = StoreManager.getStore(storeId);
       this.validator = new Validator();
       this.errors = this.validator.validate(validationRules, opts);
       if (this.errors.length) {
         return this.logErrors(opts);
       }
-      this.runId = utilCore.uuidv4();
       this.targetNode = document.querySelector('#' + opts.targetElem);
       this.errors = this.targetElemValidate(opts);
       if (this.errors.length) {
         return this.logErrors(opts);
       }
-
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
-      this.config = storeManager.getStore(storeManager.createStore(this.runId, opts));
-      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode);
-      window.addEventListener('resize', this.onResize.bind(this), false);
+      this.targetNode.style.position = 'relative';
+
+      /* For accessibility */
+      this.targetNode.setAttribute('role', 'region');
+      this.targetNode.setAttribute('aria-hidden', 'false');
+      this.targetNode.setAttribute('aria-label', 'SmartchartsNXT interactive ' + this.config._state.type);
+      this.a11yService = a11yFactory.createInstance(this.runId, this.targetNode);
+      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode, 'vnode', null, {}, false);
+
+      /* Detect the element resize and re-draw accordingly */
+      this.onResize = this.onResize.bind(this);
+      if (!UtilCore.isIE) {
+        const resizeObserver = new ResizeObserver(entries => {
+          for (const entry of entries) {
+            this.onResize(entry.target);
+          }
+        });
+        resizeObserver.observe(this.targetNode);
+      } else if ($SC.IESupport && $SC.IESupport.ResizeObserver) {
+        const ro = new $SC.IESupport.ResizeObserver((entries) => {
+          for (const entry of entries) {
+            const { width, height } = entry.contentRect;
+            this.onResize({
+              offsetWidth: width,
+              offsetHeight: height
+            });
+          }
+        });
+        ro.observe(this.targetNode);
+      }
+
       $SC.debug && console.debug(this.core);
     } catch (ex) {
       this.logErrors(this.config._state, ex);
     }
   }
 
-  onResize(e = {}) {
-    e.data = {
-      targetWidth: this.targetNode.offsetWidth,
-      targetHeight: this.targetNode.offsetHeight
+  onResize(element) {
+    const e = {
+      data: {
+        targetWidth: element.offsetWidth,
+        targetHeight: element.offsetHeight
+      }
     };
     this.events.emit('resize', e);
   }
@@ -61,7 +93,7 @@ class Chart {
     if (this.errors.length) {
       return this.logErrors(this.config._state);
     }
-    this.events.emit('render', this.config._state);
+    this.events.emitSync('render', this.config._state);
   }
 
   logErrors(opts, ex) {

@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import uiCore from './../core/ui.core';
+import UiCore from './../core/ui.core';
 
 
 /**
@@ -40,8 +40,8 @@ class ErrorView extends Component {
         <circle cx={this.props.width / 2} cy={(this.props.height / 2) - 80} r='25' fill='#717171' />
         <text fill='#fff' x={(this.props.width / 2) - 5} y={(this.props.height / 2) - 70} font-weight='bold' font-size='35'>i</text>
         <text class='error-text-group' fill='#000' font-family='Lato' text-rendering='geometricPrecision'>
-          <tspan class='err-text' text-anchor='middle' x={this.props.width / 2} y={this.props.height / 2} font-size={uiCore.getScaledFontSize(this.props.width, 15, 25)} >Oops! Something went wrong. </tspan>
-          <tspan class='err-text' text-anchor='middle' x={this.props.width / 2} y={(this.props.height / 2 + 30)} font-size={uiCore.getScaledFontSize(this.props.width, 25, 16)} fill='#03A9F4'>See the javascript console for technical details.</tspan>
+          <tspan class='err-text' text-anchor='middle' x={this.props.width / 2} y={this.props.height / 2} font-size={UiCore.getScaledFontSize(this.props.width, 15, 25)} >Oops! Something went wrong. </tspan>
+          <tspan class='err-text' text-anchor='middle' x={this.props.width / 2} y={(this.props.height / 2 + 30)} font-size={UiCore.getScaledFontSize(this.props.width, 25, 16)} fill='#03A9F4'>See the javascript console for technical details.</tspan>
         </text>
       </svg>
     );

@@ -4,50 +4,20 @@ import defaultConfig from './../settings/config';
 import Point from './../core/point';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
-import utilCore from './../core/util.core';
-import uiCore from './../core/ui.core';
+import UtilCore from './../core/util.core';
+import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 
 /**
  * tooltip.js
  * @createdOn:17-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create tooltip area for the chart.
- * @extends Component.
- * @example
- config
-"tooltip": {
-  "enable": true,                   // [default: true | false ]
-  "followPointer": false,           // [true | default: false ]  Note: This option only available when tooltip are grouped.
-  "grouped": true,                  // [default: true | false ]
-  "pointerVicinity": 10,            // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
-  "content": {
-    "header": function(pointSet, index, tipConfig) {
-      return (...);
-    },
-    "body": function(pointSet, index, tipConfig) {
-      return (...);
-    },
-    "footer": function(pointSet, index, tipConfig) {
-      return (...);
-    }
-  },
-  "headerTextColor": "greenyellow",   // [ default: #fff ]
-  "headerBgColor": "#555",            // [ default: #555 ]
-  "textColor": "yellow",              // [ default: #000 ]
-  "bgColor": "green",                 // [ default: #fff ]
-  "footerTextColor": "greenyellow",   // [ default: #fff ]
-  "footerBgColor": "#555",            // [ default: #555 ]
-  "fontSize": 14,                     // [ default: 14 ]
-  "fontFamily": "Lato",               // [ default: Lato ]
-  "xPadding": 0,                      // [ default: 0 ]
-  "yPadding": 0,                      // [ default: 0 ]
-  "borderColor": "none",              // [ default: point.seriesColor ]
-  "borderWidth": 2,                   // [ default: 3 ]
-  "opacity": 0.8,                     // [ default: 0.8 ]
-}
+ * @extends Component
  */
+
 class Tooltip extends Component {
   constructor(props) {
     super(props);
@@ -60,14 +30,15 @@ class Tooltip extends Component {
     this.hide = this.hide.bind(this);
     this.followMousePointer = this.followMousePointer.bind(this);
     this.rootContainer = document.getElementById(this.context.rootContainerId);
-    this.containerIdIE = utilCore.getRandomID();
+    this.allTipContainer = null;
+    this.containerIdIE = UtilCore.getRandomID();
   }
 
   initInstances(props) {
     this.instances = [];
     for (let i = 0; i < props.instanceCount; i++) {
       this.instances.push({
-        tipId: utilCore.getRandomID(),
+        tipId: UtilCore.getRandomID(),
         originPoint: new Point(0, 0),
         cPoint: new Point(0, 0),
         topLeft: new Point(0, 0),
@@ -93,16 +64,28 @@ class Tooltip extends Component {
       yPadding: Number(props.opts.yPadding) || 0,
       strokeWidth: typeof props.opts.borderWidth === 'undefined' ? 3 : props.opts.borderWidth,
       opacity: typeof props.opts.opacity === 'undefined' ? 0.8 : props.opts.opacity,
-      followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer
+      followPointer: typeof props.opts.followPointer === 'undefined' ? false : props.opts.followPointer,
+      borderRadius: typeof props.opts.borderRadius === 'undefined' ? 0 : props.opts.borderRadius,
+      anchorBaseWidth: typeof props.opts.anchorWidth === 'undefined' ? 8 : props.opts.anchorWidth, // width of the anchor
+      anchorHeight: typeof props.opts.anchorHeight === 'undefined' ? 10 : props.opts.anchorHeight, // height of the anchor
+      dropShadow: typeof props.opts.dropShadow === 'undefined' ? true : props.opts.dropShadow
     };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
+    if (UtilCore.isIE && !this.allTipContainer) {
+      const containerID = UtilCore.getRandomID();
+      let strHtml = `<div id='sc-tooltip-container-html-${containerID}' 
+            style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
+          </div>`;
+      this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
+      this.allTipContainer = this.rootContainer.querySelector(`#sc-tooltip-container-html-${containerID}`);
+    }
     this.emitter.on('updateTooltip', this.updateTip);
     this.emitter.on('hideTooltip', this.hide);
     if (this.props.grouped && this.config.followPointer) {
@@ -114,25 +97,29 @@ class Tooltip extends Component {
     this.setConfig(nextProps);
   }
 
-  componentWillUpdate(nextProps) {
-    if(nextProps.instanceCount !== this.props.instanceCount) {
+  beforeUpdate(nextProps) {
+    if (nextProps.instanceCount !== this.props.instanceCount) {
       this.initInstances(nextProps);
     }
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
+    if (this.allTipContainer) {
+      this.allTipContainer.style.width = this.context.svgWidth + 'px';
+      this.allTipContainer.style.height = this.context.svgHeight + 'px';
+    }
     let nodeList = this.ref.node.querySelectorAll('.sc-tooltip-content');
     Array.prototype.forEach.call(nodeList, (node) => {
       let index = node.getAttribute('index');
-      if(!utilCore.isIE) {
+      if (!UtilCore.isIE) {
         node && (node.innerHTML = this.instances[index].tooltipContent);
-      }else {
+      } else {
         this.createTipAsHTML(node);
       }
     });
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('updateTooltip', this.updateTip);
     this.emitter.removeListener('hideTooltip', this.hide);
     if (this.props.grouped && this.config.followPointer) {
@@ -144,11 +131,11 @@ class Tooltip extends Component {
     if (this.props.opts.enable === false) {
       return <tooltip-disabled></tooltip-disabled>;
     }
-    if(utilCore.isIE) {
+    if (UtilCore.isIE) {
       this.createTipContainerHTML();
     }
     return (
-      <g class='sc-tooltip-container' pointer-events='none' aria-atomic='true' aria-live='assertive'>
+      <g class='sc-tooltip-container' pointer-events='none' aria-atomic='true' aria-live='polite'>
         {
           this.getTooltipContainer()
         }
@@ -162,32 +149,34 @@ class Tooltip extends Component {
       if (!this.instances[i].opacity) {
         continue;
       }
-      tipContainer.push(<g instanceId={this.props.instanceId} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
+      tipContainer.push(<g instanceId={this.props.instanceId + '-' + i} class={`sc-tip-${this.instances[i].tipId}`} transform={this.instances[i].transform.replace(/px/gi, '')}>
         {this.getTipStyle(i)}
         <SpeechBox x={0} y={0} width={this.instances[i].contentWidth + 1} height={this.instances[i].contentHeight} cpoint={this.instances[i].cPoint}
-          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={true} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth} >
+          bgColor={this.config.bgColor} fillOpacity={this.config.opacity} shadow={this.config.dropShadow} strokeColor={this.instances[i].strokeColor} strokeWidth={this.config.strokeWidth}
+          anchorBaseWidth={this.config.anchorBaseWidth} cornerRadius={this.config.borderRadius}>
         </SpeechBox>
         <g class='sc-text-tooltip-grp'>
-          {utilCore.isIE ?
-          (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
-            style={{
-              position: 'absolute',
-              width: this.instances[i].contentWidth - (2 * this.config.xPadding) + 1 + 'px',
-              height: this.instances[i].contentHeight - (2 * this.config.yPadding) + 'px',
-              transform: this.instances[i].transform,
-              top: this.instances[i].contentY + 'px',
-              left: this.instances[i].contentX + 'px',
-              color: this.config.textColor,
-              fontSize: this.config.fontSize + 'px',
-              fontFamily: this.config.fontFamily,
-              overflow: 'hidden',
-              opacity: this.config.opacity
-            }}>
-          </x-div>) :
-          (
-            <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
-            </foreignObject>
-          )}
+          {UtilCore.isIE ?
+            (<x-div index={i} class={'sc-tooltip-content'} data-instance={JSON.stringify(this.instances[i])}
+              style={{
+                position: 'absolute',
+                width: this.instances[i].contentWidth - (2 * this.config.xPadding) + 1 + 'px',
+                height: this.instances[i].contentHeight - (2 * this.config.yPadding) + 'px',
+                transform: this.instances[i].transform,
+                top: this.instances[i].contentY + 'px',
+                left: this.instances[i].contentX + 'px',
+                color: this.config.textColor,
+                fontSize: this.config.fontSize + 'px',
+                fontFamily: this.config.fontFamily,
+                overflow: 'hidden',
+                opacity: this.config.opacity,
+                borderRadius: this.config.borderRadius + 'px'
+              }}>
+            </x-div>) :
+            (
+              <foreignObject class={'sc-tooltip-content'} index={i} innerHTML={this.instances[i].tooltipContent} x={this.instances[i].contentX + 1} y={this.instances[i].contentY} width={this.instances[i].contentWidth - (2 * this.config.xPadding)} height={this.instances[i].contentHeight - (2 * this.config.yPadding)} >
+              </foreignObject>
+            )}
         </g>
       </g>);
     }
@@ -199,25 +188,29 @@ class Tooltip extends Component {
     if (this.props.grouped && this.config.followPointer) {
       transitionFunction = 'none';
     }
+    if (UtilCore.isIE) {
+      transitionFunction = 'none';
+    }
     return (
-    <Style>
-      {{
-        ['.sc-tip-' + this.instances[i].tipId]: {
-          WebkitTransition: transitionFunction,
-          MozTransition: transitionFunction,
-          OTransition: transitionFunction,
-          transition: transitionFunction,
-          transform: this.instances[i].transform
-        },
-        ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
-          color: this.config.textColor,
-          fontSize: this.config.fontSize + 'px',
-          fontFamily: this.config.fontFamily,
-          overflow: 'hidden',
-          opacity: this.config.opacity
-        }
-      }}
-    </Style>);
+      <Style>
+        {{
+          ['.sc-tip-' + this.instances[i].tipId]: {
+            WebkitTransition: transitionFunction,
+            MozTransition: transitionFunction,
+            OTransition: transitionFunction,
+            transition: transitionFunction,
+            transform: this.instances[i].transform
+          },
+          ['.sc-tip-' + this.instances[i].tipId + ' .sc-tooltip-content']: {
+            color: this.config.textColor,
+            fontSize: this.config.fontSize + 'px',
+            fontFamily: this.config.fontFamily,
+            overflow: 'hidden',
+            opacity: this.config.opacity,
+            borderRadius: this.config.borderRadius + 'px'
+          }
+        }}
+      </Style>);
   }
 
   createTooltipContent(line1, line2) {
@@ -231,27 +224,24 @@ class Tooltip extends Component {
   }
 
   createTipContainerHTML() {
-    let strHtml = `<div class='sc-tooltip-container-html' style='position: relative; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: ${-this.context.svgHeight}px; margin-top: -5px;pointer-events: none;'></div>`;
-    let allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
-    if(allTipContainer === null) {
-      this.rootContainer.insertAdjacentHTML('beforeend', strHtml);
-      allTipContainer = this.rootContainer.querySelector('.sc-tooltip-container-html');
+    if (!this.allTipContainer) {
+      return;
     }
-    let tipContainer = allTipContainer.querySelector('#sc-tooltip-container-' +  this.containerIdIE);
-    if(tipContainer) {
+    let tipContainer = this.allTipContainer.querySelector('#sc-tooltip-container-' + this.containerIdIE);
+    if (tipContainer) {
       tipContainer.parentNode.removeChild(tipContainer);
     }
-    strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='assertive' 
-      style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
-    </div>`;
-    allTipContainer.insertAdjacentHTML('beforeend', strHtml);
+    let strHtml = `<div id='sc-tooltip-container-${this.containerIdIE}' aria-atomic='true' aria-live='polite' 
+        style='position: absolute; width: ${this.context.svgWidth}px; height: ${this.context.svgHeight}px; top: 0; pointer-events: none;'>
+      </div>`;
+    this.allTipContainer.insertAdjacentHTML('beforeend', strHtml);
   }
 
   createTipAsHTML(node) {
-    if(node) {
+    if (node) {
       let instanceData = JSON.parse(node.dataset.instance);
       let tipContainer = document.getElementById(`sc-tooltip-container-${this.containerIdIE}`);
-      if(tipContainer) {
+      if (tipContainer) {
         node.innerHTML = instanceData.tooltipContent;
         tipContainer.appendChild(node);
       }
@@ -274,8 +264,7 @@ class Tooltip extends Component {
       return;
     }
 
-    let { originPoint, pointData, line1, line2 } = event;
-    let tipIterator;
+    let { originPoint, pointData, line1, line2 } = event, tipIterator;
 
     if (!this.props.grouped && pointData instanceof Array) {
       pointData.sort((a, b) => a.y - b.y);
@@ -290,7 +279,7 @@ class Tooltip extends Component {
       let xPadding = this.config.xPadding;
       let yPadding = this.config.yPadding;
       let strContents = '';
-      let delta = 10; // is anchor height
+      let delta = this.config.anchorHeight; // this is anchor height
       let inst;
 
       if (pointData instanceof Array) {
@@ -330,7 +319,7 @@ class Tooltip extends Component {
           line2 = 'html';
         } else if (typeof event.content === 'string') {
           let tooltipContent = event.content.replace(/{{/g, '${').replace(/}}/g, '}');
-          line1 = utilCore.assemble(tooltipContent, 'point')(pointData);
+          line1 = UtilCore.assemble(tooltipContent, 'point')(pointData);
           line2 = 'html';
         }
       }
@@ -356,6 +345,9 @@ class Tooltip extends Component {
       let width = txtWidth + (2 * xPadding);
       let height = lineHeight + (2 * yPadding);
       let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
+      if (this.props.opts.position === ENUMS.TOOLTIP_POSITION.STATIC && this.props.grouped) {
+        topLeft = cPoint = new Point(this.props.opts.left === undefined ? 0 : this.props.opts.left, this.props.opts.top === undefined ? 0 : this.props.opts.top);
+      }
       let textPos = new Point(topLeft.x, topLeft.y);
 
       let newState = {
@@ -384,11 +376,11 @@ class Tooltip extends Component {
               X2: newState.topLeft.x + newState.contentWidth,
               Y2: newState.topLeft.y + newState.contentHeight
             }, {
-                X1: oldTip.topLeft.x,
-                Y1: oldTip.topLeft.y,
-                X2: oldTip.topLeft.x + oldTip.contentWidth,
-                Y2: oldTip.topLeft.y + oldTip.contentHeight
-              });
+              X1: oldTip.topLeft.x,
+              Y1: oldTip.topLeft.y,
+              X2: oldTip.topLeft.x + oldTip.contentWidth,
+              Y2: oldTip.topLeft.y + oldTip.contentHeight
+            });
             if (ol) {
               if (newState.topLeft.y < oldTip.topLeft.y) {
                 newState.topLeft.y -= 10;
@@ -419,13 +411,23 @@ class Tooltip extends Component {
   }
 
   followMousePointer(e) {
-    let mousePos = uiCore.cursorPoint(this.context.rootContainerId, e);
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
     if (this.instances[0] && this.instances[0].opacity) {
       let cPoint = this.instances[0].originPoint;
-      let shiftLeft = this.instances[0].contentWidth + 20;
-      let shiftTop = this.instances[0].contentHeight / 2;
-      this.instances[0].transform = `translate(${mousePos.x - shiftLeft}px,${mousePos.y - shiftTop}px)`;
-      this.instances[0].cPoint = new Point(cPoint.x - mousePos.x + shiftLeft, cPoint.y - mousePos.y + shiftTop);
+      let shiftX = this.instances[0].contentWidth + 20;
+      let shiftY = this.instances[0].contentHeight / 2;
+      let transX = mousePos.x - shiftX, transY = mousePos.y - shiftY;
+      let cTransX = cPoint.x - mousePos.x + shiftX, cTransY = cPoint.y - mousePos.y + shiftY;
+      if (transX < 0) {
+        transX = mousePos.x + 20;
+        cTransX = cPoint.x - mousePos.x - 20;
+      }
+      if (transY < 0) {
+        transY = 0;
+        cTransY = cPoint.y;
+      }
+      this.instances[0].transform = `translate(${transX}px,${transY}px)`;
+      this.instances[0].cPoint = new Point(cTransX, cTransY);
       this.update();
     }
   }

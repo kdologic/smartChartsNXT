@@ -1,12 +1,13 @@
 'use strict';
 
 import defaultConfig from './../settings/config';
-import geom from './../core/geom.core';
+import GeomCore from './../core/geom.core';
 import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
-import uiCore from '../core/ui.core';
-import utilCore from '../core/util.core';
+import UiCore from '../core/ui.core';
+import UtilCore from '../core/util.core';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import MarkerIcon from './markerIcon';
 
 /**
  * legendBox.js
@@ -25,35 +26,6 @@ import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
  * display - inline : inline only take space as much required. it wouldn't wrap the legends.
  * display - block: block will take entire row. It will wrap the legends if overflow.
  *
- * @example
- * config:
-"legends":{
-    "enable" : true,                              // [ default: true | false ]
-    "top": 70,                                    // [ default: 70 ]
-    "left": 100,                                  // [ default: 100 ]
-    "maxWidth": "90%",                            // [ default : 100%] x % value accepted. Only applicable when display inline.
-    "alignment": $SC.ENUMS.ALIGNMENT.HORIZONTAL,  // [ default: ALIGNMENT.HORIZONTAL | ALIGNMENT.VERTICAL ]
-    "display": $SC.ENUMS.DISPLAY.INLINE,          // [ default: DISPLAY.INLINE | DISPLAY.BLOCK] Note: block will take entire row but inline only take space as much required
-    "float": $SC.ENUMS.FLOAT.NONE,                // [ FLOAT.TOP | FLOAT.BOTTOM | FLOAT.LEFT | FLOAT.RIGHT | default: FLOAT.NONE ]
-    "textColor": "#000",                          // [ default: theme.fontColorDark ]
-    "bgColor": "none",                            // [ default: none ]
-    "hoverColor":"none",                          // [ default: none ]
-    "fontSize": 14,                               // [ default: theme.fontSizeMedium ]
-    "fontFamily": "Lato",                         // [ default: Lato ]
-    "itemBorderWidth": 1,                         // [ default: 1 ]
-    "itemBorderColor": "#000",                    // [ default: #000 ]
-    "itemBorderOpacity": 1,                       // [ default: 1 ]
-    "itemBorderRadius": 10,                       // [ default: 10 ]
-    "borderColor": "none",                        // [ default: none ]
-    "borderWidth": 1,                             // [ default: 1 ]
-    "borderOpacity": 1,                           // [ default: 1 ]
-    "opacity": 0.9,                               // [ default: 0.9 ]
-    "toggleType": true,                           // [ default: true | false ]
-    "hideIcon": false,                            // [ true | default: false ]
-    "hideLabel": false,                           // [ true | default: false ]
-    "hideValue": false                            // [ true | default: false ]
-  }
-
  * @event
  * 1. legendClicked - Triggered when clicked on a legend box.
  * 2. legendHovered - Triggered when mouse hover on a legend box.
@@ -69,10 +41,24 @@ class LegendBox extends Component {
     this.setConfig(this.props);
     this.renderCount = 0;
     this.state = {
-      legendSet: this.props.legendSet.map(lSet => {
+      legendSet: this.props.legendSet.map((lSet) => {
         lSet.totalWidth = lSet.labelLength = 0;
         lSet.isToggled = lSet.isToggled === undefined ? false : lSet.isToggled;
         lSet.transform = '';
+        lSet.icon = {
+          ...{
+            enable: true,
+            type: ENUMS.ICON_TYPE.CIRCLE,
+            URL: ''
+          }, ...lSet.icon
+        };
+        lSet.bgFillOpacity = 0;
+        lSet.strokeOpacity = 0.1;
+        lSet.defaultIconStroke = 'none';
+        lSet.iconHighlight = false;
+        if (!lSet.icon.enable) {
+          lSet.icon.type = 'none';
+        }
         return lSet;
       }),
       left: 0,
@@ -92,7 +78,8 @@ class LegendBox extends Component {
     this.padding = 10;
     this.containerWidth = 0;
     this.containerHeight = 0;
-    this.colorContWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconHeight = this.config.hideIcon === true ? 0 : 15;
     this.hoverHeight = 15;
     this.lineHeight = 30;
     this.toggleColor = 'none';
@@ -102,22 +89,22 @@ class LegendBox extends Component {
     this.onLeave = this.onLeave.bind(this);
 
     this.calcFloatingPosition();
-    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
 
   setConfig(props) {
     this.config = {
-      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : uiCore.percentToPixel(this.context.svgWidth, props.opts.left),
-      maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : uiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
+      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.top),
+      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
+      maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : UiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
       type: props.opts.alignment || props.type || ENUMS.ALIGNMENT.HORIZONTAL,
       float: props.opts.float || props.float || ENUMS.FLOAT.NONE,
       display: props.opts.display || props.display || ENUMS.DISPLAY.INLINE,
       textColor: props.opts.textColor || defaultConfig.theme.fontColorDark,
       bgColor: props.opts.bgColor || props.background || 'none',
-      hoverColor: props.opts.hoverColor || props.hoverColor || '#999',
+      hoverColor: props.opts.hoverColor || props.hoverColor || 'none',
       fontSize: props.opts.fontSize || defaultConfig.theme.fontSizeMedium,
       fontFamily: props.opts.fontFamily || defaultConfig.theme.fontFamily,
       itemBorderWidth: typeof props.opts.itemBorderWidth === 'undefined' ? 1 : props.opts.itemBorderWidth,
@@ -129,44 +116,45 @@ class LegendBox extends Component {
       strokeOpacity: typeof props.opts.borderOpacity === 'undefined' ? (props.strokeOpacity || 1) : 1,
       opacity: typeof props.opts.opacity === 'undefined' ? (props.opacity || 0.9) : 0.9,
       toggleType: !!(props.opts.toggleType || props.toggleType || false),
-      hideIcon: props.opts.hideIcon === 'undefined' ? (typeof props.hideIcon === 'undefined' ? false : props.hideIcon) : props.opts.hideIcon,
-      hideLabel: props.opts.hideLabel === 'undefined' ? (typeof props.hideLabel === 'undefined' ? false : props.hideLabel) : props.opts.hideLabel,
-      hideValue: props.opts.hideValue === 'undefined' ? (typeof props.hideValue === 'undefined' ? false : props.hideValue) : props.opts.hideValue
+      hideIcon: typeof props.opts.hideIcon === 'undefined' ? (typeof props.hideIcon === 'undefined' ? false : props.hideIcon) : props.opts.hideIcon,
+      hideLabel: typeof props.opts.hideLabel === 'undefined' ? (typeof props.hideLabel === 'undefined' ? false : props.hideLabel) : props.opts.hideLabel,
+      hideValue: typeof props.opts.hideValue === 'undefined' ? (typeof props.hideValue === 'undefined' ? false : props.hideValue) : props.opts.hideValue
     };
-    this.colorContWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconWidth = this.config.hideIcon === true ? 0 : 15;
+    this.iconHeight = this.config.hideIcon === true ? 0 : 15;
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     /* Need to re-render when float = bottom */
     if (this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       setTimeout(() => this.emitter.emit('legendRendered', configData));
     }
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.setConfig(nextProps);
     this.calcFloatingPosition();
-    utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
+    UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
     this.calcLegendPositions();
     this.setContainerWidthHeight();
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     /* Need to re-render when float = bottom */
     if ((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = utilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       this.emitter.emit('legendRendered', configData);
     }
   }
@@ -175,11 +163,11 @@ class LegendBox extends Component {
     this.cumulativeWidth = 0;
     this.renderCount++;
     return (
-      <g transform={`translate(${this.state.legendBoxTrnsX},${this.state.legendBoxTrnsY})`}>
+      <g transform={`translate(${this.state.legendBoxTrnsX},${this.state.legendBoxTrnsY})`} role="region">
         <path class='legend-container-border' d={this.getContainerBorderPath()} fill={this.config.bgColor}
           opacity={this.config.opacity} stroke-width={this.config.strokeWidth} stroke={this.config.strokeColor} stroke-opacity={this.config.strokeOpacity}
         />
-        <g class='legend-set' transform={`translate(${this.state.legendSetTrnsX})`}>
+        <g class='sc-legend-set' transform={`translate(${this.state.legendSetTrnsX})`}>
           {this.getLegendSet()}
         </g>
       </g>
@@ -192,33 +180,31 @@ class LegendBox extends Component {
 
   getLegend(data, index, withContainer = true) {
     return (
-      <g class={`sc-legend-${index} sc-series-legend`} tabindex='0' transform={this.state.legendSet[index].transform || ''} style={{ cursor: 'pointer' }}
+      <g class={`sc-legend-${index} sc-series-legend`} transform={this.state.legendSet[index].transform || ''} style={{ cursor: 'pointer' }} tabindex='0'
+        role="button" aria-label={(data.isToggled ? 'Show' : 'Hide ') + data.label + ' series'} aria-pressed={data.isToggled}
         events={{
-          click: this.onClick,
-          keyup: this.onClick,
-          mouseenter: this.onHover,
-          mouseleave: this.onLeave,
-          focusin: this.onHover,
-          focusout: this.onLeave
+          click: (e) => this.onClick(e, index),
+          keyup: (e) => this.onClick(e, index),
+          mouseenter: (e) => this.onHover(e, index),
+          mouseleave: (e) => this.onLeave(e, index),
+          focusin: (e) => this.onHover(e, index),
+          focusout: (e) => this.onLeave(e, index)
         }} >
         {withContainer &&
           <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding / 2)} y={this.state.top + (this.padding / 2)} rx={this.config.itemBorderRadius}
             width={data.totalWidth} height={this.hoverHeight + this.padding} fill={this.config.hoverColor} stroke-opacity={this.config.itemBorderOpacity}
-            stroke={this.config.itemBorderColor} stroke-width={this.config.itemBorderWidth} style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': '0', 'pointerEvents': 'all' }}>
+            stroke={this.config.itemBorderColor} stroke-width={this.config.itemBorderWidth} style={{ 'transition': 'fill-opacity 0.3s linear', 'fillOpacity': data.bgFillOpacity, 'pointerEvents': 'all' }}>
           </rect>
         }
-        {!this.props.opts.hideIcon &&
-          <g class='sc-legend-icon-group'>
-            <rect class={`sc-legend-${index} sc-legend-color-${index}`} x={this.state.left + this.padding} y={this.state.top + this.padding}
-              width={this.colorContWidth} height={this.colorContWidth} fill={data.isToggled ? this.toggleColor : data.color}
-              shape-rendering='optimizeSpeed' stroke-width={2} stroke='none' opacity='1'>
-            </rect>
+        {!this.config.hideIcon &&
+          <g class='sc-legend-icon-group' transform="translate(2,0)">
+            {this.getIcon(index, data)}
             <path class={`sc-icon-x-${index}`} stroke='#000' fill='none' stroke-linecap='round' stroke-opacity={data.isToggled ? 1 : 0}
               d={[
                 'M', this.state.left + this.padding, this.state.top + this.padding,
-                'L', this.state.left + this.padding + this.colorContWidth, this.state.top + this.padding + this.colorContWidth,
-                'M', this.state.left + this.padding + this.colorContWidth, this.state.top + this.padding,
-                'L', this.state.left + this.padding, this.state.top + this.padding + this.colorContWidth
+                'L', this.state.left + this.padding + this.iconWidth, this.state.top + this.padding + this.iconWidth,
+                'M', this.state.left + this.padding + this.iconWidth, this.state.top + this.padding,
+                'L', this.state.left + this.padding, this.state.top + this.padding + this.iconWidth
               ].join(' ')} stroke-width='1'>
             </path>
           </g>
@@ -230,15 +216,34 @@ class LegendBox extends Component {
 
   getLegendText(data, index) {
     return (
-      <text class={`sc-legend-${index} sc-legend-txt-${index}`} font-size={this.config.fontSize} x={this.state.left + this.colorContWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
+      <text class={`sc-legend-${index} sc-legend-txt-${index}`} stroke-width={0.5} stroke={this.config.textColor} stroke-opacity={data.strokeOpacity} font-size={this.config.fontSize} x={this.state.left + this.iconWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
         fill={this.config.textColor} font-family={this.config.fontFamily} pointer-events='none' >
         <tspan class={`sc-legend-${index} sc-legend-txt-label-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}>{!this.config.hideLabel && data.label}</tspan>
         <tspan class={`sc-legend-${index} sc-legend-txt-value-${index}`} text-decoration={data.isToggled ? 'line-through' : 'none'}
-          dx={this.state.lengthSet.max.labelLength - this.state.legendSet[index].labelLength + this.padding}>
+          dx={this.state.lengthSet.max.labelLength - data.labelLength + this.padding}>
           {!this.config.hideValue && data.value}
         </tspan>
       </text>
     );
+  }
+
+  getIcon(index, data) {
+    const line = <line x1={this.state.left + this.padding - (this.iconWidth / 4)} y1={this.state.top + this.padding + (this.iconWidth / 2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth / 4)} y2={this.state.top + this.padding + (this.iconWidth / 2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>;
+    if (!data.icon.enable) {
+      return line;
+    }
+    if (!data.icon.type) {
+      return [
+        line,
+        <rect x={this.state.left + this.padding} y={this.state.top + this.padding} width={this.iconWidth} height={this.iconWidth} fill={data.isToggled ? this.toggleColor : data.color}
+          shape-rendering='optimizeSpeed' stroke-width={2} stroke={data.defaultIconStroke} opacity='1'>
+        </rect>
+      ];
+    }
+    return [
+      line,
+      <MarkerIcon id={index} type={data.icon.type} x={this.state.left + this.padding + (this.iconWidth / 2)} y={this.state.top + this.padding + (this.iconHeight / 2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" URL={data.icon.URL || ''}></MarkerIcon>
+    ];
   }
 
   calcFloatingPosition() {
@@ -306,14 +311,13 @@ class LegendBox extends Component {
       labelLength: []
     };
     this.state.legendSet.forEach((lSet, index) => {
-      lengthSet.totalWidth.push(lSet.totalWidth = uiCore.getComputedBBox(this.getLegend(lSet, index, false)).width + this.padding),
-        lengthSet.labelLength.push(lSet.labelLength = uiCore.getComputedTextWidth(this.getLegendText(lSet, index)));
+      lengthSet.totalWidth.push(lSet.totalWidth = UiCore.getComputedBBox(this.getLegend(lSet, index, false)).width + this.padding);
+      lengthSet.labelLength.push(lSet.labelLength = UiCore.getComputedTextWidth(this.getLegendText(lSet, index)));
     });
     lengthSet.max = {
       width: Math.max(...lengthSet.totalWidth),
       labelLength: Math.max(...lengthSet.labelLength)
     };
-    //lengthSet.innerWidth = (lengthSet.max.width + this.padding) * Math.min(this.state.legendSet.length, this.getMaxLegendInLine(lengthSet.max.width + (2 * this.padding)));
     return lengthSet;
   }
 
@@ -327,7 +331,7 @@ class LegendBox extends Component {
   }
 
   getContainerBorderPath() {
-    return geom.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
+    return GeomCore.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
   }
 
   getBBox() {
@@ -349,11 +353,10 @@ class LegendBox extends Component {
     return e;
   }
 
-  onClick(e) {
+  onClick(e, index) {
     if (e.type === 'keyup' && (e.which || e.keyCode) !== 32) {
       return;
     }
-    let index = e.target.classList[0].substring('sc-legend-'.length);
     if (this.config.toggleType) {
       this.state.legendSet[index].isToggled = !this.state.legendSet[index].isToggled;
       this.update();
@@ -362,32 +365,24 @@ class LegendBox extends Component {
     this.emitter.emit('legendClicked', e);
   }
 
-  onHover(e) {
-    let index = e.target.classList[0].substring('sc-legend-'.length);
-    if (this.ref.node.querySelector(`.sc-legend-border-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-border-${index}`).style['fill-opacity'] = 0.9;
-    }
-    if (this.ref.node.querySelector(`.sc-legend-txt-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-txt-${index}`).style['font-weight'] = 'bold';
-    }
-    if (this.ref.node.querySelector(`.sc-legend-color-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-color-${index}`).setAttribute('stroke', '#000');
-    }
+  onHover(e, index) {
+    this.state.legendSet[index].bgFillOpacity = 1;
+    this.state.legendSet[index].strokeOpacity = 1;
+    this.state.legendSet[index].defaultIconStroke = '#000';
+    this.state.legendSet[index].iconHighlight = true;
+
+    this.update();
     this.assignLegendData(index, e);
     this.emitter.emit('legendHovered', e);
   }
 
-  onLeave(e) {
-    let index = e.target.classList[0].substring('sc-legend-'.length);
-    if (this.ref.node.querySelector(`.sc-legend-border-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-border-${index}`).style['fill-opacity'] = 0;
-    }
-    if (this.ref.node.querySelector(`.sc-legend-txt-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-txt-${index}`).style['font-weight'] = 'normal';
-    }
-    if (this.ref.node.querySelector(`.sc-legend-color-${index}`)) {
-      this.ref.node.querySelector(`.sc-legend-color-${index}`).setAttribute('stroke', 'none');
-    }
+  onLeave(e, index) {
+    this.state.legendSet[index].bgFillOpacity = 0;
+    this.state.legendSet[index].strokeOpacity = 0.1;
+    this.state.legendSet[index].defaultIconStroke = 'none';
+    this.state.legendSet[index].iconHighlight = false;
+
+    this.update();
     this.assignLegendData(index, e);
     this.emitter.emit('legendLeaved', e);
   }
