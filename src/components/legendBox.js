@@ -124,11 +124,11 @@ class LegendBox extends Component {
     this.iconHeight = this.config.hideIcon === true ? 0 : 15;
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     /* Need to re-render when float = bottom */
     if (this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
@@ -140,7 +140,7 @@ class LegendBox extends Component {
     }
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.setConfig(nextProps);
     this.calcFloatingPosition();
     utilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
@@ -148,7 +148,7 @@ class LegendBox extends Component {
     this.setContainerWidthHeight();
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     /* Need to re-render when float = bottom */
     if ((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();

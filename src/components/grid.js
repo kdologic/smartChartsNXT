@@ -79,11 +79,11 @@ class Grid extends Component {
     this.state.hLineDashArray = this.config.horizontal.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.setConfig(nextProps);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('onHorizontalLabelsRender', this.updateVerticalGrid);
     this.emitter.removeListener('onVerticalLabelsRender', this.updateHorizontalGrid);
   }

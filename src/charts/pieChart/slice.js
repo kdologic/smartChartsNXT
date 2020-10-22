@@ -33,11 +33,11 @@ class Slice extends Component {
     this.maxMarkerTextLen = 15;
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined); 
   }
 
-  componentDidMount() {
+  afterMount() {
     if(this.props.slicedOut === true) {
       this.toggleSlide(); 
     }

@@ -34,11 +34,11 @@ class TextBox extends Component {
     };
   }
 
-  componentDidMount() {
+  afterMount() {
     this.processAfterRender();
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     this.processAfterRender();
   }
 

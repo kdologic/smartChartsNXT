@@ -17,11 +17,11 @@ class ConnectorBox extends Component {
     super(props);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 

@@ -45,14 +45,14 @@ class ZoomOutBox extends Component {
     });
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('beforePrint', this.hideIcon);
     this.emitter.on('afterPrint', this.showIcon);
     this.emitter.on('beforeSave', this.hideIcon);
     this.emitter.on('afterSave', this.showIcon);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('beforePrint', this.hideIcon);
     this.emitter.removeListener('afterPrint', this.showIcon);
     this.emitter.removeListener('beforeSave', this.hideIcon);

@@ -118,13 +118,13 @@ class Menu extends Component {
     this.configureMenuItems(this.props.opts);
   }
 
-  componentDidMount() {
+  afterMount() {
     if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
       this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
     }
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.configureMenuItems(nextProps.opts);
   }
 

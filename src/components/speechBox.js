@@ -32,15 +32,15 @@ class SpeechBox extends Component {
     return this._cpoint;
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.aHalfWidth = typeof nextProps.anchorBaseWidth === 'undefined' ? 8 : nextProps.anchorBaseWidth;
   }
 

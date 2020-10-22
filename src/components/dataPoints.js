@@ -34,17 +34,17 @@ class DataPoints extends Component {
     this.state.icons = {};
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('highlightPointMarker', this.doHighlight);
     this.emitter.on('normalizeAllPointMarker', this.normalize);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('highlightPointMarker', this.doHighlight);
     this.emitter.removeListener('normalizeAllPointMarker', this.normalize);
     this.state.icons = {};

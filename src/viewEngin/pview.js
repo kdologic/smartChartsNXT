@@ -36,8 +36,8 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {},
 
   let component = (nodeType === 'rnode' ? node : renderDOM.call({ context: ctx }, node));
 
-  if (component.self && typeof component.self.componentWillMount === 'function') {
-    component.self.componentWillMount.call(component.self);
+  if (component.self && typeof component.self.beforeMount === 'function') {
+    component.self.beforeMount.call(component.self);
   }
 
   if (!oldNode) {
@@ -54,8 +54,8 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {},
     delete component.eventStack;
   }
 
-  if (component.self && typeof component.self.componentDidMount === 'function') {
-    component.self.componentDidMount.call(component.self);
+  if (component.self && typeof component.self.afterMount === 'function') {
+    component.self.afterMount.call(component.self);
   }
 
   return component;
@@ -91,7 +91,7 @@ function renderDOM(vnode) {
         }
       })(key);
 
-      if(attrVal !== undefined) {
+      if (attrVal !== undefined) {
         component.node.setAttribute(key, attrVal);
       }
     });
@@ -140,8 +140,8 @@ function renderDOM(vnode) {
     /* eslint-disable-next-line babel/no-invalid-this */
     let childComp = renderDOM.call(({ context: this.context } || {}), c);
 
-    if (childComp.self && typeof childComp.self.componentWillMount === 'function') {
-      childComp.self.componentWillMount.call(childComp.self);
+    if (childComp.self && typeof childComp.self.beforeMount === 'function') {
+      childComp.self.beforeMount.call(childComp.self);
     }
 
     component.children.push(childComp);
@@ -152,8 +152,8 @@ function renderDOM(vnode) {
       delete childComp.eventStack;
     }
 
-    if (childComp.self && typeof childComp.self.componentDidMount === 'function') {
-      component.eventStack.push(childComp.self.componentDidMount.bind(childComp.self));
+    if (childComp.self && typeof childComp.self.afterMount === 'function') {
+      component.eventStack.push(childComp.self.afterMount.bind(childComp.self));
     }
   });
 
@@ -246,11 +246,11 @@ window.__h__ = window.__h__ || __h__;
  */
 function _extends(dest, ...args) {
   const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
-  if(!dest) {
+  if (!dest) {
     return {};
-  }else if(args.length === 0) {
+  } else if (args.length === 0) {
     return dest;
-  }else {
+  } else {
     return dest = merge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
   }
 }
@@ -266,7 +266,7 @@ function parseStyleProps(objStyle) {
   }
   let sArr = [];
   Object.keys(objStyle).forEach(key => {
-    if(typeof objStyle[key] === 'undefined') {
+    if (typeof objStyle[key] === 'undefined') {
       return;
     }
     if (objStyle[key].old !== undefined && objStyle[key].old !== null && objStyle[key].new !== undefined && objStyle[key].new !== null) {
@@ -469,8 +469,8 @@ class Component {
         ref.self.propsWillReceive.call(ref.self, newProps);
       }
 
-      if (ref && ref.self && typeof ref.self.shouldComponentUpdate === 'function') {
-        let shouldUpdate = ref.self.shouldComponentUpdate(newProps);
+      if (ref && ref.self && typeof ref.self.shouldUpdate === 'function') {
+        let shouldUpdate = ref.self.shouldUpdate(newProps);
         if (!shouldUpdate) {
           ref.self.props = newProps;
           return false;
@@ -481,8 +481,8 @@ class Component {
         ref.self.__proto__.context = context;
       }
 
-      if (ref && ref.self && typeof ref.self.componentWillUpdate === 'function') {
-        ref.self.componentWillUpdate.call(ref.self, newProps);
+      if (ref && ref.self && typeof ref.self.beforeUpdate === 'function') {
+        ref.self.beforeUpdate.call(ref.self, newProps);
       }
 
       if (ref && ref.self) {
@@ -503,8 +503,8 @@ class Component {
           this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, context);
           newVNode.nodeName.vnode = newRenderedVnode;
           ref.children = ref.self.ref.children;
-          if (ref && ref.self && typeof ref.self.componentDidUpdate === 'function') {
-            ref.self.componentDidUpdate(oldVNode.attributes);
+          if (ref && ref.self && typeof ref.self.afterUpdate === 'function') {
+            ref.self.afterUpdate(oldVNode.attributes);
           }
           return;
         } else if (typeof newVNode.nodeName === 'string') {
@@ -567,8 +567,8 @@ class Component {
     }
     if (typeof newVNode.nodeName === 'object') {
       newVNode.nodeName.vnode = newRenderedVnode;
-      if (typeof ref.self.componentDidUpdate === 'function') {
-        ref.self.componentDidUpdate(oldVNode.nodeName.props);
+      if (typeof ref.self.afterUpdate === 'function') {
+        ref.self.afterUpdate(oldVNode.nodeName.props);
       }
     }
   }
@@ -624,8 +624,8 @@ class Component {
       }
     }
 
-    if (destroyableObj && typeof destroyableObj.componentWillUnmount === 'function') {
-      destroyableObj.componentWillUnmount.call(destroyableObj);
+    if (destroyableObj && typeof destroyableObj.beforeUnmount === 'function') {
+      destroyableObj.beforeUnmount.call(destroyableObj);
     }
 
     if (typeof destroyableNode.nodeName === 'object') {
@@ -675,7 +675,7 @@ class Component {
               });
               return evtNames.filter(v => !!v).join();
             default:
-              if(attrChanges[group][k] === undefined) {
+              if (attrChanges[group][k] === undefined) {
                 return undefined;
               }
               if (attrChanges[group][k].old !== undefined && attrChanges[group][k].new !== undefined) {
@@ -686,11 +686,11 @@ class Component {
           }
         })(key);
 
-        if(attrVal === undefined) {
+        if (attrVal === undefined) {
           fastdom.mutate(() => {
             dom.removeAttribute(key);
           });
-        }else {
+        } else {
           fastdom.mutate(() => {
             dom.setAttribute(key, attrVal);
           });
@@ -722,12 +722,12 @@ class Component {
       console.time(compName + ' update');
     }
 
-    if (!this.shouldComponentUpdate(this.props)) {
+    if (!this.shouldUpdate(this.props)) {
       return false;
     }
 
-    if (typeof this.componentWillUpdate === 'function') {
-      this.componentWillUpdate(this.props);
+    if (typeof this.beforeUpdate === 'function') {
+      this.beforeUpdate(this.props);
     }
 
     let vnodeNow = this.render();
@@ -737,8 +737,8 @@ class Component {
     }
     this._reconcile(this.vnode, vnodeNow, this.ref, objContext);
 
-    if (typeof this.componentDidUpdate === 'function') {
-      this.componentDidUpdate(this.props);
+    if (typeof this.afterUpdate === 'function') {
+      this.afterUpdate(this.props);
     }
 
     if (config.debug && config.debugRenderTime) {
@@ -778,21 +778,21 @@ class Component {
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentWillMount(nextProps) { }
+  beforeMount(nextProps) { }
 
   /**
    * Lifecycle event - fires after the component mounted on parent DOM.
    * @param {Object} nextProps New set of props.
    * @returns {undefined} void.
    */
-  componentDidMount(nextProps) { }
+  afterMount(nextProps) { }
 
   /**
    * Call before render and determine component update
    * @param {Object} nextProps Next set of props that will receive by component.
    * @returns {boolean} Return boolean true or false.
    */
-  shouldComponentUpdate(nextProps = {}) {
+  shouldUpdate(nextProps = {}) {
     return true;
   }
 
@@ -801,20 +801,20 @@ class Component {
    * @param {Object} nextProps set of props that was there before update that component.
    * @returns {undefined} void.
    */
-  componentWillUpdate(nextProps = {}) { }
+  beforeUpdate(nextProps = {}) { }
 
   /**
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {Object} prevProps set of props that was there before update that component.
    * @returns {undefined} void.
    */
-  componentDidUpdate(prevProps) { }
+  afterUpdate(prevProps) { }
 
   /**
    * Lifecycle event - fires before the component unmounted from parent DOM.
    * @returns {undefined} void.
    */
-  componentWillUnmount() { }
+  beforeUnmount() { }
 }
 
 export { mountTo, renderDOM, Component, parseStyleProps };

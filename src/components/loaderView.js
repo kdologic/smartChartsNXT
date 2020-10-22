@@ -26,12 +26,12 @@ class LoaderView extends Component {
     this.onHideLoader = this.onHideLoader.bind(this);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('showLoader', this.onShowLoader);
     this.emitter.on('hideLoader', this.onHideLoader);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('showLoader', this.onShowLoader);
     this.emitter.removeListener('hideLoader', this.onHideLoader);
   }

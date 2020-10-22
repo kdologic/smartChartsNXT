@@ -94,15 +94,15 @@ class DrawConnectedPoints extends Component {
     }
   }
 
-  shouldComponentUpdate() {
+  shouldUpdate() {
     return this.props.shouldRender;
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
@@ -111,7 +111,7 @@ class DrawConnectedPoints extends Component {
     this.state.animated = false;
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     let rangeStart = '', rangeEnd = '';
     if (this.props.accessibility) {
       rangeStart = this.props.xAxisInfo.selectedCategories[0];
@@ -126,7 +126,7 @@ class DrawConnectedPoints extends Component {
     }
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);

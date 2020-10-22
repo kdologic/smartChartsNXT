@@ -30,7 +30,7 @@ class Watermark extends Component {
     this.onMouseLeave = this.onMouseLeave.bind(this);
   }
 
-  componentDidMount() {
+  afterMount() {
     let textWidth = this.ref.node.querySelector('.watermark-text').getBBox().width;
     if (this.state.textWidth !== textWidth) {
       this.setState({

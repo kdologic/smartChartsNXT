@@ -154,7 +154,7 @@ class PieChart extends Component {
     this.CHART_DATA.totalValue = 0;
   } 
 
-  componentDidMount() {
+  afterMount() {
     if(this.firstRender){
       this.firstRender = false; 
       this.calcPieDimensions(); 

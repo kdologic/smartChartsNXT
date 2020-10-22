@@ -62,15 +62,15 @@ class SeriesLabel extends Component {
     this.resetConfig(this.props);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.store.setValue('seriesLabelData', {[this.props.instanceId]: []});
   }
 

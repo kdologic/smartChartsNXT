@@ -114,23 +114,23 @@ class Rect extends Component {
     console.log('propsWillReceive --', this.props.id ,'(new)', nextProps.id);
   }
 
-  componentWillMount() {
-    console.log('componentWillMount --', this.props);
+  beforeMount() {
+    console.log('beforeMount --', this.props);
   }
 
-  componentDidMount() {
-    console.log('componentDidMount --', this.props);
+  afterMount() {
+    console.log('afterMount --', this.props);
   }
 
-  componentDidUpdate(prevProps) {
-    console.log('componentDidUpdate --', prevProps);
+  afterUpdate(prevProps) {
+    console.log('afterUpdate --', prevProps);
   }
 
-  componentWillUnmount() {
-    console.log('componentWillUnmount --', this.props.id);
+  beforeUnmount() {
+    console.log('beforeUnmount --', this.props.id);
   }
 
-  shouldComponentUpdate(nextProps) {
+  shouldUpdate(nextProps) {
     return true;
   }
 

@@ -49,11 +49,11 @@ class VerticalLabels extends Component {
       '.</div>', false);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.intervalId = setInterval(() => {
       if (this.ref.node.getBoundingClientRect().width > this.props.maxWidth) {
         this.setState({ fontSize: this.state.fontSize - 1 });

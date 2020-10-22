@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -163,13 +164,13 @@
             "lineThickness": 1,                         // [ default: 1 ]
             "lineOpacity": 0.2                          // [ default: 0.2 ]
           },
-          "bgColor": '#9DE5FF',                          // [ default: none ]
-          "fillOptions": {                               // pattern have and highest priority then gradient and image has the lowest priority.
+          "bgColor": '#9DE5FF',                         // [ default: none ]
+          "fillOptions": {                              // pattern have and highest priority then gradient and image has the lowest priority.
             //"pattern": "pattern-1",                   // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
             "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
             //"image":  "image-fill-1"                  // [ no default value , only available which is defined defs field]
           },
-          "bgOpacity": 0.2                               // [ default: 0.1 ]   
+          "bgOpacity": 0.2                              // [ default: 0.1 ]   
         },
         "pointerCrosshair": {
           "vertical": {
@@ -325,113 +326,112 @@
             "zeroBase": false                           // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
           },
           "series": [{
-              "visible": true,                          // [ default: true | false ]
-              "name": 'Raphael',                        // [ required : string ]
-              "a11y": {
-                description: "Showing his performance as a sales representative"   // [ default: '']
-              },
-              "lineWidth": 1.5,                         // [ default: 1.5 ]
-              "lineOpacity": 1,                         // [ default: 1 ]
-              "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,  // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
-              "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,  // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
-              "areaOpacity": 0.5,                       // [ default: 0.2]
-              "fillOptions": {                          // pattern have and highest priority then gradient and image has the lowest priority.
-                //"pattern": "pattern-1",               // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
-                //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
-                //"image":  "image-fill-1"              // [ no default value , only available which is defined defs field]
-              },
-              "marker": {
-                "enable": true,                         // [ default: true | false ] // Note: will hide when marker density < 15px
-                "type": $SC.ENUMS.ICON_TYPE.CIRCLE,     // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
-                "width": 12,                            // [ default: 12]
-                "height": 12,                           // [ default: 12]
-                "URL": ""                               // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
-              },
-              "spline": true,                           // [ default: true | false ]
-              // "dropShadow": true,                    // [ default: true | false ] Note: Drop shadow only applicable for line charts.
-              "animated": true,                         // [ default: true | false ]
-              "seriesLabel": {
-                "enable": false,                         // [ true | default: false ]
-                "labelOverlap": false,                  // [ true | default: false ]
-                "textOnly": false,                      // [ true | default: false ] Note: Display only text without background.
-                "showConnectorLine": true,              // [ default: true | false ] Note: Draw a connector line between label and series chart.
-                //"textColor": "",                      // [ default : series.lineColor || series.areaColor ]
-                "textOpacity": 1,                       // [ default: 1 ]
-                "bgColor": "#fff",                      // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
-                "bgOpacity": 0.5,                       // [ default: 0.5 ]
-                //"borderColor": "",                    // [ default: series.lineColor || series.areaColor ]
-                "borderWidth": 1,                       // [ default: 1 ]
-                "borderRadius": 5,                      // [ default: 5 ]
-                "xPadding": 5,                          // [ default: 5 ] Create left and right padding inside the label box
-                "yPadding": 5,                          // [ default: 5 ] Create top and bottom padding inside the label box.
-                "shadow": true,                         // [ default: true | false ] Create a drop shadow when background box is visible. No shadow for texOnly mode.
-                "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
-                "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
-              },
-              "dataLabels": {
-                "enable": false,                        // [ true | default: false ]
-                "float": $SC.ENUMS.FLOAT.TOP,           // [ $SC.ENUMS.FLOAT.(default: TOP | BOTTOM | LEFT | RIGHT) ]
-                "labelOverlap": false,                  // [ true | default: false ]
-                "textColor": "#000",                    // [ default : $SC.GLOBAL.theme.fontColorDark ]
-                "textOpacity": 1,                       // [ default: 1 ]
-                "bgColor": "#fff",                      // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
-                "bgOpacity": 0.5,                       // [ default: 0.5 ]
-                "borderColor": $SC.COLOR_STRINGS.MAT_BLUE, // [ default: $SC.GLOBAL.theme.bgColorMedium ]
-                "borderWidth": 1,                       // [ default: 1 ]
-                "borderRadius": 5,                      // [ default: 5 ]
-                "filter": function(val, index) {        // [ optional ] Reducer function for data labels.
-                  return true;
-                },
-                "formatter": function(val, index) {     // [ optional ] Formatter function of text value for data labels.
-                  return "Rs. " + val;
-                }, 
-                "anchorBaseWidth": 5,                   // [ default: 5 ] Width of anchor at base
-                "xPadding": 5,                          // [ default: 5 ] Create left and right padding inside the label box
-                "yPadding": 5,                          // [ default: 5 ] Create top and bottom padding inside the label box.
-                "offsetX": 0,                           // [ default: 0 ] Create margin left from it's relative position.
-                "offsetY": 0,                           // [ default: 0 ] Create margin bottom from it's relative position.
-                "shadow": true,                         // [ default: true | false ]
-                "classes": [],                          // [ default: empty array ] Array of classes that will be added into main container of data labels.         
-                "style": {}                             // [ default: empty object ] CSS Styles that will be added into each data label.
-              },
-              "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
-                "max": 1000,
-                "min": -1000
-              })       
-              // [
-              //   {value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
-              // ] 
-              // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
+            "visible": true,                            // [ default: true | false ]
+            "name": 'Raphael',                          // [ required : string ]
+            "a11y": {
+              description: "Showing his performance as a sales representative"   // [ default: '']
             },
-            {
-              "visible": true,
-              "name": 'Clara',
-              "lineWidth": 1.5,
-              "lineOpacity": 1,
-              "areaColor": '#008000',
-              "areaOpacity": 0.5,
-              "fillOptions": { 
-                //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
+            "lineWidth": 1.5,                           // [ default: 1.5 ]
+            "lineOpacity": 1,                           // [ default: 1 ]
+            "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
+            "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
+            "areaOpacity": 0.5,                         // [ default: 0.2]
+            "fillOptions": {                            // pattern have and highest priority then gradient and image has the lowest priority.
+              //"pattern": "pattern-1",                 // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
+              //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
+              //"image":  "image-fill-1"                // [ no default value , only available which is defined defs field]
+            },
+            "marker": {
+              "enable": true,                           // [ default: true | false ] // Note: will hide when marker density < 15px
+              "type": $SC.ENUMS.ICON_TYPE.CIRCLE,       // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
+              "width": 12,                              // [ default: 12]
+              "height": 12,                             // [ default: 12]
+              "URL": ""                                 // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
+            },
+            "spline": true,                             // [ default: true | false ]
+            // "dropShadow": true,                      // [ default: true | false ] Note: Drop shadow only applicable for line charts.
+            "animated": true,                           // [ default: true | false ]
+            "seriesLabel": {
+              "enable": false,                          // [ true | default: false ]
+              "labelOverlap": false,                    // [ true | default: false ]
+              "textOnly": false,                        // [ true | default: false ] Note: Display only text without background.
+              "showConnectorLine": true,                // [ default: true | false ] Note: Draw a connector line between label and series chart.
+              //"textColor": "",                        // [ default : series.lineColor || series.areaColor ]
+              "textOpacity": 1,                         // [ default: 1 ]
+              "bgColor": "#fff",                        // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
+              "bgOpacity": 0.5,                         // [ default: 0.5 ]
+              //"borderColor": "",                      // [ default: series.lineColor || series.areaColor ]
+              "borderWidth": 1,                         // [ default: 1 ]
+              "borderRadius": 5,                        // [ default: 5 ]
+              "xPadding": 5,                            // [ default: 5 ] Create left and right padding inside the label box
+              "yPadding": 5,                            // [ default: 5 ] Create top and bottom padding inside the label box.
+              "shadow": true,                           // [ default: true | false ] Create a drop shadow when background box is visible. No shadow for texOnly mode.
+              "classes": [],                            // [ default: empty array ] Array of classes that will be added into main container of data labels.         
+              "style": {}                               // [ default: empty object ] CSS Styles that will be added into each data label.
+            },
+            "dataLabels": {
+              "enable": false,                          // [ true | default: false ]
+              "float": $SC.ENUMS.FLOAT.TOP,             // [ $SC.ENUMS.FLOAT.(default: TOP | BOTTOM | LEFT | RIGHT) ]
+              "labelOverlap": false,                    // [ true | default: false ]
+              "textColor": "#000",                      // [ default : $SC.GLOBAL.theme.fontColorDark ]
+              "textOpacity": 1,                         // [ default: 1 ]
+              "bgColor": "#fff",                        // [ default : $SC.GLOBAL.theme.bgColorLight ]                  
+              "bgOpacity": 0.5,                         // [ default: 0.5 ]
+              "borderColor": $SC.COLOR_STRINGS.MAT_BLUE,// [ default: $SC.GLOBAL.theme.bgColorMedium ]
+              "borderWidth": 1,                         // [ default: 1 ]
+              "borderRadius": 5,                        // [ default: 5 ]
+              "filter": function(val, index) {          // [ optional ] Reducer function for data labels.
+                return true;
               },
-              "marker": {
-                "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
-                // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
-              },
-              "spline": false,
-              "animated": true,
-              "dataLabels": {
-                "enable": false
-              },
-              "data": generateRandomTimeSeries(new Date().getTime(), 100, {
-                "max": 1000,
-                "min": -1000
-              })
-              // [
-              // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
-              // ]
-            }
-          ]
+              "formatter": function(val, index) {       // [ optional ] Formatter function of text value for data labels.
+                return "Rs. " + val;
+              }, 
+              "anchorBaseWidth": 5,                     // [ default: 5 ] Width of anchor at base
+              "xPadding": 5,                            // [ default: 5 ] Create left and right padding inside the label box
+              "yPadding": 5,                            // [ default: 5 ] Create top and bottom padding inside the label box.
+              "offsetX": 0,                             // [ default: 0 ] Create margin left from it's relative position.
+              "offsetY": 0,                             // [ default: 0 ] Create margin bottom from it's relative position.
+              "shadow": true,                           // [ default: true | false ]
+              "classes": [],                            // [ default: empty array ] Array of classes that will be added into main container of data labels.         
+              "style": {}                               // [ default: empty object ] CSS Styles that will be added into each data label.
+            },
+            "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
+              "max": 1000,
+              "min": -1000
+            })       
+            // [
+            //   {value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
+            // ] 
+            // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
+          },
+          {
+            "visible": true,
+            "name": 'Clara',
+            "lineWidth": 1.5,
+            "lineOpacity": 1,
+            "areaColor": '#008000',
+            "areaOpacity": 0.5,
+            "fillOptions": { 
+              //"gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV 
+            },
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+              // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+              // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+            },
+            "spline": false,
+            "animated": true,
+            "dataLabels": {
+              "enable": false
+            },
+            "data": generateRandomTimeSeries(new Date().getTime(), 100, {
+              "max": 1000,
+              "min": -1000
+            })
+            // [
+            // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
+            // ]
+          }]
         },
         // events: {
         //   beforeRender: function (e) {

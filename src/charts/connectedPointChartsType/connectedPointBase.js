@@ -508,7 +508,7 @@ class ConnectedPointBase extends Component {
     }
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('hScroll', this.onHScroll);
     this.emitter.on('highlightPointMarker', this.onHighlightPointMarker);
     this.emitter.on('interactiveMouseLeave', this.onMouseLeave);
@@ -524,11 +524,11 @@ class ConnectedPointBase extends Component {
     this.state.shouldFSRender = false;
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     this.state.shouldFSRender = false;
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('hScroll', this.onHScroll);
     this.emitter.removeListener('highlightPointMarker', this.onHighlightPointMarker);
     this.emitter.removeListener('interactiveMouseLeave', this.onMouseLeave);

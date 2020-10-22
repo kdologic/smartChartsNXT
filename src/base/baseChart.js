@@ -113,7 +113,7 @@ class BaseChart extends Component {
     this.CHART_DATA = { ...this.CHART_DATA, ...config };
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('menuClosed', this.hideMenuPopup);
     this.emitter.on('beforePrint', this.hideBeforeSave);
     this.emitter.on('afterPrint', this.showAfterSave);
@@ -123,7 +123,7 @@ class BaseChart extends Component {
     this.emitter.on('render', this.onRenderComponent);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('menuClosed', this.hideMenuPopup);
     this.emitter.removeListener('beforePrint', this.hideBeforeSave);
     this.emitter.removeListener('afterPrint', this.showAfterSave);
@@ -132,7 +132,7 @@ class BaseChart extends Component {
     this.emitter.removeListener('resize', this.onResizeComponent);
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     this.state.globalRenderAll = false;
     this.store.setValue('globalRenderAll', false);
   }

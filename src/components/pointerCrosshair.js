@@ -68,17 +68,17 @@ class PointerCrosshair extends Component {
     });
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('setVerticalCrosshair', this.setVCrosshairBind);
     this.emitter.on('setHorizontalCrosshair', this.setHCrosshairBind);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('setVerticalCrosshair', this.setVCrosshairBind);
     this.emitter.removeListener('setHorizontalCrosshair', this.setHCrosshairBind);
   }

@@ -72,11 +72,11 @@ class Tooltip extends Component {
     };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     if (utilCore.isIE && !this.allTipContainer) {
       const containerID = utilCore.getRandomID();
@@ -97,13 +97,13 @@ class Tooltip extends Component {
     this.setConfig(nextProps);
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     if (nextProps.instanceCount !== this.props.instanceCount) {
       this.initInstances(nextProps);
     }
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     if (this.allTipContainer) {
       this.allTipContainer.style.width = this.context.svgWidth + 'px';
       this.allTipContainer.style.height = this.context.svgHeight + 'px';
@@ -119,7 +119,7 @@ class Tooltip extends Component {
     });
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('updateTooltip', this.updateTip);
     this.emitter.removeListener('hideTooltip', this.hide);
     if (this.props.grouped && this.config.followPointer) {

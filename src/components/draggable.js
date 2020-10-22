@@ -55,11 +55,11 @@ class Draggable extends Component {
     this.onMouseDownHandler = this.onMouseDownHandler.bind(this);
   }
 
-  componentDidMount() {
+  afterMount() {
     this.rootSVG = document.getElementById(this.context.rootSvgId);
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     if (this.initialIntersectElems && this.mouseDrag) {
       let intersectedElemsNow = this.getIntersectedElems();
 

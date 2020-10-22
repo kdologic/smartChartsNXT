@@ -101,12 +101,12 @@ class HorizontalScroller extends Component {
     }
   }
 
-  componentDidMount() {
+  afterMount() {
     this.emitter.on('onScrollReset', this.onScrollReset);
     this.emitter.on('onUpdateRangeVal', this.onUpdateRangeVal);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.emitter.removeListener('onScrollReset', this.onScrollReset);
     this.emitter.removeListener('onUpdateRangeVal', this.onUpdateRangeVal);
     this.onScrollEnd();
@@ -472,11 +472,11 @@ class SliderWindow extends Component {
     this.state = Object.assign({}, this.state, nextProps);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -505,11 +505,11 @@ class SliderLeftHandle extends Component {
     this.state = { ...this.state, ...nextProps };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -570,11 +570,11 @@ class SliderRightHandle extends Component {
     this.state = { ...this.state, ...nextProps };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 

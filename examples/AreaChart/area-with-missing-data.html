@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Missing or null value - Area Chart | SmartChartsNXT</title>
   <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
 </head>
+
 <body style='background: #54626F;'>
   <div role='figure' class="chart-base">
     <div id='chartContainer' style="width:100%; height:600px;"></div>
   </div>
-  
+
   <script type="text/javascript">
     var areaChart;
     SmartChartsNXT.ready(function () {
@@ -20,13 +24,13 @@
         "targetElem": "chartContainer",
         "bgColor": "#FAFAFA",
         "title": {
-          "text":"Seasonal And Annual Rainfall (in mm)",
+          "text": "Seasonal And Annual Rainfall (in mm)",
           "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
           "textColor": "#54626F",
           "fontSize": 22
         },
         "subtitle": {
-          "text":"*missing data will create discontinuous area",
+          "text": "*missing data will create discontinuous area",
           "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,
           "textColor": "#B2BEB5",
           "fontSize": 12
@@ -42,30 +46,30 @@
           "fillOptions": {
             "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
           },
-          "bgOpacity": 0.5 
+          "bgOpacity": 0.5
         },
-        "legends":{
+        "legends": {
           "itemBorderWidth": 0
         },
         "tooltip": {
           "anchorWidth": 0,
-          "anchorHeight": 10, 
+          "anchorHeight": 10,
           "borderWidth": 0,
           "borderRadius": 10,
           "headerBgColor": "#54626F",
           "content": {
-            "header": function(pointSet, index, tipConfig) {
+            "header": function (pointSet, index, tipConfig) {
               return (
-                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") + ';font-size: 18px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
                   pointSet[index].formattedLabel +
                 '</p>'
               );
             },
-            "body": function(pointSet, index, tipConfig) {
+            "body": function (pointSet, index, tipConfig) {
               let point = pointSet[index];
               return (
                 '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
-                  '<td style="padding: 5px">' + 
+                  '<td style="padding: 5px">' +
                     '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
                       point.seriesName +
                   '</td>' +
@@ -76,7 +80,7 @@
           }
         },
         "horizontalScroller": {
-          "enable": false  
+          "enable": false
         },
         "dataSet": {
           "xAxis": {
@@ -107,12 +111,12 @@
             "dataLabels": {
               "bgOpacity": 0.8,
               "borderColor": "#0076A3",
-              "filter": function(val, index) {
+              "filter": function (val, index) {
                 return val !== null;
               },
-              "formatter": function(val, index) {
-                return val+ ' mm';
-              }, 
+              "formatter": function (val, index) {
+                return val + ' mm';
+              },
               "style": {
                 "fontSize": "10px"
               }

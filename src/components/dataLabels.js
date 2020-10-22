@@ -59,15 +59,15 @@ class DataLabels extends Component {
     this.resetConfig(this.props.opts);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  componentWillUnmount() {
+  beforeUnmount() {
     this.store.setValue('labelsData', {[this.props.instanceId]: []});
   }
 

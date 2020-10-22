@@ -17,19 +17,19 @@ class DiamondIcon extends Component {
     };
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  componentDidUpdate() {
+  afterUpdate() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     if(this.props.highlighted !== nextProps.highlighted) {
       this.state.highlighted = nextProps.highlighted ? 0.5 : 0;
     }

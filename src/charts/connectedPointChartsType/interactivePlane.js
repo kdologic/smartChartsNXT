@@ -29,11 +29,11 @@ class InteractivePlane extends Component {
     this.onKeyUp = this.onKeyUp.bind(this);
   }
 
-  componentWillMount() {
+  beforeMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  componentDidMount() {
+  afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 

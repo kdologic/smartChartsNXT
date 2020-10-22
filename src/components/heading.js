@@ -55,7 +55,7 @@ class heading extends Component {
     }
   }
 
-  componentWillUpdate(nextProps) {
+  beforeUpdate(nextProps) {
     this.setConfig(nextProps);
   }
 
