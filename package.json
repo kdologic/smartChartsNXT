@@ -1,7 +1,22 @@
 {
   "name": "smartcharts-nxt",
-  "version": "0.1.0",
+  "title": "SmartChartsNXT",
   "description": "Smart and Simple JavaScript chart library for Mobile, Web and App",
+  "version": "0.1.0",
+  "main": "index.js",
+  "homepage": "https://github.com/kdologic/smartChartsNXT#readme",
+  "author": {
+    "name": "Kausik Dey",
+    "email": "kausik008@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kdologic/smartChartsNXT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kdologic/smartChartsNXT/issues"
+  },
+  "license": "MIT",
   "keywords": [
     "charts",
     "graphs",
@@ -13,29 +28,15 @@
     "responsive",
     "visual"
   ],
-  "main": "index.js",
-  "sideEffects": [
-    "./src/plugIns/classList.shim.min.js"
-  ],
   "scripts": {
     "start": "gulp --env=develop",
     "build": "gulp build --env=production",
     "build:watch": "gulp build watch --env=production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kausikongit/smartChartsNXT.git"
-  },
-  "author": {
-    "name": "Kausik Dey",
-    "email": "kausik008@gmail.com"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/kausikongit/smartChartsNXT/issues"
-  },
-  "homepage": "https://github.com/kausikongit/smartChartsNXT#readme",
+  "sideEffects": [
+    "./src/plugIns/classList.shim.min.js"
+  ],
   "devDependencies": {
     "@babel/core": "7.6.0",
     "@babel/plugin-external-helpers": "7.2.0",
