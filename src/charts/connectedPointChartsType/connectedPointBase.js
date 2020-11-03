@@ -366,6 +366,7 @@ class ConnectedPointBase extends Component {
     const dataMapFn = (data, index) => {
       let d = {};
       if (data !== null && typeof data === 'object') {
+        d = {...data};
         d.value = data.value;
       } else {
         d.value = data;
