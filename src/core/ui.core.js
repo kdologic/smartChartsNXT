@@ -129,7 +129,7 @@ class UiCore {
    */
   static cursorPoint = (targetElem, evt) => {
     if (typeof targetElem === 'string') {
-      targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt');
+      targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt .sc-prime-view');
     }
     let pt = targetElem.createSVGPoint();
     pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;

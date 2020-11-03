@@ -2,7 +2,7 @@
 
 import { Component } from './../viewEngin/pview';
 import Style from './../viewEngin/style';
-import {fontFaceStatic} from './font-lato';
+import { fontFaceStatic } from './font-lato';
 import defaultConfig from './../settings/config';
 
 /**
@@ -24,8 +24,21 @@ class CommonStyles extends Component {
         <style>{fontFaceStatic}</style>
         <Style>
           {{
-            '.smartcharts-nxt *': {
+            '.smartcharts-nxt *, .sc-prime-view *': {
               'outline': 'none'
+            },
+            '.smartcharts-nxt svg, .sc-prime-view': {
+              'fontFamily': defaultConfig.theme.fontFamily,
+              'background': 'transparent',
+              'MozTapHighlightColor': 'rgba(0, 0, 0, 0)',
+              'WebkitTapHighlightColor': 'rgba(0, 0, 0, 0)',
+              'WebkitUserSelect': 'none',
+              'HtmlUserSelect': 'none',
+              'MozUserSelect': 'none',
+              'MsUserSelect': 'none',
+              'OUserSelect': 'none',
+              'UserSelect': 'none',
+              'overflow': 'hidden'
             },
             '.smartcharts-nxt .focus-in': {
               'stroke': defaultConfig.theme.fontColorHighlight
@@ -33,7 +46,7 @@ class CommonStyles extends Component {
             '.smartcharts-nxt .do-focus-highlight:focus': {
               'stroke': defaultConfig.theme.fontColorHighlight
             },
-            '.smartcharts-nxt .sc-hide': {
+            '.smartcharts-nxt .sc-hide, .sc-prime-view .sc-hide': {
               'display': 'none'
             },
             '.sc-screen-reader-only': {

@@ -3,8 +3,7 @@
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import defaultConfig from '../settings/config';
 import { Component } from '../viewEngin/pview';
-import Textbox from './textBox';
-import Style from '../viewEngin/style';
+import RichTextBox from './richTextBox';
 import UtilCore from '../core/util.core';
 import UiCore from '../core/ui.core';
 
@@ -28,25 +27,35 @@ class heading extends Component {
   }
 
   setConfig(props) {
-    let alignTextMap = { [ENUMS.HORIZONTAL_ALIGN.LEFT]: 'left', [ENUMS.HORIZONTAL_ALIGN.CENTER]: 'middle', [ENUMS.HORIZONTAL_ALIGN.RIGHT]: 'right' };
+    const alignTextMap = { [ENUMS.HORIZONTAL_ALIGN.LEFT]: 'left', [ENUMS.HORIZONTAL_ALIGN.CENTER]: 'center', [ENUMS.HORIZONTAL_ALIGN.RIGHT]: 'right' };
+    const headingTypeMap = { h1: '32', h2: '24', h3: '18.72', h4: '16', h5: '13.28', h6: '10.72' };
     this.config = {
       width: UiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,
-      height: UiCore.percentToPixel(this.context.svgWidth, props.opts.height),
+      height: UiCore.percentToPixel(this.context.svgHeight, props.opts.height),
       style: props.opts.style || '',
-      top: typeof props.opts.top === 'undefined' ? (props.posY || 0) : UiCore.percentToPixel(this.context.svgHeight, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (props.posX || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
-      fontFamily: props.opts.fontFamily || props.fontFamily || defaultConfig.theme.fontFamily,
-      fontSize: props.opts.fontSize || props.fontSize || defaultConfig.theme.fontSizeLarge,
+      offsetTop: typeof props.opts.top === 'undefined' ? (props.posY || 0) : UiCore.percentToPixel(this.context.svgHeight, props.opts.top),
+      offsetLeft: typeof props.opts.left === 'undefined' ? (props.posX || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
+      fontSize: headingTypeMap[this.props.type] || headingTypeMap['h2'],
       textColor: props.opts.textColor || props.textColor || defaultConfig.theme.fontColorDark,
-      stroke: props.opts.borderColor || props.stroke || 'none',
-      bgColor: props.opts.bgColor || props.bgColor || 'none',
-      textAnchor: alignTextMap[props.opts.textAlign] || alignTextMap[props.textAlign] || alignTextMap.center,
-      padding: props.opts.padding || props.padding || 0,
+      textAlign: alignTextMap[props.opts.textAlign] || alignTextMap[props.textAlign] || alignTextMap.center,
       responsive: Object.assign({
-        wrapText: true,
         reducer: () => ({ text: props.opts.text })
       }, props.opts.responsive)
     };
+    this.config.top = this.config.offsetTop;
+
+    switch (this.config.textAlign) {
+      case 'left':
+        this.config.left = this.config.offsetLeft;
+        break;
+      default:
+      case 'center':
+        this.config.left = (this.context.svgWidth - this.config.width) / 2 + this.config.offsetLeft;
+        break;
+      case 'right':
+        this.config.left = (this.context.svgWidth - this.config.width) + this.config.offsetLeft;
+        break;
+    }
 
     let modifiedConfig = {};
     if (typeof this.config.responsive.reducer === 'function') {
@@ -60,23 +69,11 @@ class heading extends Component {
   }
 
   render() {
-    const style = {
-      [`.sc-header-text-${this.id}`]: {
-        'font-family': this.config.fontFamily,
-        'font-size': this.config.fontSize + 'px',
-        'fill': this.config.textColor,
-        'stroke': this.config.stroke,
-        ...this.config.style
-      }
-    };
     return (
       <g aria-hidden='true' class={`sc-header-grp-${this.id}`}>
-        <Style>
-          {{ [`.sc-header-grp-${this.id}`]: this.config.style }}
-        </Style>
-        <Textbox class={`sc-header-text-${this.id}`} style={style} posX={this.config.left} posY={this.config.top} width={this.config.width} height={this.config.height} textAnchor={this.config.textAnchor} bgColor={this.config.bgColor}
-          textColor={this.config.textColor} borderRadius={0} padding={this.config.padding} stroke={this.config.stroke} text={this.state.text || ''} wrapText={this.config.responsive.wrapText}>
-        </Textbox>
+        <RichTextBox class={`sc-header-text-${this.id}`} style={this.config.style} posX={this.config.left} posY={this.config.top} width={this.config.width} height={this.config.height} textAlign={this.config.textAlign}
+          fontSize={this.config.fontSize} textColor={this.config.textColor} text={this.state.text || ''} >
+        </RichTextBox>
       </g>
     );
   }

@@ -31,21 +31,15 @@
         "title": {
           "text":"A javascript Multi Line Chart, that can visualize multiple data line",
           "top": 20,              
-          "left": "50%",          
+          "left": 0,          
           "width": "90%",         
           "height": "",           
           "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER,  
           "textColor": "#7CB0A1", 
-          "borderColor":"none",   
-          "fontFamily": "Lato",   
-          "bgColor": "none",      
-          "padding": 0,           
-          "fontSize": 20,         
           "style": {
             "opacity": 1.0                      
           },
           "responsive": {
-            "wrapText": true,
             "reducer": function(chartWidth, chartHeight) {
               if(chartWidth < 500) {
                 return {
@@ -66,21 +60,15 @@
         "subtitle": {
           "text":"Data generated with random data set",
           "top": 50,             
-          "left": "50%",         
+          "left": 0,         
           "width": "95%",        
           "height": "",          
           "textAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER, 
           "textColor": "#9c27b0",
-          "borderColor":"none",  
-          "fontFamily": "Lato",  
-          "bgColor": "none",     
-          "padding": 0,          
-          "fontSize": 12,        
           "style": {
             "opacity": 1.0
           },
           "responsive": {
-            "wrapText": true,
             "reducer": function(chartWidth, chartHeight) {
               // support reducer same as title property
             }

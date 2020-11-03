@@ -545,10 +545,10 @@ class ConnectedPointBase extends Component {
 
   render() {
     return (
-      <g>
+      <g class='sc-connected-point-base'>
         <Draggable instanceId='drag-132'>
-          <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
-          <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
+          <Heading instanceId='sc-title' type="h3" opts={this.CHART_OPTIONS.title} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+          <Heading instanceId='sc-subtitle' type="h5" opts={this.CHART_OPTIONS.subtitle} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' />
         </Draggable>
 
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}

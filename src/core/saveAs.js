@@ -24,13 +24,14 @@ import UtilCore from './util.core';
  */
 
 /*
- Observations:
+ Limitations of IE:
    1.  IE11 was unable to convert the SVG into base64 data URL. So, using Canvg v3.0.5 (https://github.com/canvg/canvg) to achieve the same.
 
    Found some limitation with Canvg usage -
    2.  Canvg unable to handle filter properly, few filter attributed are still unsupported there.
    3.  Canvg can't handle image inside filter it become blank.
-   4.  Canvg can't handle multiple level of transformations, after conversion elements are off-positioned. e.i noticed for title and subtitle.
+   4.  Canvg can't handle multiple level of transformations, after conversion elements may get off-positioned.
+   5.  Canvg don't have support for foreignObject. So before download rich text components are converted into plain text to render into downloaded image. I.E. Title and subtitle.
 */
 
 class SaveAs {
@@ -90,6 +91,10 @@ class SaveAs {
         node.parentNode.removeChild(node);
       });
 
+      elemNode.querySelectorAll('.show-before-save').forEach((node) => {
+        node.classList.remove('sc-hide');
+      });
+
       let allImages = elemNode.querySelectorAll('image');
       if (UtilCore.isIE || allImages.length === 0) {
         resolve(new XMLSerializer().serializeToString(elemNode));
@@ -146,7 +151,8 @@ class SaveAs {
       CloneNode in IE 11 create erroneous values on patterns elements that fails Canvg to work properly so remove for IE 11.
       Also drop shadow filter, create distorted and faded canvas images. Better to avoid it for IE 11.
     */
-    this.serialize(UtilCore.isIE ? svgRoot : svgRoot.cloneNode(true))
+    let elemNode = UtilCore.isIE ? svgRoot : svgRoot.cloneNode(true);
+    this.serialize(elemNode)
       .then((serializedString) => {
         let svgString = this.normalizeCSS(serializedString);
         if (opts.type === 'print') {
@@ -252,6 +258,10 @@ class SaveAs {
             }
           };
         }
+      }).then(() => {
+        elemNode.querySelectorAll('.show-before-save').forEach((node) => {
+          node.classList.add('sc-hide');
+        });
       }).catch((err) => {
         throw err;
       });
