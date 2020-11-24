@@ -57,7 +57,7 @@ class DrawConnectedPoints extends Component {
       height: this.props.height
     }, this.props.clip);
 
-    let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
+    let fillOpt = UiCore.processFillOptions(this.props.fillOptions, this.rid);
     if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;

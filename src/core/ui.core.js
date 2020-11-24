@@ -243,13 +243,13 @@ class UiCore {
   };
 
   /**
-   * Process fill options for pattern, gradient or image based on config
-   * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID
+   * Process fill options for pattern, gradient or image based on config.
+   * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID.
+   * @param {String} rid A randomly generated fill id.
    * @return {Object} Return {fillType, fillBy and fillId}
    */
-  static processFillOptions = (fillOptions = {}) => {
+  static processFillOptions = (fillOptions = {}, rid = UtilCore.getRandomID()) => {
     const globalDefMap = StoreManager.getStore('global').getValue('defMap');
-    const rid = UtilCore.getRandomID();
     const gradId = 'sc-fill-grad-' + rid;
     const patternId = 'sc-fill-pattern-' + rid;
     let fillType = 'solidColor';

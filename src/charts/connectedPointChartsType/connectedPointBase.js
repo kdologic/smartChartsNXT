@@ -54,7 +54,7 @@ class ConnectedPointBase extends Component {
         legendTop: 70,
         hLabelHeight: 80,
         vLabelWidth: 70,
-        paddingX: 5,
+        paddingX: 10,
         longestSeries: 0,
         zoomOutBoxWidth: 40,
         zoomOutBoxHeight: 40
@@ -366,7 +366,7 @@ class ConnectedPointBase extends Component {
     const dataMapFn = (data, index) => {
       let d = {};
       if (data !== null && typeof data === 'object') {
-        d = {...data};
+        d = { ...data };
         d.value = data.value;
       } else {
         d.value = data;
@@ -687,8 +687,8 @@ class ConnectedPointBase extends Component {
             this.state.cs.scaleX = scaleX;
           }}
           clip={{
-            x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
-            width: this.CHART_DATA.gridBoxWidth - (2 * this.CHART_DATA.paddingX),
+            x: this.state.offsetLeftChange,
+            width: this.CHART_DATA.gridBoxWidth,
             offsetLeft: this.state.offsetLeftChange,
             offsetRight: this.state.offsetRightChange
           }}

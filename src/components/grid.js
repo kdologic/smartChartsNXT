@@ -20,6 +20,7 @@ class Grid extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.clipId = UtilCore.getRandomID();
+    this.rFillId = UtilCore.getRandomID();
     this.config = {};
     this.state = {
       vGridCount: this.props.vGridCount,
@@ -61,15 +62,15 @@ class Grid extends Component {
       bgOpacity: typeof props.opts.bgOpacity === 'undefined' ? 0.1 : props.opts.bgOpacity
     };
 
-    if(this.config.bgColor === 'none') {
+    if (this.config.bgColor === 'none') {
       this.state.fillBy = this.config.bgColor;
       this.state.fillType = 'none';
-    }else {
-      let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions);
-      if(fillOpt.fillBy === 'none') {
+    } else {
+      let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions, this.rFillId);
+      if (fillOpt.fillBy === 'none') {
         this.state.fillType = 'solidColor';
         this.state.fillBy = this.config.bgColor;
-      }else {
+      } else {
         this.state.fillType = fillOpt.fillType;
         this.state.fillBy = fillOpt.fillBy;
         this.state.fillId = fillOpt.fillId;
