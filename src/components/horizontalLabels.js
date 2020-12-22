@@ -16,7 +16,7 @@ import a11yFactory from './../core/a11y';
  * @extends Component
  *
  * @event
- * 1. onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 1. onHorizontalLabelsRender : Fire when horizontal labels draws.
  * 2. hLabelEnter: Fire when mouse hover on label text.
  * 3. hLabelExit: Fire mouse out of label text.
  */
@@ -105,7 +105,7 @@ class HorizontalLabels extends Component {
 
   render() {
     this.setIntervalLength();
-    this.emitter.emit('onHorizontalLabelsRender', {
+    this.emitter.emitSync('onHorizontalLabelsRender', {
       intervalLen: this.state.intervalLen,
       values: this.state.categories,
       count: this.state.categories.length

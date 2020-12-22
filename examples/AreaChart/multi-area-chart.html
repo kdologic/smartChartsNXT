@@ -295,7 +295,21 @@
             "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
-            "fontFamily": $SC.GLOBAL.theme.fontFamily   // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+            // Enable a color band region with text label on background.
+            // "markRegions": [{                           
+            //   "from": 2,                             // [ default: 0 ] Data index start from 1, Region start value.
+            //   "to": 5,                               // [ default: 0 ] Data index start from 1, Region end value.
+            //   "color": "purple",                     // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
+            //   "borderColor": 'none',                 // [ default: "none" ] Border color of the region.
+            //   "opacity": 0.5,                        // [ default: 0.2 ]
+            //   "label": {
+            //     "text": "Purple range",              // [ default: "" ] Rich text (With HTML) label of the region.
+            //     "fontSize": "12",                    // [ default: 14 ]
+            //     "color": "#000",                     // [ default: #000 ]
+            //     "style": {}                          // [ default: {} ] Add css style for the label text.
+            //   }
+            // }]
           },
           "yAxis": {
             "title": "Total Sales",                     // [ default: Value-axis ]
@@ -311,7 +325,21 @@
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
-            "zeroBase": false                           // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+            "zeroBase": false,                          // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+            // Enable a color band region with text label on background.
+            // "markRegions": [{                           
+            //   "from": 15,                            // [ default: 0 ] Region start value.
+            //   "to": 20,                              // [ default: 0 ] Region end value.
+            //   "color": "purple",                     // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
+            //   "borderColor": 'blue',                 // [ default: "none" ] Border color of the region.
+            //   "opacity": 0.5,                        // [ default: 0.2 ]
+            //   "label": {
+            //     "text": "Purple range",              // [ default: "" ] Rich text (With HTML) label of the region.
+            //     "fontSize": "12",                    // [ default: 14 ]
+            //     "color": "#000",                     // [ default: #000 ]
+            //     "style": {}                          // [ default: {} ] Add css style for the label text.
+            //   }
+            // }]
           },
           "series": [{
             "visible": true,                            // [ default: true | false ]
@@ -386,10 +414,8 @@
             "data": generateRandomTimeSeries(new Date().getTime(), 100, { // [ required]
               "max": 1000,
               "min": -1000
-            })       
-            // [
-            //   {value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}
-            // ] 
+            }) 
+            // [{value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}] 
             // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
           },
           {
@@ -419,7 +445,8 @@
             // [
             // {label:1, value:800},{label:2, value:-800},{label:3, value:800},{label:4, value:-800},{label:5, value:800},{label:7, value:-800}, {label:6, value:1800}
             // ]
-          }]
+          }
+        ]
         },
         // events: {
         //   beforeRender: function (e) {

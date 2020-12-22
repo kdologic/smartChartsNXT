@@ -19,6 +19,8 @@ import a11yFactory from './../../core/a11y';
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
  * @extends Component
+ * @event
+ * 1. onUpdateScale : update scaleX and scaleY.
  */
 
 class DrawConnectedPoints extends Component {
@@ -180,6 +182,13 @@ class DrawConnectedPoints extends Component {
     if (typeof props.getScaleX === 'function') {
       props.getScaleX(this.state.scaleX);
     }
+    if (this.props.emitScale) {
+      this.emitter.emitSync('onUpdateScale', {
+        scaleX: this.state.scaleX,
+        scaleY: this.state.scaleY
+      });
+    }
+
   }
 
   render() {

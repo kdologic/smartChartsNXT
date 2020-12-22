@@ -13,6 +13,7 @@ import LegendBox from './../../components/legendBox';
 import Heading from './../../components/heading';
 import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
+import MarkRegion from './../../components/markRegion';
 import AxisBar from './../../components/axisBar';
 import PointerCrosshair from './../../components/pointerCrosshair';
 import DrawConnectedPoints from './drawConnectedPoints';
@@ -552,15 +553,15 @@ class ConnectedPointBase extends Component {
           <Heading instanceId='sc-subtitle' type="h5" opts={this.CHART_OPTIONS.subtitle} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' />
         </Draggable>
 
+        <MarkRegion posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} xMarkRegions={this.state.cs.dataSet.xAxis.markRegions || []} yMarkRegions={this.state.cs.dataSet.yAxis.markRegions || []}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.yInterval}
+          paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
+        </MarkRegion>
+
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
           width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
-
-        <AxisBar xAxis={this.state.cs.dataSet.xAxis || {}} yAxis={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
-        </AxisBar>
 
         <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
           transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
@@ -583,6 +584,11 @@ class ConnectedPointBase extends Component {
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
         </g>
+
+        <AxisBar xAxis={this.state.cs.dataSet.xAxis || {}} yAxis={this.state.cs.dataSet.yAxis || {}}
+          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+        </AxisBar>
 
         <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
           posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
@@ -682,7 +688,7 @@ class ConnectedPointBase extends Component {
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin}
           dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
-          totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
+          totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''} emitScale={true}
           getScaleX={(scaleX) => {
             this.state.cs.scaleX = scaleX;
           }}
@@ -705,7 +711,8 @@ class ConnectedPointBase extends Component {
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
+            accessibility={false} emitScale={false}
             getScaleX={(scaleX) => {
               this.state.fs.scaleX = scaleX;
             }}
@@ -714,7 +721,7 @@ class ConnectedPointBase extends Component {
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
+            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false} emitScale={false}>
           </DrawConnectedPoints>
         </g>
       );

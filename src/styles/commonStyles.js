@@ -49,6 +49,19 @@ class CommonStyles extends Component {
             '.smartcharts-nxt .sc-hide, .sc-prime-view .sc-hide': {
               'display': 'none'
             },
+            '.smartcharts-nxt .sc-hide-ie, .sc-prime-view .sc-hide-ie': {
+              'visibility': 'hidden'
+            },
+            '.smartcharts-nxt .sc-horizontal-center, .sc-prime-view .sc-horizontal-center': {
+              'position': 'absolute',
+              'left': '50%',
+              'transform': 'translateX(-50%)'
+            },
+            '.smartcharts-nxt .sc-vertical-center, .sc-prime-view .sc-vertical-center': {
+              'position': 'absolute',
+              'top': '50%',
+              'transform': 'translateY(-50%)'
+            },
             '.sc-screen-reader-only': {
               'position': 'absolute',
               'width': '1px',

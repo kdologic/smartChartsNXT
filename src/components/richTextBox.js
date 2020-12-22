@@ -40,7 +40,8 @@ class TextBox extends Component {
       fontSize: this.props.fontSize ? this.props.fontSize : defaultConfig.theme.fontSizeMedium + 'px',
       textColor: props.textColor || defaultConfig.theme.fontColorDark,
       text: props.text || '',
-      textAlign: props.textAlign || ENUMS.HORIZONTAL_ALIGN.LEFT
+      textAlign: props.textAlign || ENUMS.HORIZONTAL_ALIGN.LEFT,
+      verticalAlignMiddle: props.verticalAlignMiddle === undefined ? false : props.verticalAlignMiddle
     };
     const styleString = parseStyleProps({
       ...this.defaultStyle,
@@ -61,10 +62,19 @@ class TextBox extends Component {
   afterMount() {
     this.contentElem = this.ref.node.querySelector('#' + this.contentId);
     if (UtilCore.isIE) {
-      let strHtml = `<div id=${this.contentId} style='width: ${this.state.width}px;height: ${this.state.height}px;transform: translate(${this.props.posX}px, ${this.props.posY}px);position:absolute;'></div>`;
-      this.htmlContainerIE = document.getElementById(this.context.htmlContainerIE);
-      this.htmlContainerIE.insertAdjacentHTML('beforeend', strHtml);
-      this.contentElem = this.htmlContainerIE.querySelector(`#${this.contentId}`);
+      setTimeout(() => {
+        let acutalTextPos = this.ref.node.querySelector('.sc-text-node').getBoundingClientRect();
+        let svgPos = document.querySelector('#' + this.context.rootSvgId).getBoundingClientRect();
+        let left = acutalTextPos.left - svgPos.left;
+        let top = acutalTextPos.top - svgPos.top;
+        if (this.state.textAlign === 'center') {
+          left = left - this.props.width / 2 + acutalTextPos.width / 2;
+        }
+        let strHtml = `<div id="${this.contentId}" style="width: ${this.state.width}px;height: ${this.state.height}px;transform: translate(${left}px, ${top}px);position:absolute;"></div>`;
+        this.htmlContainerIE = document.getElementById(this.context.htmlContainerIE);
+        this.htmlContainerIE.insertAdjacentHTML('beforeend', strHtml);
+        this.contentElem = this.htmlContainerIE.querySelector(`#${this.contentId}`);
+      });
     }
     if (this.contentElem) {
       this.updateInnerHTML();
@@ -77,9 +87,19 @@ class TextBox extends Component {
 
   afterUpdate() {
     if (UtilCore.isIE && this.contentElem) {
-      this.contentElem.style.width = this.state.width + 'px';
-      this.contentElem.style.height = this.state.height + 'px';
-      this.contentElem.style.transform = `translate(${this.props.posX}px, ${this.props.posY}px)`;
+      setTimeout(() => {
+        this.contentElem.style.width = this.state.width + 'px';
+        this.contentElem.style.height = this.state.height + 'px';
+
+        let acutalTextPos = this.ref.node.querySelector('.sc-text-node').getBoundingClientRect();
+        let svgPos = document.querySelector('#' + this.context.rootSvgId).getBoundingClientRect();
+        let left = acutalTextPos.left - svgPos.left;
+        let top = acutalTextPos.top - svgPos.top;
+        if (this.state.textAlign === 'center') {
+          left = left - this.props.width / 2 + acutalTextPos.width / 2;
+        }
+        this.contentElem.style.transform = `translate(${left}px, ${top}px)`;
+      });
     }
     if (this.contentElem) {
       this.updateInnerHTML();
@@ -103,10 +123,10 @@ class TextBox extends Component {
   updateInnerHTML() {
     const styleString = parseStyleProps({
       ...this.defaultStyle,
-      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', width: '100%', textAlign: this.props.textAlign },
+      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', width: '100%', textAlign: this.state.textAlign },
       ...this.props.style
     });
-    this.contentElem.innerHTML = `<div style='${styleString}'>${this.state.text}</div>`;
+    this.contentElem.innerHTML = `<div style='${styleString}' class=${this.state.verticalAlignMiddle && !UtilCore.isIE ? 'sc-vertical-center' : ''}>${this.state.text}</div>`;
   }
 
   getContentDim(strContents, styleString) {
@@ -125,7 +145,9 @@ class TextBox extends Component {
   }
 
   getDownloadableTextForIE() {
-    let ieTextPosX = 0, ieTextPosY = this.state.height / 2, ieTextAnchor = 'start';
+    let ieTextPosX = 0;
+    let ieTextPosY = this.props.verticalAlignMiddle ? this.state.height / 2 : 12;
+    let ieTextAnchor = 'start';
     switch (this.state.textAlign) {
       case 'center':
         ieTextPosX = this.state.width / 2;
@@ -135,9 +157,10 @@ class TextBox extends Component {
         ieTextPosX = this.state.width;
         ieTextAnchor = 'end';
     }
+
     return (
-      <g class='show-before-save sc-hide'>
-        <text style={this.textStyleIE} x={ieTextPosX} y={ieTextPosY} dominant-baseline="middle" text-anchor={ieTextAnchor}>
+      <g class='show-before-save sc-hide-ie'>
+        <text class="sc-text-node" style={this.textStyleIE} x={ieTextPosX} y={ieTextPosY} dominant-baseline={this.props.verticalAlignMiddle ? 'middle' : 'hanging'} text-anchor={ieTextAnchor}>
           <tspan >{this.extractContent(this.state.text)}</tspan>
         </text>
       </g>

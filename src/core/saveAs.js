@@ -45,6 +45,8 @@ class SaveAs {
     'svg': 'image/svg+xml'
   };
 
+  removedNodesForIE = [];
+
   print(opts) {
     opts.type = 'print';
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
@@ -87,12 +89,17 @@ class SaveAs {
 
   serialize(elemNode) {
     return new Promise((resolve, reject) => {
+      this.removedNodesForIE = [];
       elemNode.querySelectorAll('remove-before-save').forEach((node) => {
+        if (UtilCore.isIE) {
+          this.removedNodesForIE.push({ parentNode: node.parentNode, node: node });
+        }
         node.parentNode.removeChild(node);
       });
 
       elemNode.querySelectorAll('.show-before-save').forEach((node) => {
         node.classList.remove('sc-hide');
+        node.classList.remove('sc-hide-ie');
       });
 
       let allImages = elemNode.querySelectorAll('image');
@@ -258,9 +265,13 @@ class SaveAs {
             }
           };
         }
-      }).then(() => {
+      })
+      .then(() => {
+        this.removedNodesForIE.map((nodeElem) => {
+          nodeElem.parentNode.appendChild(nodeElem.node);
+        });
         elemNode.querySelectorAll('.show-before-save').forEach((node) => {
-          node.classList.add('sc-hide');
+          node.classList.add(UtilCore.isIE ? 'sc-hide-ie' : 'sc-hide');
         });
       }).catch((err) => {
         throw err;
