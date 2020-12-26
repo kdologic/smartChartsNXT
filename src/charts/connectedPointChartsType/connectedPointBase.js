@@ -973,9 +973,10 @@ class ConnectedPointBase extends Component {
   onLegendHover(e) {
     this.state.cs.dataSet.series.forEach((s, i) => {
       this.emitter.emit('changeAreaBrightness', {
-        instanceId: 'cs' + i,
+        type: 'highlight',
+        instanceId: 'cs-' + i,
         strokeOpacity: i == e.index ? 1 : 0.2,
-        opacity: i == e.index ? 1 : 0.1
+        opacity: i == e.index ? 0.5 : 0.1
       });
     });
   }
@@ -983,7 +984,8 @@ class ConnectedPointBase extends Component {
   onLegendLeave() {
     this.state.cs.dataSet.series.forEach((s, i) => {
       this.emitter.emit('changeAreaBrightness', {
-        instanceId: 'cs' + i,
+        type: 'normalize',
+        instanceId: 'cs-' + i,
         strokeOpacity: this.CHART_DATA.dataSet.series[i].lineOpacity || 1,
         opacity: this.CHART_DATA.dataSet.series[i].areaOpacity || 0.2
       });

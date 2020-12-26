@@ -257,6 +257,8 @@ class HorizontalScroller extends Component {
 
     window.addEventListener('mousemove', this.onScrollMove, false);
     window.addEventListener('touchmove', this.onScrollMove, false);
+    window.addEventListener('mouseup', this.onScrollEnd, false);
+    window.addEventListener('touchend', this.onScrollEnd, false);
   }
 
   onScrollMove(e) {
@@ -325,9 +327,6 @@ class HorizontalScroller extends Component {
       }
       this.update();
     }
-
-    window.addEventListener('mouseup', this.onScrollEnd, false);
-    window.addEventListener('touchend', this.onScrollEnd, false);
   }
 
   onUpdateRangeVal(e) {

@@ -11,6 +11,7 @@
       width: 130px;
       height: 100px;
       border-radius: 5px 5px 0 0;
+      cursor: pointer;
     }
 
     .color-name-cont {
@@ -30,6 +31,14 @@
       top: 50%;
       left: 50%;
       transform: translateX(-50%) translateY(-50%);
+    }
+
+    input.color-code {
+      width: 90%;
+      background: none;
+      border: none;
+      text-align: center;
+      font-size: 18px;
     }
   </style>
 
@@ -68,7 +77,7 @@
         let strHTML = '';
         strHTML += '<td class="color-cell" role="cell">';
         strHTML +=    '<div class="color-box" style="background-color:' + colorCode + ';">';
-        strHTML +=      '<span class="color-code">' + colorCode + '</span>';
+        strHTML +=      '<input class="color-code" value="'+colorCode+'"></input>';
         strHTML +=    '</div>';
         strHTML +=    '<div class="color-name-cont">';
         strHTML +=      '<span>' + colorName + '</span>';
@@ -78,10 +87,20 @@
       }
 
       function bindEvents() {
-
+        document.querySelectorAll('.color-cell').forEach((cell) => {
+          cell.addEventListener('click', (e) => {
+            let colorCode = cell.querySelector('input.color-code');
+            colorCode.select();
+            colorCode.setSelectionRange(0, 99999); /* For mobile devices */
+            /* Copy the text inside the text field */
+            document.execCommand("copy");
+            alert("Copied color: " + colorCode.value);
+          });
+        });
+        
       }
 
-      generateTable();
+      generateTable().then(bindEvents);;
     </script>
 </head>
 

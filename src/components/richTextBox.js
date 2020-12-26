@@ -4,6 +4,7 @@ import { Component, parseStyleProps } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import UtilCore from '../core/util.core';
+import UiCore from '../core/ui.core';
 
 /**
  * richTextBox.js
@@ -18,7 +19,7 @@ import UtilCore from '../core/util.core';
  * Before download in IE all rich text will be converted into plain text to render it into main svg.
  */
 
-class TextBox extends Component {
+class RichTextBox extends Component {
   constructor(props) {
     super(props);
     this.state = {};
@@ -26,8 +27,8 @@ class TextBox extends Component {
     this.contentElem = null;
 
     this.defaultStyle = {
-      display: 'inline-block',
-      position: 'absolute',
+      display: 'block',
+      position: 'relative',
       fontFamily: defaultConfig.theme.fontFamily,
       fontSize: defaultConfig.theme.fontSizeMedium + 'px'
     };
@@ -54,7 +55,11 @@ class TextBox extends Component {
       fill: this.state.textColor,
       ...props.style
     };
+
     let dim = this.getContentDim(props.text || '', styleString);
+
+    this.state.contentWidth = dim.width;
+    this.state.contentHeight= dim.height;
     this.state.width = props.width || dim.width;
     this.state.height = props.height || dim.height;
   }
@@ -70,13 +75,15 @@ class TextBox extends Component {
         if (this.state.textAlign === 'center') {
           left = left - this.props.width / 2 + acutalTextPos.width / 2;
         }
-        let strHtml = `<div id="${this.contentId}" style="width: ${this.state.width}px;height: ${this.state.height}px;transform: translate(${left}px, ${top}px);position:absolute;"></div>`;
+        let strHtml = `<div id="${this.contentId}" style="position: absolute; width: ${this.state.width}px; height: ${this.state.height}px; transform: translate(${left}px, ${top}px); overflow-y: ${this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll': 'hidden'}; pointer-events: ${this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'all': 'none'};"></div>`;
         this.htmlContainerIE = document.getElementById(this.context.htmlContainerIE);
         this.htmlContainerIE.insertAdjacentHTML('beforeend', strHtml);
         this.contentElem = this.htmlContainerIE.querySelector(`#${this.contentId}`);
+        if (this.contentElem) {
+          this.updateInnerHTML();
+        }
       });
-    }
-    if (this.contentElem) {
+    }else if (this.contentElem) {
       this.updateInnerHTML();
     }
   }
@@ -106,11 +113,18 @@ class TextBox extends Component {
     }
   }
 
+  beforeUnmount() {
+    if (UtilCore.isIE && this.contentElem) {
+      this.contentElem.parentNode.removeChild(this.contentElem);
+    }
+  }
+
   render() {
     return (
       <g class={this.props.class || ''} transform={`translate(${this.props.posX},${this.props.posY})`}>
         {!UtilCore.isIE &&
-          <foreignObject id={this.contentId} x={0} y={0} width={this.state.width} height={this.state.height} innerHTML={this.state.text}>
+          <foreignObject id={this.contentId} x={0} y={0} width={this.state.width} height={this.state.height} innerHTML={this.state.text} 
+            style={{'overflowY': this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll': 'hidden'}}>
           </foreignObject>
         }
         {UtilCore.isIE &&
@@ -123,7 +137,7 @@ class TextBox extends Component {
   updateInnerHTML() {
     const styleString = parseStyleProps({
       ...this.defaultStyle,
-      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', width: '100%', textAlign: this.state.textAlign },
+      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', textAlign: this.state.textAlign },
       ...this.props.style
     });
     this.contentElem.innerHTML = `<div style='${styleString}' class=${this.state.verticalAlignMiddle && !UtilCore.isIE ? 'sc-vertical-center' : ''}>${this.state.text}</div>`;
@@ -146,7 +160,7 @@ class TextBox extends Component {
 
   getDownloadableTextForIE() {
     let ieTextPosX = 0;
-    let ieTextPosY = this.props.verticalAlignMiddle ? this.state.height / 2 : 12;
+    let ieTextPosY = this.props.verticalAlignMiddle ? this.state.height / 2 : 14;
     let ieTextAnchor = 'start';
     switch (this.state.textAlign) {
       case 'center':
@@ -157,11 +171,13 @@ class TextBox extends Component {
         ieTextPosX = this.state.width;
         ieTextAnchor = 'end';
     }
-
+    let lines = this.splitLines(this.extractContent(this.state.text));
     return (
       <g class='show-before-save sc-hide-ie'>
         <text class="sc-text-node" style={this.textStyleIE} x={ieTextPosX} y={ieTextPosY} dominant-baseline={this.props.verticalAlignMiddle ? 'middle' : 'hanging'} text-anchor={ieTextAnchor}>
-          <tspan >{this.extractContent(this.state.text)}</tspan>
+          {
+            lines.map((l, i) => <tspan x={ieTextPosX} dy={i == 0 ? 0 : 15}>{l}</tspan>)
+          }
         </text>
       </g>
     );
@@ -183,6 +199,22 @@ class TextBox extends Component {
     return [span.textContent || span.innerText].toString().replace(/ +/g, ' ');
   }
 
+  splitLines(text){
+    let splitText = text.split(' ');
+    let lines = [], line=[];
+    for(let i =0 ;i<splitText.length;i++) {
+      let word = splitText[i];
+      line.push(word);
+      if(UiCore.getComputedTextWidth(<text>{line.join(' ')}</text>) > this.state.contentWidth) {
+        line.pop();
+        lines.push(line.join(' '));
+        line = [word];
+      }
+    }
+    lines.push(line.join(' '));
+    return lines;
+  }
+
 }
 
-export default TextBox;
+export default RichTextBox;

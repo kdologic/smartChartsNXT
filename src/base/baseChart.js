@@ -14,6 +14,7 @@ import LoaderView from './../components/loaderView';
 import StoreManager from './../liveStore/storeManager';
 import GlobalDefs from './../styles/globalDefs';
 import a11yFactory from './../core/a11y';
+import PopupContainer from './../popupComponents/popupContainer';
 
 /**
  * baseChart.js
@@ -185,6 +186,7 @@ class BaseChart extends Component {
 
           <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
 
+          <PopupContainer></PopupContainer>
           <LoaderView></LoaderView>
         </svg>
         {UtilCore.isIE &&
