@@ -97,7 +97,6 @@ class RichTextBox extends Component {
       setTimeout(() => {
         this.contentElem.style.width = this.state.width + 'px';
         this.contentElem.style.height = this.state.height + 'px';
-
         let acutalTextPos = this.ref.node.querySelector('.sc-text-node').getBoundingClientRect();
         let svgPos = document.querySelector('#' + this.context.rootSvgId).getBoundingClientRect();
         let left = acutalTextPos.left - svgPos.left;
@@ -106,9 +105,11 @@ class RichTextBox extends Component {
           left = left - this.props.width / 2 + acutalTextPos.width / 2;
         }
         this.contentElem.style.transform = `translate(${left}px, ${top}px)`;
+        if (this.contentElem) {
+          this.updateInnerHTML();
+        }
       });
-    }
-    if (this.contentElem) {
+    }else if (this.contentElem) {
       this.updateInnerHTML();
     }
   }

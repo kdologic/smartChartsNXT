@@ -89,7 +89,7 @@ class PointerCrosshair extends Component {
 
   render() {
     return (
-      <g class='sc-pointer-crosshair' transition=''>
+      <g class='sc-pointer-crosshair' style={{'pointerEvents': 'none'}}>
         <Style>
           {{
             '.sc-crosshair-group': {

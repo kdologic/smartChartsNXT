@@ -296,20 +296,19 @@
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
-            // Enable a color band region with text label on background.
-            // "markRegions": [{                           
-            //   "from": 2,                             // [ default: 0 ] Data index start from 1, Region start value.
-            //   "to": 5,                               // [ default: 0 ] Data index start from 1, Region end value.
-            //   "color": "purple",                     // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
-            //   "borderColor": 'none',                 // [ default: "none" ] Border color of the region.
-            //   "opacity": 0.5,                        // [ default: 0.2 ]
-            //   "label": {
-            //     "text": "Purple range",              // [ default: "" ] Rich text (With HTML) label of the region.
-            //     "fontSize": "12",                    // [ default: 14 ]
-            //     "color": "#000",                     // [ default: #000 ]
-            //     "style": {}                          // [ default: {} ] Add css style for the label text.
-            //   }
-            // }]
+            "markRegions": [{                           // Enable a color band region with text label on background.
+              "from": 7,                                // [ default: 0 ] Data index start from 1, Region start value.
+              "to": 8,                                  // [ default: 0 ] Data index start from 1, Region end value.
+              "color": "purple",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
+              "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
+              "opacity": 0.2,                           // [ default: 0.2 ]
+              "label": {    
+                "text": "Purple range",                 // [ default: "" ] Rich text (With HTML) label of the region.
+                "fontSize": "12",                       // [ default: 14 ]
+                "color": "#000",                        // [ default: #000 ]
+                "style": {}                             // [ default: {} ] Add css style for the label text.
+              }
+            }]
           },
           "yAxis": {
             "title": "Total Sales",                     // [ default: Value-axis ]
@@ -326,20 +325,19 @@
             "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             "zeroBase": false,                          // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
-            // Enable a color band region with text label on background.
-            // "markRegions": [{                           
-            //   "from": 15,                            // [ default: 0 ] Region start value.
-            //   "to": 20,                              // [ default: 0 ] Region end value.
-            //   "color": "purple",                     // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
-            //   "borderColor": 'blue',                 // [ default: "none" ] Border color of the region.
-            //   "opacity": 0.5,                        // [ default: 0.2 ]
-            //   "label": {
-            //     "text": "Purple range",              // [ default: "" ] Rich text (With HTML) label of the region.
-            //     "fontSize": "12",                    // [ default: 14 ]
-            //     "color": "#000",                     // [ default: #000 ]
-            //     "style": {}                          // [ default: {} ] Add css style for the label text.
-            //   }
-            // }]
+            "markRegions": [{                           // Enable a color band region with text label on background.   
+              "from": 800,                              // [ default: 0 ] Region start value.
+              "to": 1000,                               // [ default: 0 ] Region end value.
+              "color": "orange",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
+              "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
+              "opacity": 0.2,                           // [ default: 0.2 ]
+              "label": {    
+                "text": "Orange range",                 // [ default: "" ] Rich text (With HTML) label of the region.
+                "fontSize": "12",                       // [ default: 14 ]
+                "color": "#000",                        // [ default: #000 ]
+                "style": {}                             // [ default: {} ] Add css style for the label text.
+              }
+            }]
           },
           "series": [{
             "visible": true,                            // [ default: true | false ]
@@ -362,7 +360,12 @@
               "type": $SC.ENUMS.ICON_TYPE.CIRCLE,       // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
               "width": 12,                              // [ default: 12]
               "height": 12,                             // [ default: 12]
-              "URL": ""                                 // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM 
+              "URL": "",                                // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM
+              "events": {
+                "click": function(e) {                  // Event will fire when click on the marker.
+                  alert('Marker clicked !!')
+                }
+              } 
             },
             "spline": true,                             // [ default: true | false ]
             // "dropShadow": true,                      // [ default: true | false ] Note: Drop shadow only applicable for line charts.
@@ -481,15 +484,16 @@
 
       /* Show popup */
       // areaChart.showPopup({
-      //   x: 110,
-      //   y:110,
-      //   width: 300,
-      //   height: 200,
-      //   title: "Draggable Popup title",
-      //   body: "<p style='text-align:center;margin:0;'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ornare massa eget egestas purus viverra accumsan in nisl nisi. Ipsum consequat nisl vel pretium lectus. Erat nam at lectus urna duis convallis. Adipiscing elit pellentesque habitant morbi tristique senectus. Viverra orci sagittis eu volutpat odio facilisis. Risus commodo viverra maecenas accumsan lacus vel facilisis volutpat. Nulla pharetra diam sit amet nisl suscipit adipiscing bibendum. In pellentesque massa placerat duis ultricies lacus sed turpis. Volutpat est velit egestas dui id ornare arcu odio ut. Laoreet non curabitur gravida arcu ac tortor dignissim convallis aenean. A diam maecenas sed enim. Pellentesque id nibh tortor id aliquet lectus proin nibh nisl. Nulla pharetra diam sit amet nisl. Elementum facilisis leo vel fringilla est ullamcorper eget nulla. Scelerisque mauris pellentesque pulvinar pellentesque habitant morbi tristique senectus. Sagittis purus sit amet volutpat consequat mauris nunc congue nisi.</p>",
-      //   textVerticalAlignMiddle: false,
-      //   isDraggable: true,
-      //   isModal: true
+      //   x: 110,                                      // [ default: Center of the screen ]
+      //   y:110,                                       // [ default: Center of the screen ]
+      //   width: 400,                                  // [ default: 300 ]
+      //   height: 200,                                 // [ default: 200 ]
+      //   title: "Draggable Popup title",              // [ default: "" ] HTML supported popup title.
+      //   body: "<p style='text-align:center;margin:0;'>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ornare massa eget egestas purus viverra accumsan in nisl nisi. Ipsum consequat nisl vel pretium lectus. Erat nam at lectus urna duis convallis. Adipiscing elit pellentesque habitant morbi tristique senectus.</p>",
+      //   textVerticalAlignMiddle: false,              // [ true | default: false ] Set vertical text align middle.
+      //   isDraggable: true,                           // [ default: true | false ] Popup will be draggable only by drag through it's title bar.
+      //   isModal: true,                               // [ default: true | false ] Create a transparent back drop.
+      //   isAnimated: true                             // [ default: true | false ]
       // });
     });
   </script>

@@ -15,8 +15,10 @@
   <div role='figure' class="chart-base">
     <div id='chartContainer' style="width:100%; height:550px;"></div>
     <p class="chart-caption" aria-hidden="true">
-      This chart shows how we can use customized marker symbols. SmartChartsNXT already supports common symbols like circle, diamond, triangle, star etc. 
-      In this chart we have used custom weather symbols to indicate specific weather seasons like Summer, Winter, Monsoons.
+      This chart shows how we can use customized marker symbols. SmartChartsNXT already supports common symbols like
+      circle, diamond, triangle, star etc.
+      In this chart we have used custom weather symbols to indicate specific weather seasons like Summer, Winter,
+      Monsoons.
     </p>
   </div>
 
@@ -39,6 +41,12 @@
           "textColor": "#8F9779"
         },
         "gridBox": {
+          "vertical": {
+            "enable": false
+          },
+          "horizontal": {
+            "enable": false
+          },
           "bgColor": '#FFF',
           "bgOpacity": 0.2
         },
@@ -48,29 +56,29 @@
         "tooltip": {
           "followPointer": true,
           "grouped": true,
-          "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,
+          "position": $SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,
           "anchorWidth": 0,
           "borderColor": "none",
           "borderWidth": 0,
           "borderRadius": 10,
           "dropShadow": false,
           "content": {
-            "header": function(pointSet, index, tipConfig) {
+            "header": function (pointSet, index, tipConfig) {
               return (
-                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") +';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
-                  pointSet[index].formattedLabel +
+                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") + ';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                pointSet[index].formattedLabel +
                 '</p>'
               );
             },
-            "body": function(pointSet, index, tipConfig) {
+            "body": function (pointSet, index, tipConfig) {
               let point = pointSet[index];
               return (
                 '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
-                  '<td style="padding: 5px">' + 
-                    '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
-                      point.seriesName +
-                  '</td>' +
-                  '<td style="padding: 5px">' + (point.value) + ' \u00BAC</td>' +
+                '<td style="padding: 5px">' +
+                '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
+                point.seriesName +
+                '</td>' +
+                '<td style="padding: 5px">' + (point.value) + ' \u00BAC</td>' +
                 '</tr>'
               );
             }
@@ -85,7 +93,63 @@
           },
           "yAxis": {
             "title": "TEMPERATURE (\u00BAC)",
-            "append": " \u00BAC"
+            "append": " \u00BAC",
+            "markRegions": [{
+              "from": 30,
+              "to": 40,
+              "color": "red",
+              "borderColor": 'none',
+              "opacity": 0.1,
+              "label": {
+                "text": "<p style='position:relative;top:-20px;margin:0;text-align:center;font-weight:bold;'>Heat Wave</p>",
+                "fontSize": "14",
+                "color": "#000",
+              }
+            }, {
+              "from": 22,
+              "to": 30,
+              "color": "orange",
+              "borderColor": 'none',
+              "opacity": 0.1,
+              "label": {
+                "text": "<p style='position:relative;padding-left:20%;margin:0;font-weight:bold;'>Moderately Hot</p>",
+                "fontSize": "14",
+                "color": "#000",
+              }
+            }, {
+              "from": 16,
+              "to": 22,
+              "color": "green",
+              "borderColor": 'none',
+              "opacity": 0.1,
+              "label": {
+                "text": "<p style='position:relative;padding-left:20%;margin:0;font-weight:bold;'>Pleasant temperature</p>",
+                "fontSize": "14",
+                "color": "#000",
+              }
+            }, {
+              "from": 7,
+              "to": 16,
+              "color": "purple",
+              "borderColor": 'none',
+              "opacity": 0.1,
+              "label": {
+                "text": "<p style='margin:0;font-weight:bold;'>Moderately Cold</p>",
+                "fontSize": "14",
+                "color": "#000",
+              }
+            }, {
+              "from": 7,
+              "to": -10,
+              "color": "blue",
+              "borderColor": 'none',
+              "opacity": 0.1,
+              "label": {
+                "text": "<p style='margin:0;text-align:center;font-weight:bold;'>Cold Wave</p>",
+                "fontSize": "14",
+                "color": "#000",
+              }
+            }]
           },
           "series": [{
             "name": 'Kolkata',
@@ -95,15 +159,9 @@
               "showConnectorLine": false,
             },
             "dataLabels": {
-              "offsetY": -10,
+              "offsetY": -15,
               "bgColor": "#A1DAD7",
               "borderWidth": 0,
-              "filter": function (val, index) {
-                if ([4, 6].indexOf(index) !== -1) {
-                  return true;
-                }
-                return false;
-              },
               "formatter": function (val, index) {
                 return val + " \u00BAC";
               },
@@ -114,32 +172,252 @@
             },
             "marker": {
               "type": $SC.ENUMS.ICON_TYPE.CIRCLE,
-              "width": 10
+              "width": 10,
             },
             "dropShadow": true,
             "data": [
-              { "label": "Jan", "value": 19.5 }, { "label": "Feb", "value": 22 }, { "label": "Mar", "value": 27 }, { "label": "Apr", "value": 29.9 },
               {
-                "label": "May", "value": 30.4,
+                "label": "Jan",
+                "value": 19.5,
                 "marker": {
                   "enable": true,
                   "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                  "width": 25,
-                  "height": 25,
-                  "URL": "/smartchartsnxt/examples/static/images/icon_sunshine.png"
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_snowflakes.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 180,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in January</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>January, in Kolkata, India, is another warm winter month, with average temperature fluctuating between 13.8°C (56.8°F) and 26.4°C (79.5°F). January is the coldest month, with an average high-temperature of 26.4°C (79.5°F) and an average low-temperature of 13.8°C (56.8°F).</p>",
+                      });
+                    }
+                  }
                 }
-              }, { "label": "Jun", "value": 29.7 },
-              {
-                "label": "Jul", "value": 28.7,
+              }, {
+                "label": "Feb",
+                "value": 22,
                 "marker": {
                   "enable": true,
                   "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                  "width": 25,
-                  "height": 25,
-                  "URL": "/smartchartsnxt/examples/static/images/icon_cloudy_rainfall.png"
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_snowflakes.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 170,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in February</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>The last month of the winter, February, is another warm month in Kolkata, India, with average temperature fluctuating between 16.9°C (62.4°F) and 29.1°C (84.4°F). In Kolkata, the average high-temperature in February is essentially the same as in January - a still moderately hot 29.1°C (84.4°F).</p>",
+                      });
+                    }
+                  }
                 }
-              }, { "label": "Aug", "value": 28.6 },
-              { "label": "Sep", "value": 28.9 }, { "label": "Oct", "value": 27.4 }, { "label": "Nov", "value": 23.3 }, { "label": "Dec", "value": 19.5 }
+              },
+              {
+                "label": "Mar",
+                "value": 27,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 200,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in March</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>March, the first month of the pre-monsoon summer, in Kolkata, is a hot month, with temperature in the range of an average high of 33.5°C (92.3°F) and an average low of 21.7°C (71.1°F). In March, the average high-temperature marginally rises, from a warm 29.1°C (84.4°F) in February, to a tropical 33.5°C (92.3°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Apr",
+                "value": 29.9,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 170,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in April</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>April in Kolkata, India, is a very hot pre-monsoon summer month, with average temperature fluctuating between 25.1°C (77.2°F) and 35.3°C (95.5°F). In Kolkata, the average high-temperature is almost the same as in March - a sweltering 35.3°C (95.5°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "May",
+                "value": 30.4,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunshine.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 180,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in May</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>May, the last month of the pre-monsoon summer, in Kolkata, is also a sweltering month, with temperature in the range of an average high of 35.4°C (95.7°F) and an average low of 26°C (78.8°F). With an average high-temperature of 35.4°C (95.7°F) and an average low-temperature of 26°C (78.8°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Jun",
+                "value": 29.7,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_partly_cloudy.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 150,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in June</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>June, the first month of the rainy (monsoon) season, in Kolkata, is still a hot month, with temperature in the range of an average high of 34°C (93.2°F) and an average low of 26.5°C (79.7°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Jul",
+                "value": 28.7,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_cloudy_rainfall.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 160,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in July</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>Kolkata in July you can expect: almost every day rain, habitually thunderstorm, and another hot rainy (monsoon) season month, with temperature in the range of an average high of 32.3°C (90.1°F) and an average low of 26.1°C (79°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Aug",
+                "value": 28.6,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_rainy_low.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 140,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in August</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>August, the same as July, in Kolkata, India, is another tropical rainy (monsoon) season month, with average temperature ranging between max 32.1°C (89.8°F) and min 26.1°C (79°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Sep",
+                "value": 28.9,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_partly_cloudy.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 140,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in September</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>September, the last month of the rainy (monsoon) season, in Kolkata, is another tropical month, with average temperature varying between 32.4°C (90.3°F) and 25.8°C (78.4°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Oct",
+                "value": 27.4,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 150,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in October</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>The first month of the post monsoon autumn, October, is still a tropical month in Kolkata, India, with temperature in the range of an average low of 23.9°C (75°F) and an average high of 32.3°C (90.1°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Nov",
+                "value": 23.3,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_autumn.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 130,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in November</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>November, the last month of the post monsoon autumn, in Kolkata, is still a tropical month, with average temperature fluctuating between 30.3°C (86.5°F) and 19.6°C (67.3°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Dec",
+                "value": 19.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_snowflakes.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 130,
+                        title: "<span style='font-weight:bold;'>Weather of Kolkata in December</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>December, the first month of the winter, in Kolkata, is also a moderately hot month, with average temperature fluctuating between 14.5°C (58.1°F) and 27°C (80.6°F).</p>",
+                      });
+                    }
+                  }
+                }
+              }
             ]
           }, {
             "name": 'New York',
@@ -150,15 +428,9 @@
             },
             "dataLabels": {
               "float": $SC.ENUMS.FLOAT.BOTTOM,
-              "offsetY": 10,
+              "offsetY": 15,
               "bgColor": "#FAEBD7",
               "borderWidth": 0,
-              "filter": function (val, index) {
-                if ([0, 1, 4].indexOf(index) !== -1) {
-                  return true;
-                }
-                return false;
-              },
               "formatter": function (val, index) {
                 return val + " \u00BAC";
               },
@@ -174,35 +446,246 @@
             "dropShadow": true,
             "data": [
               {
-                "label": "Jan", "value": -0.6,
+                "label": "Jan",
+                "value": -0.6,
                 "marker": {
                   "enable": true,
                   "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                  "width": 25,
-                  "height": 25,
-                  "URL": "/smartchartsnxt/examples/static/images/icon_winter_cold.png"
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_winter_cold.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 230,
+                        title: "<span style='font-weight:bold;'>Weather of New York in January</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>January is the coldest month of the year in New York with the regions near Adirondacks in the frigid 3°F (-16.1°C) to 29°F (-1.7°C) average range - a few days drop even below 0°F (-17.8°C).</p><p style='line-height: 1.5; padding: 5px;'>January is also the snowiest month of the year, which witnesses one-third of the average annual snowfall across the state.</p>",
+                      });
+                    }
+                  }
                 }
               }, {
-                "label": "Feb", "value": -0.5,
+                "label": "Feb",
+                "value": -0.5,
                 "marker": {
                   "enable": true,
                   "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                  "width": 25,
-                  "height": 25,
-                  "URL": "/smartchartsnxt/examples/static/images/icon_winter_cold.png"
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_winter_cold.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 160,
+                        title: "<span style='font-weight:bold;'>Weather of New York in February</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>February is a cold winter month in New York with the average low temperatures in the cold 5°F (-15°C) to 26°F (-3.3°C) zone and the average high temperatures in the 28°F (-2.2°C) to 42°F (5.6°C) range across different regions of the state.</p>",
+                      });
+                    }
+                  }
                 }
-              }, { "label": "Mar", "value": 4.9 }, { "label": "Apr", "value": 10.6 },
+              }, {
+                "label": "Mar",
+                "value": 4.9,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_winter_cloud.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 160,
+                        title: "<span style='font-weight:bold;'>Weather of New York in March</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>March is a cold and wet month that starts the spring season in New York. Average high temperatures are in the mild 37°F (2.8°C) to 50°F (10°C) range, while the average lows are below freezing in the 14°F (-10°C) to 26°F (-3.3°C) range.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Apr",
+                "value": 10.6,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny_cloud.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 190,
+                        title: "<span style='font-weight:bold;'>Weather of New York in April</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>April is a wonderful month in New York, especially in the upstate rural parts of the state, with flowers blossoming in the rugged terrain as the forests and hills come alive after the departure of the chilly winter. Average temperatures range from a low of 29°F (-1.7°C) in the mountains to a high of 61°F (16.1°C) in the coastal south.</p>",
+                      });
+                    }
+                  }
+                }
+              },
               {
                 "label": "May", "value": 16.5,
                 "marker": {
                   "enable": true,
                   "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
-                  "width": 25,
-                  "height": 25,
-                  "URL": "/smartchartsnxt/examples/static/images/icon_snow_cloudy.png"
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny_rain_cloud.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 190,
+                        title: "<span style='font-weight:bold;'>Weather of New York in May</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>May is one of the best times to visit New York with brilliant sunshine lasting up to 8 hours a day. Sunny days abound with pleasant temperatures throughout the state: average highs are 65°F (18.3°C) to 70°F (21.1°C), while average lows are between 39°F (3.9°C) and 54°F (12.2°C).</p>",
+                      });
+                    }
+                  }
                 }
-              }, { "label": "Jun", "value": 21.5 }, { "label": "Jul", "value": 24.5 }, { "label": "Aug", "value": 23.8 },
-              { "label": "Sep", "value": 19.5 }, { "label": "Oct", "value": 13.5 }, { "label": "Nov", "value": 7.9 }, { "label": "Dec", "value": 2.2 }
+              }, {
+                "label": "Jun",
+                "value": 21.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 190,
+                        title: "<span style='font-weight:bold;'>Weather of New York in June</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>June is summer in New York with average temperatures in the sunny 75°F (23.9°C) to 80°F (26.7°C) range and average lows of 47°F (8.3°C) to 64°F (17.8°C).</p><p style='margin:0;line-height: 1.5; padding: 5px;'>The state averages approximately 20 sunny days during the month with 9 hours of daily sunshine.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Jul",
+                "value": 24.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunshine.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 190,
+                        title: "<span style='font-weight:bold;'>Weather of New York in July</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>July is the hottest month of the year in New York with average high temperatures of 75°F (23.9°C) to 85°F (29.4°C).</p><p style='margin:0;line-height: 1.5; padding: 5px;'>New York City experiences many days that cross 95°F (35°C), while a few even touch the psychological barrier of 100°F (37.8°C).</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Aug",
+                "value": 23.8,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_sunny.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 150,
+                        title: "<span style='font-weight:bold;'>Weather of New York in August</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>August is a hot summer month, as many parts of the state register a few days above 90°F (32.2°C). However, the average high temperatures are in the 75°F (23.9°C) to 80°F (26.7°C) range due to the sticky heat and partly cloudy skies.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Sep",
+                "value": 19.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_summer_thunder_storm.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 130,
+                        title: "<span style='font-weight:bold;'>Weather of New York in September</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>September transitions to the beautiful autumn season that sees the average high temperatures of 68°F (20°C) to 75°F (23.9°C) range.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Oct",
+                "value": 13.5,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 35,
+                  "height": 35,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_autumn_park.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 240,
+                        title: "<span style='font-weight:bold;'>Weather of New York in October</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>October displays spectacular fall foliage in New York; it is particularly breathtaking in upstate New York, which has a diverse landscape of lakes, rivers, streams, meadows, and mountains. It is one of the best times to visit New York with wonderful weather and witness nature in its full glory.</p><p style='line-height: 1.5; padding: 5px;'>Average high temperatures are in the range of 55°F (12.8°C) to 65°F (18.3°C), while average low temperatures register 36°F (2.2°C) to 50°F (10°C) across the state.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Nov",
+                "value": 7.9,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_snowflakes.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 150,
+                        title: "<span style='font-weight:bold;'>Weather of New York in November</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>November is the last month of the autumn in New York that sees mild to cold temperatures in the state. While the days average mild 45°F (7.2°C) to 55°F (12.8°C), the nights are chillier in the 27°F (-2.8°C) to 40°F (4.4°C) average range.</p>",
+                      });
+                    }
+                  }
+                }
+              }, {
+                "label": "Dec",
+                "value": 2.2,
+                "marker": {
+                  "enable": true,
+                  "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
+                  "width": 20,
+                  "height": 20,
+                  "URL": "/smartchartsnxt/examples/static/images/icons/icon_winter_cold.png",
+                  "events": {
+                    "click": function (e) {
+                      lineChart.showPopup({
+                        width: 400,
+                        height: 150,
+                        title: "<span style='font-weight:bold;'>Weather of New York in December</span>",
+                        body: "<p style='margin:0;line-height: 1.5; padding: 5px;'>December is a cold winter month with the average high temperatures in the 35°F (1.7°C) to 45°F (7.2°C) range and the average low temperatures in the freezing 15°F (-9.4°C) to 25°F (-3.9°C) range across the state.</p>",
+                      });
+                    }
+                  }
+                }
+              }
             ]
           }]
         }

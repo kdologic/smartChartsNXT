@@ -79,7 +79,6 @@ class DrawConnectedPoints extends Component {
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
     this.store.setValue('pointsData', { [this.props.instanceId]: this.state.pointSet });
 
-    this.interactiveMouseClick = this.interactiveMouseClick.bind(this);
     this.mouseMoveBind = this.interactiveMouseMove.bind(this);
     this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
     this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
@@ -108,7 +107,6 @@ class DrawConnectedPoints extends Component {
 
   afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    this.emitter.on('interactiveMouseClick', this.interactiveMouseClick);
     this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
@@ -132,7 +130,6 @@ class DrawConnectedPoints extends Component {
   }
 
   beforeUnmount() {
-    this.emitter.removeListener('interactiveMouseClick', this.interactiveMouseClick);
     this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
     this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
@@ -228,11 +225,14 @@ class DrawConnectedPoints extends Component {
           </path>
         }
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1'></path>
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
+            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1'>
+          </path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
-            type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor} opacity={this.state.marker.opacity} >
+            type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers}
+            fillColor={this.props.areaFillColor || this.props.lineFillColor} opacity={this.state.marker.opacity} events={this.state.marker.events || {}} >
           </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
@@ -335,12 +335,6 @@ class DrawConnectedPoints extends Component {
     };
   }
 
-  interactiveMouseClick(e) {
-    if (!this.props.dataPoints) {
-      return;
-    }
-  }
-
   interactiveMouseMove(e) {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return;
@@ -366,7 +360,8 @@ class DrawConnectedPoints extends Component {
         relY: nearPoint.y,
         dist: nearPoint.dist,
         pointIndex: nearPoint.index,
-        seriesIndex: this.props.index
+        seriesIndex: this.props.index,
+        offsetLeft: this.state.clip.offsetLeft
       };
     } else {
       evt.highlightedPoint = {
@@ -414,7 +409,8 @@ class DrawConnectedPoints extends Component {
           relY: nearPoint.y,
           dist: 0,
           pointIndex: nearPoint.index,
-          seriesIndex: this.props.index
+          seriesIndex: this.props.index,
+          offsetLeft: this.state.clip.offsetLeft
         };
       } else {
         evt.highlightedPoint = {

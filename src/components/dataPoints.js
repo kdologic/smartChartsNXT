@@ -22,7 +22,8 @@ class DataPoints extends Component {
       highlightedIndex: null,
       pointSet: this.props.opacity ? this.props.pointSet : [],
       opacity: this.props.opacity,
-      icons: {}
+      icons: {},
+      hotspots: {}
     };
     this.doHighlight = this.doHighlight.bind(this);
     this.normalize = this.normalize.bind(this);
@@ -86,7 +87,7 @@ class DataPoints extends Component {
       iconHeight = marker.height;
     }
     return (
-      <MarkerIcon type={iconType} instanceId={point.index} id={point.index} x={point.x} y={point.y} width={iconWidth} height={iconHeight}
+      <MarkerIcon index={iconType + '_' + this.props.instanceId + '_' + point.index} type={iconType} instanceId={point.index} id={point.index} x={point.x} y={point.y} width={iconWidth} height={iconHeight}
         fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff" URL={iconURL || ''}
         onRef={ref => {
           this.state.icons[point.index] = ref;
@@ -106,6 +107,10 @@ class DataPoints extends Component {
         this.state.icons[this.state.highlightedIndex].normalize();
       }
     }
+    if (this.state.highlightedIndex !== undefined && this.state.hotspots[this.state.highlightedIndex]) {
+      this.emitter.emit('removeHotspot', { id: this.state.hotspots[this.state.highlightedIndex].id });
+      delete this.state.hotspots[this.state.highlightedIndex];
+    }
     this.state.highlightedIndex = null;
   }
 
@@ -115,12 +120,65 @@ class DataPoints extends Component {
       return;
     }
     if (this.props.opacity === 0) {
-      let pData = { x: e.highlightedPoint.relX, y: e.highlightedPoint.relY, index };
+      let pData = {
+        x: e.highlightedPoint.relX,
+        y: e.highlightedPoint.relY, index
+      };
       this.setState({ pointSet: [pData] });
       this.state.highlightedIndex = index;
     } else if (this.state.icons[index]) {
       this.state.highlightedIndex = index;
       this.state.icons[index].highlight();
+    }
+
+    let customMarker = this.props.customizedMarkers[index];
+    let events = customMarker && customMarker.events ? customMarker.events : this.props.events;
+
+    if (!this.state.hotspots[index] && typeof events.click === 'function') {
+      let hpId = 'hp-' + UtilCore.getRandomID();
+      let label = this.props.xAxisInfo.selectedCategories[index];
+      let formattedLabel = label;
+      if (this.props.xAxisInfo.categories.parseAsDate && UtilCore.isDate(label)) {
+        label = label.valueOf();
+        formattedLabel = UtilCore.dateFormat(label).format(this.props.xAxisInfo.categories.displayDateFormat || 'LL');
+      }
+      formattedLabel = `${(this.props.xAxisInfo.prepend || '') + formattedLabel + (this.props.xAxisInfo.append || '')}`;
+      let point = {
+        ...e.highlightedPoint,
+        ...{ value: this.state.pointSet.filter((v) => v.index == index)[0].value },
+        ...{ label, formattedLabel }
+      };
+      let icon = {
+        type: this.props.type,
+        URL: this.props.markerURL,
+        width: this.props.markerWidth,
+        height: this.props.markerHeight
+      };
+      if (this.props.customizedMarkers[index]) {
+        icon = { ...icon, ...this.props.customizedMarkers[index] };
+      }
+      let hotspotElem = <circle id={hpId} class="sc-hotspot" cx={e.highlightedPoint.relX - e.highlightedPoint.offsetLeft} cy={e.highlightedPoint.relY} r={icon.width / 2 + 8} fill="red" fill-opacity={0.0001} style={{ 'cursor': 'pointer' }}
+        events={{
+          click: (event) => {
+            events.click.bind({
+              x: e.highlightedPoint.relX - e.highlightedPoint.offsetLeft,
+              y: e.highlightedPoint.relY,
+              color: this.props.fillColor,
+              seriesName: this.props.seriesName,
+              seriesIndex: e.highlightedPoint.seriesIndex,
+              pointIndex: index,
+              point: point,
+              icon: icon
+            })(event);
+          }
+        }}></circle>;
+      this.state.hotspots[index] = {
+        id: hpId,
+        hotspot: hotspotElem
+      };
+    }
+    if (this.state.hotspots[index]) {
+      this.emitter.emit('addHotspot', this.state.hotspots[index]);
     }
   }
 }
