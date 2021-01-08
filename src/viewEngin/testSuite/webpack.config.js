@@ -20,6 +20,9 @@ module.exports = {
           presets: []
         }
       }
+    }, {
+      test: /\.css$/,
+      use: [{ loader: 'to-string-loader' }, { loader: 'css-loader' }]
     }]
   },
   optimization: {

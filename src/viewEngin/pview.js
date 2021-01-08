@@ -612,6 +612,9 @@ class Component {
    */
   _removeOldNode(nodePos = 0, oldVNode, ref) {
     let destroyableNode = oldVNode.children[nodePos], destroyableObj;
+    if (typeof destroyableNode === 'string' || typeof destroyableNode === 'number') {
+      ref.node.textContent = '';
+    }
     if (typeof destroyableNode.nodeName === 'object') {
       destroyableObj = destroyableNode.nodeName;
       destroyableNode = destroyableNode.nodeName.vnode;
