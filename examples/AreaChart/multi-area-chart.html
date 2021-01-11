@@ -298,7 +298,7 @@
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             "markRegions": [{                           // Enable a color band region with text label on background.
               "from": 7,                                // [ default: 0 ] Data index start from 1, Region start value.
-              "to": 8,                                  // [ default: 0 ] Data index start from 1, Region end value.
+              "to": 8.1,                                  // [ default: 0 ] Data index start from 1, Region end value.
               "color": "purple",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
               "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
               "opacity": 0.2,                           // [ default: 0.2 ]
@@ -327,7 +327,7 @@
             "zeroBase": false,                          // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
             "markRegions": [{                           // Enable a color band region with text label on background.   
               "from": 800,                              // [ default: 0 ] Region start value.
-              "to": 1000,                               // [ default: 0 ] Region end value.
+              "to": 1010,                               // [ default: 0 ] Region end value.
               "color": "orange",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
               "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
               "opacity": 0.2,                           // [ default: 0.2 ]
@@ -363,7 +363,12 @@
               "URL": "",                                // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM
               "events": {
                 "click": function(e) {                  // Event will fire when click on the marker.
-                  alert('Marker clicked !!')
+                  areaChart.showPopup({
+                    width: 400,
+                    height: 500,
+                    title: "Marker Clicked !!",
+                    body: "<pre style='margin:0;'><code>"+(JSON.stringify(this, null, '    '))+"</code></pre>"
+                  });
                 }
               } 
             },
@@ -435,6 +440,16 @@
               "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
               // "type": $SC.ENUMS.ICON_TYPE.CUSTOM,
               // "URL": "/smartchartsnxt/examples/static/images/icon_partly_cloudy.svg"
+              "events": {
+                "click": function(e) {                  
+                  areaChart.showPopup({
+                    width: 400,
+                    height: 500,
+                    title: "Marker Clicked !!",
+                    body: "<pre style='margin:0;'><code>"+(JSON.stringify(this, null, '    '))+"</code></pre>"
+                  });
+                }
+              } 
             },
             "spline": false,
             "animated": true,

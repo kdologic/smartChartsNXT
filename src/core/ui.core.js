@@ -115,7 +115,20 @@ class UiCore {
     document.body.appendChild(svg);
     const textDOM = mountTo(vnode, svg).node;
     if (textDOM) {
-      bbox = textDOM.getBoundingClientRect();
+      let box = textDOM.getBoundingClientRect();
+      bbox = {
+        bottom: box.bottom,
+        height: box.height,
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        width: box.width,
+        x: box.x,
+        y: box.y
+      };
+      if (typeof textDOM.getComputedTextLength == 'function') {
+        bbox.width = textDOM.getComputedTextLength();
+      }
     }
     svg.parentNode.removeChild(svg);
     return { width: bbox.width, height: bbox.height };

@@ -187,6 +187,7 @@ class BaseChart extends Component {
           <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
 
           <PopupContainer></PopupContainer>
+
           <LoaderView></LoaderView>
         </svg>
         {UtilCore.isIE &&

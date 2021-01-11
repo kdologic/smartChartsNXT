@@ -425,7 +425,7 @@ class DrawConnectedPoints extends Component {
 
   changeAreaBrightness(e) {
     if (this.props.instanceId === e.instanceId && e.strokeOpacity) {
-      this.setState({ strokeOpacity: e.strokeOpacity, strokeWidth: e.type === 'highlight' ? this.state.strokeWidth + 1 : this.state.strokeWidth - 1, opacity: e.opacity || this.props.opacity || 1 });
+      this.setState({ strokeOpacity: e.strokeOpacity, strokeWidth: e.type === 'highlight' && this.props.lineStrokeWidth ? this.props.lineStrokeWidth + 1 : (this.props.lineStrokeWidth || 0), opacity: e.opacity || this.props.opacity || 1 });
     }
   }
 

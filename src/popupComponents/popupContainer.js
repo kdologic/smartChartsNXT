@@ -132,7 +132,7 @@ class PopupContainer extends Component {
           </g>
 
           <g class="sc-popup-body-group" clip-path={`url(#${data.clipId})`}>
-            <RichTextBox class='sc-popup-body' posX={0} posY={this.state.titleHeight} width={data.width} height={data.height - this.state.titleHeight}
+            <RichTextBox class='sc-popup-body' posX={0} posY={this.state.titleHeight} width={data.width} contentWidth={data.width} height={data.height - this.state.titleHeight}
               textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={data.textVerticalAlignMiddle} overflow="scroll"
               fontSize={data.fontSize} textColor={data.fontColor} style={{ ...{ padding: '5px' }, ...data.style }} text={data.body || ''} >
             </RichTextBox>

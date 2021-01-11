@@ -26,32 +26,71 @@ class MarkRegion extends Component {
     this.setConfig(props);
     this.state = {
       scaleX: 0,
-      scaleY: 0
+      scaleY: 0,
+      xRegionsLabel: {},
+      yRegionsLabel: {},
+      reRender: false
     };
     this.onUpdateScale = this.onUpdateScale.bind(this);
   }
 
   setConfig(props) {
-    let mapFn = (d, i) => ({
-      fill: d.color || UtilCore.getColor(i),
-      stroke: d.borderColor || 'none',
-      opacity: d.opacity || 0.2,
-      text: d.label && d.label.text !== undefined ? d.label.text : '',
-      fontSize: d.label && d.label.fontSize ? d.label.fontSize : 14,
-      fontColor: d.label && d.label.color ? d.label.color : '#000',
-      textStyle: d.label && d.label.style ? d.label.style : {}
-    });
-    let xRegions = props.xMarkRegions.map(mapFn);
-    let yRegions = props.yMarkRegions.map(mapFn);
+    let mapFn = (oldConfig) => (d, i) => {
+      let conf = {
+        fill: d.color || UtilCore.getColor(i),
+        stroke: d.borderColor || 'none',
+        opacity: d.opacity || 0.2,
+        text: d.label && d.label.text !== undefined ? d.label.text : '',
+        fontSize: d.label && d.label.fontSize ? d.label.fontSize : 14,
+        fontColor: d.label && d.label.color ? d.label.color : '#000',
+        textStyle: d.label && d.label.style ? d.label.style : {}
+      };
+      if (oldConfig[i]) {
+        return { ...oldConfig[i], ...conf };
+      }
+      return conf;
+    };
+    let xRegions = props.xMarkRegions.map(mapFn(this.config.xRegions));
+    let yRegions = props.yMarkRegions.map(mapFn(this.config.yRegions));
     this.config = { xRegions, yRegions };
-  }
-
-  propsWillReceive(nextProps) {
-    this.setConfig(nextProps);
   }
 
   afterMount() {
     this.emitter.on('onUpdateScale', this.onUpdateScale);
+  }
+
+  beforeUpdate(nextProps) {
+    this.setConfig(nextProps);
+  }
+
+  afterUpdate() {
+    if (this.state.scaleX) {
+      for (let refId in this.state.xRegionsLabel) {
+        let xRegion = this.state.xRegionsLabel[refId];
+        let textDim = xRegion.textDim = xRegion.obj.getContentDim();
+        let xRegionConfig = this.config.xRegions.filter(v => v.refId === refId);
+        if (textDim.width > xRegion.width && xRegionConfig.length && xRegionConfig[0].rotateText != -90) {
+          xRegionConfig[0].rotateText = -90;
+          this.state.reRender = true;
+        } else {
+          xRegionConfig[0].rotateText = 0;
+        }
+      }
+      for (let refId in this.state.yRegionsLabel) {
+        let yRegion = this.state.yRegionsLabel[refId];
+        let textDim = yRegion.textDim = yRegion.obj.getContentDim();
+        let yRegionConfig = this.config.yRegions.filter(v => v.refId === refId);
+        if (textDim.height > yRegion.height && yRegionConfig.length && yRegionConfig[0].moveTextOutside != 1) {
+          yRegionConfig[0].moveTextOutside = 1;
+          this.state.reRender = true;
+        } else {
+          yRegionConfig[0].moveTextOutside = 0;
+        }
+      }
+      if (this.state.reRender) {
+        this.setState({ reRender: false });
+      }
+    }
   }
 
   render() {
@@ -75,13 +114,39 @@ class MarkRegion extends Component {
       region.to = region.to || 0;
       let valueDiff = Math.abs(region.to - region.from);
       let height = valueDiff * scaleY;
+      let textHeight = height;
+      let textPosY = (this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY;
       let config = this.config.yRegions[i];
+      if (config.refId && this.state.yRegionsLabel[config.refId]) {
+        this.state.yRegionsLabel[config.refId].width = this.props.width;
+        this.state.yRegionsLabel[config.refId].height = height;
+        if (config.moveTextOutside) {
+          textPosY -= this.state.yRegionsLabel[config.refId].textDim.height;
+          textHeight = this.state.yRegionsLabel[config.refId].textDim.height;
+        }
+      }
       return (
         <g>
           <rect class="sc-y-mark-region" x={0} y={(this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={10} posY={(this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY} width={this.props.width} height={height} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
-              fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''} >
+            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={10} posY={textPosY} width={this.props.width} height={textHeight} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+              fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
+              onRef={(ref) => {
+                if (ref) {
+                  config.refId = ref.contentId;
+                  this.state.yRegionsLabel[ref.contentId] = {
+                    obj: ref,
+                    width: this.props.width,
+                    height: height
+                  };
+                }
+              }}
+              onDestroyRef={(ref) => {
+                if (ref) {
+                  delete config.refId;
+                  delete this.state.yRegionsLabel[ref.contentId];
+                }
+              }}>
             </RichTextBox>
           }
         </g>
@@ -102,13 +167,40 @@ class MarkRegion extends Component {
         valueDiff = valueDiff < 0 ? 0 : valueDiff;
       }
       let width = valueDiff * scaleX;
+      let posY = 10;
+      let textWidth = undefined;
       let config = this.config.xRegions[i];
+      if (config.refId && this.state.xRegionsLabel[config.refId]) {
+        this.state.xRegionsLabel[config.refId].width = width;
+        this.state.xRegionsLabel[config.refId].height = this.props.height;
+        if (config.rotateText) {
+          textWidth = Math.max(width, this.state.xRegionsLabel[config.refId].textDim.width);
+          posY = this.state.xRegionsLabel[config.refId].textDim.width;
+        }
+      }
+
       return (
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
           <rect x={(startFrom - 1) * scaleX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={10} width={width} height={this.props.height} textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
-              fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''} >
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={width} contentWidth={textWidth} textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
+              rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
+              onRef={(ref) => {
+                if (ref) {
+                  config.refId = ref.contentId;
+                  this.state.xRegionsLabel[ref.contentId] = {
+                    obj: ref,
+                    width: width,
+                    height: this.props.height
+                  };
+                }
+              }}
+              onDestroyRef={(ref) => {
+                if (ref) {
+                  delete config.refId;
+                  delete this.state.xRegionsLabel[ref.contentId];
+                }
+              }}>
             </RichTextBox>
           }
         </g>
