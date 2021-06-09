@@ -154,7 +154,7 @@ class HorizontalLabels extends Component {
 
     if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
       let labelWidth = UiCore.getComputedTextWidth(label);
-      if (x + (labelWidth / 2) > this.props.maxWidth) {
+      if (x + (labelWidth) > this.props.maxWidth) {
         let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
         label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
       }

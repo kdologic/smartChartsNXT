@@ -7,7 +7,7 @@
   <title>Example of Multi Series Area Chart  | SmartChartsNXT</title>
   <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
   <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
-  <script src="/smartChartsNXT/build/smartChartsNxt.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNXT.ieSupport.bundle.js" type="text/javascript"></script>
   <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
 </head>
 
@@ -269,6 +269,7 @@
         },
         "dataSet": {
           "xAxis": {
+            "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR ] Note: Log x-axis not supported yet.
             "title": "Date",                            // [ default: Label-axis ]
             // To resolve a category it uses multiple try-n-error logic. Categories inside series[i].data[j].label have the highest priority, 
             // if not found then search the label on other series with same data index.
@@ -311,6 +312,7 @@
             }]
           },
           "yAxis": {
+            "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR | $SC.ENUMS.AXIS_TYPE.LOGARITHMIC ]
             "title": "Total Sales",                     // [ default: Value-axis ]
             "prepend": "\u20B9 ",                       // [ default: "" ]
             "append": "",                               // [ default: "" ]
@@ -423,6 +425,7 @@
               "max": 1000,
               "min": -1000
             }) 
+            // [0.1, 100, 200, 300, null, 400, 500, -600, 700, 800]
             // [{value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}] 
             // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
           },

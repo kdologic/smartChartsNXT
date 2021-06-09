@@ -73,6 +73,10 @@ export const OPTIONS_TYPE = {
     BOX3D: 'sc-pattern-box3d',
     SHAPE_S: 'sc-pattern-shape-s',
     CHECKERBOARD: 'sc-pattern-carbon-checkerboard'
+  },
+  AXIS_TYPE: {
+    LOGARITHMIC: 'logarithmic',
+    LINEAR: 'linear'
   }
 };
 

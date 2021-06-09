@@ -83,8 +83,15 @@ class ConnectedPointBase extends Component {
           }
         },
         dataSet: {
-          xAxis: { title: 'Label-axis' },
-          yAxis: { title: 'Value-axis', zeroBase: false }
+          xAxis: {
+            type: ENUMS.AXIS_TYPE.LINEAR,
+            title: 'Label-axis'
+          },
+          yAxis: {
+            type: ENUMS.AXIS_TYPE.LINEAR,
+            title: 'Value-axis',
+            zeroBase: false
+          }
         },
         horizontalScroller: {
           enable: true,
@@ -366,11 +373,15 @@ class ConnectedPointBase extends Component {
 
     const dataMapFn = (data, index) => {
       let d = {};
+      let yAxisType = this.CHART_DATA.dataSet.yAxis.type;
       if (data !== null && typeof data === 'object') {
         d = { ...data };
         d.value = data.value;
       } else {
         d.value = data;
+      }
+      if (yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC && d.value <= 0) {
+        d.value = null;
       }
       d.label = resolveCategory(data, index);
       d.index = index;
@@ -415,7 +426,7 @@ class ConnectedPointBase extends Component {
       dataSet.series[i].valueSet = [];
       for (let j = 0, len = data.length; j < len; j++) {
         let v = data[j].value;
-        minVal = (v < minVal) ? v : minVal;
+        minVal = (v < minVal && v !== null) ? v : minVal;
         maxVal = (v > maxVal) ? v : maxVal;
         if (j > categories.length - 1) {
           categories.push(data[j].label);
@@ -436,7 +447,11 @@ class ConnectedPointBase extends Component {
     this.state[dataFor].dataSet.xAxis.selectedCategories = categories;
     this.state[dataFor].maxima = Math.max(...maxSet);
     this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
+    if (this.state[dataFor].dataSet.yAxis.type === ENUMS.AXIS_TYPE.LINEAR) {
+      this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
+    } else if (this.state[dataFor].dataSet.yAxis.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      this.state[dataFor].yInterval = UiCore.calcIntervalByMinMaxLog(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
+    }
     ({ iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount } = this.state[dataFor].yInterval);
     this.state.gridHeight = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount);
   }
@@ -554,12 +569,12 @@ class ConnectedPointBase extends Component {
         </Draggable>
 
         <MarkRegion posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} xMarkRegions={this.state.cs.dataSet.xAxis.markRegions || []} yMarkRegions={this.state.cs.dataSet.yAxis.markRegions || []}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.yInterval}
+          xAxisType={this.state.cs.dataSet.xAxis.type} yAxisType={this.state.cs.dataSet.yAxis.type} width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.yInterval}
           paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </MarkRegion>
 
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yAxisType={this.state.cs.dataSet.yAxis.type}
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
 

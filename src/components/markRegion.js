@@ -57,6 +57,9 @@ class MarkRegion extends Component {
 
   afterMount() {
     this.emitter.on('onUpdateScale', this.onUpdateScale);
+    if (this.state.reRender) {
+      this.setState({ reRender: false });
+    }
   }
 
   beforeUpdate(nextProps) {
@@ -80,9 +83,13 @@ class MarkRegion extends Component {
         let yRegion = this.state.yRegionsLabel[refId];
         let textDim = yRegion.textDim = yRegion.obj.getContentDim();
         let yRegionConfig = this.config.yRegions.filter(v => v.refId === refId);
-        if (textDim.height > yRegion.height && yRegionConfig.length && yRegionConfig[0].moveTextOutside != 1) {
-          yRegionConfig[0].moveTextOutside = 1;
-          this.state.reRender = true;
+        if (yRegionConfig.length && yRegionConfig[0].moveTextOutside != 1) {
+          if (textDim.height > yRegion.height || (yRegion.posY < 0 && (yRegion.posY + yRegion.height) > 0)) {
+            yRegionConfig[0].moveTextOutside = 1;
+            this.state.reRender = true;
+          } else {
+            yRegionConfig[0].moveTextOutside = 0;
+          }
         } else {
           yRegionConfig[0].moveTextOutside = 0;
         }
@@ -113,23 +120,40 @@ class MarkRegion extends Component {
       region.from = region.from || 0;
       region.to = region.to || 0;
       let valueDiff = Math.abs(region.to - region.from);
+      let startRegionY = (this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY;
+      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        valueDiff = Math.abs(Math.log10(region.to) - Math.log10(region.from));
+        startRegionY = (Math.log10(this.props.yInterval.iMax) - Math.log10(Math.max(region.from, region.to))) * scaleY;
+      }
       let height = valueDiff * scaleY;
       let textHeight = height;
-      let textPosY = (this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY;
+      let textPosY = startRegionY;
+      let textPosX = 10;
       let config = this.config.yRegions[i];
       if (config.refId && this.state.yRegionsLabel[config.refId]) {
         this.state.yRegionsLabel[config.refId].width = this.props.width;
         this.state.yRegionsLabel[config.refId].height = height;
-        if (config.moveTextOutside) {
+        if (config.moveTextOutside == 1) {
           textPosY -= this.state.yRegionsLabel[config.refId].textDim.height;
           textHeight = this.state.yRegionsLabel[config.refId].textDim.height;
+          if (textPosY < 0) {
+            textPosY = startRegionY + height;
+            textHeight = this.state.yRegionsLabel[config.refId].textDim.height;
+          }
+        }
+        this.state.yRegionsLabel[config.refId].posX = textPosX;
+        this.state.yRegionsLabel[config.refId].posY = textPosY;
+        if (textPosY < 0 && (textPosY + height > 0)) {
+          this.state.reRender = true;
+        } else {
+          this.state.reRender = false;
         }
       }
       return (
         <g>
-          <rect class="sc-y-mark-region" x={0} y={(this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
+          <rect class="sc-y-mark-region" x={0} y={startRegionY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={10} posY={textPosY} width={this.props.width} height={textHeight} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
               fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {

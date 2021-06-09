@@ -1,5 +1,6 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import UtilCore from './../core/util.core';
@@ -107,9 +108,14 @@ class VerticalLabels extends Component {
   getLabels() {
     let labels = [];
     this.zeroBaseIndex = -1;
-    for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
-      let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = UiCore.formatTextValue(labelVal);
+    let i = this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC ? Math.log10(this.minLabelVal) : 0;
+    let decimalCount = this.countDecimals(this.minLabelVal);
+    for (let lCount = this.props.labelCount; lCount >= 0; lCount--, i++) {
+      let labelVal = this.minLabelVal + (i * this.props.valueInterval(i));
+      if (this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        labelVal = this.props.valueInterval(i);
+      }
+      this.maxLabelVal = UiCore.formatTextValue(labelVal, decimalCount);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {
@@ -128,7 +134,7 @@ class VerticalLabels extends Component {
 
   getEachLabel(val, index) {
     let x = this.config.labelAlign === 'end' ? - 10 : this.config.labelAlign === 'start' ? 5 : 0;
-    let y = this.valueSet.length === 1 ? this.props.valueInterval : index * this.props.intervalLen;
+    let y = this.valueSet.length === 1 ? this.props.valueInterval(1) : index * this.props.intervalLen;
     y = this.config.labelAlign === 'end' ? y : y - 10;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
@@ -149,6 +155,13 @@ class VerticalLabels extends Component {
 
   onMouseLeave(e) {
     this.emitter.emit('vLabelExit', e);
+  }
+
+  countDecimals(value) {
+    if (Math.floor(value) === value) {
+      return 0;
+    }
+    return value.toString().split('.')[1].length || 0;
   }
 }
 

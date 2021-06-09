@@ -164,8 +164,14 @@ class DrawConnectedPoints extends Component {
   prepareData(props) {
     this.state.valueSet = props.dataSet;
     this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
-    this.state.scaleY = props.height / (props.maxVal - props.minVal);
-    this.state.baseLine = props.maxVal * this.state.scaleY;
+    if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LINEAR) {
+      this.state.scaleY = props.height / (props.maxVal - props.minVal);
+      this.state.baseLine = (props.maxVal) * this.state.scaleY;
+    } else if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      this.state.scaleY = props.height / (Math.log10(props.maxVal) - Math.log10(props.minVal));
+      this.state.baseLine = Math.log10(props.maxVal) * this.state.scaleY;
+    }
+
     if (typeof props.marker === 'object') {
       this.state.marker = {
         ...{
@@ -264,6 +270,9 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [], sIndex = 0;
     this.state.pointSet = this.state.valueSet.map((data, i) => {
+      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+        data = Math.log10(data);
+      }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
@@ -300,6 +309,9 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
+      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+        data = Math.log10(data);
+      }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));

@@ -135,6 +135,17 @@ class Grid extends Component {
           stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
         </line>
       );
+      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        for (let subGridCount = 2; subGridCount < 10; subGridCount++) {
+          grids.push(
+            <line instanceId={`hline-${gridCount}-${subGridCount}`} class={`sc-h-grid-line-${gridCount}-${subGridCount}`}
+              x1={0} y1={(gridCount + (1 - Math.log10(subGridCount))) * this.state.hGridInterval} x2={this.props.width} y2={(gridCount + (1 - Math.log10(subGridCount))) * this.state.hGridInterval}
+              fill='none' stroke={this.config.horizontal.lineColor} stroke-opacity={gridCount == this.state.zeroBaseGridIndex ? 1 : 0.08}
+              stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
+            </line>
+          );
+        }
+      }
     }
     return grids;
   }
