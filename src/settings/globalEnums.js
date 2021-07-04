@@ -28,6 +28,11 @@ export const OPTIONS_TYPE = {
     LEFT: 'left',
     CENTER: 'center'
   },
+  VERTICAL_ALIGN: {
+    TOP: 'top',
+    CENTER: 'center',
+    BOTTOM: 'bottom'
+  },
   DISPLAY: {
     INLINE: 'inline',
     BLOCK: 'block',

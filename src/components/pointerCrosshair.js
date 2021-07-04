@@ -1,9 +1,9 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
 import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
@@ -89,7 +89,7 @@ class PointerCrosshair extends Component {
 
   render() {
     return (
-      <g class='sc-pointer-crosshair' style={{'pointerEvents': 'none'}}>
+      <g class='sc-pointer-crosshair' style={{ 'pointerEvents': 'none' }}>
         <Style>
           {{
             '.sc-crosshair-group': {
@@ -108,9 +108,7 @@ class PointerCrosshair extends Component {
             <g class='sc-crosshair-group sc-h-crosshair' transform={`translate(0, ${this.state.hy1})`}>
               <line x1={this.state.hx1} y1={0} x2={this.state.hx2} y2={0}
                 fill='none' stroke={this.config.horizontal.lineColor} stroke-width={this.config.horizontal.strokeWidth} opacity={this.config.horizontal.lineOpacity} stroke-dasharray={this.config.horizontal.dashArray} shape-rendering='optimizeSpeed' />
-              <SpeechBox x={this.state.hx1 - this.state.horizontalLabelWidth - 5} y={-this.state.horizontalLabelHeight / 2} width={this.state.horizontalLabelWidth} height={this.state.horizontalLabelHeight} cpoint={new Point(this.state.hx1, 0)}
-                anchorBaseWidth={5} bgColor={this.config.horizontal.labelBackgroundColor} fillOpacity={this.config.horizontal.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
-              </SpeechBox>
+              {this.getHorizontalSpeechBox()}
               {this.getHorizontalLabelText()}
             </g>
           }
@@ -120,9 +118,7 @@ class PointerCrosshair extends Component {
             <g class='sc-crosshair-group sc-v-crosshair' transform={`translate(${this.state.vx1},0)`}>
               <line x1={0} y1={this.state.vy1} x2={0} y2={this.state.vy2}
                 fill='none' stroke={this.config.vertical.lineColor} stroke-width={this.config.vertical.strokeWidth} opacity={this.config.vertical.lineOpacity} stroke-dasharray={this.config.vertical.dashArray} shape-rendering='optimizeSpeed' />
-              <SpeechBox x={this.state.boxLeft} y={this.state.boxTop} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy2)}
-                anchorBaseWidth={5} bgColor={this.config.vertical.labelBackgroundColor} fillOpacity={this.config.vertical.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
-              </SpeechBox>
+              {this.getVerticalSpeechBox()}
               {this.getVerticalLabelText()}
             </g>
           }
@@ -131,20 +127,100 @@ class PointerCrosshair extends Component {
     );
   }
 
+  getVerticalSpeechBox() {
+    if (this.props.xAxis.positionOpposite === true) {
+      let posY = this.state.vy1 + 5;
+      if (this.props.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+        posY = this.state.vy1 - this.state.verticalLabelHeight - 5;
+      }
+      return (
+        <SpeechBox x={this.state.boxLeft} y={posY} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy1)}
+          anchorBaseWidth={5} bgColor={this.config.vertical.labelBackgroundColor} fillOpacity={this.config.vertical.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
+        </SpeechBox>
+      );
+
+    } else {
+      let posY = this.state.vy2 + 5;
+      if (this.props.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+        posY = this.state.vy2 - this.state.verticalLabelHeight - 5;
+      }
+      return (
+        <SpeechBox x={this.state.boxLeft} y={posY} width={this.state.verticalLabelWidth} height={this.state.verticalLabelHeight} cpoint={new Point(0, this.state.vy2)}
+          anchorBaseWidth={5} bgColor={this.config.vertical.labelBackgroundColor} fillOpacity={this.config.vertical.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
+        </SpeechBox>
+      );
+    }
+  }
+
+  getHorizontalSpeechBox() {
+    if (this.props.yAxis.positionOpposite === true) {
+      let posX = this.state.hx2 + 5;
+      if (this.props.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+        posX = this.state.hx2 - this.state.horizontalLabelWidth - 5;
+      }
+      return (
+        <SpeechBox x={posX} y={-this.state.horizontalLabelHeight / 2} width={this.state.horizontalLabelWidth} height={this.state.horizontalLabelHeight} cpoint={new Point(this.state.hx2, 0)}
+          anchorBaseWidth={5} bgColor={this.config.horizontal.labelBackgroundColor} fillOpacity={this.config.horizontal.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
+        </SpeechBox>);
+    } else {
+      let posX = this.state.hx1 - this.state.horizontalLabelWidth - 5;
+      if (this.props.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT) {
+        posX = this.state.hx1 + 5;
+      }
+      return (
+        <SpeechBox x={posX} y={-this.state.horizontalLabelHeight / 2} width={this.state.horizontalLabelWidth} height={this.state.horizontalLabelHeight} cpoint={new Point(this.state.hx1, 0)}
+          anchorBaseWidth={5} bgColor={this.config.horizontal.labelBackgroundColor} fillOpacity={this.config.horizontal.labelOpacity} shadow={true} strokeColor='none' strokeWidth={0} >
+        </SpeechBox>);
+    }
+  }
+
   getVerticalLabelText() {
-    return (
-      <text fill={this.config.vertical.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
-        <tspan x={-this.state.overflow} y={this.state.vy2 + 25}>{this.state.verticalLabelText}</tspan>
-      </text>
-    );
+    if (this.props.xAxis.positionOpposite === true) {
+      let posY = this.state.vy1 + 25;
+      if (this.props.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+        posY = this.state.vy1 - 15;
+      }
+      return (
+        <text fill={this.config.vertical.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
+          <tspan x={-this.state.overflow} y={posY}>{this.state.verticalLabelText}</tspan>
+        </text>
+      );
+    } else {
+      let posY = this.state.vy2 + 25;
+      if (this.props.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+        posY = this.state.vy2 - 15;
+      }
+      return (
+        <text fill={this.config.vertical.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
+          <tspan x={-this.state.overflow} y={posY}>{this.state.verticalLabelText}</tspan>
+        </text>
+      );
+    }
   }
 
   getHorizontalLabelText() {
-    return (
-      <text fill={this.config.horizontal.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
-        <tspan x={this.state.hx1 - (this.state.horizontalLabelWidth / 2) - 5} y={5}>{this.state.horizontalLabelText}</tspan>
-      </text>
-    );
+    if (this.props.yAxis.positionOpposite === true) {
+      let posX = this.state.hx2 + (this.state.horizontalLabelWidth / 2) + 5;
+      if (this.props.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+        posX = this.state.hx2 - (this.state.horizontalLabelWidth / 2) - 5;
+      }
+      return (
+        <text fill={this.config.horizontal.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
+          <tspan x={posX} y={5}>{this.state.horizontalLabelText}</tspan>
+        </text>
+      );
+    } else {
+      let posX = this.state.hx1 + (this.state.horizontalLabelWidth / 2) + 5;
+      if (this.props.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+        posX = this.state.hx1 - (this.state.horizontalLabelWidth / 2) - 5;
+      }
+      return (
+        <text fill={this.config.horizontal.labelTextColor} font-family={defaultConfig.theme.fontFamily} text-rendering='geometricPrecision' text-anchor='middle' stroke='none'>
+          <tspan x={posX} y={5}>{this.state.horizontalLabelText}</tspan>
+        </text>
+      );
+    }
+
   }
 
   setVCrosshair(data) {
@@ -164,8 +240,11 @@ class PointerCrosshair extends Component {
       verticalLabelWidth: textWidth > this.config.vertical.labelMinWidth ? textWidth : this.config.vertical.labelMinWidth,
       overflow: 0
     };
+    if (this.props.xAxis.positionOpposite === true) {
+      vState.vy1 = this.props.vLineStart;
+      vState.vy2 = this.config.vertical.spread === ENUMS.CROSSHAIR_SPREAD.FULL ? this.props.vLineEnd : Math.min(...data.map(d => d.y));
+    }
     vState.boxLeft = -(vState.verticalLabelWidth / 2);
-    vState.boxTop = vState.vy2 + 5;
     if (vState.vx1 - (vState.verticalLabelWidth / 2) < 0) {
       let overflow = vState.vx1 - (vState.verticalLabelWidth / 2) - 5;
       vState.boxLeft = vState.boxLeft - overflow;
@@ -187,14 +266,19 @@ class PointerCrosshair extends Component {
     this.state.horizontalLabelText = '' + data[0].formattedValue;
     let textWidth = UiCore.getComputedTextWidth(this.getHorizontalLabelText()) + (2 * this.state.labelTextPadding);
     let topY = Math.min(...data.map(d => d.y));
-    this.setState({
+    let hState = {
       isHorizontalCrosshairVisible: true,
       hx1: this.props.hLineStart,
       hy1: topY,
       hx2: this.config.horizontal.spread === ENUMS.CROSSHAIR_SPREAD.FULL ? this.props.hLineEnd : data[0].x,
       hy2: topY,
       horizontalLabelWidth: textWidth
-    });
+    };
+    if (this.props.yAxis.positionOpposite) {
+      hState.hx1 = this.config.horizontal.spread === ENUMS.CROSSHAIR_SPREAD.FULL ? this.props.hLineStart : data[0].x;
+      hState.hx2 = this.props.hLineEnd;
+    }
+    this.setState(hState);
   }
 
 }

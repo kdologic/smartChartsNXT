@@ -98,8 +98,11 @@ class VerticalLabels extends Component {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} aria-hidden='true'>
         {this.getLabels()}
-        {this.config.labelAlign === 'end' &&
+        {!this.props.opts.positionOpposite && this.config.labelAlign === 'end' &&
           <Ticks posX={-(this.props.opts.tickSpan || this.defaultTickSpan)} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
+        }
+        {this.props.opts.positionOpposite && this.config.labelAlign === 'start' &&
+          <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
         }
       </g>
     );
@@ -133,9 +136,14 @@ class VerticalLabels extends Component {
   }
 
   getEachLabel(val, index) {
-    let x = this.config.labelAlign === 'end' ? - 10 : this.config.labelAlign === 'start' ? 5 : 0;
+    let labelMargin = (this.props.opts.tickSpan || this.defaultTickSpan) + 5;
+    let x = this.config.labelAlign === 'end' ? - (labelMargin) : this.config.labelAlign === 'start' ? labelMargin : 0;
     let y = this.valueSet.length === 1 ? this.props.valueInterval(1) : index * this.props.intervalLen;
-    y = this.config.labelAlign === 'end' ? y : y - 10;
+    if (this.props.opts.positionOpposite) {
+      y = this.config.labelAlign === 'start' ? y : y - 10;
+    } else {
+      y = this.config.labelAlign === 'end' ? y : y - 10;
+    }
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
       <text class="sc-vertical-label" font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'

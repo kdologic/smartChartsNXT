@@ -85,12 +85,14 @@ class ConnectedPointBase extends Component {
         dataSet: {
           xAxis: {
             type: ENUMS.AXIS_TYPE.LINEAR,
-            title: 'Label-axis'
+            title: 'Label-axis',
+            positionOpposite: false
           },
           yAxis: {
             type: ENUMS.AXIS_TYPE.LINEAR,
             title: 'Value-axis',
-            zeroBase: false
+            zeroBase: false,
+            positionOpposite: false
           }
         },
         horizontalScroller: {
@@ -186,7 +188,12 @@ class ConnectedPointBase extends Component {
         offsetRightChange: 0,
         shouldFSRender: this.props.globalRenderAll
       };
-
+      this.defaultMargins = {
+        left: 30,
+        right: 30,
+        top: 80,
+        bottom: 10
+      };
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
       this.legendBoxFloat = this.props.chartOptions.legends ? (this.props.chartOptions.legends.float || 'none') : 'none';
       this.pointData = [];
@@ -231,21 +238,34 @@ class ConnectedPointBase extends Component {
     this.minWidth = this.CHART_DATA.minWidth;
     this.minHeight = this.CHART_DATA.minHeight;
 
-    const defaultMargins = {
-      left: 100,
-      right: 20,
-      top: 120,
-      bottom: this.CHART_OPTIONS.horizontalScroller.height + 90
-    };
-
     this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? defaultMargins.left : this.CHART_DATA.marginLeft;
-    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? defaultMargins.right : this.CHART_DATA.marginRight;
-    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
-    this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
+    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? this.defaultMargins.left : this.CHART_DATA.marginLeft;
+    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? this.defaultMargins.right : this.CHART_DATA.marginRight;
+    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? this.defaultMargins.top : this.CHART_DATA.marginTop;
+    this.CHART_DATA.marginBottom = this.CHART_OPTIONS.horizontalScroller.height + this.CHART_DATA.hLabelHeight + this.defaultMargins.bottom;
 
-    if (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left && (!this.CHART_OPTIONS.pointerCrosshair || this.CHART_OPTIONS.pointerCrosshair.horizontal.spread === ENUMS.CROSSHAIR_SPREAD.NONE)) {
-      this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth + 2;
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite && (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP && this.CHART_DATA.marginTop === this.defaultMargins.top)) {
+      this.CHART_DATA.marginTop = this.defaultMargins.top + this.CHART_DATA.hLabelHeight;
+    }
+
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite) {
+      this.CHART_DATA.marginBottom -= this.CHART_DATA.hLabelHeight;
+    }
+
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite === false && this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+      this.CHART_DATA.marginBottom -= this.CHART_DATA.hLabelHeight;
+    }
+
+    if (!this.CHART_OPTIONS.horizontalScroller.enable) {
+      this.CHART_DATA.marginBottom -= this.CHART_OPTIONS.horizontalScroller.height;
+    }
+
+    if (!this.CHART_DATA.dataSet.yAxis.positionOpposite && (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT && this.CHART_DATA.marginLeft === this.defaultMargins.left)) {
+      this.CHART_DATA.marginLeft = this.defaultMargins.left + this.CHART_DATA.vLabelWidth;
+    }
+
+    if (this.CHART_DATA.dataSet.yAxis.positionOpposite && (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginRight === this.defaultMargins.right)) {
+      this.CHART_DATA.marginRight = this.defaultMargins.right + this.CHART_DATA.vLabelWidth;
     }
 
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
@@ -578,53 +598,110 @@ class ConnectedPointBase extends Component {
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
 
-        <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
-          transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
-          textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
-          style={{
-            '.sc-vertical-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
-            }
-          }} />
-
-        <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight / 2) + 5)}
-          bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
-          textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
-          style={{
-            '.sc-horizontal-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
-            }
-          }} />
-
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
         </g>
 
-        <AxisBar xAxis={this.state.cs.dataSet.xAxis || {}} yAxis={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
-        </AxisBar>
+        {this.state.cs.dataSet.yAxis.positionOpposite === false &&
+          <g>
+            <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
+              transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
+              textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
+              style={{
+                '.sc-vertical-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="y-left" type='y' yAxis={this.state.cs.dataSet.yAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+            </AxisBar>
+            <VerticalLabels instanceId="v-label-left" opts={this.state.cs.dataSet.yAxis || {}}
+              posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
+              labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
+            </VerticalLabels>
+          </g>
+        }
 
-        <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
-          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
-        </VerticalLabels>
+        {this.state.cs.dataSet.yAxis.positionOpposite === true &&
+          <g>
+            <TextBox class='sc-vertical-axis-title' posX={this.context.svgWidth - 5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
+              transform={`rotate(${90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
+              textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
+              style={{
+                '.sc-vertical-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="y-right" type='y' yAxis={this.state.cs.dataSet.yAxis || {}} posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+            </AxisBar>
 
-        <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
-          categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
-          clip={{
-            x: this.state.offsetLeftChange,
-            width: this.CHART_DATA.gridBoxWidth
-          }} >
-        </HorizontalLabels>
+            <VerticalLabels instanceId="v-label-right" opts={this.state.cs.dataSet.yAxis || {}}
+              posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
+              labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
+            </VerticalLabels>
+          </g>
+        }
+
+        {this.state.cs.dataSet.xAxis.positionOpposite === false &&
+          <g>
+            <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
+              posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.BOTTOM ? (this.CHART_DATA.hLabelHeight / 2) : 0) + 5)}
+              bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
+              textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
+              style={{
+                '.sc-horizontal-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="x-bottom" type='x' xAxis={this.state.cs.dataSet.xAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+            </AxisBar>
+
+            <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
+              posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
+              maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+              categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
+              clip={{
+                x: this.state.offsetLeftChange,
+                width: this.CHART_DATA.gridBoxWidth
+              }} >
+            </HorizontalLabels>
+          </g>
+        }
+
+        {this.state.cs.dataSet.xAxis.positionOpposite === true &&
+          <g>
+            <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
+              posY={(this.CHART_DATA.marginTop - (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP ? this.CHART_DATA.hLabelHeight : this.CHART_DATA.hLabelHeight / 2) - 5)}
+              bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
+              textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
+              style={{
+                '.sc-horizontal-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="x-top" type='x' xAxis={this.state.cs.dataSet.xAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={0}>
+            </AxisBar>
+
+            <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
+              posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop}
+              maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+              categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
+              clip={{
+                x: this.state.offsetLeftChange,
+                width: this.CHART_DATA.gridBoxWidth
+              }} >
+            </HorizontalLabels>
+          </g>
+        }
 
         {this.getSeriesLabel()}
 
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth}
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          opts={this.CHART_OPTIONS.pointerCrosshair || {}}>
+          opts={this.CHART_OPTIONS.pointerCrosshair || {}} xAxis={this.state.cs.dataSet.xAxis} yAxis={this.state.cs.dataSet.yAxis}>
         </PointerCrosshair>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
@@ -637,7 +714,8 @@ class ConnectedPointBase extends Component {
         }
 
         {this.CHART_OPTIONS.horizontalScroller.enable &&
-          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight}
+          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft}
+            posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) + (this.CHART_DATA.dataSet.xAxis.positionOpposite ? 0 : this.CHART_DATA.hLabelHeight)}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} getRangeVal={this.getRangeVal.bind(this)} >
             {this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside &&
@@ -968,8 +1046,12 @@ class ConnectedPointBase extends Component {
 
   onLegendRendered(e) {
     if (e.float === ENUMS.FLOAT.NONE) {
-      const newMarginTop = e.bBox.y + e.bBox.height + 10;
-      if (this.CHART_DATA.marginTop !== newMarginTop) {
+      const addedMarginTop = e.bBox.height;
+      let newMarginTop = this.defaultMargins.top + addedMarginTop;
+      if (this.CHART_DATA.dataSet.xAxis.positionOpposite && (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP)) {
+        newMarginTop = newMarginTop + this.CHART_DATA.hLabelHeight;
+      }
+      if (this.CHART_DATA.marginTop != newMarginTop) {
         this.CHART_DATA.marginTop = newMarginTop;
         this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
         this.prepareDataSet();

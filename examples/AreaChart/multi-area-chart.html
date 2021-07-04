@@ -292,14 +292,16 @@
             "tickOpacity": 1,                           // [ default: 1 ]
             "tickColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "tickSpan": 6,                              // [ default: 6 ]
+            "labelAlign": $SC.ENUMS.VERTICAL_ALIGN.BOTTOM,// [ $SC.ENUMS.VERTICAL_ALIGN.(TOP | default: BOTTOM) ]
             "labelOpacity": 1,                          // [ default: 1 ]
             "labelColor": "#000",                       // [ default : $SC.GLOBAL.theme.fontColorDark ]
             "axisColor": $SC.GLOBAL.theme.fontColorDark,// [ default : $SC.GLOBAL.theme.fontColorDark ]
             "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "positionOpposite": false,                  // [ true | default: false ] Note: if true then axis will be position opposite side [top side]
             "markRegions": [{                           // Enable a color band region with text label on background.
               "from": 7,                                // [ default: 0 ] Data index start from 1, Region start value.
-              "to": 8.1,                                  // [ default: 0 ] Data index start from 1, Region end value.
+              "to": 8.1,                                // [ default: 0 ] Data index start from 1, Region end value.
               "color": "purple",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
               "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
               "opacity": 0.2,                           // [ default: 0.2 ]
@@ -327,6 +329,7 @@
             "fontSize": 14,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             "zeroBase": false,                          // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
+            "positionOpposite": false,                  // [ true | default: false ] Note: if true then axis position will be on opposite side [right side]
             "markRegions": [{                           // Enable a color band region with text label on background.   
               "from": 800,                              // [ default: 0 ] Region start value.
               "to": 1010,                               // [ default: 0 ] Region end value.
