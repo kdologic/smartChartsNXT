@@ -49,21 +49,21 @@ class InteractiveHotspots extends Component {
 
   getHotspots() {
     let hotspots = [];
-    for(let spot in this.state.hotspots) {
+    for (let spot in this.state.hotspots) {
       hotspots.push(this.state.hotspots[spot]);
     }
     return hotspots;
   }
 
   onAddHotspot(e) {
-    if(e.id && e.hotspot) {
+    if (e.id && e.hotspot) {
       this.state.hotspots[e.id] = e.hotspot;
     }
     this.update();
   }
 
   onRemoveHotspot(e) {
-    if(e.id && this.state.hotspots[e.id]) {
+    if (e.id && this.state.hotspots[e.id]) {
       delete this.state.hotspots[e.id];
       this.update();
     }

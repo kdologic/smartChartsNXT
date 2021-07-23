@@ -12,7 +12,7 @@
 </head>
 
 <body>
-  <div role='figure' class="chart-base">
+  <div role="figure" class="chart-base">
     <div id="chartContainer" style="width:100%; height:600px;"></div>
   </div>
 
@@ -152,7 +152,7 @@
             "lineThickness": 1,                         // [ default: 1 ]
             "lineOpacity": 0.2                          // [ default: 0.2 ]
           },
-          "bgColor": '#9DE5FF',                         // [ default: none ]
+          "bgColor": "#9DE5FF",                         // [ default: none ]
           "fillOptions": {                              // pattern have and highest priority then gradient and image has the lowest priority.
             //"pattern": "pattern-1",                   // [ default: $SC.ENUMS.PATTERN.CIRCLE_1 ] We can use predefined patterns or we can use custom patternID that defined in global defs
             "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL, // [ default: $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL_REV ] We can use predefined gradient or we can use custom gradientID that defined in global defs
@@ -275,10 +275,10 @@
             // if not found then search the label on other series with same data index.
             // if not found then search in xAxis.category or xAxis.category.value field, if not found then try to resolve it from category.startFrom along with category.increaseBy value.
             // if still not found any value then assign the (index + 1) as a default value of the category.
-            // "categories": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'], // Note: Categories can be array of values.
+            // "categories": ["JA", "FE", "MA", "AP", "ME", "JN", "JL"], // Note: Categories can be array of values.
             "categories": {                             // Note: It can be an object with associate config. 
-              // "value": ['JA', 'FE', 'MA', 'AP', 'ME', 'JN', 'JL'],
-              // "value": ['12-10-2020', '13-10-2020', '14-10-2020', '15-10-2020', '16-10-2020'],
+              // "value": ["JA", "FE", "MA", "AP", "ME", "JN", "JL"],
+              // "value": ["12-10-2020", "13-10-2020", "14-10-2020", "15-10-2020", "16-10-2020"],
               "startFrom": "12-10-2020",                // [ default: 1 ] Note: It's value will be consider when no appropriate category found on data filed or category value field. 
               "increaseBy": 1000*60*60*24,              // [ default: 1 ] Note: It must be a Numeric value. For datetime it increase by 1 millisecond.
               "parseAsDate": true,                      // [ true | default: false ] Note: It will parse a category only if it is a valid date.
@@ -303,7 +303,7 @@
               "from": 7,                                // [ default: 0 ] Data index start from 1, Region start value.
               "to": 8.1,                                // [ default: 0 ] Data index start from 1, Region end value.
               "color": "purple",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
-              "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
+              "borderColor": "none",                    // [ default: "none" ] Border color of the region.
               "opacity": 0.2,                           // [ default: 0.2 ]
               "label": {    
                 "text": "Purple range",                 // [ default: "" ] Rich text (With HTML) label of the region.
@@ -334,7 +334,7 @@
               "from": 800,                              // [ default: 0 ] Region start value.
               "to": 1010,                               // [ default: 0 ] Region end value.
               "color": "orange",                        // [ default: $SC.COLOR_MODEL[index] ] Fill color of the region.
-              "borderColor": 'none',                    // [ default: "none" ] Border color of the region.
+              "borderColor": "none",                    // [ default: "none" ] Border color of the region.
               "opacity": 0.2,                           // [ default: 0.2 ]
               "label": {    
                 "text": "Orange range",                 // [ default: "" ] Rich text (With HTML) label of the region.
@@ -346,13 +346,15 @@
           },
           "series": [{
             "visible": true,                            // [ default: true | false ]
-            "name": 'Raphael',                          // [ required : string ]
+            "name": "Raphael",                          // [ required : string ]
             "a11y": {
-              description: "Showing his performance as a sales representative"   // [ default: '']
+              description: "Showing his performance as a sales representative"   // [ default: ""]
             },
             "lineWidth": 1.5,                           // [ default: 1.5 ]
             "lineOpacity": 1,                           // [ default: 1 ]
             "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
+            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.(default: SOLID | DASHED)]
+            "lineDashArray": "6 3",                       // [ default: "4" ]
             "areaColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: Optional copied from areaColor
             "areaOpacity": 0.5,                         // [ default: 0.2]
             "fillOptions": {                            // pattern have and highest priority then gradient and image has the lowest priority.
@@ -365,7 +367,7 @@
               "type": $SC.ENUMS.ICON_TYPE.CIRCLE,       // [ default: $SC.ENUMS.ICON_TYPE.(CIRCLE | TRIANGLE | DIAMOND | STAR | CUSTOM)]
               "width": 12,                              // [ default: 12]
               "height": 12,                             // [ default: 12]
-              "URL": "",                                // [ default: ''] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM
+              "URL": "",                                // [ default: ""] Support custom marker URL with marker type $SC.ENUMS.ICON_TYPE.CUSTOM
               "events": {
                 "click": function(e) {                  // Event will fire when click on the marker.
                   areaChart.showPopup({
@@ -429,12 +431,12 @@
               "min": -1000
             }) 
             // [0.1, 100, 200, 300, null, 400, 500, -600, 700, 800]
-            // [{value:100},{label:'feb', value:200},{label:'mar', value:300},{label:'apr', value:400},{label:'may', value:500},{label:'jun', value:600}, {value:700}] 
-            // [100, {label:'feb', value:200}, null, 300, 400, {label:'jun', value:null}, 500, 600, 700]
+            // [{value:100},{label:"feb", value:200},{label:"mar", value:300},{label:"apr", value:400},{label:"may", value:500},{label:"jun", value:600}, {value:700}] 
+            // [100, {label:"feb", value:200}, null, 300, 400, {label:"jun", value:null}, 500, 600, 700]
           },
           {
             "visible": true,
-            "name": 'Clara',
+            "name": "Clara",
             "lineWidth": 1.5,
             "lineOpacity": 1,
             "areaColor": '#008000',
@@ -472,32 +474,51 @@
           }
         ]
         },
-        // events: {
-        //   beforeRender: function (e) {
-        //     console.log(e, "event before rendering");
-        //   },
-        //   afterRender: function (e) {
-        //     console.log(e, "event after rendering complete");
-        //   },
-        //   onInit: function (e) {
-        //     console.log(e, "event onInit");
-        //   },
-        //   afterParseData: function (e) {
-        //     console.log(e, "event afterParseData");
-        //   }
-        // },
-        zoomWindow: {
+        "zoomWindow": {
           "leftIndex": 3,                               // [ default: 1 ]
           "rightIndex": 10                              // [ default: max data length ]
         }
       });
 
       /** add event listener **/
-      // areaChart.events.on('hScroll', function(e) {console.log(e)});
+      // areaChart.events.on('hScroll', (e) => {console.log('Horizontal Scroll', e)});
       // areaChart.events.on('beforeSave', () => {console.log('before save!');});
       // areaChart.events.on('afterSave', () => {console.log('after save!');});
       // areaChart.events.on('beforePrint', () => {console.log('before print!');});
       // areaChart.events.on('afterPrint', () => {console.log('after print!');});
+      // areaChart.events.on('resize', () => {console.log('before resize!');});
+      // areaChart.events.on('beforeRender', () => {console.log('before render!');});
+      // areaChart.events.on('afterRender', () => {console.log('after render!');});
+      // areaChart.events.on('menuExpanded', () => {console.log('menu expanded!');});
+      // areaChart.events.on('menuClosed', () => {console.log('menu closed!');});
+      // areaChart.events.on('highlightPointMarker', () => {console.log('Highlight Point Marker');});
+      // areaChart.events.on('normalizeAllPointMarker', () => {console.log('Normalize Point Marker');});
+      // areaChart.events.on('interactiveMouseEnter', () => {console.log('Interactive pane mouse enter');});
+      // areaChart.events.on('interactiveMouseLeave', () => {console.log('Interactive pane mouse leave');});
+      // areaChart.events.on('interactiveMouseMove', () => {console.log('Interactive pane mouse move');});
+      // areaChart.events.on('interactiveKeyPress', () => {console.log('Interactive pane key press');});
+      // areaChart.events.on('interactiveMouseClick', () => {console.log('Interactive pane mouse click');});
+      // areaChart.events.on('interactiveMouseUp', () => {console.log('Interactive pane mouse up');});
+      // areaChart.events.on('interactiveMouseDown', () => {console.log('Interactive pane mouse down');});
+      // areaChart.events.on('vLabelEnter', () => {console.log('Mouse enter vertical label');});
+      // areaChart.events.on('vLabelExit', () => {console.log('Mouse exit vertical label');});
+      // areaChart.events.on('onVerticalLabelsRender', () => {console.log('Vertical label rendered');});
+      // areaChart.events.on('hLabelEnter', () => {console.log('Mouse enter Horizontal label');});
+      // areaChart.events.on('hLabelExit', () => {console.log('Mouse exit Horizontal label');});
+      // areaChart.events.on('onHorizontalLabelsRender', () => {console.log('Horizontal label rendered');});
+      // areaChart.events.on('legendClicked',() => {console.log('Legend clicked');});
+      // areaChart.events.on('legendHovered',() => {console.log('Legend hovered');});
+      // areaChart.events.on('legendLeaved', () => {console.log('Legend leaved');});
+      // areaChart.events.on('legendRendered', () => {console.log('Legend rendered');});
+      // areaChart.events.on('onZoomout', () => {console.log('On zoom out');});
+      // areaChart.events.on('onScrollReset', () => {console.log('Horizontal scroll reset');});
+      // areaChart.events.on('onUpdateRangeVal', () => {console.log('Range value updated');});
+      // areaChart.events.on('showLoader', () => {console.log('Show loader screen');});
+      // areaChart.events.on('hideLoader', () => {console.log('Hide oader screen');});
+      // areaChart.events.on('onUpdateScale', () => {console.log('Hide oader screen');});
+      // areaChart.events.on('updateTooltip', () => {console.log('On update tooltip');});
+      // areaChart.events.on('hideTooltip', () => {console.log('On update tooltip');});
+      // areaChart.events.on('createPopup', () => {console.log('On create popup');});
 
       /* To change config */ 
       // areaChart.config._state.dataSet.xAxis.title = 'changed x title';

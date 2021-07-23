@@ -40,6 +40,7 @@ class DrawConnectedPoints extends Component {
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
       strokeWidth: this.props.lineStrokeWidth || 0,
+      lineDashArray: 0,
       opacity: typeof this.props.opacity === 'undefined' ? 1 : this.props.opacity,
       currentHighlightedPoint: {
         pointIndex: null
@@ -52,6 +53,10 @@ class DrawConnectedPoints extends Component {
 
     this.defaultMarkerWidth = 12;
     this.defaultMarkerHeight = 12;
+
+    if (this.props.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+      this.state.lineDashArray = this.props.lineDashArray || 4;
+    }
 
     this.state.clip = Object.assign({
       x: 0,
@@ -157,6 +162,9 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+    if (nextProps.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+      this.state.lineDashArray = nextProps.lineDashArray || 4;
+    }
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
     this.store.setValue('pointsData', { [nextProps.instanceId]: this.state.pointSet });
   }
@@ -232,7 +240,7 @@ class DrawConnectedPoints extends Component {
         }
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
-            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1'>
+            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1' stroke-dasharray={this.state.lineDashArray}>
           </path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&

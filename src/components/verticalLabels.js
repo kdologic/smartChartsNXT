@@ -67,9 +67,6 @@ class VerticalLabels extends Component {
 
   propsWillReceive(nextProps) {
     this.resetConfig(nextProps.opts);
-    this.state = {
-      fontSize: this.config.fontSize
-    };
     this.minLabelVal = nextProps.minVal;
     this.maxLabelVal = nextProps.maxVal;
   }
@@ -138,7 +135,7 @@ class VerticalLabels extends Component {
   getEachLabel(val, index) {
     let labelMargin = (this.props.opts.tickSpan || this.defaultTickSpan) + 5;
     let x = this.config.labelAlign === 'end' ? - (labelMargin) : this.config.labelAlign === 'start' ? labelMargin : 0;
-    let y = this.valueSet.length === 1 ? this.props.valueInterval(1) : index * this.props.intervalLen;
+    let y = index * this.props.intervalLen;
     if (this.props.opts.positionOpposite) {
       y = this.config.labelAlign === 'start' ? y : y - 10;
     } else {
@@ -169,7 +166,8 @@ class VerticalLabels extends Component {
     if (Math.floor(value) === value) {
       return 0;
     }
-    return value.toString().split('.')[1].length || 0;
+    let count = value.toString().split('.')[1].length;
+    return count > 10 ? 10 : count || 0;
   }
 }
 

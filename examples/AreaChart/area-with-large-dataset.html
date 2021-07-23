@@ -37,8 +37,8 @@
   </script>
 </head>
 <body>
-  <div role='figure' class="chart-base">
-    <div id='chartContainer' style="width:100%; height:550px;"></div>
+  <div role="figure" class="chart-base">
+    <div id="chartContainer" style="width:100%; height:550px;"></div>
   </div>
   <p class="chart-caption" aria-hidden="true">
     SmartchartsNXT can efficiently process large dataset with 50000 or more data points. Chart uses powerful data processing model, 
@@ -82,7 +82,7 @@
           "textColor": "#9c27b0"
         },                      
         "gridBox": {
-          "bgColor": 'skyblue',
+          "bgColor": "skyblue",
           "fillOptions": {
             "gradient": $SC.ENUMS.GRADIENT.LINEAR_HORIZONTAL
           },
@@ -128,6 +128,7 @@
           "borderWidth": 0              
         },
         "horizontalScroller": {
+          "enable": true,
           "height": 20,
           "chartInside": false
         },
@@ -140,7 +141,7 @@
             "title": "Value"
           },
           "series": [{
-            "name": 'Random Data',
+            "name": "Random Data",
             "lineColor": "#009688",
             "areaColor": "#009688",
             "marker": {

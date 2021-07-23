@@ -54,7 +54,7 @@ class ConnectedPointBase extends Component {
         subtitleTop: 50,      // Default x position of subtitle from top
         legendTop: 70,
         hLabelHeight: 80,
-        vLabelWidth: 70,
+        vLabelWidth: 60,
         paddingX: 10,
         longestSeries: 0,
         zoomOutBoxWidth: 40,
@@ -86,17 +86,19 @@ class ConnectedPointBase extends Component {
           xAxis: {
             type: ENUMS.AXIS_TYPE.LINEAR,
             title: 'Label-axis',
+            labelAlign: ENUMS.VERTICAL_ALIGN.BOTTOM,
             positionOpposite: false
           },
           yAxis: {
             type: ENUMS.AXIS_TYPE.LINEAR,
             title: 'Value-axis',
             zeroBase: false,
+            labelAlign: ENUMS.HORIZONTAL_ALIGN.RIGHT,
             positionOpposite: false
           }
         },
         horizontalScroller: {
-          enable: true,
+          enable: false,
           height: 35,
           chartInside: true
         },
@@ -713,7 +715,7 @@ class ConnectedPointBase extends Component {
           </Draggable>
         }
 
-        {this.CHART_OPTIONS.horizontalScroller.enable &&
+        {this.CHART_OPTIONS.horizontalScroller.enable !== false &&
           <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft}
             posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) + (this.CHART_DATA.dataSet.xAxis.positionOpposite ? 0 : this.CHART_DATA.hLabelHeight)}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
@@ -779,7 +781,7 @@ class ConnectedPointBase extends Component {
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin}
+          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} lineStyle={series.lineStyle || ENUMS.LINE_STYLE.SOLID} lineDashArray={series.lineDashArray || 0} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin}
           dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
           totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''} emitScale={true}
           getScaleX={(scaleX) => {
@@ -803,7 +805,7 @@ class ConnectedPointBase extends Component {
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
             accessibility={false} emitScale={false}
             getScaleX={(scaleX) => {
@@ -813,7 +815,7 @@ class ConnectedPointBase extends Component {
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
             maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false} emitScale={false}>
           </DrawConnectedPoints>
         </g>

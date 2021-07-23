@@ -27,6 +27,7 @@ class BaseChart extends Component {
   constructor(props) {
     try {
       super(props);
+      this._setState = this.setState;
       this.chartType = this.props.opts.type;
       this.store = StoreManager.getStore(this.props.runId);
       this.a11yWriter = a11yFactory.getWriter(this.props.runId);
@@ -97,6 +98,11 @@ class BaseChart extends Component {
       this.a11yWriter.createSpace(this.descId);
       this.a11yWriter.write(this.descId, '<div aria-hidden="false">' + this.CHART_OPTIONS.a11y.description + '</div>');
     }
+    this.setState = (opt) => {
+      this.emitter.emitSync('beforeRender');
+      this._setState(opt);
+      this.emitter.emitSync('afterRender');
+    };
   }
 
   passContext() {
@@ -300,7 +306,8 @@ class BaseChart extends Component {
 
   showMenuPopup(e) {
     if (e.type == 'click' || (e.type == 'keypress' && (e.which === 13 || e.which === 32))) {
-      this.setState({ menuExpanded: true });
+      this.emitter.emit('menuExpanded', e);
+      this._setState({ menuExpanded: true });
     }
   }
 
