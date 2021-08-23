@@ -123,6 +123,7 @@ class VerticalLabels extends Component {
       }
     }
     this.emitter.emitSync('onVerticalLabelsRender', {
+      isPrimary: this.props.priority === 'primary',
       intervalLen: this.props.intervalLen,
       intervalValue: this.props.valueInterval,
       zeroBaseIndex: this.zeroBaseIndex,

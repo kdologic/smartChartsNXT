@@ -55,34 +55,8 @@
         },
         "tooltip": {
           "followPointer": true,
-          "grouped": true,
           "position": $SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,
-          "anchorWidth": 0,
-          "borderColor": "none",
-          "borderWidth": 0,
-          "borderRadius": 10,
-          "dropShadow": false,
-          "content": {
-            "header": function (pointSet, index, tipConfig) {
-              return (
-                '<p style="background-color:' + (tipConfig.headerBgColor || "#555") + ';font-size: 18px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
-                pointSet[index].formattedLabel +
-                '</p>'
-              );
-            },
-            "body": function (pointSet, index, tipConfig) {
-              let point = pointSet[index];
-              return (
-                '<tr  style="font-size: ' + (tipConfig.fontSize || 14) + 'px; color:' + (tipConfig.textColor || "#000") + ';">' +
-                '<td style="padding: 5px">' +
-                '<span style="background-color:' + point.areaColor + '; display:inline-block; width:10px; height:10px;margin-right:5px;"></span>' +
-                point.seriesName +
-                '</td>' +
-                '<td style="padding: 5px">' + (point.value) + ' \u00BAC</td>' +
-                '</tr>'
-              );
-            }
-          }
+          "dropShadow": false
         },
         "dataSet": {
           "xAxis": {

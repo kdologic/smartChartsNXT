@@ -99,7 +99,7 @@ class HorizontalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
-        dateFormat: config.categories.dateFormat || defaultConfig.formatting.displayDateFormat
+        dateFormat: config.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat
       }
     };
   }

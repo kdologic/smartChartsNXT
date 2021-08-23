@@ -92,7 +92,7 @@ class Grid extends Component {
   render() {
     return (
       <g class='sc-chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
-        { this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
+        {this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
         }
         <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.fillBy} fill-opacity={this.config.bgOpacity} stroke-width='0' />
@@ -158,11 +158,13 @@ class Grid extends Component {
   }
 
   updateHorizontalGrid(hg) {
-    this.setState({
-      hGridCount: hg.count,
-      hGridInterval: hg.intervalLen,
-      zeroBaseGridIndex: hg.zeroBaseIndex
-    });
+    if (hg.isPrimary) {
+      this.setState({
+        hGridCount: hg.count,
+        hGridInterval: hg.intervalLen,
+        zeroBaseGridIndex: hg.zeroBaseIndex
+      });
+    }
   }
 
 }

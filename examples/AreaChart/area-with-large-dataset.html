@@ -95,7 +95,7 @@
           "content": {
             "header": function(pointSet, index, tipConfig) {
               return (
-                '<p style="background-color:'+ (tipConfig.headerBgColor || "#555") + '; font-size: 14px; text-align: left; color: ' + (tipConfig.headerTextColor || "#fff") + ';margin:0;padding: 5px 5px;">' +
+                '<p style="background-color:'+ (tipConfig.headerBgColor || "#555") + '; font-size: 14px; text-align: center; color: ' + (tipConfig.headerTextColor || "#fff") + '; font-weight: bold; margin:0;padding: 5px 5px;">' +
                   'Index: ' + pointSet[index].formattedLabel +
                 '</p>'
               );
@@ -119,8 +119,8 @@
               );
             }
           },
-          "headerTextColor": "greenyellow",
-          "headerBgColor": "#555",         
+          "headerTextColor": "#000",
+          "headerBgColor": "#009688",         
           "textColor": "#000",             
           "bgColor": "#e8f4f8",            
           "footerTextColor": "#000",       

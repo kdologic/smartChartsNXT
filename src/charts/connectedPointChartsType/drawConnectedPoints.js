@@ -240,7 +240,7 @@ class DrawConnectedPoints extends Component {
         }
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
           <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
-            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1' stroke-dasharray={this.state.lineDashArray}>
+            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1' stroke-dasharray={this.state.lineDashArray} stroke-linecap="round">
           </path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
