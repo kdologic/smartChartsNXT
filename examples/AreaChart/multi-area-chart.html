@@ -209,15 +209,15 @@
           "hideValue": false                            // [ true | default: false ]
         },
         "tooltip": {
-          "enable": true,                               // [default: true | false ]
-          "followPointer": false,                       // [true | default: false ] Note: This option only available when tooltip are grouped.
-          "grouped": true,                              // [default: true | false ]
-          "pointerVicinity": 50,                        // [default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
-          "anchorWidth": 8,                             // [default: 0 ]
-          "anchorHeight": 10,                           // [default: 10 ]
-          "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [$SC.ENUMS.TOOLTIP_POSITION.(default: DYNAMIC | STATIC )] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
-          "top": 120,                                   // [default: 0 ] DYNAMIC tip, top value will be ignored.
-          "left": 100,                                  // [default: 0 ] DYNAMIC tip, left value will be ignored.
+          "enable": true,                               // [ default: true | false ]
+          "followPointer": false,                       // [ true | default: false ] Note: This option only available when tooltip are grouped.
+          "grouped": true,                              // [ default: true | false ]
+          "pointerVicinity": 50,                        // [ default: 50] Note: It's an area surrounding marker point where tooltip get visible if mouse pointer entered.
+          "anchorWidth": 8,                             // [ default: 0 ]
+          "anchorHeight": 10,                           // [ default: 10 ]
+          "position":$SC.ENUMS.TOOLTIP_POSITION.DYNAMIC,// [ $SC.ENUMS.TOOLTIP_POSITION.(default: DYNAMIC | STATIC ) ] Note: Tooltip should be grouped and when DYNAMIC tip, top and left value will be ignored.
+          "top": 120,                                   // [ default: 0 ] DYNAMIC tip, top value will be ignored.
+          "left": 100,                                  // [ default: 0 ] DYNAMIC tip, left value will be ignored.
           "content": {
             "header": function(pointSet, index, tipConfig) {
               return (
@@ -262,6 +262,46 @@
           "opacity": 0.8,                               // [ default: 0.8 ]
           "dropShadow": true                            // [ default: true | false ]
         },
+        "annotationLabels": [{
+          "options": {
+            "isDraggable": true,                        // [ default: true | false ] note: shape type annotation can't be draggable.
+            "isCollapsable": false,                     // [ default: true ]
+            "offsetX": 0,                               // [ default: 0 ] Note: Move entire label along with anchor point to left or right.
+            "offsetY": 0,                               // [ default: -10 ] Note: Move entire label along with anchor point to top or bottom
+            "float": $SC.ENUMS.FLOAT.TOP,               // [ $SC.ENUMS.FLOAT.(default: TOP | BOTTOM | LEFT | RIGHT) ]
+            "textColor": "#fff",                        // [ default: $SC.GLOBAL.theme.fontColorDark ]
+            "bgColor": "purple",                        // [ default: $SC.GLOBAL.theme.bgColorLight ]
+            "fontSize": 12,                             // [ default: 12 ]
+            "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
+            "xPadding": 5,                              // [ default: 5 ] Note: Create X padding inside label box.
+            "yPadding": 5,                              // [ default: 0 ] Note: Create Y padding inside label box
+            "borderColor": "#000",                      // [ default: $SC.GLOBAL.theme.bgColorDark ]
+            "borderWidth": 1,                           // [ default: 1 ]
+            "borderRadius": 5,                          // [ default: 5 ]
+            "opacity": 1,                               // [ default: 0.5 ] Note: Label background opacity.
+            "maxWidth": 150,                            // [ default: 150 ] Note: Maximum width of Annotation label box
+            "dropShadow": true,                         // [ default: true | false ]
+            "rotate": 0                                 // [ default: 0 ] Note: When apply rotation then annotations a does not have anchor or linking line. Also annotation can't be auto adjust its positions. 
+          },
+          "labels": [{
+            "text": 'X:12, Y:160 - annotation 1 showing this annotation for a point',
+            "speechBubble": true,                       // [ default: true | false] Note: when false - replace background speech bubble with rect (no anchor available). Also annotation can't be auto adjust its positions. 
+            "x": 12,                                    // Note: x is the data index position. can be fraction also like 1.4
+            "y": 160                                    // Note: Y is the data value position.
+          }, 
+          // {
+          //   "shape": "M 0 0 h 50 v 50 h -50 Z",         // Note: Shape type annotations are non-draggable and can't contain any text in it.
+          //   "x": 8,                                     // Note: x is the data index position.
+          //   "y": 250                                    // Note: Y is the data value position.
+          // }, {
+          //   "image": "/smartchartsnxt/examples/static/images/icons/icon_down_arrow.svg",
+          //   "width": "30",                              // Note: support image width
+          //   "height": "30",                             // Note: support image height
+          //   "x": 5,                                  
+          //   "y": 200    
+          // }
+        ]
+        }],
         "horizontalScroller": {
           "enable": true,                               // [ default: true | false ]
           "height": 35,                                 // [ default: 35 ]
@@ -434,7 +474,8 @@
               "min": -1000
             }) 
             // [0.1, 10, 100, 1000, 5000, 15000, 30500, 60050, 70000, 80000]
-            // [{value:100},{label:"feb", value:200},{label:"mar", value:300},{label:"apr", value:400},{label:"may", value:500},{label:"jun", value:600}, {value:700}] 
+            // [[1, 10], 15, 20, 25, 30, 35, [40],[null],["feb", 130], 100,["mar", 90], 130, 160, 195, ["apr", 230], [21, 290]]
+            // [{value:100},{label:"feb", value:130},{label:"mar", value:90},{label:"apr", value:230},{label:"may", value:290},{label:"jun", value:160}, {value:130}] 
             // [100, {label:"feb", value:200}, null, 300, 400, {label:"jun", value:null}, 500, 600, 700]
           },
           {

@@ -207,7 +207,7 @@ class MarkRegion extends Component {
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
           <rect x={(startFrom - 1) * scaleX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={width} contentWidth={textWidth} textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
               rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {

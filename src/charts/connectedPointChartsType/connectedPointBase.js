@@ -25,6 +25,7 @@ import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane';
 import StoreManager from './../../liveStore/storeManager';
 import SeriesLabel from './../../components/seriesLabel';
+import AnnotationLabels from './../../components/annotationLabels';
 import a11yFactory from './../../core/a11y';
 
 
@@ -407,7 +408,13 @@ class ConnectedPointBase extends Component {
     const resolveCategory = (data, index) => {
       let label, parseAsDate = this.CHART_DATA.dataSet.xAxis.categories.parseAsDate, parseDateFormat = this.CHART_DATA.dataSet.xAxis.categories.parseDateFormat;
       if (data !== null && typeof data === 'object') {
-        if (typeof data.label !== 'undefined') {
+        if (data instanceof Array && data.length > 1) {
+          if (parseAsDate && UtilCore.isDate(data[0], parseDateFormat)) {
+            label = UtilCore.dateFormat(data[0], parseDateFormat || undefined);
+          } else {
+            label = data[0];
+          }
+        } else if (typeof data.label !== 'undefined') {
           if (parseAsDate && UtilCore.isDate(data.label, parseDateFormat)) {
             label = UtilCore.dateFormat(data.label, parseDateFormat || undefined);
           } else {
@@ -418,13 +425,22 @@ class ConnectedPointBase extends Component {
       if (label === undefined) {
         for (let s = 0; s < this.CHART_OPTIONS.dataSet.series.length; s++) {
           let series = this.CHART_OPTIONS.dataSet.series[s];
-          if (series.data && series.data[index] && typeof series.data[index] === 'object' && typeof series.data[index].label !== 'undefined') {
-            if (parseAsDate && UtilCore.isDate(series.data[index].label, parseDateFormat)) {
-              label = UtilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
-            } else {
-              label = series.data[index].label;
+          if (series.data && series.data[index] && typeof series.data[index] === 'object') {
+            if (series.data[index] instanceof Array && series.data[index].length > 1) {
+              if (parseAsDate && UtilCore.isDate(series.data[index][0], parseDateFormat)) {
+                label = UtilCore.dateFormat(series.data[index][0], parseDateFormat || undefined);
+              } else {
+                label = series.data[index][0];
+              }
+              break;
+            } else if (typeof series.data[index].label !== 'undefined') {
+              if (parseAsDate && UtilCore.isDate(series.data[index].label, parseDateFormat)) {
+                label = UtilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
+              } else {
+                label = series.data[index].label;
+              }
+              break;
             }
-            break;
           }
         }
         if (label === undefined) {
@@ -446,8 +462,18 @@ class ConnectedPointBase extends Component {
       let d = {};
       let yAxisType = this.CHART_DATA.dataSet.yAxis.primary.type;
       if (data !== null && typeof data === 'object') {
-        d = { ...data };
-        d.value = data.value;
+        if (data instanceof Array) {
+          if (data.length > 1) {
+            d.value = data[1];
+          } else if (data.length === 1) {
+            d.value = data[0];
+          } else {
+            d.value = null;
+          }
+        } else {
+          d = { ...data };
+          d.value = data.value;
+        }
       } else {
         d.value = data;
       }
@@ -587,6 +613,19 @@ class ConnectedPointBase extends Component {
       }
     }
     return data;
+  }
+
+  calculateScale(width, height, maxVal, minVal, paddingX, maxSeriesLen, yAxisInfo) {
+    let scaleX = (width - (2 * paddingX)) / (maxSeriesLen - 1 || 2);
+    let scaleY = 0, baseLine = 0;
+    if (yAxisInfo.type === ENUMS.AXIS_TYPE.LINEAR) {
+      scaleY = height / (maxVal - minVal);
+      baseLine = maxVal * scaleY;
+    } else if (yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      scaleY = height / (Math.log10(maxVal) - Math.log10(minVal));
+      baseLine = Math.log10(maxVal) * scaleY;
+    }
+    return { scaleX, scaleY, baseLine };
   }
 
   calcOffsetChanges() {
@@ -769,12 +808,26 @@ class ConnectedPointBase extends Component {
           </HorizontalScroller>
         }
 
-        {this.CHART_OPTIONS.tooltip.enable &&
-          <Tooltip instanceId='marker-tooltip' instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length}
-            opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
-            svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
-          </Tooltip>
+        <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
+        </InteractivePlane>
+
+        {this.CHART_OPTIONS.annotationLabels && this.CHART_OPTIONS.annotationLabels.length && this.state.cs.dataSet.series.filter(d => d.data.length > 0).length &&
+          <AnnotationLabels annotations={this.CHART_OPTIONS.annotationLabels} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+            width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.primary.yInterval} yAxisType={this.state.cs.dataSet.yAxis.primary.type}
+            scaleX={this.state.cs.scaleX} scaleY={this.state.cs.scaleY} baseLine={this.state.cs.baseLine}
+            paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
+          </AnnotationLabels>
         }
+
+        <g class="sc-marker-tooltip-container-main">
+          {this.CHART_OPTIONS.tooltip.enable &&
+            <Tooltip instanceId='marker-tooltip' instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length}
+              opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
+              svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
+            </Tooltip>
+          }
+        </g>
 
         <Tooltip instanceId='label-tooltip' instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
           opts={{
@@ -800,10 +853,6 @@ class ConnectedPointBase extends Component {
           }}>
         </Tooltip>
 
-        <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
-        </InteractivePlane>
-
         {this.CHART_OPTIONS.horizontalScroller.enable && (this.state.hScrollLeftOffset !== 0 || this.state.hScrollRightOffset !== 100) &&
           <ZoomoutBox posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth} posY={this.CHART_DATA.marginTop}
             width={this.CHART_DATA.zoomOutBoxWidth} height={this.CHART_DATA.zoomOutBoxHeight} >
@@ -821,16 +870,24 @@ class ConnectedPointBase extends Component {
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       let seriesTotalDataCount = this.state.fs.dataSet.series.filter(s => s.index === series.index)[0].data.filter(v => v !== null).length;
       let yAxisFollow = series.yAxisLinkIndex === 0 || !series.yAxisLinkIndex ? 'primary' : 'secondary';
+      let width = this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange;
+      let height = this.CHART_DATA.gridBoxHeight;
+      let maxVal = this.state.cs[yAxisFollow].yInterval.iMax;
+      let minVal = this.state.cs[yAxisFollow].yInterval.iMin;
+      let yAxisInfo = this.state.cs.dataSet.yAxis[yAxisFollow];
+
+      let scale = this.calculateScale(width, height, maxVal, minVal, this.CHART_DATA.paddingX, this.state.maxSeriesLen, yAxisInfo);
+      this.state.cs.scaleX = scale.scaleX;
+      this.state.cs.scaleY = scale.scaleY;
+      this.state.cs.baseLine = scale.baseLine;
       return (
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
+          width={width} height={height} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} lineStyle={series.lineStyle || ENUMS.LINE_STYLE.SOLID} lineDashArray={series.lineDashArray || 0} areaStrokeWidth={0} maxVal={this.state.cs[yAxisFollow].yInterval.iMax} minVal={this.state.cs[yAxisFollow].yInterval.iMin}
-          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis[yAxisFollow]}
+          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} lineStyle={series.lineStyle || ENUMS.LINE_STYLE.SOLID} lineDashArray={series.lineDashArray || 0} areaStrokeWidth={0} maxVal={maxVal} minVal={minVal}
+          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo}
           totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''} emitScale={true}
-          getScaleX={(scaleX) => {
-            this.state.cs.scaleX = scaleX;
-          }}
+          scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}
           clip={{
             x: this.state.offsetLeftChange,
             width: this.CHART_DATA.gridBoxWidth,
@@ -846,22 +903,28 @@ class ConnectedPointBase extends Component {
   drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       let yAxisFollow = series.yAxisLinkIndex === 0 || !series.yAxisLinkIndex ? 'primary' : 'secondary';
+      let width = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
+      let height = this.CHART_OPTIONS.horizontalScroller.height - 5;
+      let maxVal = this.state.fs[yAxisFollow].yInterval.iMax;
+      let minVal = this.state.fs[yAxisFollow].yInterval.iMin;
+      let yAxisInfo = this.state.cs.dataSet.yAxis[yAxisFollow];
+
+      let scale = this.calculateScale(width, height, maxVal, minVal, 0, this.state.maxSeriesLenFS, yAxisInfo);
+      this.state.fs.scaleX = scale.scaleX;
       return (
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
-            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
+            width={width} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
             lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
-            maxVal={this.state.fs[yAxisFollow].yInterval.iMax} minVal={this.state.fs[yAxisFollow].yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis[yAxisFollow]}
-            accessibility={false} emitScale={false}
-            getScaleX={(scaleX) => {
-              this.state.fs.scaleX = scaleX;
-            }}
+            maxVal={maxVal} minVal={minVal} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo}
+            accessibility={false} emitScale={false} scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}
             clipId={this.scrollOffsetClipId}>
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
-            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
-            maxVal={this.state.fs[yAxisFollow].yInterval.iMax} minVal={this.state.fs[yAxisFollow].yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis[yAxisFollow]} accessibility={false} emitScale={false}>
+            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={height} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
+            maxVal={maxVal} minVal={minVal} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo} accessibility={false} emitScale={false}
+            scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}>
           </DrawConnectedPoints>
         </g>
       );
@@ -1186,7 +1249,7 @@ class ConnectedPointBase extends Component {
     return this.state.cs.dataSet.series.map((series) => {
       return {
         label: series.name,
-        color: series.areaColor,
+        color: series.lineColor,
         icon: typeof series.marker === 'object' ? series.marker : {},
         isToggled: !series.visible
       };

@@ -16,6 +16,7 @@ class SpeechBox extends Component {
   constructor(props) {
     super(props);
     this.aHalfWidth = typeof this.props.anchorBaseWidth === 'undefined' ? 8 : this.props.anchorBaseWidth;
+    this.showAnchor = typeof this.props.showAnchor === 'undefined' ? true : this.props.showAnchor;
     this.state = {
       aTop: false,
       aBottom: false,
@@ -42,17 +43,27 @@ class SpeechBox extends Component {
 
   beforeUpdate(nextProps) {
     this.aHalfWidth = typeof nextProps.anchorBaseWidth === 'undefined' ? 8 : nextProps.anchorBaseWidth;
+    this.showAnchor = typeof nextProps.showAnchor === 'undefined' ? true : nextProps.showAnchor;
   }
 
   render() {
     this.cpoint = this.props.cpoint;
+    let speechBox = this.showAnchor ?
+      <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity}
+        filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''}
+        stroke={this.props.strokeColor} stroke-width={typeof this.props.strokeWidth === 'undefined' ? 1 : this.props.strokeWidth } stroke-opacity={typeof this.props.strokeOpacity === 'undefined' ? 1 : this.props.strokeOpacity}
+        shape-rendering='geometricPrecision' vector-effect='non-scaling-stroke'>
+      </path>
+      :
+      <rect class='sc-speech-box-path' x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} rx={this.props.cornerRadius || 0} fill={this.props.bgColor}
+        fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity} filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''}
+        stroke={this.props.strokeColor} stroke-width={typeof this.props.strokeWidth === 'undefined' ? 1 : this.props.strokeWidth } stroke-opacity={typeof this.props.strokeOpacity === 'undefined' ? 1 : this.props.strokeOpacity}
+        shape-rendering='geometricPrecision' vector-effect='non-scaling-stroke'>
+      </rect>;
     return (
       <g id={this.props.id || ''} class='sc-speech-box' transform={`translate(${this.props.x},${this.props.y})`}>
         {this.props.shadow && UiCore.dropShadow('sc-speech-box-drop-shadow')}
-        <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity}
-          filter={this.props.shadow ? 'url(#sc-speech-box-drop-shadow)' : ''}
-          stroke={this.props.strokeColor} stroke-width={typeof this.props.strokeWidth === 'undefined' ? 1 : this.props.strokeWidth } stroke-opacity={typeof this.props.strokeOpacity === 'undefined' ? 1 : this.props.strokeOpacity}
-          shape-rendering='geometricPrecision' vector-effect='non-scaling-stroke' />
+        {speechBox}
       </g>
     );
   }

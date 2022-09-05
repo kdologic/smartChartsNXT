@@ -15,7 +15,7 @@ import UiCore from '../core/ui.core';
  * @extends: Component
  */
 
-class heading extends Component {
+class Heading extends Component {
   constructor(props) {
     super(props);
     this.id = UtilCore.getRandomID();
@@ -80,4 +80,4 @@ class heading extends Component {
 
 }
 
-export default heading;
+export default Heading;

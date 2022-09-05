@@ -171,14 +171,9 @@ class DrawConnectedPoints extends Component {
 
   prepareData(props) {
     this.state.valueSet = props.dataSet;
-    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
-    if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LINEAR) {
-      this.state.scaleY = props.height / (props.maxVal - props.minVal);
-      this.state.baseLine = (props.maxVal) * this.state.scaleY;
-    } else if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
-      this.state.scaleY = props.height / (Math.log10(props.maxVal) - Math.log10(props.minVal));
-      this.state.baseLine = Math.log10(props.maxVal) * this.state.scaleY;
-    }
+    this.state.scaleX = props.scaleX;
+    this.state.scaleY = props.scaleY;
+    this.state.baseLine = props.baseLine;
 
     if (typeof props.marker === 'object') {
       this.state.marker = {
@@ -194,13 +189,11 @@ class DrawConnectedPoints extends Component {
     }
 
     this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
-    if (typeof props.getScaleX === 'function') {
-      props.getScaleX(this.state.scaleX);
-    }
     if (this.props.emitScale) {
       this.emitter.emitSync('onUpdateScale', {
         scaleX: this.state.scaleX,
-        scaleY: this.state.scaleY
+        scaleY: this.state.scaleY,
+        baseLine: this.state.baseLine
       });
     }
   }
@@ -220,6 +213,7 @@ class DrawConnectedPoints extends Component {
             </style>
           }
         </remove-before-save>
+        {/* {<path d={GeomCore.describeRoundedRect(5, 5, 100, 100, 10).join(' ')} fill="yellow"></path>} */}
         {this.props.clipId === undefined &&
           <defs>
             <clipPath id={this.clipPathId}>
@@ -246,7 +240,7 @@ class DrawConnectedPoints extends Component {
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
             type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers}
-            fillColor={this.props.areaFillColor || this.props.lineFillColor} opacity={this.state.marker.opacity} events={this.state.marker.events || {}} >
+            fillColor={this.props.lineFillColor || this.props.areaFillColor} opacity={this.state.marker.opacity} events={this.state.marker.events || {}} >
           </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&

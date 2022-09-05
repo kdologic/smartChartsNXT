@@ -47,7 +47,7 @@ class RichTextBox extends Component {
     };
     const styleString = parseStyleProps({
       ...this.defaultStyle,
-      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', width: (props.contentWidth ? props.contentWidth + 'px' : 'initial') },
+      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', maxWidth: (props.contentWidth ? props.contentWidth + 'px' : 'initial') },
       ...props.style
     });
     this.textStyleIE = parseStyleProps({
@@ -132,7 +132,7 @@ class RichTextBox extends Component {
     return (
       <g class={this.props.class || ''} transform={`translate(${this.props.posX},${this.props.posY})`}>
         {!UtilCore.isIE &&
-          <foreignObject id={this.contentId} x={0} y={0} width={this.props.contentWidth || this.state.width} height={this.state.height} innerHTML={this.state.text}
+          <foreignObject id={this.contentId} x={0} y={0} width={this.state.width || this.state.contentWidth} height={this.state.height} innerHTML={this.state.text}
             style={{ 'overflowY': this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll' : 'hidden' }}
             transform={this.state.rotation ? `rotate(${this.state.rotation}, 0, ${this.state.contentHeight})` : ''}>
           </foreignObject>
