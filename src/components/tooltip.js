@@ -335,7 +335,7 @@ class Tooltip extends Component {
       temp.style.position = 'absolute';
       document.getElementsByTagName('body')[0].appendChild(temp);
       let containBox = {
-        width: temp.getBoundingClientRect().width,
+        width: temp.getBoundingClientRect().width + 2,
         height: temp.getBoundingClientRect().height
       };
       temp && temp.parentNode.removeChild(temp);

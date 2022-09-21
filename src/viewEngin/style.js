@@ -7,7 +7,7 @@ import { Component, parseStyleProps } from './pview';
  * @createdOn:02-May-2018
  * @author:SmartChartsNXT
  * @description: This component will create a style element into dom.
- * @extends Compoent
+ * @extends Component
  */
 
 class Style extends Component {

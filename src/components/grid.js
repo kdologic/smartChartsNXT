@@ -20,6 +20,7 @@ class Grid extends Component {
     super(props);
     this.emitter = eventEmitter.getInstance(this.context.runId);
     this.clipId = UtilCore.getRandomID();
+    this.rFillId = UtilCore.getRandomID();
     this.config = {};
     this.state = {
       vGridCount: this.props.vGridCount,
@@ -61,15 +62,15 @@ class Grid extends Component {
       bgOpacity: typeof props.opts.bgOpacity === 'undefined' ? 0.1 : props.opts.bgOpacity
     };
 
-    if(this.config.bgColor === 'none') {
+    if (this.config.bgColor === 'none') {
       this.state.fillBy = this.config.bgColor;
       this.state.fillType = 'none';
-    }else {
-      let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions);
-      if(fillOpt.fillBy === 'none') {
+    } else {
+      let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions, this.rFillId);
+      if (fillOpt.fillBy === 'none') {
         this.state.fillType = 'solidColor';
         this.state.fillBy = this.config.bgColor;
-      }else {
+      } else {
         this.state.fillType = fillOpt.fillType;
         this.state.fillBy = fillOpt.fillBy;
         this.state.fillId = fillOpt.fillId;
@@ -91,7 +92,7 @@ class Grid extends Component {
   render() {
     return (
       <g class='sc-chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
-        { this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
+        {this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
         }
         <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.fillBy} fill-opacity={this.config.bgOpacity} stroke-width='0' />
@@ -134,6 +135,17 @@ class Grid extends Component {
           stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
         </line>
       );
+      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        for (let subGridCount = 2; subGridCount < 10; subGridCount++) {
+          grids.push(
+            <line instanceId={`hline-${gridCount}-${subGridCount}`} class={`sc-h-grid-line-${gridCount}-${subGridCount}`}
+              x1={0} y1={(gridCount + (1 - Math.log10(subGridCount))) * this.state.hGridInterval} x2={this.props.width} y2={(gridCount + (1 - Math.log10(subGridCount))) * this.state.hGridInterval}
+              fill='none' stroke={this.config.horizontal.lineColor} stroke-opacity={gridCount == this.state.zeroBaseGridIndex ? 1 : 0.08}
+              stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
+            </line>
+          );
+        }
+      }
     }
     return grids;
   }
@@ -146,11 +158,13 @@ class Grid extends Component {
   }
 
   updateHorizontalGrid(hg) {
-    this.setState({
-      hGridCount: hg.count,
-      hGridInterval: hg.intervalLen,
-      zeroBaseGridIndex: hg.zeroBaseIndex
-    });
+    if (hg.isPrimary) {
+      this.setState({
+        hGridCount: hg.count,
+        hGridInterval: hg.intervalLen,
+        zeroBaseGridIndex: hg.zeroBaseIndex
+      });
+    }
   }
 
 }

@@ -39,6 +39,8 @@ class Chart {
       if (this.errors.length) {
         return this.logErrors(opts);
       }
+      this.targetNodeWidth = this.targetNode.offsetWidth;
+      this.targetNodeHeight = this.targetNode.offsetHeight;
       this.events = eventEmitter.createInstance(this.runId);
       this.targetNode.setAttribute('runId', this.runId);
       this.targetNode.style.position = 'relative';
@@ -48,7 +50,7 @@ class Chart {
       this.targetNode.setAttribute('aria-hidden', 'false');
       this.targetNode.setAttribute('aria-label', 'SmartchartsNXT interactive ' + this.config._state.type);
       this.a11yService = a11yFactory.createInstance(this.runId, this.targetNode);
-      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} />, this.targetNode, 'vnode', null, {}, false);
+      this.core = mountTo(<BaseChart opts={this.config._state} runId={this.runId} width={this.targetNodeWidth} height={this.targetNodeHeight} />, this.targetNode, 'vnode', null, {}, false);
 
       /* Detect the element resize and re-draw accordingly */
       this.onResize = this.onResize.bind(this);
@@ -71,6 +73,7 @@ class Chart {
         });
         ro.observe(this.targetNode);
       }
+      this.showPopup = this.showPopup.bind(this);
 
       $SC.debug && console.debug(this.core);
     } catch (ex) {
@@ -79,13 +82,17 @@ class Chart {
   }
 
   onResize(element) {
-    const e = {
-      data: {
-        targetWidth: element.offsetWidth,
-        targetHeight: element.offsetHeight
-      }
-    };
-    this.events.emit('resize', e);
+    if (this.oldTargetWidth !== element.offsetWidth || this.oldTargetHeight !== element.offsetHeight) {
+      const e = {
+        data: {
+          oldTargetWidth: this.targetNodeWidth,
+          oldTargetHeight: this.targetNodeHeight,
+          targetWidth: this.targetNodeWidth = element.offsetWidth,
+          targetHeight: this.targetNodeHeight = element.offsetHeight
+        }
+      };
+      this.events.emit('resize', e);
+    }
   }
 
   render() {
@@ -94,6 +101,10 @@ class Chart {
       return this.logErrors(this.config._state);
     }
     this.events.emitSync('render', this.config._state);
+  }
+
+  showPopup(data) {
+    this.events.emit('createPopup', data);
   }
 
   logErrors(opts, ex) {
@@ -113,7 +124,7 @@ class Chart {
   }
 
   showErrorScreen(opts) {
-    mountTo(<ErrorView width={this.targetNode.offsetWidth} height={this.targetNode.offsetHeight} chartType={opts.type} runId={this.runId}></ErrorView>, this.targetNode);
+    mountTo(<ErrorView width={this.targetNodeWidth} height={this.targetNodeHeight} chartType={opts.type} runId={this.runId}></ErrorView>, this.targetNode);
   }
 
   targetElemValidate() {

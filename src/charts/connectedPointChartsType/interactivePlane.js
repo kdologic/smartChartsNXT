@@ -3,6 +3,7 @@
 import { Component } from './../../viewEngin/pview';
 import UiCore from './../../core/ui.core';
 import eventEmitter from './../../core/eventEmitter';
+import InteractiveHotspots from './interactiveHotspots';
 
 /**
  * interactivePlane.js
@@ -21,6 +22,9 @@ class InteractivePlane extends Component {
       isFocused: false
     };
 
+    this.onClick = this.onClick.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
     this.onMouseMove = this.onMouseMove.bind(this);
@@ -39,19 +43,40 @@ class InteractivePlane extends Component {
 
   render() {
     return (
-      <g class='sc-interactive' transform={`translate(${this.props.posX},${this.props.posY})`} role="region" aria-label="Interactive chart. Use left arrow or right arrow to navigate between data points.">
-        <rect class={'sc-interactive-plane' + (this.state.isFocused ? ' focus-in' : '')} width={this.props.width} height={this.props.height} fill='none' style={{ pointerEvents: 'all' }} tabindex='0'
-          events={{
-            mouseenter: this.onMouseEnter,
-            mouseleave: this.onMouseLeave,
-            mousemove: this.onMouseMove,
-            focusin: this.onFocusIn,
-            focusout: this.onFocusOut,
-            keyup: this.onKeyUp
-          }}
-        />
+      <g class='sc-interactive' transform={`translate(${this.props.posX},${this.props.posY})`} role="region" aria-label="Interactive chart. Use left arrow or right arrow to navigate between data points."
+        events={{
+          click: this.onClick,
+          mousedown: this.onMouseDown,
+          mouseup: this.onMouseUp,
+          mouseenter: this.onMouseEnter,
+          mouseleave: this.onMouseLeave,
+          mousemove: this.onMouseMove,
+          focusin: this.onFocusIn,
+          focusout: this.onFocusOut,
+          keyup: this.onKeyUp
+        }}>
+        <rect class={'sc-interactive-plane' + (this.state.isFocused ? ' focus-in' : '')} width={this.props.width} height={this.props.height} fill='none' style={{ pointerEvents: 'all' }} tabindex='0' />
+        <InteractiveHotspots></InteractiveHotspots>
       </g>
     );
+  }
+
+  onClick(e) {
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    e.pos = mousePos;
+    this.emitter.emitSync('interactiveMouseClick', e);
+  }
+
+  onMouseDown(e) {
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    e.pos = mousePos;
+    this.emitter.emitSync('interactiveMouseDown', e);
+  }
+
+  onMouseUp(e) {
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    e.pos = mousePos;
+    this.emitter.emitSync('interactiveMouseUp', e);
   }
 
   onMouseMove(e) {
@@ -61,6 +86,8 @@ class InteractivePlane extends Component {
   }
 
   onMouseEnter(e) {
+    let mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    e.pos = mousePos;
     this.emitter.emitSync('interactiveMouseEnter', e);
   }
 

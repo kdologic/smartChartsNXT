@@ -19,6 +19,8 @@ import a11yFactory from './../../core/a11y';
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
  * @extends Component
+ * @event
+ * 1. onUpdateScale : update scaleX and scaleY.
  */
 
 class DrawConnectedPoints extends Component {
@@ -37,6 +39,8 @@ class DrawConnectedPoints extends Component {
       pointSet: [],
       valueSet: [],
       strokeOpacity: this.props.strokeOpacity || 1,
+      strokeWidth: this.props.lineStrokeWidth || 0,
+      lineDashArray: 0,
       opacity: typeof this.props.opacity === 'undefined' ? 1 : this.props.opacity,
       currentHighlightedPoint: {
         pointIndex: null
@@ -50,6 +54,10 @@ class DrawConnectedPoints extends Component {
     this.defaultMarkerWidth = 12;
     this.defaultMarkerHeight = 12;
 
+    if (this.props.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+      this.state.lineDashArray = this.props.lineDashArray || 4;
+    }
+
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
@@ -57,7 +65,7 @@ class DrawConnectedPoints extends Component {
       height: this.props.height
     }, this.props.clip);
 
-    let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
+    let fillOpt = UiCore.processFillOptions(this.props.fillOptions, this.rid);
     if (fillOpt.fillBy === 'none') {
       this.state.fillType = 'solidColor';
       this.state.fillBy = this.props.areaFillColor;
@@ -154,15 +162,19 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
+    if (nextProps.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+      this.state.lineDashArray = nextProps.lineDashArray || 4;
+    }
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
     this.store.setValue('pointsData', { [nextProps.instanceId]: this.state.pointSet });
   }
 
   prepareData(props) {
     this.state.valueSet = props.dataSet;
-    this.state.scaleX = (props.width - (2 * props.paddingX)) / (props.maxSeriesLen - 1 || 2);
-    this.state.scaleY = props.height / (props.maxVal - props.minVal);
-    this.state.baseLine = props.maxVal * this.state.scaleY;
+    this.state.scaleX = props.scaleX;
+    this.state.scaleY = props.scaleY;
+    this.state.baseLine = props.baseLine;
+
     if (typeof props.marker === 'object') {
       this.state.marker = {
         ...{
@@ -177,8 +189,12 @@ class DrawConnectedPoints extends Component {
     }
 
     this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
-    if (typeof props.getScaleX === 'function') {
-      props.getScaleX(this.state.scaleX);
+    if (this.props.emitScale) {
+      this.emitter.emitSync('onUpdateScale', {
+        scaleX: this.state.scaleX,
+        scaleY: this.state.scaleY,
+        baseLine: this.state.baseLine
+      });
     }
   }
 
@@ -197,6 +213,7 @@ class DrawConnectedPoints extends Component {
             </style>
           }
         </remove-before-save>
+        {/* {<path d={GeomCore.describeRoundedRect(5, 5, 100, 100, 10).join(' ')} fill="yellow"></path>} */}
         {this.props.clipId === undefined &&
           <defs>
             <clipPath id={this.clipPathId}>
@@ -216,11 +233,14 @@ class DrawConnectedPoints extends Component {
           </path>
         }
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')} filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.props.lineStrokeWidth || 0} fill='none' opacity='1'></path>
+          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
+            filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1' stroke-dasharray={this.state.lineDashArray} stroke-linecap="round">
+          </path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
           <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
-            type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers} fillColor={this.props.areaFillColor || this.props.lineFillColor} opacity={this.state.marker.opacity} >
+            type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers}
+            fillColor={this.props.lineFillColor || this.props.areaFillColor} opacity={this.state.marker.opacity} events={this.state.marker.events || {}} >
           </DataPoints>
         }
         {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
@@ -252,6 +272,9 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [], sIndex = 0;
     this.state.pointSet = this.state.valueSet.map((data, i) => {
+      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+        data = Math.log10(data);
+      }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
@@ -288,6 +311,9 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
+      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+        data = Math.log10(data);
+      }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
@@ -348,7 +374,8 @@ class DrawConnectedPoints extends Component {
         relY: nearPoint.y,
         dist: nearPoint.dist,
         pointIndex: nearPoint.index,
-        seriesIndex: this.props.index
+        seriesIndex: this.props.index,
+        offsetLeft: this.state.clip.offsetLeft
       };
     } else {
       evt.highlightedPoint = {
@@ -396,7 +423,8 @@ class DrawConnectedPoints extends Component {
           relY: nearPoint.y,
           dist: 0,
           pointIndex: nearPoint.index,
-          seriesIndex: this.props.index
+          seriesIndex: this.props.index,
+          offsetLeft: this.state.clip.offsetLeft
         };
       } else {
         evt.highlightedPoint = {
@@ -411,7 +439,7 @@ class DrawConnectedPoints extends Component {
 
   changeAreaBrightness(e) {
     if (this.props.instanceId === e.instanceId && e.strokeOpacity) {
-      this.setState({ strokeOpacity: e.strokeOpacity, opacity: e.opacity || this.props.opacity || 1 });
+      this.setState({ strokeOpacity: e.strokeOpacity, strokeWidth: e.type === 'highlight' && this.props.lineStrokeWidth ? this.props.lineStrokeWidth + 1 : (this.props.lineStrokeWidth || 0), opacity: e.opacity || this.props.opacity || 1 });
     }
   }
 

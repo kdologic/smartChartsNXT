@@ -14,6 +14,7 @@ import LoaderView from './../components/loaderView';
 import StoreManager from './../liveStore/storeManager';
 import GlobalDefs from './../styles/globalDefs';
 import a11yFactory from './../core/a11y';
+import PopupContainer from './../popupComponents/popupContainer';
 
 /**
  * baseChart.js
@@ -26,6 +27,7 @@ class BaseChart extends Component {
   constructor(props) {
     try {
       super(props);
+      this._setState = this.setState;
       this.chartType = this.props.opts.type;
       this.store = StoreManager.getStore(this.props.runId);
       this.a11yWriter = a11yFactory.getWriter(this.props.runId);
@@ -54,7 +56,7 @@ class BaseChart extends Component {
       this.chartValidationRules = CHART_MODULES[this.chartType].validationRules;
       this.validator = new Validator();
       this.validationErrors = this.validator.validate(this.chartValidationRules, this.CHART_OPTIONS);
-      if(this.validationErrors.length) {
+      if (this.validationErrors.length) {
         throw this.validationErrors;
       }
       this.globalDefs = new GlobalDefs(this.CHART_OPTIONS.defs);
@@ -72,9 +74,10 @@ class BaseChart extends Component {
       this.descId = UtilCore.getRandomID();
       this.blurFilterId = UtilCore.getRandomID();
       this.menuIconGradId = UtilCore.getRandomID();
+      this.htmlContainerIE = 'sc-html-container-ie-' + UtilCore.getRandomID();
       this.initCanvasSize(this.state.width, this.state.height);
     } catch (ex) {
-        throw ex;
+      throw ex;
     }
 
     this.onMenuIconFocusIn = this.onMenuIconFocusIn.bind(this);
@@ -91,10 +94,15 @@ class BaseChart extends Component {
     this.a11yWriter.createSpace(this.titleId);
     this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.title || {}).text || '') + '</div>');
     this.a11yWriter.write(this.titleId, '<div aria-hidden="false">' + ((this.CHART_OPTIONS.subtitle || {}).text || '') + '</div>', false);
-    if(this.CHART_OPTIONS.a11y.description) {
+    if (this.CHART_OPTIONS.a11y.description) {
       this.a11yWriter.createSpace(this.descId);
       this.a11yWriter.write(this.descId, '<div aria-hidden="false">' + this.CHART_OPTIONS.a11y.description + '</div>');
     }
+    this.setState = (opt) => {
+      this.emitter.emitSync('beforeRender');
+      this._setState(opt);
+      this.emitter.emitSync('afterRender');
+    };
   }
 
   passContext() {
@@ -103,6 +111,7 @@ class BaseChart extends Component {
       chartType: this.chartType,
       rootSvgId: this.getChartId(),
       rootContainerId: this.CHART_OPTIONS.targetElem,
+      htmlContainerIE: this.htmlContainerIE,
       svgWidth: this.CHART_DATA.svgWidth,
       svgHeight: this.CHART_DATA.svgHeight,
       svgCenter: this.CHART_DATA.svgCenter
@@ -141,66 +150,78 @@ class BaseChart extends Component {
     this.initCanvasSize(this.state.width, this.state.height);
     const Chart = CHART_MODULES[this.chartType].chart;
     return (
-      <svg
-        //xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
-        role="region"
-        version={1.1}
-        width={this.CHART_OPTIONS.width}
-        height={this.CHART_OPTIONS.height}
-        viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
-        id={this.getChartId()}
-        class='smartcharts-nxt'
-        aria-label="Interactive chart."
-        aria-describedby={this.descId}
-        style={{
-          fontFamily: defaultConfig.theme.fontFamily,
-          background: 'transparent',
-          MozTapHighlightColor: 'rgba(0, 0, 0, 0)',
-          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)',
-          WebkitUserSelect: 'none',
-          HtmlUserSelect: 'none',
-          MozUserSelect: 'none',
-          MsUserSelect: 'none',
-          OUserSelect: 'none',
-          UserSelect: 'none',
-          overflow: 'hidden'
-        }} >
+      <x-div id={`${this.getChartId()}_cont`} class='smartcharts-nxt' style="position: relative;">
+        <svg
+          //xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
+          role="region"
+          version={1.1}
+          width={this.CHART_OPTIONS.width}
+          height={this.CHART_OPTIONS.height}
+          viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
+          id={this.getChartId()}
+          class="sc-prime-view"
+          aria-label="Interactive chart."
+          aria-describedby={this.descId} >
 
-        <desc aria-hidden='true'>{(this.CHART_DATA.name) + ' - created using SmartChartsNXT chart library.'}</desc>
+          <desc aria-hidden='true'>{(this.CHART_DATA.name) + ' - created using SmartChartsNXT chart library.'}</desc>
 
-        <CommonStyles></CommonStyles>
-        { this.globalDefs.mapAll() }
+          <CommonStyles></CommonStyles>
 
-        <g class='sc-canvas-border-container'>
-          <rect x='1' y='1' class='sc-canvas-border' vector-effect='non-scaling-stroke'
-            width={this.CHART_OPTIONS.width - 2}
-            height={this.CHART_OPTIONS.height - 2}
-            shape-rendering='optimizeSpeed'
-            fill-opacity={1}
-            fill={this.CHART_OPTIONS.bgColor || '#fff'}
-            strokeWidth={1}
-            stroke={this.CHART_OPTIONS.canvasBorder ? defaultConfig.theme.fontColorDark : 'none'}
-            style={{ pointerEvents: 'none' }}
-          />
-        </g>
+          {this.globalDefs.mapAll()}
 
-        {this.CHART_OPTIONS.creditsWatermark.enable &&
-          <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
-        }
+          <g class='sc-canvas-border-container'>
+            <rect x='1' y='1' class='sc-canvas-border' vector-effect='non-scaling-stroke'
+              width={this.CHART_OPTIONS.width - 2}
+              height={this.CHART_OPTIONS.height - 2}
+              shape-rendering='optimizeSpeed'
+              fill-opacity={1}
+              fill={this.CHART_OPTIONS.bgColor || '#fff'}
+              strokeWidth={1}
+              stroke={this.CHART_OPTIONS.canvasBorder ? defaultConfig.theme.fontColorDark : 'none'}
+              style={{ pointerEvents: 'none' }}
+            />
+          </g>
 
-        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
-          this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
-        }
+          {this.CHART_OPTIONS.creditsWatermark.enable &&
+            <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
+          }
 
-        <g id={`${this.getChartId()}_cont`}>
+          {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
+            this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
+          }
+
           <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
-        </g>
 
-        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
-          <Menu opts={this.CHART_OPTIONS.menu.mainMenu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} targetNode={`#${this.getChartId()}_cont`}></Menu>
+          <PopupContainer></PopupContainer>
+
+          <LoaderView></LoaderView>
+        </svg>
+        {UtilCore.isIE &&
+          <x-div id={this.htmlContainerIE} style={{
+            position: 'absolute',
+            width: this.CHART_DATA.svgWidth + 'px',
+            height: this.CHART_DATA.svgHeight + 'px',
+            top: 0,
+            left: 0,
+            pointerEvents: 'none'
+          }}></x-div>
         }
-        <LoaderView></LoaderView>
-      </svg>
+        {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false && this.state.menuExpanded &&
+          <svg
+            role="region"
+            version={1.1}
+            width={this.CHART_OPTIONS.width}
+            height={this.CHART_OPTIONS.height}
+            viewbox={`0, 0, ${this.CHART_OPTIONS.width}, ${this.CHART_OPTIONS.height}`}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}>
+            <Menu opts={this.CHART_OPTIONS.menu.mainMenu} x={this.CHART_DATA.svgWidth - 50} y={3} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} rootNode={`#${this.getChartId()}`} rootContainer={`#${this.CHART_OPTIONS.targetElem}`} ></Menu>
+          </svg>
+        }
+      </x-div>
     );
   }
 
@@ -285,14 +306,15 @@ class BaseChart extends Component {
 
   showMenuPopup(e) {
     if (e.type == 'click' || (e.type == 'keypress' && (e.which === 13 || e.which === 32))) {
-      this.setState({ menuExpanded: true });
+      this.emitter.emit('menuExpanded', e);
+      this._setState({ menuExpanded: true });
     }
   }
 
   hideMenuPopup() {
     this.setState({ menuExpanded: false });
     setTimeout(() => {
-      if(typeof this.ref.node.querySelector('.sc-menu-icon-bg').focus === 'function') {
+      if (typeof this.ref.node.querySelector('.sc-menu-icon-bg').focus === 'function') {
         this.ref.node.querySelector('.sc-menu-icon-bg').focus();
       }
     }, 0);
@@ -310,7 +332,7 @@ class BaseChart extends Component {
 
   onMenuIconMouseIn(e) {
     this.ref.node.querySelector('.dot-group').classList.add('active');
-    if(UtilCore.isIE) {
+    if (UtilCore.isIE) {
       e.target.setAttribute('transform', 'scale(1.5)');
     }
   }
@@ -318,7 +340,7 @@ class BaseChart extends Component {
   onMenuIconMouseOut(e) {
     if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
-      if(UtilCore.isIE) {
+      if (UtilCore.isIE) {
         e.target.setAttribute('transform', 'scale(1)');
       }
     }
@@ -352,12 +374,12 @@ class BaseChart extends Component {
 
   onRenderComponent(newOpts) {
     this.validationErrors = this.validator.validate(this.chartValidationRules, newOpts);
-    if(this.validationErrors.length) {
+    if (this.validationErrors.length) {
       throw this.validationErrors;
     }
     this.CHART_OPTIONS = UtilCore.extends(this.CHART_OPTIONS, newOpts, { width: 1, height: 1 });
     this.store.setValue('globalRenderAll', true);
-    this.setState({ globalRenderAll: true});
+    this.setState({ globalRenderAll: true });
   }
 }
 

@@ -1,5 +1,6 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import UtilCore from './../core/util.core';
@@ -66,9 +67,6 @@ class VerticalLabels extends Component {
 
   propsWillReceive(nextProps) {
     this.resetConfig(nextProps.opts);
-    this.state = {
-      fontSize: this.config.fontSize
-    };
     this.minLabelVal = nextProps.minVal;
     this.maxLabelVal = nextProps.maxVal;
   }
@@ -97,8 +95,11 @@ class VerticalLabels extends Component {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} aria-hidden='true'>
         {this.getLabels()}
-        {this.config.labelAlign === 'end' &&
+        {!this.props.opts.positionOpposite && this.config.labelAlign === 'end' &&
           <Ticks posX={-(this.props.opts.tickSpan || this.defaultTickSpan)} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
+        }
+        {this.props.opts.positionOpposite && this.config.labelAlign === 'start' &&
+          <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
         }
       </g>
     );
@@ -107,9 +108,14 @@ class VerticalLabels extends Component {
   getLabels() {
     let labels = [];
     this.zeroBaseIndex = -1;
-    for (let lCount = this.props.labelCount, i = 0; lCount >= 0; lCount--) {
-      let labelVal = this.minLabelVal + (i++ * this.props.valueInterval);
-      this.maxLabelVal = UiCore.formatTextValue(labelVal);
+    let i = this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC ? Math.log10(this.minLabelVal) : 0;
+    let decimalCount = this.countDecimals(this.minLabelVal);
+    for (let lCount = this.props.labelCount; lCount >= 0; lCount--, i++) {
+      let labelVal = this.minLabelVal + (i * this.props.valueInterval(i));
+      if (this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        labelVal = this.props.valueInterval(i);
+      }
+      this.maxLabelVal = UiCore.formatTextValue(labelVal, decimalCount);
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {
@@ -117,6 +123,7 @@ class VerticalLabels extends Component {
       }
     }
     this.emitter.emitSync('onVerticalLabelsRender', {
+      isPrimary: this.props.priority === 'primary',
       intervalLen: this.props.intervalLen,
       intervalValue: this.props.valueInterval,
       zeroBaseIndex: this.zeroBaseIndex,
@@ -127,9 +134,14 @@ class VerticalLabels extends Component {
   }
 
   getEachLabel(val, index) {
-    let x = this.config.labelAlign === 'end' ? - 10 : this.config.labelAlign === 'start' ? 5 : 0;
-    let y = this.valueSet.length === 1 ? this.props.valueInterval : index * this.props.intervalLen;
-    y = this.config.labelAlign === 'end' ? y : y - 10;
+    let labelMargin = (this.props.opts.tickSpan || this.defaultTickSpan) + 5;
+    let x = this.config.labelAlign === 'end' ? - (labelMargin) : this.config.labelAlign === 'start' ? labelMargin : 0;
+    let y = index * this.props.intervalLen;
+    if (this.props.opts.positionOpposite) {
+      y = this.config.labelAlign === 'start' ? y : y - 10;
+    } else {
+      y = this.config.labelAlign === 'end' ? y : y - 10;
+    }
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     return (
       <text class="sc-vertical-label" font-family={this.config.fontFamily} fill={this.config.labelColor} opacity={this.config.labelOpacity} stroke='none'
@@ -149,6 +161,14 @@ class VerticalLabels extends Component {
 
   onMouseLeave(e) {
     this.emitter.emit('vLabelExit', e);
+  }
+
+  countDecimals(value) {
+    if (Math.floor(value) === value) {
+      return 0;
+    }
+    let count = value.toString().split('.')[1].length;
+    return count > 10 ? 10 : count || 0;
   }
 }
 

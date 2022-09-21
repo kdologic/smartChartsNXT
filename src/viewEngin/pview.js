@@ -612,20 +612,24 @@ class Component {
    */
   _removeOldNode(nodePos = 0, oldVNode, ref) {
     let destroyableNode = oldVNode.children[nodePos], destroyableObj;
+    if (typeof destroyableNode === 'string' || typeof destroyableNode === 'number') {
+      ref.node.textContent = '';
+    }
     if (typeof destroyableNode.nodeName === 'object') {
       destroyableObj = destroyableNode.nodeName;
       destroyableNode = destroyableNode.nodeName.vnode;
     }
+
+    if (destroyableObj && typeof destroyableObj.beforeUnmount === 'function') {
+      destroyableObj.beforeUnmount.call(destroyableObj);
+    }
+
     if (destroyableNode.children && destroyableNode.children instanceof Array) {
       for (let c = 0; c < destroyableNode.children.length; c++) {
         if (ref.children[nodePos]) {
           this._removeOldNode(c, destroyableNode, ref.children[nodePos]);
         }
       }
-    }
-
-    if (destroyableObj && typeof destroyableObj.beforeUnmount === 'function') {
-      destroyableObj.beforeUnmount.call(destroyableObj);
     }
 
     if (typeof destroyableNode.nodeName === 'object') {

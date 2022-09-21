@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gradient stroke color Line Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNXT.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body style="background: #B284BE;">
+  <div role="figure" class="chart-base">
+    <div id="chartContainer" style="width:100%; height:550px;"></div>
+    <p class="chart-caption" aria-hidden="true">
+      This chart demonstrate the gradient stroke color of line. It used the gradient definition used to create inside def field.  
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    var lineChart;
+    SmartChartsNXT.ready()
+      .then(function () {
+        lineChart = new SmartChartsNXT.Chart({
+          "type": $SC.CHART_TYPE.LINE_CHART,
+          "targetElem": "chartContainer",
+          "bgColor": "#fbf3f6",
+          "a11y": {
+            "description": "This chart demonstrate the gradient stroke color of line. It used the gradient definition used to create inside def field."
+          },
+          "title": {
+            "text": "Page fault rate",
+            "textColor": "#714693"
+          },
+          "subtitle": {
+            "text": "Demonstrate gradient stroke color",
+            "textColor": "#B2BEB5"
+          },
+          "defs": {                                       
+            "gradients": [{
+              "tagName": "linearGradient",                
+              "id": "grad-1",                             
+              "attrs": {                                  
+                "x1": 0,
+                "x2": 0,
+                "y1": 0,
+                "y2": 1,
+                "gradientUnits": "objectBoundingBox"
+              },
+              "stops": [{                                 
+                "offset": "0%", 
+                "stop-color": "red"
+              },{
+                "offset": "25%", 
+                "stop-color": "pink",
+              },{
+                "offset": "50%", 
+                "stop-color": "orange",
+              },{
+                "offset": "75%", 
+                "stop-color": "blue",
+              },{
+                "offset": "100%", 
+                "stop-color": "green",
+              }] 
+            }]
+          },
+          "gridBox": {
+            "vertical": {
+              "enable": false
+            },
+            "horizontal": {
+              "enable": false
+            },
+            "bgColor": "#FFF",
+            "bgOpacity": 1
+          },
+          "legends": {
+            "enable": false
+          },
+          "dataSet": {
+            "xAxis": {
+              "title": "Time",
+              "intervalThreshold": 30,
+              "categories": {
+                "startFrom": 1
+              }
+            },
+            "yAxis": {
+              "type": $SC.ENUMS.AXIS_TYPE.LINEAR,
+              "title": "Page Faults",
+            },
+            "series": [{
+              "name": "Page faults",
+              "lineWidth": 8,
+              "lineColor": "url(#grad-1)",
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.CIRCLE
+              },
+              "spline": true,
+              "data": [5, 20, 11, 50, 7, 2, 14, 8, 4, 19, 25]
+            }]
+          }
+        });
+      });
+  </script>
+</body>
+
+</html>

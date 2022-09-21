@@ -18,8 +18,12 @@ class AxisBar extends Component {
   render() {
     return (
       <g transform={`translate(${this.props.posX},${this.props.posY})`} >
-        <line class='sc-x-axis' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={this.props.xAxis.axisColor || defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
-        <line class='sc-y-axis' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={this.props.yAxis.axisColor || defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
+        { this.props.type === 'x' &&
+          <line class='sc-x-axis' x1={0} y1={this.props.height} x2={this.props.width} y2={this.props.height} fill='none' stroke={this.props.xAxis.axisColor || defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
+        }
+        { this.props.type === 'y' &&
+          <line class='sc-y-axis' x1={0} y1={0} x2={0} y2={this.props.height} fill='none' stroke={this.props.yAxis.axisColor || defaultConfig.theme.bgColorDark} stroke-width='1' opacity='1' shape-rendering='optimizeSpeed' />
+        }
       </g>
     );
   }

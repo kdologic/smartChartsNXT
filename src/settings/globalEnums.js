@@ -28,6 +28,11 @@ export const OPTIONS_TYPE = {
     LEFT: 'left',
     CENTER: 'center'
   },
+  VERTICAL_ALIGN: {
+    TOP: 'top',
+    CENTER: 'center',
+    BOTTOM: 'bottom'
+  },
   DISPLAY: {
     INLINE: 'inline',
     BLOCK: 'block',
@@ -73,6 +78,10 @@ export const OPTIONS_TYPE = {
     BOX3D: 'sc-pattern-box3d',
     SHAPE_S: 'sc-pattern-shape-s',
     CHECKERBOARD: 'sc-pattern-carbon-checkerboard'
+  },
+  AXIS_TYPE: {
+    LOGARITHMIC: 'logarithmic',
+    LINEAR: 'linear'
   }
 };
 

@@ -1,5 +1,6 @@
 'use strict';
 
+import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
 import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import UtilCore from './../core/util.core';
@@ -16,7 +17,7 @@ import a11yFactory from './../core/a11y';
  * @extends Component
  *
  * @event
- * 1. onHorizontalLabelRender : Fire when horizontal labels draws.
+ * 1. onHorizontalLabelsRender : Fire when horizontal labels draws.
  * 2. hLabelEnter: Fire when mouse hover on label text.
  * 3. hLabelExit: Fire mouse out of label text.
  */
@@ -98,14 +99,14 @@ class HorizontalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
-        dateFormat: config.categories.dateFormat || defaultConfig.formatting.displayDateFormat
+        dateFormat: config.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat
       }
     };
   }
 
   render() {
     this.setIntervalLength();
-    this.emitter.emit('onHorizontalLabelsRender', {
+    this.emitter.emitSync('onHorizontalLabelsRender', {
       intervalLen: this.state.intervalLen,
       values: this.state.categories,
       count: this.state.categories.length
@@ -114,10 +115,10 @@ class HorizontalLabels extends Component {
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} aria-hidden='true'>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x - 100} y={this.state.clip.y} width={this.state.clip.width + 100} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - 100} y={this.state.clip.y - (this.props.opts.labelAlign === ENUMS.VERTICAL_ALIGN.TOP ? this.state.clip.height : 0)} width={this.state.clip.width + 100} height={this.state.clip.height} />
           </clipPath>
           <clipPath id={this.clipPathId + '-tick'}>
-            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
+            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y - (this.props.opts.labelAlign === ENUMS.VERTICAL_ALIGN.TOP ? (this.props.opts.tickSpan || this.defaultTickSpan) : 0)} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
           </clipPath>
         </defs>
         <g class='sc-horizontal-labels' transform={`translate(${this.props.paddingX}, 0)`}>
@@ -125,9 +126,16 @@ class HorizontalLabels extends Component {
             this.getLabels()
           }
         </g>
-        <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
-          <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
-        </g>
+        {this.props.opts.labelAlign === ENUMS.VERTICAL_ALIGN.TOP &&
+          <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
+            <Ticks posX={0} posY={-(this.props.opts.tickSpan || this.defaultTickSpan)} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+          </g>
+        }
+        {this.props.opts.labelAlign === ENUMS.VERTICAL_ALIGN.BOTTOM &&
+          <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
+            <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+          </g>
+        }
       </g>
     );
   }
@@ -142,7 +150,7 @@ class HorizontalLabels extends Component {
 
   getEachLabel(val, index) {
     let x = this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen;
-    let y = 18;
+    let y = this.props.opts.labelAlign === ENUMS.VERTICAL_ALIGN.TOP ? -18 : 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
@@ -154,7 +162,7 @@ class HorizontalLabels extends Component {
 
     if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
       let labelWidth = UiCore.getComputedTextWidth(label);
-      if (x + (labelWidth / 2) > this.props.maxWidth) {
+      if (x + (labelWidth) > this.props.maxWidth) {
         let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
         label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
       }

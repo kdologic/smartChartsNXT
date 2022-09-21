@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiple Y-Axis with Line Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNXT.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body style="background: #013E62;">
+  <div role="figure" class="chart-base">
+    <div id="chartContainer" style="width:100%; height:550px;"></div>
+    <p class="chart-caption" aria-hidden="true" style="color:#fff">
+      This chart demonstrate the feature of multiple scale with 2 different Y-Axis. Each series should link the Y-Axis index via "yAxisLinkIndex" property. 
+      If this property is missing then as a default Y-Axis 0 index will be chosen as a scale of that series. Also we can modify title, axis and tick color as per our requirement.
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    var lineChart;
+    SmartChartsNXT.ready()
+      .then(function () {
+        lineChart = new SmartChartsNXT.Chart({
+          "type": $SC.CHART_TYPE.LINE_CHART,
+          "targetElem": "chartContainer",
+          "bgColor": "#f0f5f9",
+          "a11y": {
+            "description": "This chart demonstrate the feature of multiple scale with 2 different Y-Axis. Each series should link the Y-Axis index via \"yAxisLinkIndex\" property. If this property is missing then as a default Y-Axis 0 index will be chosen as a scale of that series. Also we can modify title, axis and tick color as per our requirement."
+          },
+          "title": {
+            "text": "PARIS - Temperature vs Rain fall",
+            "textColor": "#013E62"
+          },
+          "subtitle": {
+            "text": "Source: <a href='http://www.worldclimate.com/' style='color: gray;font-size: 12px;'>World Climate</a>",
+            "textColor": "#B2BEB5"
+          },
+          "gridBox": {
+            "bgColor": "#FFF",
+            "bgOpacity": 1
+          },
+          "legends": {
+            "itemBorderWidth": 0
+          },
+          "dataSet": {
+            "xAxis": {
+              "title": "Months",
+              "intervalThreshold": 30,
+              "categories": ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            },
+            "yAxis": [{
+              "type": $SC.ENUMS.AXIS_TYPE.LINEAR,
+              "title": "Temperature (\u00BAC)",
+              "append": " \u00BAC",
+              "titleColor": "#013E62",
+              "axisColor": "#013E62", 
+              "tickColor":"#013E62",
+              "labelColor": "#013E62"
+            },{
+              "type": $SC.ENUMS.AXIS_TYPE.LINEAR,
+              "title": "Rain Fall (mm)",
+              "append": " mm", 
+              "labelAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT,
+              "positionOpposite": true,
+              "titleColor": "#9C2542",
+              "axisColor": "#9C2542", 
+              "tickColor":"#9C2542",
+              "labelColor": "#9C2542"
+            }],
+            "series": [{
+              "name": "Temperature",
+              "lineWidth": 2,
+              "lineColor": "#013E62",
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.CIRCLE
+              },
+              "spline": true,
+              "yAxisLinkIndex": 0,
+              "data": [2.6,	4.0, 6.4,	9.9, 13.8, 16.9, 18.7, 18.3, 15.4, 10.8 ,6.3, 3.4]
+            },{
+              "name": "Rain Fall",
+              "lineWidth": 2,
+              "lineColor": "#9C2542",
+              "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,
+              "lineDashArray": "6 3",
+              "marker": {
+                "type": $SC.ENUMS.ICON_TYPE.DIAMOND
+              },
+              "spline": false,
+              "yAxisLinkIndex": 1,
+              "data": [45.8, 38.9, 41.0, 44.4, 55.7, 56.6, 57.0, 55.2, 52.8, 56.5, 53.7, 49.3]
+            }]
+          }
+        });
+      });
+  </script>
+</body>
+
+</html>

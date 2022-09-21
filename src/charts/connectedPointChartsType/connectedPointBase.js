@@ -13,6 +13,7 @@ import LegendBox from './../../components/legendBox';
 import Heading from './../../components/heading';
 import TextBox from './../../components/textBox';
 import Grid from './../../components/grid';
+import MarkRegion from './../../components/markRegion';
 import AxisBar from './../../components/axisBar';
 import PointerCrosshair from './../../components/pointerCrosshair';
 import DrawConnectedPoints from './drawConnectedPoints';
@@ -24,6 +25,7 @@ import Tooltip from './../../components/tooltip';
 import InteractivePlane from './interactivePlane';
 import StoreManager from './../../liveStore/storeManager';
 import SeriesLabel from './../../components/seriesLabel';
+import AnnotationLabels from './../../components/annotationLabels';
 import a11yFactory from './../../core/a11y';
 
 
@@ -53,12 +55,20 @@ class ConnectedPointBase extends Component {
         subtitleTop: 50,      // Default x position of subtitle from top
         legendTop: 70,
         hLabelHeight: 80,
-        vLabelWidth: 70,
-        paddingX: 5,
+        vLabelWidth: 60,
+        paddingX: 10,
         longestSeries: 0,
         zoomOutBoxWidth: 40,
         zoomOutBoxHeight: 40
       }, this.props.chartData);
+
+      this.yAxisDefaults = {
+        type: ENUMS.AXIS_TYPE.LINEAR,
+        title: 'Value-axis',
+        zeroBase: false,
+        labelAlign: ENUMS.HORIZONTAL_ALIGN.RIGHT,
+        positionOpposite: false
+      };
 
       this.CHART_OPTIONS = UtilCore.extends({
         title: {
@@ -82,11 +92,16 @@ class ConnectedPointBase extends Component {
           }
         },
         dataSet: {
-          xAxis: { title: 'Label-axis' },
-          yAxis: { title: 'Value-axis', zeroBase: false }
+          xAxis: {
+            type: ENUMS.AXIS_TYPE.LINEAR,
+            title: 'Label-axis',
+            labelAlign: ENUMS.VERTICAL_ALIGN.BOTTOM,
+            positionOpposite: false
+          },
+          yAxis: this.yAxisDefaults
         },
         horizontalScroller: {
-          enable: true,
+          enable: false,
           height: 35,
           chartInside: true
         },
@@ -94,7 +109,11 @@ class ConnectedPointBase extends Component {
           enable: true,
           followPointer: false,
           grouped: true,
-          pointerVicinity: 50
+          pointerVicinity: 50,
+          anchorWidth: 0,
+          anchorHeight: 10,
+          borderWidth: 0,
+          borderRadius: 10
         },
         zoomWindow: {}
       }, this.props.chartOptions);
@@ -153,21 +172,39 @@ class ConnectedPointBase extends Component {
         get windowRightIndex() {
           return this._windowRightIndex;
         },
-        hGridCount: 6,
-        gridHeight: 0,
+        hGridCount: {
+          primary: 6,
+          secondary: 6
+        },
+        gridHeight: {
+          primary: 0,
+          secondary: 0
+        },
         cs: {
           maxima: 0,
           minima: 0,
-          valueInterval: 0,
-          yInterval: {},
+          primary: {
+            yInterval: {},
+            valueInterval: 0
+          },
+          secondary: {
+            yInterval: {},
+            valueInterval: 0
+          },
           scaleX: 0,
           dataSet: undefined
         },
         fs: {
           maxima: 0,
           minima: 0,
-          valueInterval: 0,
-          yInterval: {},
+          primary: {
+            yInterval: {},
+            valueInterval: 0
+          },
+          secondary: {
+            yInterval: {},
+            valueInterval: 0
+          },
           dataSet: undefined
         },
         hScrollLeftOffset: 0,
@@ -178,7 +215,12 @@ class ConnectedPointBase extends Component {
         offsetRightChange: 0,
         shouldFSRender: this.props.globalRenderAll
       };
-
+      this.defaultMargins = {
+        left: 30,
+        right: 30,
+        top: 80,
+        bottom: 10
+      };
       this.legendBoxType = this.props.chartOptions.legends ? (this.props.chartOptions.legends.alignment || 'horizontal') : 'horizontal';
       this.legendBoxFloat = this.props.chartOptions.legends ? (this.props.chartOptions.legends.float || 'none') : 'none';
       this.pointData = [];
@@ -209,7 +251,7 @@ class ConnectedPointBase extends Component {
       this.a11yWriter.createSpace(this.srLenAccId, this.hLabelAccId, this.vLabelAccId);
       this.a11yWriter.write(this.srLenAccId, '<div aria-hidden="false">Chart draws ' + this.CHART_DATA.dataSet.series.length + ' data series.</div>');
       this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_DATA.dataSet.xAxis.title || 'values') + '.</div>', false);
-      this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_DATA.dataSet.yAxis.title || 'values') + '.</div>', false);
+      this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_DATA.dataSet.yAxis.primary.title || 'values') + '.</div>', false);
     } catch (ex) {
       ex.errorIn = `Error in ${this.context.chartType} with runId:${this.context.runId}`;
       throw ex;
@@ -223,21 +265,42 @@ class ConnectedPointBase extends Component {
     this.minWidth = this.CHART_DATA.minWidth;
     this.minHeight = this.CHART_DATA.minHeight;
 
-    const defaultMargins = {
-      left: 100,
-      right: 20,
-      top: 120,
-      bottom: this.CHART_OPTIONS.horizontalScroller.height + 90
-    };
-
     this.CHART_DATA.chartCenter = new Point(this.CHART_DATA.svgCenter.x, this.CHART_DATA.svgCenter.y + 50);
-    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? defaultMargins.left : this.CHART_DATA.marginLeft;
-    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? defaultMargins.right : this.CHART_DATA.marginRight;
-    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? defaultMargins.top : this.CHART_DATA.marginTop;
-    this.CHART_DATA.marginBottom = !this.CHART_DATA.marginBottom ? this.CHART_OPTIONS.horizontalScroller.height + defaultMargins.bottom : this.CHART_DATA.marginBottom;
+    this.CHART_DATA.marginLeft = !this.CHART_DATA.marginLeft ? this.defaultMargins.left : this.CHART_DATA.marginLeft;
+    this.CHART_DATA.marginRight = !this.CHART_DATA.marginRight ? this.defaultMargins.right : this.CHART_DATA.marginRight;
+    this.CHART_DATA.marginTop = !this.CHART_DATA.marginTop ? this.defaultMargins.top : this.CHART_DATA.marginTop;
+    this.CHART_DATA.marginBottom = this.CHART_OPTIONS.horizontalScroller.height + this.CHART_DATA.hLabelHeight + this.defaultMargins.bottom;
 
-    if (this.CHART_DATA.dataSet.yAxis.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginLeft === defaultMargins.left && (!this.CHART_OPTIONS.pointerCrosshair || this.CHART_OPTIONS.pointerCrosshair.horizontal.spread === ENUMS.CROSSHAIR_SPREAD.NONE)) {
-      this.CHART_DATA.marginLeft = defaultMargins.left - this.CHART_DATA.vLabelWidth + 2;
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite && (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP && this.CHART_DATA.marginTop === this.defaultMargins.top)) {
+      this.CHART_DATA.marginTop = this.defaultMargins.top + this.CHART_DATA.hLabelHeight;
+    }
+
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite) {
+      this.CHART_DATA.marginBottom -= this.CHART_DATA.hLabelHeight;
+    }
+
+    if (this.CHART_DATA.dataSet.xAxis.positionOpposite === false && this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP) {
+      this.CHART_DATA.marginBottom -= this.CHART_DATA.hLabelHeight;
+    }
+
+    if (!this.CHART_OPTIONS.horizontalScroller.enable) {
+      this.CHART_DATA.marginBottom -= this.CHART_OPTIONS.horizontalScroller.height;
+    }
+
+    if (!this.CHART_DATA.dataSet.yAxis.primary.positionOpposite && (this.CHART_DATA.dataSet.yAxis.primary.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT && this.CHART_DATA.marginLeft === this.defaultMargins.left)) {
+      this.CHART_DATA.marginLeft = this.defaultMargins.left + this.CHART_DATA.vLabelWidth;
+    }
+
+    if (this.CHART_DATA.dataSet.yAxis.secondary && !this.CHART_DATA.dataSet.yAxis.secondary.positionOpposite && (this.CHART_DATA.dataSet.yAxis.secondary.labelAlign === ENUMS.HORIZONTAL_ALIGN.RIGHT)) {
+      this.CHART_DATA.marginLeft = this.defaultMargins.left + this.CHART_DATA.vLabelWidth;
+    }
+
+    if (this.CHART_DATA.dataSet.yAxis.primary.positionOpposite && (this.CHART_DATA.dataSet.yAxis.primary.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT && this.CHART_DATA.marginRight === this.defaultMargins.right)) {
+      this.CHART_DATA.marginRight = this.defaultMargins.right + this.CHART_DATA.vLabelWidth;
+    }
+
+    if (this.CHART_DATA.dataSet.yAxis.secondary && this.CHART_DATA.dataSet.yAxis.secondary.positionOpposite && (this.CHART_DATA.dataSet.yAxis.secondary.labelAlign === ENUMS.HORIZONTAL_ALIGN.LEFT)) {
+      this.CHART_DATA.marginRight = this.defaultMargins.right + this.CHART_DATA.vLabelWidth;
     }
 
     this.CHART_DATA.gridBoxWidth = (this.CHART_DATA.svgCenter.x * 2) - this.CHART_DATA.marginLeft - this.CHART_DATA.marginRight;
@@ -297,6 +360,23 @@ class ConnectedPointBase extends Component {
 
   beforeProcessTurboData() {
     this.CHART_DATA.dataSet = this.CHART_OPTIONS.dataSet;
+    if (this.CHART_DATA.dataSet.yAxis instanceof Array) {
+      let yAxis = {
+        primary: this.yAxisDefaults,
+        secondary: undefined
+      };
+      if (this.CHART_DATA.dataSet.yAxis[0]) {
+        yAxis.primary = UtilCore.extends(yAxis.primary, this.CHART_DATA.dataSet.yAxis[0]);
+      }
+      if (this.CHART_DATA.dataSet.yAxis[1]) {
+        yAxis.secondary = UtilCore.extends(this.yAxisDefaults, this.CHART_DATA.dataSet.yAxis[1]);
+      }
+      this.CHART_DATA.dataSet.yAxis = yAxis;
+    } else {
+      this.CHART_DATA.dataSet.yAxis = {
+        primary: UtilCore.extends(this.yAxisDefaults, this.CHART_DATA.dataSet.yAxis)
+      };
+    }
     let categoryOpt = this.CHART_DATA.dataSet.xAxis.categories, categoryValues = [];
     let startFrom = 1, increaseBy = 1;
     let defaultOption = {
@@ -328,7 +408,13 @@ class ConnectedPointBase extends Component {
     const resolveCategory = (data, index) => {
       let label, parseAsDate = this.CHART_DATA.dataSet.xAxis.categories.parseAsDate, parseDateFormat = this.CHART_DATA.dataSet.xAxis.categories.parseDateFormat;
       if (data !== null && typeof data === 'object') {
-        if (typeof data.label !== 'undefined') {
+        if (data instanceof Array && data.length > 1) {
+          if (parseAsDate && UtilCore.isDate(data[0], parseDateFormat)) {
+            label = UtilCore.dateFormat(data[0], parseDateFormat || undefined);
+          } else {
+            label = data[0];
+          }
+        } else if (typeof data.label !== 'undefined') {
           if (parseAsDate && UtilCore.isDate(data.label, parseDateFormat)) {
             label = UtilCore.dateFormat(data.label, parseDateFormat || undefined);
           } else {
@@ -339,13 +425,22 @@ class ConnectedPointBase extends Component {
       if (label === undefined) {
         for (let s = 0; s < this.CHART_OPTIONS.dataSet.series.length; s++) {
           let series = this.CHART_OPTIONS.dataSet.series[s];
-          if (series.data && series.data[index] && typeof series.data[index] === 'object' && typeof series.data[index].label !== 'undefined') {
-            if (parseAsDate && UtilCore.isDate(series.data[index].label, parseDateFormat)) {
-              label = UtilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
-            } else {
-              label = series.data[index].label;
+          if (series.data && series.data[index] && typeof series.data[index] === 'object') {
+            if (series.data[index] instanceof Array && series.data[index].length > 1) {
+              if (parseAsDate && UtilCore.isDate(series.data[index][0], parseDateFormat)) {
+                label = UtilCore.dateFormat(series.data[index][0], parseDateFormat || undefined);
+              } else {
+                label = series.data[index][0];
+              }
+              break;
+            } else if (typeof series.data[index].label !== 'undefined') {
+              if (parseAsDate && UtilCore.isDate(series.data[index].label, parseDateFormat)) {
+                label = UtilCore.dateFormat(series.data[index].label, parseDateFormat || undefined);
+              } else {
+                label = series.data[index].label;
+              }
+              break;
             }
-            break;
           }
         }
         if (label === undefined) {
@@ -365,10 +460,25 @@ class ConnectedPointBase extends Component {
 
     const dataMapFn = (data, index) => {
       let d = {};
+      let yAxisType = this.CHART_DATA.dataSet.yAxis.primary.type;
       if (data !== null && typeof data === 'object') {
-        d.value = data.value;
+        if (data instanceof Array) {
+          if (data.length > 1) {
+            d.value = data[1];
+          } else if (data.length === 1) {
+            d.value = data[0];
+          } else {
+            d.value = null;
+          }
+        } else {
+          d = { ...data };
+          d.value = data.value;
+        }
       } else {
         d.value = data;
+      }
+      if (yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC && d.value <= 0) {
+        d.value = null;
       }
       d.label = resolveCategory(data, index);
       d.index = index;
@@ -389,8 +499,10 @@ class ConnectedPointBase extends Component {
   }
 
   prepareDataSet(isFS = false) {
-    let maxSet = [];
-    let minSet = [];
+    let primaryMaxSet = [];
+    let primaryMinSet = [];
+    let secondaryMaxSet = [];
+    let secondaryMinSet = [];
     let categories = [];
     let dataFor = isFS ? 'fs' : 'cs';
     let dataSet = this.copyDataset(this.CHART_DATA.dataSet);
@@ -408,12 +520,12 @@ class ConnectedPointBase extends Component {
     for (let i = 0; i < dataSet.series.length; i++) {
       let data = dataSet.series[i].data;
       let minVal = data.length === 0 ? 0 : Number.MAX_SAFE_INTEGER;
-      let maxVal = data.length === 0 ? 1 : Number.MIN_SAFE_INTEGER;
+      let maxVal = data.length === 0 ? 10 : Number.MIN_SAFE_INTEGER;
       let customizedMarkers = {};
       dataSet.series[i].valueSet = [];
       for (let j = 0, len = data.length; j < len; j++) {
         let v = data[j].value;
-        minVal = (v < minVal) ? v : minVal;
+        minVal = (v < minVal && v !== null) ? v : minVal;
         maxVal = (v > maxVal) ? v : maxVal;
         if (j > categories.length - 1) {
           categories.push(data[j].label);
@@ -423,8 +535,14 @@ class ConnectedPointBase extends Component {
         }
         dataSet.series[i].valueSet.push(v);
       }
-      maxSet.push(maxVal);
-      minSet.push(minVal);
+      let yAxisFollow = dataSet.series[i].yAxisLinkIndex === 0 || !dataSet.series[i].yAxisLinkIndex ? 'primary' : 'secondary';
+      if (yAxisFollow === 'primary') {
+        primaryMaxSet.push(maxVal);
+        primaryMinSet.push(minVal);
+      } else {
+        secondaryMaxSet.push(maxVal);
+        secondaryMinSet.push(minVal);
+      }
       dataSet.series[i].index = i;
       dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1.5 : dataSet.series[i].lineWidth;
       this.setSeriesColor(i, dataSet.series[i]);
@@ -432,11 +550,36 @@ class ConnectedPointBase extends Component {
     }
     this.state[dataFor].dataSet = dataSet;
     this.state[dataFor].dataSet.xAxis.selectedCategories = categories;
-    this.state[dataFor].maxima = Math.max(...maxSet);
-    this.state[dataFor].minima = Math.min(...minSet);
-    this.state[dataFor].yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].minima, this.state[dataFor].maxima, this.state[dataFor].dataSet.yAxis.zeroBase);
-    ({ iVal: this.state[dataFor].valueInterval, iCount: this.state.hGridCount } = this.state[dataFor].yInterval);
-    this.state.gridHeight = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount);
+    this.state[dataFor].maxima = Math.max(...primaryMaxSet, ...secondaryMaxSet);
+    this.state[dataFor].primaryMaxima = Math.max(...primaryMaxSet);
+    this.state[dataFor].secondaryMaxima = Math.max(...secondaryMaxSet);
+    this.state[dataFor].minima = Math.min(...primaryMinSet, ...secondaryMinSet);
+    this.state[dataFor].primaryMinima = Math.min(...primaryMinSet);
+    this.state[dataFor].secondaryMinima = Math.min(...secondaryMinSet);
+    if (!isFinite(this.state[dataFor].secondaryMaxima)) {
+      this.state[dataFor].secondaryMaxima = this.state[dataFor].maxima;
+    }
+    if (!isFinite(this.state[dataFor].secondaryMinima)) {
+      this.state[dataFor].secondaryMinima = this.state[dataFor].minima;
+    }
+    /* For primary y axis */
+    if (this.state[dataFor].dataSet.yAxis.primary.type === ENUMS.AXIS_TYPE.LINEAR) {
+      this.state[dataFor].primary.yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].primaryMinima, this.state[dataFor].primaryMaxima, this.state[dataFor].dataSet.yAxis.primary.zeroBase);
+    } else if (this.state[dataFor].dataSet.yAxis.primary.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      this.state[dataFor].primary.yInterval = UiCore.calcIntervalByMinMaxLog(this.state[dataFor].primaryMinima, this.state[dataFor].primaryMaxima, this.state[dataFor].dataSet.yAxis.primary.zeroBase);
+    }
+    /* For secondary y axis */
+    if (this.state[dataFor].dataSet.yAxis.secondary) {
+      if (this.state[dataFor].dataSet.yAxis.secondary.type === ENUMS.AXIS_TYPE.LINEAR) {
+        this.state[dataFor].secondary.yInterval = UiCore.calcIntervalByMinMax(this.state[dataFor].secondaryMinima, this.state[dataFor].secondaryMaxima, this.state[dataFor].dataSet.yAxis.secondary.zeroBase);
+      } else if (this.state[dataFor].dataSet.yAxis.secondary.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+        this.state[dataFor].secondary.yInterval = UiCore.calcIntervalByMinMaxLog(this.state[dataFor].secondaryMinima, this.state[dataFor].secondaryMaxima, this.state[dataFor].dataSet.yAxis.secondary.zeroBase);
+      }
+    }
+    ({ iVal: this.state[dataFor].primary.valueInterval, iCount: this.state.hGridCount.primary } = this.state[dataFor].primary.yInterval);
+    ({ iVal: this.state[dataFor].secondary.valueInterval, iCount: this.state.hGridCount.secondary } = this.state[dataFor].secondary.yInterval);
+    this.state.gridHeight.primary = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount.primary);
+    this.state.gridHeight.secondary = (this.CHART_DATA.gridBoxHeight / this.state.hGridCount.secondary);
   }
 
   setSeriesColor(index, series) {
@@ -470,6 +613,19 @@ class ConnectedPointBase extends Component {
       }
     }
     return data;
+  }
+
+  calculateScale(width, height, maxVal, minVal, paddingX, maxSeriesLen, yAxisInfo) {
+    let scaleX = (width - (2 * paddingX)) / (maxSeriesLen - 1 || 2);
+    let scaleY = 0, baseLine = 0;
+    if (yAxisInfo.type === ENUMS.AXIS_TYPE.LINEAR) {
+      scaleY = height / (maxVal - minVal);
+      baseLine = maxVal * scaleY;
+    } else if (yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      scaleY = height / (Math.log10(maxVal) - Math.log10(minVal));
+      baseLine = Math.log10(maxVal) * scaleY;
+    }
+    return { scaleX, scaleY, baseLine };
   }
 
   calcOffsetChanges() {
@@ -545,64 +701,91 @@ class ConnectedPointBase extends Component {
 
   render() {
     return (
-      <g>
+      <g class='sc-connected-point-base'>
         <Draggable instanceId='drag-132'>
-          <Heading instanceId='sc-title' opts={this.CHART_OPTIONS.title} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
-          <Heading instanceId='sc-subtitle' opts={this.CHART_OPTIONS.subtitle} posX={this.CHART_DATA.svgWidth / 2} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' fontSize={defaultConfig.theme.fontSizeSmall} />
+          <Heading instanceId='sc-title' type="h3" opts={this.CHART_OPTIONS.title} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.title.top)} width='90%' />
+          <Heading instanceId='sc-subtitle' type="h5" opts={this.CHART_OPTIONS.subtitle} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top)} width='95%' />
         </Draggable>
 
+        <MarkRegion posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} xMarkRegions={this.state.cs.dataSet.xAxis.markRegions || []} yMarkRegions={this.state.cs.dataSet.yAxis.primary.markRegions || []}
+          xAxisType={this.state.cs.dataSet.xAxis.type} yAxisType={this.state.cs.dataSet.yAxis.primary.type} width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.primary.yInterval}
+          paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
+        </MarkRegion>
+
         <Grid opts={this.CHART_OPTIONS.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yAxisType={this.state.cs.dataSet.yAxis.primary.type}
           vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
         </Grid>
-
-        <AxisBar xAxis={this.state.cs.dataSet.xAxis || {}} yAxis={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
-        </AxisBar>
-
-        <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
-          transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6}
-          textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={this.CHART_DATA.dataSet.yAxis.title}
-          style={{
-            '.sc-vertical-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
-            }
-          }} />
-
-        <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))} posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.hLabelHeight / 2) + 5)}
-          bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
-          textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
-          style={{
-            '.sc-horizontal-axis-title': {
-              'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
-            }
-          }} />
 
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
         </g>
 
-        <VerticalLabels opts={this.state.cs.dataSet.yAxis || {}}
-          posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin} valueInterval={this.state.cs.valueInterval}
-          labelCount={this.state.hGridCount} intervalLen={this.state.gridHeight} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
-        </VerticalLabels>
+        {this.drawYAxis(this.state.cs.dataSet.yAxis.primary, 'primary')}
 
-        <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
-          posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
-          categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
-          clip={{
-            x: this.state.offsetLeftChange,
-            width: this.CHART_DATA.gridBoxWidth
-          }} >
-        </HorizontalLabels>
+        {this.state.cs.dataSet.yAxis.secondary &&
+          this.drawYAxis(this.state.cs.dataSet.yAxis.secondary, 'secondary')
+        }
+
+        {this.state.cs.dataSet.xAxis.positionOpposite === false &&
+          <g>
+            <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
+              posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.BOTTOM ? (this.CHART_DATA.hLabelHeight / 2) : 0) + 5)}
+              bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={this.CHART_DATA.dataSet.xAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
+              textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
+              style={{
+                '.sc-horizontal-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="x-bottom" type='x' xAxis={this.state.cs.dataSet.xAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+            </AxisBar>
+
+            <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
+              posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
+              maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+              categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
+              clip={{
+                x: this.state.offsetLeftChange,
+                width: this.CHART_DATA.gridBoxWidth
+              }} >
+            </HorizontalLabels>
+          </g>
+        }
+
+        {this.state.cs.dataSet.xAxis.positionOpposite === true &&
+          <g>
+            <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
+              posY={(this.CHART_DATA.marginTop - (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP ? this.CHART_DATA.hLabelHeight : this.CHART_DATA.hLabelHeight / 2) - 5)}
+              bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={this.CHART_DATA.dataSet.xAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
+              textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
+              style={{
+                '.sc-horizontal-axis-title': {
+                  'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+                }
+              }} />
+            <AxisBar instanceId="x-top" type='x' xAxis={this.state.cs.dataSet.xAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+              width={this.CHART_DATA.gridBoxWidth} height={0}>
+            </AxisBar>
+
+            <HorizontalLabels opts={this.state.cs.dataSet.xAxis || {}}
+              posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop}
+              maxWidth={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} maxHeight={this.CHART_DATA.hLabelHeight}
+              categorySet={this.state.cs.dataSet.xAxis.selectedCategories} paddingX={this.CHART_DATA.paddingX} accessibilityId={this.hLabelAccId}
+              clip={{
+                x: this.state.offsetLeftChange,
+                width: this.CHART_DATA.gridBoxWidth
+              }} >
+            </HorizontalLabels>
+          </g>
+        }
 
         {this.getSeriesLabel()}
 
         <PointerCrosshair hLineStart={this.CHART_DATA.marginLeft} hLineEnd={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth}
           vLineStart={this.CHART_DATA.marginTop} vLineEnd={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight}
-          opts={this.CHART_OPTIONS.pointerCrosshair || {}}>
+          opts={this.CHART_OPTIONS.pointerCrosshair || {}} xAxis={this.state.cs.dataSet.xAxis} yAxis={this.state.cs.dataSet.yAxis.primary}>
         </PointerCrosshair>
 
         {(!this.CHART_OPTIONS.legends || (this.CHART_OPTIONS.legends && this.CHART_OPTIONS.legends.enable !== false)) &&
@@ -614,8 +797,9 @@ class ConnectedPointBase extends Component {
           </Draggable>
         }
 
-        {this.CHART_OPTIONS.horizontalScroller.enable &&
-          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + this.CHART_DATA.hLabelHeight}
+        {this.CHART_OPTIONS.horizontalScroller.enable !== false &&
+          <HorizontalScroller opts={this.CHART_OPTIONS.horizontalScroller || {}} posX={this.CHART_DATA.marginLeft}
+            posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight) + (this.CHART_DATA.dataSet.xAxis.positionOpposite ? 0 : this.CHART_DATA.hLabelHeight)}
             width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height} leftOffset={this.state.leftOffset} rightOffset={this.state.rightOffset}
             offsetColor='#bbb' offsetClipId={this.scrollOffsetClipId} windowClipId={this.scrollWindowClipId} getRangeVal={this.getRangeVal.bind(this)} >
             {this.CHART_OPTIONS.horizontalScroller.enable && this.CHART_OPTIONS.horizontalScroller.chartInside &&
@@ -624,12 +808,26 @@ class ConnectedPointBase extends Component {
           </HorizontalScroller>
         }
 
-        {this.CHART_OPTIONS.tooltip.enable &&
-          <Tooltip instanceId='marker-tooltip' instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length}
-            opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
-            svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
-          </Tooltip>
+        <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
+        </InteractivePlane>
+
+        {this.CHART_OPTIONS.annotationLabels && this.CHART_OPTIONS.annotationLabels.length && this.state.cs.dataSet.series.filter(d => d.data.length > 0).length &&
+          <AnnotationLabels annotations={this.CHART_OPTIONS.annotationLabels} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+            width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs.primary.yInterval} yAxisType={this.state.cs.dataSet.yAxis.primary.type}
+            scaleX={this.state.cs.scaleX} scaleY={this.state.cs.scaleY} baseLine={this.state.cs.baseLine}
+            paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
+          </AnnotationLabels>
         }
+
+        <g class="sc-marker-tooltip-container-main">
+          {this.CHART_OPTIONS.tooltip.enable &&
+            <Tooltip instanceId='marker-tooltip' instanceCount={this.CHART_OPTIONS.tooltip.grouped ? 1 : this.state.cs.dataSet.series.filter(d => d.data.length > 0).length}
+              opts={this.CHART_OPTIONS.tooltip || {}} grouped={this.CHART_OPTIONS.tooltip.grouped}
+              svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} >
+            </Tooltip>
+          }
+        </g>
 
         <Tooltip instanceId='label-tooltip' instanceCount={1} grouped={false} svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight}
           opts={{
@@ -655,10 +853,6 @@ class ConnectedPointBase extends Component {
           }}>
         </Tooltip>
 
-        <InteractivePlane posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} >
-        </InteractivePlane>
-
         {this.CHART_OPTIONS.horizontalScroller.enable && (this.state.hScrollLeftOffset !== 0 || this.state.hScrollRightOffset !== 100) &&
           <ZoomoutBox posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth - this.CHART_DATA.zoomOutBoxWidth} posY={this.CHART_DATA.marginTop}
             width={this.CHART_DATA.zoomOutBoxWidth} height={this.CHART_DATA.zoomOutBoxHeight} >
@@ -675,19 +869,28 @@ class ConnectedPointBase extends Component {
     });
     return this.state.cs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
       let seriesTotalDataCount = this.state.fs.dataSet.series.filter(s => s.index === series.index)[0].data.filter(v => v !== null).length;
+      let yAxisFollow = series.yAxisLinkIndex === 0 || !series.yAxisLinkIndex ? 'primary' : 'secondary';
+      let width = this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange;
+      let height = this.CHART_DATA.gridBoxHeight;
+      let maxVal = this.state.cs[yAxisFollow].yInterval.iMax;
+      let minVal = this.state.cs[yAxisFollow].yInterval.iMin;
+      let yAxisInfo = this.state.cs.dataSet.yAxis[yAxisFollow];
+
+      let scale = this.calculateScale(width, height, maxVal, minVal, this.CHART_DATA.paddingX, this.state.maxSeriesLen, yAxisInfo);
+      this.state.cs.scaleX = scale.scaleX;
+      this.state.cs.scaleY = scale.scaleY;
+      this.state.cs.baseLine = scale.baseLine;
       return (
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
-          width={this.CHART_DATA.gridBoxWidth + this.state.offsetLeftChange + this.state.offsetRightChange} height={this.CHART_DATA.gridBoxHeight} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
+          width={width} height={height} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
           lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
-          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} areaStrokeWidth={0} maxVal={this.state.cs.yInterval.iMax} minVal={this.state.cs.yInterval.iMin}
-          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis}
-          totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''}
-          getScaleX={(scaleX) => {
-            this.state.cs.scaleX = scaleX;
-          }}
+          marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} lineStyle={series.lineStyle || ENUMS.LINE_STYLE.SOLID} lineDashArray={series.lineDashArray || 0} areaStrokeWidth={0} maxVal={maxVal} minVal={minVal}
+          dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo}
+          totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''} emitScale={true}
+          scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}
           clip={{
-            x: this.state.offsetLeftChange + this.CHART_DATA.paddingX,
-            width: this.CHART_DATA.gridBoxWidth - (2 * this.CHART_DATA.paddingX),
+            x: this.state.offsetLeftChange,
+            width: this.CHART_DATA.gridBoxWidth,
             offsetLeft: this.state.offsetLeftChange,
             offsetRight: this.state.offsetRightChange
           }}
@@ -699,21 +902,29 @@ class ConnectedPointBase extends Component {
 
   drawHScrollSeries(marginLeft, marginTop) {
     return this.state.fs.dataSet.series.filter(d => d.data.length > 0).map((series) => {
+      let yAxisFollow = series.yAxisLinkIndex === 0 || !series.yAxisLinkIndex ? 'primary' : 'secondary';
+      let width = this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth;
+      let height = this.CHART_OPTIONS.horizontalScroller.height - 5;
+      let maxVal = this.state.fs[yAxisFollow].yInterval.iMax;
+      let minVal = this.state.fs[yAxisFollow].yInterval.iMin;
+      let yAxisInfo = this.state.cs.dataSet.yAxis[yAxisFollow];
+
+      let scale = this.calculateScale(width, height, maxVal, minVal, 0, this.state.maxSeriesLenFS, yAxisInfo);
+      this.state.fs.scaleX = scale.scaleX;
       return (
         <g class='sc-fs-chart-area-container'>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
-            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}
-            getScaleX={(scaleX) => {
-              this.state.fs.scaleX = scaleX;
-            }}
+            width={width} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#efefef' lineFillColor='#dedede' fillOptions={{}}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
+            maxVal={maxVal} minVal={minVal} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo}
+            accessibility={false} emitScale={false} scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}
             clipId={this.scrollOffsetClipId}>
           </DrawConnectedPoints>
           <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'fs-clip-' + series.index} name={series.name} posX={marginLeft} posY={marginTop} paddingX={0}
-            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={this.CHART_OPTIONS.horizontalScroller.height - 5} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
-            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} lineDropShadow={false} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} areaStrokeWidth={1}
-            maxVal={this.state.fs.yInterval.iMax} minVal={this.state.fs.yInterval.iMin} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={this.state.cs.dataSet.yAxis} accessibility={false}>
+            width={this.CHART_OPTIONS.horizontalScroller.width || this.CHART_DATA.gridBoxWidth} height={height} maxSeriesLen={this.state.maxSeriesLenFS} areaFillColor='#cccccc' lineFillColor='#777' fillOptions={{}}
+            lineDropShadow={false} opacity={0.5} spline={typeof series.spline === 'undefined' ? true : series.spline} marker={{ enable: false }} centerSinglePoint={false} lineStrokeWidth={1} lineStyle={ENUMS.LINE_STYLE.SOLID} lineDashArray={0} areaStrokeWidth={1}
+            maxVal={maxVal} minVal={minVal} dataPoints={false} dataLabels={false} seriesLabel={false} animated={false} shouldRender={this.state.shouldFSRender} clipId={this.scrollWindowClipId} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo} accessibility={false} emitScale={false}
+            scaleX={scale.scaleX} scaleY={scale.scaleY} baseLine={scale.baseLine}>
           </DrawConnectedPoints>
         </g>
       );
@@ -738,6 +949,51 @@ class ConnectedPointBase extends Component {
         return <g></g>;
       }
     });
+  }
+
+  drawYAxis(yAxis, priority) {
+    if (yAxis.positionOpposite === false) {
+      return (
+        <g>
+          <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
+            transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={yAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6}
+            textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={yAxis.title}
+            style={{
+              '.sc-vertical-axis-title': {
+                'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              }
+            }} />
+          <AxisBar instanceId="y-left" type='y' yAxis={yAxis || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+            width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+          </AxisBar>
+          <VerticalLabels instanceId="v-label-left" opts={yAxis || {}} priority={priority}
+            posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
+            labelCount={this.state.hGridCount[priority]} intervalLen={this.state.gridHeight[priority]} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
+          </VerticalLabels>
+        </g>
+      );
+    } else if (yAxis.positionOpposite) {
+      return (
+        <g>
+          <TextBox class='sc-vertical-axis-title' posX={this.context.svgWidth - 5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
+            transform={`rotate(${90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={yAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6}
+            textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={yAxis.title}
+            style={{
+              '.sc-vertical-axis-title': {
+                'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
+              }
+            }} />
+          <AxisBar instanceId="y-right" type='y' yAxis={yAxis || {}} posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop}
+            width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
+          </AxisBar>
+
+          <VerticalLabels instanceId="v-label-right" opts={yAxis || {}} priority={priority}
+            posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
+            labelCount={this.state.hGridCount[priority]} intervalLen={this.state.gridHeight[priority]} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
+          </VerticalLabels>
+        </g>
+      );
+    }
   }
 
   onHScroll(e) {
@@ -817,8 +1073,8 @@ class ConnectedPointBase extends Component {
     let point = series.data[e.highlightedPoint.pointIndex];
     let formattedLabel = point.label;
     let formattedValue = UiCore.formatTextValue(point.value);
-    if (this.state.cs.dataSet.yAxis && this.state.cs.dataSet.yAxis.prefix) {
-      formattedValue = this.state.cs.dataSet.yAxis.prefix + formattedValue;
+    if (this.state.cs.dataSet.yAxis.primary && this.state.cs.dataSet.yAxis.primary.prefix) {
+      formattedValue = this.state.cs.dataSet.yAxis.primary.prefix + formattedValue;
     }
     if (this.state.cs.dataSet.xAxis && this.state.cs.dataSet.xAxis.categories.parseAsDate && UtilCore.isDate(formattedLabel)) {
       formattedLabel = UtilCore.dateFormat(formattedLabel).format(this.state.cs.dataSet.xAxis.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat);
@@ -916,7 +1172,7 @@ class ConnectedPointBase extends Component {
 
   getTooltipHeader(pointSet, index, tipConfig) {
     return (
-      `<p style='background-color:${tipConfig.headerBgColor || '#555'}; font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: left; color: ${tipConfig.headerTextColor || '#fff'};margin:0;padding: 3px 5px;'>
+      `<p style="background-color:${tipConfig.headerBgColor || '#555'};font-size: ${defaultConfig.theme.fontSizeLarge}px; text-align: center; color: ${tipConfig.headerTextColor || '#fff'};margin:0;padding: 5px 5px;">
         ${pointSet[index].formattedLabel}
       </p>`
     );
@@ -925,11 +1181,12 @@ class ConnectedPointBase extends Component {
   getTooltipBody(pointSet, index, tipConfig) {
     let point = pointSet[index];
     return (
-      `<tr  style='font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; padding: 3px 6px; color:${tipConfig.textColor || '#000'};'>
-        <td>
-          <span style='background-color:${point.areaColor}; display:inline-block; width:10px; height:10px;margin-right:5px;'></span>${point.seriesName}
+      `<tr  style="font-size: ${tipConfig.fontSize || defaultConfig.theme.fontSizeMedium}px; color:${tipConfig.textColor || '#000'};">
+        <td style="padding: 5px">
+          <span style="background-color:${point.areaColor}; display:inline-block; width:10px; height:10px; margin-right:5px;"></span>
+            ${point.seriesName}:
         </td>
-        <td>${point.value}</td>
+        <td style="padding: 5px">${point.value}</td>
       </tr>`
     );
   }
@@ -945,8 +1202,12 @@ class ConnectedPointBase extends Component {
 
   onLegendRendered(e) {
     if (e.float === ENUMS.FLOAT.NONE) {
-      const newMarginTop = e.bBox.y + e.bBox.height + 10;
-      if (this.CHART_DATA.marginTop !== newMarginTop) {
+      const addedMarginTop = e.bBox.height;
+      let newMarginTop = this.defaultMargins.top + addedMarginTop;
+      if (this.CHART_DATA.dataSet.xAxis.positionOpposite && (this.CHART_DATA.dataSet.xAxis.labelAlign === ENUMS.VERTICAL_ALIGN.TOP)) {
+        newMarginTop = newMarginTop + this.CHART_DATA.hLabelHeight;
+      }
+      if (this.CHART_DATA.marginTop != newMarginTop) {
         this.CHART_DATA.marginTop = newMarginTop;
         this.CHART_DATA.gridBoxHeight = (this.CHART_DATA.svgCenter.y * 2) - this.CHART_DATA.marginTop - this.CHART_DATA.marginBottom;
         this.prepareDataSet();
@@ -965,9 +1226,10 @@ class ConnectedPointBase extends Component {
   onLegendHover(e) {
     this.state.cs.dataSet.series.forEach((s, i) => {
       this.emitter.emit('changeAreaBrightness', {
-        instanceId: 'cs' + i,
+        type: 'highlight',
+        instanceId: 'cs-' + i,
         strokeOpacity: i == e.index ? 1 : 0.2,
-        opacity: i == e.index ? 1 : 0.1
+        opacity: i == e.index ? 0.5 : 0.1
       });
     });
   }
@@ -975,7 +1237,8 @@ class ConnectedPointBase extends Component {
   onLegendLeave() {
     this.state.cs.dataSet.series.forEach((s, i) => {
       this.emitter.emit('changeAreaBrightness', {
-        instanceId: 'cs' + i,
+        type: 'normalize',
+        instanceId: 'cs-' + i,
         strokeOpacity: this.CHART_DATA.dataSet.series[i].lineOpacity || 1,
         opacity: this.CHART_DATA.dataSet.series[i].areaOpacity || 0.2
       });
@@ -986,7 +1249,7 @@ class ConnectedPointBase extends Component {
     return this.state.cs.dataSet.series.map((series) => {
       return {
         label: series.name,
-        color: series.areaColor,
+        color: series.lineColor,
         icon: typeof series.marker === 'object' ? series.marker : {},
         isToggled: !series.visible
       };

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IQ Distribution with Area Chart and Mark Regions | SmartChartsNXT</title>
+  <link rel="stylesheet" href="/smartChartsNXT/examples/static/css/example.common.style.css" type="text/css">
+  <script src="/smartChartsNXT/build/smartChartsNXT.main.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/build/smartChartsNXT.ieSupport.bundle.js" type="text/javascript"></script>
+  <script src="/smartChartsNXT/examples/static/js/example.common.js" type="text/javascript"></script>
+</head>
+
+<body style="background: #B284BE;">
+  <div role="figure" class="chart-base">
+    <div id="chartContainer" style="width:100%; height:550px;"></div>
+    <p class="chart-caption" aria-hidden="true">
+      The most commonly used individual IQ test series is the Wechsler Adult Intelligence Scale (WAIS) for adults and
+      the Wechsler Intelligence Scale for Children (WISC). Area chart with Mark Regions are used plot the Normalized IQ
+      distribution with mean 100 and standard deviation 15.
+    </p>
+  </div>
+
+  <script type="text/javascript">
+    var areaChart;
+    SmartChartsNXT.ready()
+      .then(function () {
+        areaChart = new SmartChartsNXT.Chart({
+          "type": $SC.CHART_TYPE.AREA_CHART,
+          "targetElem": "chartContainer",
+          "bgColor": "#fbf3fd",
+          "a11y": {
+            "description": "The most commonly used individual IQ test series is the Wechsler Adult Intelligence Scale (WAIS) for adults and the Wechsler Intelligence Scale for Children (WISC). Area chart with Mark Regions are used plot the Normalized IQ distribution with mean 100 and standard deviation 15."
+          },
+          "title": {
+            "text": "Normalized IQ distribution with mean 100 and standard deviation 15",
+            "textColor": "#0076A3"
+          },
+          "subtitle": {
+            "text": "Source: <a href='https://en.wikipedia.org/wiki/Intelligence_quotient' style='color: gray;pointer-events:all;'>Wikipedia</a>",
+            "textColor": "#555"
+          },
+          "gridBox": {
+            "vertical": {
+              "enable": true
+            },
+            "horizontal": {
+              "enable": false
+            },
+            "bgColor": "none",
+            "bgOpacity": 1
+          },
+          "legends": {
+            "itemBorderWidth": 0
+          },
+          "tooltip": {
+            "enable": false
+          },
+          "dataSet": {
+            "xAxis": {
+              "title": "IQ Score",
+              "intervalThreshold": 90,
+              "categories": {
+                "startFrom": 40,
+                "increaseBy": 15
+              },
+              "markRegions": [{
+                "from": 1,
+                "to": 2,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.1,
+                "label": {
+                  "text": "0.1%",
+                  "style": {
+                    "fontSize": "12px"
+                  }
+                }
+              },{
+                "from": 2,
+                "to": 3,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.3,
+                "label": {
+                  "text": "2.1%",
+                }
+              },{
+                "from": 3,
+                "to": 4,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.5,
+                "label": {
+                  "text": "13.6%",
+                  "style": {
+                    "color":"white",
+                    "fontSize": "16px"
+                  }
+                }
+              },{
+                "from": 4,
+                "to": 6,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.7,
+                "label": {
+                  "text": "34.1%",
+                  "style": {
+                    "color":"white",
+                    "fontSize": "18px"
+                  }
+                }
+              },{
+                "from": 6,
+                "to": 7,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.5,
+                "label": {
+                  "text": "13.6%",
+                  "style": {
+                    "color":"white",
+                    "fontSize": "16px"
+                  }
+                }
+              },{
+                "from": 7,
+                "to": 8,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.3,
+                "label": {
+                  "text": "2.1%",
+                }
+              },{
+                "from": 8,
+                "to": 9,
+                "color": "purple",
+                "borderColor": "none",
+                "opacity": 0.1,
+                "label": {
+                  "text": "0.1%",
+                  "style": {
+                    "fontSize": "12px"
+                  }
+                }
+              }]
+            },
+            "yAxis": {
+              "title": "Percent of people (%)",
+              "append": " %",
+              "zeroBase": true,
+              "positionOpposite": false
+            },
+            "series": [{
+              "name": "Normalized IQ Curve",
+              "lineWidth": 2,
+              "lineColor": "none",
+              "areaColor": "#fff",
+              "areaOpacity": 1, 
+              "fillOptions": {
+                "pattern": $SC.ENUMS.PATTERN.VERTICAL_2
+              },
+              "marker": {
+                "enable": false
+              },
+              "spline": true,
+              "animated": true,
+              "dropShadow": false,
+              "data": [0.0, 0.1, 2.1, 13.6, 34.1, 13.6, 2.1, 0.1, 0.0]
+            }]
+          }
+        });
+      });
+  </script>
+</body>
+
+</html>

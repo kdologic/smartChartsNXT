@@ -115,7 +115,20 @@ class UiCore {
     document.body.appendChild(svg);
     const textDOM = mountTo(vnode, svg).node;
     if (textDOM) {
-      bbox = textDOM.getBoundingClientRect();
+      let box = textDOM.getBoundingClientRect();
+      bbox = {
+        bottom: box.bottom,
+        height: box.height,
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        width: box.width,
+        x: box.x,
+        y: box.y
+      };
+      if (typeof textDOM.getComputedTextLength == 'function') {
+        bbox.width = textDOM.getComputedTextLength();
+      }
     }
     svg.parentNode.removeChild(svg);
     return { width: bbox.width, height: bbox.height };
@@ -129,7 +142,7 @@ class UiCore {
    */
   static cursorPoint = (targetElem, evt) => {
     if (typeof targetElem === 'string') {
-      targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt');
+      targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt .sc-prime-view');
     }
     let pt = targetElem.createSVGPoint();
     pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
@@ -199,7 +212,7 @@ class UiCore {
           }
 
           return {
-            iVal: tInt,
+            iVal: () => tInt,
             iCount: intv,
             iMax: iMax,
             iMin: tMinVal
@@ -209,13 +222,43 @@ class UiCore {
     }
   };
 
+  static calcIntervalByMinMaxLog = (minVal, maxVal) => {
+    let startWeight = 0.1;
+    minVal = minVal <= 0 ? startWeight : minVal;
+    maxVal = maxVal <= 0 ? 1 : maxVal;
+
+    let iMin = startWeight;
+    let iMax, iCount = 0;
+    if (startWeight > minVal) {
+      while (iMin > minVal) {
+        iMin /= 10;
+      }
+    } else {
+      while (iMin < minVal) {
+        iMin *= 10;
+      }
+    }
+    iMin = iMin / 10;
+    iMax = iMin;
+    while (iMax < maxVal) {
+      iCount++;
+      iMax = iMax * 10;
+    }
+    return {
+      iVal: (i) => 10 ** i,
+      iCount: iCount,
+      iMax: iMax,
+      iMin: iMin
+    };
+  }
+
   /**
    * Format a text value base in Billion, Million, Thousand etc.
    * @param {Number} value Input number to format.
    * @returns String of formatted value.
    */
 
-  static formatTextValue = (value) => {
+  static formatTextValue = (value, decimalCount = 2) => {
     if (Math.abs(Number(value)) >= 1000000000000) {
       return (Number(value) / 1000000000000).toFixed(2) + ' T';
     } else if (Math.abs(Number(value)) >= 1000000000) {
@@ -225,7 +268,7 @@ class UiCore {
     } else if (Math.abs(Number(value)) >= 1000) {
       return (Number(value) / 1000).toFixed(2) + ' K';
     } else {
-      return Number(value).toFixed(2);
+      return Number(value).toFixed(decimalCount);
     }
   };
 
@@ -243,13 +286,13 @@ class UiCore {
   };
 
   /**
-   * Process fill options for pattern, gradient or image based on config
-   * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID
+   * Process fill options for pattern, gradient or image based on config.
+   * @param {Object} fillOptions Object of fill option type have pattern, gradient or image ID.
+   * @param {String} rid A randomly generated fill id.
    * @return {Object} Return {fillType, fillBy and fillId}
    */
-  static processFillOptions = (fillOptions = {}) => {
+  static processFillOptions = (fillOptions = {}, rid = UtilCore.getRandomID()) => {
     const globalDefMap = StoreManager.getStore('global').getValue('defMap');
-    const rid = UtilCore.getRandomID();
     const gradId = 'sc-fill-grad-' + rid;
     const patternId = 'sc-fill-pattern-' + rid;
     let fillType = 'solidColor';
