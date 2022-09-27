@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist/types/",
+    "noImplicitAny": true,
+    "module": "CommonJS",
+    "target": "ES6",
+    "jsx": "preserve",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "declaration": true,
+    "sourceMap": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}

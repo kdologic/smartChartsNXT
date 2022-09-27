@@ -1,11 +1,12 @@
 'use strict';
 
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import defaultConfig from '../settings/config';
 import { Component } from '../viewEngin/pview';
 import RichTextBox from './richTextBox';
 import UtilCore from '../core/util.core';
 import UiCore from '../core/ui.core';
+const enums = new OPTIONS_TYPE();
 
 /**
  * heading.js
@@ -27,7 +28,7 @@ class Heading extends Component {
   }
 
   setConfig(props) {
-    const alignTextMap = { [ENUMS.HORIZONTAL_ALIGN.LEFT]: 'left', [ENUMS.HORIZONTAL_ALIGN.CENTER]: 'center', [ENUMS.HORIZONTAL_ALIGN.RIGHT]: 'right' };
+    const alignTextMap = { [enums.HORIZONTAL_ALIGN.LEFT]: 'left', [enums.HORIZONTAL_ALIGN.CENTER]: 'center', [enums.HORIZONTAL_ALIGN.RIGHT]: 'right' };
     const headingTypeMap = { h1: '32', h2: '24', h3: '18.72', h4: '16', h5: '13.28', h6: '10.72' };
     this.config = {
       width: UiCore.percentToPixel(this.context.svgWidth, (props.opts.width || props.width)) || this.context.svgWidth - 10,

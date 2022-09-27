@@ -1,6 +1,6 @@
 'use strict';
 
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import defaultConfig from '../settings/config';
 import { Component } from '../viewEngin/pview';
 import Point from '../core/point';
@@ -11,6 +11,7 @@ import GeomCore from '../core/geom.core';
 import ConnectorBox from './connectorBox';
 import RichTextBox from './richTextBox';
 import SpeechBox from './speechBox';
+const enums = new OPTIONS_TYPE();
 
 
 /**
@@ -64,7 +65,7 @@ class AnnotationLabels extends Component {
       offsetY: -10, // Move entire label along with anchor point to top or bottom
       xPadding: 5, // Create x padding inside label box
       yPadding: 5, // Create y padding inside label box
-      float: ENUMS.FLOAT.TOP,
+      float: enums.FLOAT.TOP,
       textColor: defaultConfig.theme.fontColorDark,
       bgColor: defaultConfig.theme.bgColorLight,
       fontSize: 12,
@@ -143,7 +144,7 @@ class AnnotationLabels extends Component {
     let config = annotations.options;
     return annotations.labels.map((label, index) => {
       let valueY = label.y;
-      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC && valueY > 0) {
+      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC && valueY > 0) {
         valueY = Math.log10(valueY);
       }
       let dataPoint = new Point(
@@ -249,7 +250,7 @@ class AnnotationLabels extends Component {
           {labelBox}
         </g>
         <RichTextBox class='sc-annotation-label-text' posX={config.xPadding} posY={config.yPadding} contentWidth={config.maxWidth - (2 * config.xPadding)}
-          textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={true} fontSize={config.fontSize} textColor={config.textColor} text={label.text || ''}
+          textAlign={enums.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={true} fontSize={config.fontSize} textColor={config.textColor} text={label.text || ''}
           onRef={(ref) => {
             if (ref) {
               let textDim = ref.getContentDim();
@@ -316,19 +317,19 @@ class AnnotationLabels extends Component {
       labelBoxPos = new Point(dataPoint.x, dataPoint.y);
     } else {
       switch (config.float) {
-        case ENUMS.FLOAT.TOP: {
+        case enums.FLOAT.TOP: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth / 2), dataPoint.y - (boxHeight + anchorHeight));
           break;
         }
-        case ENUMS.FLOAT.BOTTOM: {
+        case enums.FLOAT.BOTTOM: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth / 2), dataPoint.y + (anchorHeight));
           break;
         }
-        case ENUMS.FLOAT.LEFT: {
+        case enums.FLOAT.LEFT: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth + anchorHeight), dataPoint.y - (boxHeight / 2));
           break;
         }
-        case ENUMS.FLOAT.RIGHT: {
+        case enums.FLOAT.RIGHT: {
           labelBoxPos = new Point(dataPoint.x + anchorHeight, dataPoint.y - (boxHeight / 2));
           break;
         }
@@ -338,11 +339,11 @@ class AnnotationLabels extends Component {
 
       if (recursion <= 4) {
         if (labelBoxPos.y < 0) {
-          let cnf = { ...config, ...{ float: ENUMS.FLOAT.BOTTOM } };
+          let cnf = { ...config, ...{ float: enums.FLOAT.BOTTOM } };
           return this.getLabelPosition(dataPoint, boxWidth, boxHeight, cnf, noFloat, recursion + 1);
         }
         if (labelBoxPos.y + boxHeight > this.props.height) {
-          let cnf = { ...config, ...{ float: ENUMS.FLOAT.TOP } };
+          let cnf = { ...config, ...{ float: enums.FLOAT.TOP } };
           return this.getLabelPosition(dataPoint, boxWidth, boxHeight, cnf, noFloat, recursion + 1);
         }
       }
@@ -353,7 +354,7 @@ class AnnotationLabels extends Component {
       if (labelBoxPos.x + boxWidth + this.props.paddingX + this.props.vTransformX > this.props.width) {
         let diff = (labelBoxPos.x + boxWidth + this.props.paddingX + this.props.vTransformX) - this.props.width;
         labelBoxPos.x -= diff;
-        if (config.float === ENUMS.FLOAT.BOTTOM && labelBoxPos.y < 0) {
+        if (config.float === enums.FLOAT.BOTTOM && labelBoxPos.y < 0) {
           labelBoxPos.y = 0;
         }
       }

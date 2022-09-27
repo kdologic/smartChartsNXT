@@ -6,31 +6,38 @@ process.env.NODE_ENV = argv.env == 'production' ? 'production' : 'development';
 const { src, dest, series, watch } = require('gulp');
 const insert = require('gulp-insert');
 const clean = require('gulp-clean');
-
+const gulpIf = require('gulp-if');
 const minify = require('gulp-terser');
 const rename = require('gulp-rename');
 const replace = require('gulp-replace');
 
 const webpack = require('webpack-stream');
 const webpackConfig = require('./webpack.config.js');
+const ts = require('gulp-typescript');
+const tsProject = ts.createProject('tsconfig.json');
 
 const pkg = require('./package.json');
 const srcDir = './src/';
-const buildDir = './build/';
+const buildDir = './dist/';
+const tsSrc = ['src/**/*.js','src/**/*.ts'];
+const tsBuildDir = './dist/types/';
 const testDir = './test/';
+const libName = 'smartchartsnxt';
 
-let buildType = process.env.NODE_ENV == 'production' ? 'Production Build' : 'Developer Build';
+
+const isProduction = process.env.NODE_ENV == 'production';
+let buildType = isProduction ? 'Production Build' : 'Development Build';
 buildType += ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' , hour:'numeric', minute:'numeric', second:'numeric'});
 
 const header = `/**
-* SmartChartsNXT
-* http://www.smartcharts.cf
-* Version:${pkg.version}
+* ${pkg.title}
+* ${pkg.homepage}
+* Version: ${pkg.version}
 * ${buildType}
 *
-* Copyright 2020 Kausik Dey
-* Released under the MIT license
-* https://github.com/kausikongit/smartChartsNXT/blob/develop/LICENSE
+* Copyright 2022 (c) ${pkg.author.name}<${pkg.author.email}>
+* Released under the ${pkg.license} license
+* https://github.com/kdologic/smartChartsNXT/blob/develop/LICENSE
 */
 `;
 
@@ -39,29 +46,42 @@ const header = `/**
  */
 
 function buildJSTask() {
-  return src(srcDir)
+  let stream = src(srcDir)
     .pipe(webpack(webpackConfig))
-    .pipe(replace('__version__', pkg.version))
-    .pipe(insert.prepend(header))
-    .pipe(dest(buildDir));
+    .pipe(replace('__version__', pkg.version));
+
+  stream = stream.pipe(gulpIf(shouldInsertHeader, insert.prepend(header)));
+  return stream.pipe(dest(buildDir));
+}
+
+function shouldInsertHeader(file) {
+  const isSourceMap = /\.map$/.test(file.path);
+  return !isSourceMap;
 }
 
 function minifyTask() {
-  return src(buildDir + 'smartChartsNXT.main.bundle.js')
+  return src(buildDir + `${libName}.js`)
     .pipe(minify({
       'compress': {
         'booleans_as_integers': true,
         'drop_console': true,
         'drop_debugger': true,
         'side_effects': false,
-        'warnings': true
+        'warnings': true,
+        'passes': 3
       },
       'keep_classnames': true,
       'keep_fnames': true
     }))
-    .pipe(rename('smartChartsNXT.main.bundle.min.js'))
+    .pipe(rename(`${libName}.min.js`))
     .pipe(insert.prepend(header))
     .pipe(dest(buildDir));
+}
+
+function typeDefTask() {
+  return src(tsSrc)
+    .pipe(tsProject())
+    .pipe(dest(tsBuildDir));
 }
 
 function cleanTask() {
@@ -77,5 +97,6 @@ exports.clean = cleanTask;
 exports.minify = minifyTask;
 exports.watch = watchTask;
 exports.buildJS = buildJSTask;
-exports.build = series(cleanTask, buildJSTask, minifyTask);
+exports.typeDef = typeDefTask;
+exports.build = series(cleanTask, typeDefTask, buildJSTask, minifyTask);
 exports.default = series(cleanTask, buildJSTask, watchTask);

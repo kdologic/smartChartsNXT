@@ -1,9 +1,9 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../icons/iconCollection';
-
+const enums = new OPTIONS_TYPE();
 
 /**
  * markerIcon.js
@@ -29,19 +29,19 @@ class MarkerIcon extends Component {
   selectIcon() {
     switch (this.props.type) {
       default:
-      case ENUMS.ICON_TYPE.CIRCLE:
+      case enums.ICON_TYPE.CIRCLE:
         return <CircleIcon id={this.props.index} x={this.props.x} y={this.props.y} r={this.props.width / 2} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
 
-      case ENUMS.ICON_TYPE.TRIANGLE:
+      case enums.ICON_TYPE.TRIANGLE:
         return <TriangleIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
 
-      case ENUMS.ICON_TYPE.DIAMOND:
+      case enums.ICON_TYPE.DIAMOND:
         return <DiamondIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
 
-      case ENUMS.ICON_TYPE.STAR:
+      case enums.ICON_TYPE.STAR:
         return <StarIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
 
-      case ENUMS.ICON_TYPE.CUSTOM:
+      case enums.ICON_TYPE.CUSTOM:
         return <CustomIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width + 2} height={this.props.height + 2} URL={this.props.URL || ''} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
 
     }

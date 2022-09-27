@@ -8,15 +8,15 @@ import { CHART_TYPE } from './globalEnums';
  * @author:SmartChartsNXT
  * @description: Validation rule set.
  */
-
- export const validationRules = {
+const chartTypes = new CHART_TYPE();
+export const validationRules = {
   type: {
     isRequired: true,
     type: ['string'],
-    values: Object.values(CHART_TYPE),
+    values: Object.values(chartTypes),
     requiredErrMsg: 'Missing required field option.type !',
     typeErrMsg: 'Invalid type in option.type ! Should be typeof string',
-    valuesErrMsg:`Invalid value in option.type ! Supported values are [${Object.values(CHART_TYPE).join(' | ')}]`
+    valuesErrMsg: `Invalid value in option.type ! Supported values are [${Object.values(chartTypes).join(' | ')}]`
   },
   targetElem: {
     isRequired: true,
@@ -24,6 +24,6 @@ import { CHART_TYPE } from './globalEnums';
     values: '*',
     requiredErrMsg: 'Required field option.targetElem is missing or blank string !',
     typeErrMsg: 'Invalid type in option.targetElem ! Should be typeof string',
-    valuesErrMsg:''
+    valuesErrMsg: ''
   }
- };
+};

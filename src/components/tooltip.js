@@ -8,7 +8,8 @@ import UtilCore from './../core/util.core';
 import UiCore from './../core/ui.core';
 import SpeechBox from './../components/speechBox';
 import Style from './../viewEngin/style';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
+const enums = new OPTIONS_TYPE();
 
 /**
  * tooltip.js
@@ -345,7 +346,7 @@ class Tooltip extends Component {
       let width = txtWidth + (2 * xPadding);
       let height = lineHeight + (2 * yPadding);
       let { topLeft, cPoint } = this.reAlign(preAlign, originPoint, xPadding, yPadding, width, height, txtWidth, lineHeight, delta, 0);
-      if (this.props.opts.position === ENUMS.TOOLTIP_POSITION.STATIC && this.props.grouped) {
+      if (this.props.opts.position === enums.TOOLTIP_POSITION.STATIC && this.props.grouped) {
         topLeft = cPoint = new Point(this.props.opts.left === undefined ? 0 : this.props.opts.left, this.props.opts.top === undefined ? 0 : this.props.opts.top);
       }
       let textPos = new Point(topLeft.x, topLeft.y);

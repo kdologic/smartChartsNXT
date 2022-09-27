@@ -13,14 +13,15 @@ import {config as areaChartConfig, validationRules as areaChartValidationRules} 
 import {config as lineChartConfig, validationRules as lineChartValidationRules} from '../charts/connectedPointChartsType/lineChart/lineChart.config';
 
 /** ------- Mapping components and config with respective chart types ------- */
+const chartTypes = new CHART_TYPE();
 
 export const CHART_MODULES = {
-  [CHART_TYPE.AREA_CHART]: {
+  [chartTypes.AREA_CHART]: {
     config: areaChartConfig,
     validationRules: areaChartValidationRules,
     chart: ConnectedPointBase
   },
-  [CHART_TYPE.LINE_CHART]: {
+  [chartTypes.LINE_CHART]: {
     config: lineChartConfig,
     validationRules: lineChartValidationRules,
     chart: ConnectedPointBase

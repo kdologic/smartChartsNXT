@@ -23,7 +23,7 @@ class A11yFactory {
   }
 }
 
-class A11yWriter {
+export class A11yWriter {
   constructor(rootNode) {
     this.rootNode = rootNode;
     this.parentNode = document.createElement('div');

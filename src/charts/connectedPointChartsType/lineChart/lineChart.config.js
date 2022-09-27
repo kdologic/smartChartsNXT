@@ -6,10 +6,11 @@
  */
 
 import { CHART_TYPE } from '../../../settings/globalEnums';
+const chartTypes = new CHART_TYPE();
 
 export const config = {
   name: 'Line Chart',
-  type: CHART_TYPE.LINE_CHART,
+  type: chartTypes.LINE_CHART,
   minWidth: 250,
   minHeight: 400
 };

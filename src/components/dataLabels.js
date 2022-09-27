@@ -4,12 +4,12 @@ import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import GeomCore from './../core/geom.core';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import SpeechBox from './../components/speechBox';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import UtilCore from './../core/util.core';
-
+const enums = new OPTIONS_TYPE();
 
 /**
  * dataLabels.js
@@ -24,7 +24,7 @@ class DataLabels extends Component {
     super(props);
     this.store = StoreManager.getStore(this.context.runId);
     this.config = {
-      float: ENUMS.FLOAT.TOP,
+      float: enums.FLOAT.TOP,
       classes: [],
       labelOverlap: false,
       textColor: defaultConfig.theme.fontColorDark,
@@ -118,21 +118,21 @@ class DataLabels extends Component {
     let labelX, labelY;
     switch (this.config.float) {
       default:
-      case ENUMS.FLOAT.TOP:
+      case enums.FLOAT.TOP:
         labelX = data.x + this.config.offsetX;
         labelY = data.y - margin + this.config.offsetY;
         break;
-      case ENUMS.FLOAT.BOTTOM:
+      case enums.FLOAT.BOTTOM:
         labelX = data.x + this.config.offsetX;
         labelY = data.y + margin + this.config.offsetY;
         break;
-      case ENUMS.FLOAT.LEFT:
+      case enums.FLOAT.LEFT:
         margin = 10;
         labelX = data.x - margin + this.config.offsetX;
         labelY = data.y + this.config.offsetY;
         labelAlign = 'end';
         break;
-      case ENUMS.FLOAT.RIGHT:
+      case enums.FLOAT.RIGHT:
         margin = 10;
         labelX = data.x + margin + this.config.offsetX;
         labelY = data.y + this.config.offsetY;
@@ -158,16 +158,16 @@ class DataLabels extends Component {
     let speechBoxHeight = labelDim.height + (2 * this.config.yPadding);
     switch (this.config.float) {
       default:
-      case ENUMS.FLOAT.TOP:
-      case ENUMS.FLOAT.BOTTOM:
+      case enums.FLOAT.TOP:
+      case enums.FLOAT.BOTTOM:
         speechBoxX = labelX - (labelDim.width / 2) - this.config.xPadding;
         speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
-      case ENUMS.FLOAT.LEFT:
+      case enums.FLOAT.LEFT:
         speechBoxX = labelX - (labelDim.width) - this.config.xPadding;
         speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
-      case ENUMS.FLOAT.RIGHT:
+      case enums.FLOAT.RIGHT:
         speechBoxX = labelX - this.config.xPadding;
         speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;

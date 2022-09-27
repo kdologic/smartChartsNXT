@@ -1,6 +1,6 @@
 'use strict';
 
-import { CHART_TYPE, OPTIONS_TYPE as ENUMS } from './../../settings/globalEnums';
+import { CHART_TYPE, OPTIONS_TYPE } from './../../settings/globalEnums';
 import Point from './../../core/point';
 import { Component } from './../../viewEngin/pview';
 import GeomCore from './../../core/geom.core';
@@ -12,6 +12,8 @@ import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
 import a11yFactory from './../../core/a11y';
+const chartTypes = new CHART_TYPE();
+const enums = new OPTIONS_TYPE();
 
 /**
  * drawConnectedPoints.js
@@ -54,7 +56,7 @@ class DrawConnectedPoints extends Component {
     this.defaultMarkerWidth = 12;
     this.defaultMarkerHeight = 12;
 
-    if (this.props.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+    if (this.props.lineStyle === enums.LINE_STYLE.DASHED) {
       this.state.lineDashArray = this.props.lineDashArray || 4;
     }
 
@@ -162,7 +164,7 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
-    if (nextProps.lineStyle === ENUMS.LINE_STYLE.DASHED) {
+    if (nextProps.lineStyle === enums.LINE_STYLE.DASHED) {
       this.state.lineDashArray = nextProps.lineDashArray || 4;
     }
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
@@ -179,7 +181,7 @@ class DrawConnectedPoints extends Component {
       this.state.marker = {
         ...{
           enable: true,
-          type: ENUMS.ICON_TYPE.CIRCLE,
+          type: enums.ICON_TYPE.CIRCLE,
           width: this.defaultMarkerWidth,
           height: this.defaultMarkerHeight,
           URL: '',
@@ -221,13 +223,13 @@ class DrawConnectedPoints extends Component {
             </clipPath>
           </defs>
         }
-        {this.context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== 'solidColor' &&
+        {this.context.chartType === chartTypes.AREA_CHART && this.state.fillType !== 'solidColor' &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
         }
         {this.props.lineDropShadow &&
           UiCore.dropShadow(this.shadowId)
         }
-        {this.context.chartType === CHART_TYPE.AREA_CHART &&
+        {this.context.chartType === chartTypes.AREA_CHART &&
           <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>
@@ -272,7 +274,7 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [], sIndex = 0;
     this.state.pointSet = this.state.valueSet.map((data, i) => {
-      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+      if (this.props.yAxisInfo.type === enums.AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
@@ -311,7 +313,7 @@ class DrawConnectedPoints extends Component {
     let pathSegment = [];
     let segmentIndexes = [];
     this.state.pointSet = this.state.valueSet.map((data, i) => {
-      if (this.props.yAxisInfo.type === ENUMS.AXIS_TYPE.LOGARITHMIC && data !== null) {
+      if (this.props.yAxisInfo.type === enums.AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
       let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
