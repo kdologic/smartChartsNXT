@@ -1,14 +1,14 @@
 'use strict';
 
-import UiCore from './../core/ui.core';
-import font from './../styles/font-lato';
+import UiCore from './ui.core';
+import font from '../styles/font-lato';
 //import Morphing from './../plugIns/morph';
 import '../plugIns/classList.shim.min';
-import Chart from './../charts/chart';
-import viewConfig from './../viewEngin/config';
+import Chart from '../charts/chart';
+import viewConfig from '../viewEngin/config';
 
 /**
- * chart.core.js
+ * chart.core.ts
  * @createdOn: 10-Jul-2017
  * @author: SmartChartsNXT
  * @description: SmartChartsNXT Core Library components. It's bootstrap the code,
@@ -16,6 +16,12 @@ import viewConfig from './../viewEngin/config';
  */
 
 class Core {
+  private _debug: boolean = false;
+  private _debugRenderTime: boolean = false;
+  public debugEvents: boolean = false;
+  public namespaceReadyStatus: boolean = false;
+  public Chart: any; // Todo: declare proper type
+
   constructor() {
     this._debug = false;
     this.debugRenderTime = false;
@@ -30,7 +36,7 @@ class Core {
     this.namespaceReadyStatus = true;
   }
 
-  set debug(isEnable = true) {
+  set debug(isEnable) {
     this._debug = isEnable;
     this.debugRenderTime = isEnable;
     this.debugEvents = isEnable;
@@ -71,7 +77,12 @@ class Core {
   //   });
   // }
 
-  ready(successBack) {
+  /**
+   * When chart will be ready with all its dependencies then it will call the success callback.
+   * @param successBack 
+   * @returns Promise
+   */
+  ready(successBack?: any) {
     if(typeof successBack === 'function') {
       this.executeChart(successBack);
       return;
@@ -81,7 +92,7 @@ class Core {
     });
   }
 
-  executeChart(chart, error) {
+  executeChart(chart: any, error?: any) {
     if (this.namespaceReadyStatus) {
       if (typeof chart === 'function') {
         let startTime = window.performance.now();
@@ -89,6 +100,7 @@ class Core {
           chart.call(this);
         } catch (ex) {
           this.handleError(ex);
+          typeof error == 'function' && error(ex);
         }
         let endTime = window.performance.now();
         /* eslint-disable-next-line no-console */
@@ -105,14 +117,15 @@ class Core {
         }else {
           intervalCount++;
           if(intervalCount > 100) {
-            error();
+            this.handleError({errorIn: 'SmartchartsNXT: Module loading error'});
+            typeof error == 'function' && error();
           }
         }
       }, 100);
     }
   }
 
-  handleError(ex) {
+  handleError(ex: any) {
     /* eslint-disable-next-line no-console */
     ex.errorIn && console.error('SmartChartsNXT:' + ex.errorIn);
     /* eslint-disable-next-line no-console */

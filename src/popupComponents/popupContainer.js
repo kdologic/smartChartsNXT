@@ -2,13 +2,14 @@
 
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import UiCore from './../core/ui.core';
 import GeomCore from './../core/geom.core';
 import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import RichTextBox from './../components/richTextBox';
 import Easing from './../plugIns/easing';
+const enums = new OPTIONS_TYPE();
 
 /**
  * popupContainer.js

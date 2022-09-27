@@ -3,13 +3,13 @@
 import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import UtilCore from './../core/util.core';
 import GeomCore from './../core/geom.core';
 import ConnectorBox from './connectorBox';
-
+const enums = new OPTIONS_TYPE();
 
 /**
  * seriesLabel.js
@@ -113,7 +113,7 @@ class SeriesLabel extends Component {
     let labels = [];
     let index = this.pointSet.length - 1;
     let point = this.pointSet[index];
-    let label = this.getSingleLabel(index, point, point, ENUMS.FLOAT.TOP);
+    let label = this.getSingleLabel(index, point, point, enums.FLOAT.TOP);
 
     if(label) {
       labels.push(label);
@@ -149,16 +149,16 @@ class SeriesLabel extends Component {
     let connectorBoxX, connectorBoxY;
     switch (float) {
       default:
-      case ENUMS.FLOAT.TOP:
-      case ENUMS.FLOAT.BOTTOM:
+      case enums.FLOAT.TOP:
+      case enums.FLOAT.BOTTOM:
         connectorBoxX = labelX - (labelDim.width / 2) - this.config.xPadding;
         connectorBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
-      case ENUMS.FLOAT.LEFT:
+      case enums.FLOAT.LEFT:
         connectorBoxX = labelX - (labelDim.width) - this.config.xPadding;
         connectorBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
-      case ENUMS.FLOAT.RIGHT:
+      case enums.FLOAT.RIGHT:
         connectorBoxX = labelX - this.config.xPadding;
         connectorBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
@@ -172,10 +172,10 @@ class SeriesLabel extends Component {
     };
     let isOverlappingGlobal = this.checkOverlapping(this.allLabelsData, labelData);
     if(!this.config.labelOverlap && isOverlappingGlobal) {
-      if(float === ENUMS.FLOAT.TOP) {
-        return this.getSingleLabel(index, data, anchorPoint, ENUMS.FLOAT.BOTTOM);
-      }else if(float === ENUMS.FLOAT.BOTTOM && this.pointSet[index-1]) {
-        return this.getSingleLabel(index - 1, this.pointSet[index-1], anchorPoint, ENUMS.FLOAT.TOP);
+      if(float === enums.FLOAT.TOP) {
+        return this.getSingleLabel(index, data, anchorPoint, enums.FLOAT.BOTTOM);
+      }else if(float === enums.FLOAT.BOTTOM && this.pointSet[index-1]) {
+        return this.getSingleLabel(index - 1, this.pointSet[index-1], anchorPoint, enums.FLOAT.TOP);
       }
     }
     this.state.labelsData.push(labelData);
@@ -204,21 +204,21 @@ class SeriesLabel extends Component {
     let labelX, labelY;
     switch (float) {
       default:
-      case ENUMS.FLOAT.TOP:
+      case enums.FLOAT.TOP:
         labelX = data.x - marginX;
         labelY = data.y - marginY;
         break;
-      case ENUMS.FLOAT.BOTTOM:
+      case enums.FLOAT.BOTTOM:
         labelX = data.x - marginX;
         labelY = data.y + marginY;
         break;
-      case ENUMS.FLOAT.LEFT:
+      case enums.FLOAT.LEFT:
         marginX = 10;
         labelX = data.x - marginX;
         labelY = data.y;
         labelAlign = 'end';
         break;
-      case ENUMS.FLOAT.RIGHT:
+      case enums.FLOAT.RIGHT:
         marginX = 10;
         labelX = data.x + marginX;
         labelY = data.y;

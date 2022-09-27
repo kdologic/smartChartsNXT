@@ -6,10 +6,11 @@
  */
 
 import { CHART_TYPE } from '../../../settings/globalEnums';
+const chartTypes = new CHART_TYPE();
 
 export const config = {
   name: 'Area Chart',
-  type: CHART_TYPE.AREA_CHART,
+  type: chartTypes.AREA_CHART,
   minWidth: 250,
   minHeight: 400
 };

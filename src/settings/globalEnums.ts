@@ -7,62 +7,72 @@
  * @description: Global enumeration values.
  */
 
-export const OPTIONS_TYPE = {
-  ICON_TYPE: {
+export class OPTIONS_TYPE {
+  public ICON_TYPE = {
     CIRCLE: 'circle',
     TRIANGLE: 'triangle',
     DIAMOND: 'diamond',
     STAR: 'star',
     CUSTOM: 'custom'
-  },
-  LINE_STYLE: {
+  }
+  
+  public LINE_STYLE = {
     DASHED: 'dashed',
     SOLID: 'solid'
-  },
-  ALIGNMENT: {
+  };
+
+  public ALIGNMENT = {
     HORIZONTAL: 'horizontal',
     VERTICAL: 'vertical'
-  },
-  HORIZONTAL_ALIGN: {
+  };
+
+  public HORIZONTAL_ALIGN = {
     RIGHT: 'right',
     LEFT: 'left',
     CENTER: 'center'
-  },
-  VERTICAL_ALIGN: {
+  };
+
+  public VERTICAL_ALIGN = {
     TOP: 'top',
     CENTER: 'center',
     BOTTOM: 'bottom'
-  },
-  DISPLAY: {
+  };
+
+  public DISPLAY = {
     INLINE: 'inline',
     BLOCK: 'block',
     NONE: 'none'
-  },
-  FLOAT: {
+  };
+
+  public FLOAT = {
     TOP: 'top',
     BOTTOM: 'bottom',
     LEFT: 'left',
     RIGHT: 'right',
     NONE: 'none'
-  },
-  CROSSHAIR_SPREAD: {
+  };
+
+  public CROSSHAIR_SPREAD = {
     NONE: 'none',
     FULL: 'full',
     IN_POINT: 'inPoint'
-  },
-  TOOLTIP_POSITION: {
+  };
+
+  public TOOLTIP_POSITION = {
     STATIC: 'static',
     DYNAMIC: 'dynamic'
-  },
-  GRADIENT: {
+  };
+
+  public GRADIENT = {
     LINEAR_HORIZONTAL: 'linear_horizontal',
     LINEAR_HORIZONTAL_REV: 'linear_horizontal_rev',
     LINEAR_VERTICAL: 'linear_vertical',
     LINEAR_VERTICAL_REV: 'linear_vertical_rev',
     RADIAL: 'radial',
     RADIAL_REV: 'radial_rev'
-  },
-  PATTERN: {
+  };
+
+  public PATTERN = {
     CIRCLE_1: 'sc-pattern-circle-1',
     CIRCLE_2: 'sc-pattern-circle-2',
     CIRCLE_3: 'sc-pattern-circle-3',
@@ -78,19 +88,20 @@ export const OPTIONS_TYPE = {
     BOX3D: 'sc-pattern-box3d',
     SHAPE_S: 'sc-pattern-shape-s',
     CHECKERBOARD: 'sc-pattern-carbon-checkerboard'
-  },
-  AXIS_TYPE: {
+  };
+
+  public AXIS_TYPE = {
     LOGARITHMIC: 'logarithmic',
     LINEAR: 'linear'
-  }
-};
+  };
+}
 
-export const CHART_TYPE = {
-  AREA_CHART: 'AreaChart',
-  LINE_CHART: 'LineChart',
+export class CHART_TYPE {
+  public AREA_CHART = 'AreaChart';
+  public LINE_CHART ='LineChart';
   //STEP_CHART: 'StepChart',
-  PIE_CHART: 'PieChart',
-  DONUT_CHART: 'DonutChart'
+  public PIE_CHART = 'PieChart';
+  public DONUT_CHART = 'DonutChart';
   //COLUMN_CHART: 'ColumnChart',
   //BAR_CHART: 'BarChart'
-};
+}

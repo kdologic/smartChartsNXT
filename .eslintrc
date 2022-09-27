@@ -4,10 +4,11 @@
   // "off" or 0 - turn the rule off
   // "warn" or 1 - turn the rule on as a warning (doesn’t affect exit code)
   // "error" or 2 - turn the rule on as an error (exit code is 1 when triggered)
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "parserOptions": {
     "ecmaVersion": 6,                            // For ES6 syntax
     "sourceType":"module",                       // set to "script" (default) or "module" if your code is in ECMAScript modules.
+    "requireConfigFile": false,
     "ecmaFeatures": {
       "arrowFunctions": true,                    // enable arrow functions
       "binaryLiterals": true,                    // enable binary literals
@@ -38,7 +39,7 @@
   "env": {
     "browser": true,      // browser global variables
     "node": true,         // Node.js global variables and Node.js-specific rules
-    "es6": true,          // enable es6 environemnt 
+    "es6": true,          // enable es6 environment 
     "amd": false,         // defines require() and define() as global variables as per the amd spec
     "mocha": false,       // adds all of the Mocha testing global variables
     "jasmine": false,     // adds all of the Jasmine testing global variables for version 1.3 and 2.0

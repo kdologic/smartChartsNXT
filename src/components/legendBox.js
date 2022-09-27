@@ -6,8 +6,9 @@ import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import UiCore from '../core/ui.core';
 import UtilCore from '../core/util.core';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import MarkerIcon from './markerIcon';
+const enums = new OPTIONS_TYPE();
 
 /**
  * legendBox.js
@@ -48,7 +49,7 @@ class LegendBox extends Component {
         lSet.icon = {
           ...{
             enable: true,
-            type: ENUMS.ICON_TYPE.CIRCLE,
+            type: enums.ICON_TYPE.CIRCLE,
             URL: ''
           }, ...lSet.icon
         };
@@ -99,9 +100,9 @@ class LegendBox extends Component {
       top: typeof props.opts.top === 'undefined' ? (props.top || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.top),
       left: typeof props.opts.left === 'undefined' ? (props.left || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
       maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : UiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
-      type: props.opts.alignment || props.type || ENUMS.ALIGNMENT.HORIZONTAL,
-      float: props.opts.float || props.float || ENUMS.FLOAT.NONE,
-      display: props.opts.display || props.display || ENUMS.DISPLAY.INLINE,
+      type: props.opts.alignment || props.type || enums.ALIGNMENT.HORIZONTAL,
+      float: props.opts.float || props.float || enums.FLOAT.NONE,
+      display: props.opts.display || props.display || enums.DISPLAY.INLINE,
       textColor: props.opts.textColor || defaultConfig.theme.fontColorDark,
       bgColor: props.opts.bgColor || props.background || 'none',
       hoverColor: props.opts.hoverColor || props.hoverColor || 'none',
@@ -131,7 +132,7 @@ class LegendBox extends Component {
   afterMount() {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     /* Need to re-render when float = bottom */
-    if (this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) {
+    if (this.config.float === enums.FLOAT.BOTTOM || this.config.float === enums.FLOAT.RIGHT) {
       this.update();
     } else {
       this.renderCount = 0;
@@ -150,7 +151,7 @@ class LegendBox extends Component {
 
   afterUpdate() {
     /* Need to re-render when float = bottom */
-    if ((this.config.float === ENUMS.FLOAT.BOTTOM || this.config.float === ENUMS.FLOAT.RIGHT) && this.renderCount < 2) {
+    if ((this.config.float === enums.FLOAT.BOTTOM || this.config.float === enums.FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();
     } else {
       this.renderCount = 0;
@@ -248,28 +249,28 @@ class LegendBox extends Component {
 
   calcFloatingPosition() {
     switch (this.config.float) {
-      case ENUMS.FLOAT.TOP:
+      case enums.FLOAT.TOP:
         this.state.legendBoxTrnsX = this.config.left || this.padding;
         this.state.legendBoxTrnsY = this.padding;
         break;
-      case ENUMS.FLOAT.BOTTOM:
+      case enums.FLOAT.BOTTOM:
         this.state.legendBoxTrnsX = this.config.left || this.padding;
         this.state.legendBoxTrnsY = this.context.svgHeight - this.containerHeight - this.padding;
         break;
-      case ENUMS.FLOAT.LEFT:
+      case enums.FLOAT.LEFT:
         this.state.legendBoxTrnsX = this.padding;
         this.state.legendBoxTrnsY = this.config.top || this.padding;
         break;
-      case ENUMS.FLOAT.RIGHT:
+      case enums.FLOAT.RIGHT:
         this.state.legendBoxTrnsX = this.context.svgWidth - this.containerWidth - this.padding;
         this.state.legendBoxTrnsY = this.config.top || this.padding;
         break;
-      case ENUMS.FLOAT.NONE:
+      case enums.FLOAT.NONE:
       default:
         this.state.legendBoxTrnsX = this.config.left || this.padding;
         this.state.legendBoxTrnsY = this.config.top || this.padding;
     }
-    if (this.config.display === ENUMS.DISPLAY.BLOCK) {
+    if (this.config.display === enums.DISPLAY.BLOCK) {
       this.state.legendBoxTrnsX = this.padding;
     }
     this.state.legendSetTrnsX = 0;
@@ -279,12 +280,12 @@ class LegendBox extends Component {
     this.state.lineCount = 1;
     this.cumulativeWidth = 0;
     this.state.lengthSet.max.lineWidth = 0;
-    const legendBoxTrnsX = this.config.float === ENUMS.FLOAT.RIGHT ? 0 : this.state.legendBoxTrnsX;
+    const legendBoxTrnsX = this.config.float === enums.FLOAT.RIGHT ? 0 : this.state.legendBoxTrnsX;
     let maxAllowedWidth = this.context.svgWidth;
-    if (this.config.display !== ENUMS.DISPLAY.BLOCK) {
+    if (this.config.display !== enums.DISPLAY.BLOCK) {
       maxAllowedWidth = this.config.left + this.config.maxWidth > this.context.svgWidth ? (this.context.svgWidth - this.config.left) : this.config.maxWidth;
     }
-    if (this.state.legendSet.length && this.config.type === ENUMS.ALIGNMENT.VERTICAL) {
+    if (this.state.legendSet.length && this.config.type === enums.ALIGNMENT.VERTICAL) {
       maxAllowedWidth = 1;
     }
     for (let index = 0; index < this.state.legendSet.length; index++) {
@@ -322,9 +323,9 @@ class LegendBox extends Component {
   }
 
   setContainerWidthHeight() {
-    if (this.config.display === ENUMS.DISPLAY.BLOCK) {
+    if (this.config.display === enums.DISPLAY.BLOCK) {
       this.containerWidth = Math.max(this.context.svgWidth - (2 * this.padding), this.state.lengthSet.max.lineWidth);
-    } else if (this.config.display === ENUMS.DISPLAY.INLINE) {
+    } else if (this.config.display === enums.DISPLAY.INLINE) {
       this.containerWidth = this.state.lengthSet.max.lineWidth;
     }
     this.containerHeight = (this.state.lineCount * this.lineHeight) + (this.padding / 2);

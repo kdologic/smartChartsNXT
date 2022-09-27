@@ -5,7 +5,8 @@ import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import UtilCore from './../core/util.core';
 import UiCore from './../core/ui.core';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
+const enums = new OPTIONS_TYPE();
 
 /**
  * grid.js
@@ -46,14 +47,14 @@ class Grid extends Component {
     this.config = {
       vertical: {
         enable: typeof opts.vertical.enable === 'undefined' ? true : opts.vertical.enable,
-        lineStyle: opts.vertical.lineStyle || ENUMS.LINE_STYLE.DASHED,
+        lineStyle: opts.vertical.lineStyle || enums.LINE_STYLE.DASHED,
         lineColor: opts.vertical.lineColor || defaultConfig.theme.bgColorMedium,
         lineThickness: typeof opts.vertical.lineThickness === 'undefined' ? 1 : opts.vertical.lineThickness,
         lineOpacity: typeof opts.vertical.lineOpacity === 'undefined' ? 0.2 : opts.vertical.lineOpacity
       },
       horizontal: {
         enable: typeof opts.horizontal.enable === 'undefined' ? true : opts.horizontal.enable,
-        lineStyle: opts.horizontal.lineStyle || ENUMS.LINE_STYLE.SOLID,
+        lineStyle: opts.horizontal.lineStyle || enums.LINE_STYLE.SOLID,
         lineColor: opts.horizontal.lineColor || defaultConfig.theme.bgColorMedium,
         lineThickness: typeof opts.horizontal.lineThickness === 'undefined' ? 1 : opts.horizontal.lineThickness,
         lineOpacity: typeof opts.horizontal.lineOpacity === 'undefined' ? 0.2 : opts.horizontal.lineOpacity
@@ -76,8 +77,8 @@ class Grid extends Component {
         this.state.fillId = fillOpt.fillId;
       }
     }
-    this.state.vLineDashArray = this.config.vertical.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
-    this.state.hLineDashArray = this.config.horizontal.lineStyle === ENUMS.LINE_STYLE.DASHED ? 4 : 0;
+    this.state.vLineDashArray = this.config.vertical.lineStyle === enums.LINE_STYLE.DASHED ? 4 : 0;
+    this.state.hLineDashArray = this.config.horizontal.lineStyle === enums.LINE_STYLE.DASHED ? 4 : 0;
   }
 
   beforeUpdate(nextProps) {
@@ -135,7 +136,7 @@ class Grid extends Component {
           stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
         </line>
       );
-      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC) {
         for (let subGridCount = 2; subGridCount < 10; subGridCount++) {
           grids.push(
             <line instanceId={`hline-${gridCount}-${subGridCount}`} class={`sc-h-grid-line-${gridCount}-${subGridCount}`}

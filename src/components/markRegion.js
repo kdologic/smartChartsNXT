@@ -1,10 +1,11 @@
 'use strict';
 
 import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
 import RichTextBox from './richTextBox';
+const enums = new OPTIONS_TYPE();
 
 /**
  * markRegion.js
@@ -121,7 +122,7 @@ class MarkRegion extends Component {
       region.to = region.to || 0;
       let valueDiff = Math.abs(region.to - region.from);
       let startRegionY = (this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY;
-      if (this.props.yAxisType === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC) {
         valueDiff = Math.abs(Math.log10(region.to) - Math.log10(region.from));
         startRegionY = (Math.log10(this.props.yInterval.iMax) - Math.log10(Math.max(region.from, region.to))) * scaleY;
       }
@@ -153,7 +154,7 @@ class MarkRegion extends Component {
         <g>
           <rect class="sc-y-mark-region" x={0} y={startRegionY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
               fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {
@@ -207,7 +208,7 @@ class MarkRegion extends Component {
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
           <rect x={(startFrom - 1) * scaleX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={ENUMS.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={enums.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
               rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {

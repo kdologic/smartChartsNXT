@@ -2,9 +2,10 @@
 
 import { Component, parseStyleProps } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import UtilCore from '../core/util.core';
 import UiCore from '../core/ui.core';
+const enums = new OPTIONS_TYPE();
 
 /**
  * richTextBox.js
@@ -41,7 +42,7 @@ class RichTextBox extends Component {
       fontSize: this.props.fontSize ? this.props.fontSize : defaultConfig.theme.fontSizeMedium + 'px',
       textColor: props.textColor || defaultConfig.theme.fontColorDark,
       text: props.text || '',
-      textAlign: props.textAlign || ENUMS.HORIZONTAL_ALIGN.LEFT,
+      textAlign: props.textAlign || enums.HORIZONTAL_ALIGN.LEFT,
       verticalAlignMiddle: props.verticalAlignMiddle === undefined ? false : props.verticalAlignMiddle,
       rotation: props.rotation || 0
     };

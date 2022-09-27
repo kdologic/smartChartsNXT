@@ -1,6 +1,6 @@
 'use strict';
 
-import { OPTIONS_TYPE as ENUMS } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../settings/globalEnums';
 import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import UtilCore from './../core/util.core';
@@ -8,6 +8,7 @@ import eventEmitter from './../core/eventEmitter';
 import defaultConfig from './../settings/config';
 import Ticks from './ticks';
 import a11yFactory from './../core/a11y';
+const enums = new OPTIONS_TYPE();
 
 /**
  * verticalLabels.js
@@ -83,7 +84,7 @@ class VerticalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark
       }
     };
-    switch (config.labelAlign || $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT) {
+    switch (config.labelAlign || $SC.enums.HORIZONTAL_ALIGN.RIGHT) {
       default:
       case 'right': this.config.labelAlign = 'end'; break;
       case 'left': this.config.labelAlign = 'start'; break;
@@ -108,11 +109,11 @@ class VerticalLabels extends Component {
   getLabels() {
     let labels = [];
     this.zeroBaseIndex = -1;
-    let i = this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC ? Math.log10(this.minLabelVal) : 0;
+    let i = this.props.opts.type === enums.AXIS_TYPE.LOGARITHMIC ? Math.log10(this.minLabelVal) : 0;
     let decimalCount = this.countDecimals(this.minLabelVal);
     for (let lCount = this.props.labelCount; lCount >= 0; lCount--, i++) {
       let labelVal = this.minLabelVal + (i * this.props.valueInterval(i));
-      if (this.props.opts.type === ENUMS.AXIS_TYPE.LOGARITHMIC) {
+      if (this.props.opts.type === enums.AXIS_TYPE.LOGARITHMIC) {
         labelVal = this.props.valueInterval(i);
       }
       this.maxLabelVal = UiCore.formatTextValue(labelVal, decimalCount);
