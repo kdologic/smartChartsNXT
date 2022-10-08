@@ -1,32 +1,57 @@
 'use strict';
 
-import Point from './../core/point';
-import UtilCore from './../core/util.core';
-import eventEmitter from './../core/eventEmitter';
-import { Component } from './../viewEngin/pview';
-import defaultConfig from './../settings/config';
+import { TChartType } from '../models/global.models';
+import Point from '../core/point';
+import UtilCore from '../core/util.core';
+import eventEmitter, { CustomEvents } from '../core/eventEmitter';
+import { Component } from '../viewEngin/pview';
+import defaultConfig from '../settings/config';
 import { CHART_MODULES } from '../settings/chartComponentMapper';
-import Validator from './../validators/validator';
-import CommonStyles from './../styles/commonStyles';
-import Watermark from './../components/watermark';
-import Menu from './../components/menu';
-import LoaderView from './../components/loaderView';
-import StoreManager from './../liveStore/storeManager';
-import GlobalDefs from './../styles/globalDefs';
-import a11yFactory from './../core/a11y';
-import PopupContainer from './../popupComponents/popupContainer';
+import { Validator, CError } from '../validators/validator';
+import CommonStyles from '../styles/commonStyles';
+import Watermark from '../components/watermark';
+import Menu from '../components/menu';
+import LoaderView from '../components/loaderView';
+import StoreManager from '../liveStore/storeManager';
+import { Store } from '../liveStore/store';
+import { PUBLIC_SITE } from '../settings/globalEnums';
+import GlobalDefs from '../styles/globalDefs';
+import a11yFactory, { A11yWriter } from '../core/a11y';
+import PopupContainer from '../popupComponents/popupContainer';
 
 /**
- * baseChart.js
+ * baseChart.tsx
  * @createdOn: 10-May-2017
  * @author: SmartChartsNXT
  * @description:This is base chart with default config and this will initiate loading of a specific chart type.
  */
 
 class BaseChart extends Component {
-  constructor(props) {
+
+  private chartType: TChartType;
+  private store: Store;
+  private a11yWriter: A11yWriter;
+  private CHART_OPTIONS: any;
+  private CHART_DATA: any;
+  private CHART_CONST: any;
+  private chartValidationRules: any;
+  private validator: Validator;
+  private validationErrors: CError[];
+  private titleId: string;
+  private descId: string;
+  private blurFilterId: string;
+  private menuIconGradId: string;
+  private htmlContainerIE: string;
+  private globalDefs: GlobalDefs;
+  private emitter: CustomEvents;
+
+  protected state: any;
+  private _setState: (state: any) => void;
+
+
+  constructor(props: any) {
+    super(props);
     try {
-      super(props);
       this._setState = this.setState;
       this.chartType = this.props.opts.type;
       this.store = StoreManager.getStore(this.props.runId);
@@ -98,10 +123,11 @@ class BaseChart extends Component {
       this.a11yWriter.createSpace(this.descId);
       this.a11yWriter.write(this.descId, '<div aria-hidden="false">' + this.CHART_OPTIONS.a11y.description + '</div>');
     }
-    this.setState = (opt) => {
+    this.setState = (opt): any => {
       this.emitter.emitSync('beforeRender');
-      this._setState(opt);
+      let updatedState = this._setState(opt);
       this.emitter.emitSync('afterRender');
+      return updatedState;
     };
   }
 
@@ -118,7 +144,7 @@ class BaseChart extends Component {
     };
   }
 
-  loadConfig(config) {
+  loadConfig(config: any) {
     this.CHART_DATA = { ...this.CHART_DATA, ...config };
   }
 
@@ -152,7 +178,7 @@ class BaseChart extends Component {
     return (
       <x-div id={`${this.getChartId()}_cont`} class='smartcharts-nxt' style="position: relative;">
         <svg
-          //xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
+          xmlns='http://www.w3.org/2000/svg' // XMLSerializer issue with IE 11
           role="region"
           version={1.1}
           width={this.CHART_OPTIONS.width}
@@ -183,7 +209,7 @@ class BaseChart extends Component {
           </g>
 
           {this.CHART_OPTIONS.creditsWatermark.enable &&
-            <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link='http://www.smartcharts.cf' title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
+            <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link={PUBLIC_SITE} title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
           }
 
           {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
@@ -229,7 +255,7 @@ class BaseChart extends Component {
     return this.props.runId;
   }
 
-  initCanvasSize(width, height, minWidth = this.CHART_DATA.minWidth, minHeight = this.CHART_DATA.minHeight) {
+  initCanvasSize(width: number, height: number, minWidth: number = this.CHART_DATA.minWidth, minHeight: number = this.CHART_DATA.minHeight): void {
     this.CHART_DATA.svgWidth = this.CHART_OPTIONS.width = UtilCore.clamp(minWidth, Math.max(minWidth, width), width);
     this.CHART_DATA.svgHeight = this.CHART_OPTIONS.height = UtilCore.clamp(minHeight, Math.max(minHeight, height), height);
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
@@ -239,7 +265,7 @@ class BaseChart extends Component {
     return `${this.chartType}_${this.getRunId()}`;
   }
 
-  getMenuIcon(posX, posY) {
+  getMenuIcon(posX: number, posY: number): any {
     return (
       <g class='sc-menu-icon' transform={`translate(${posX},${posY})`}>
         <title>Chart Options</title>
@@ -304,8 +330,8 @@ class BaseChart extends Component {
     );
   }
 
-  showMenuPopup(e) {
-    if (e.type == 'click' || (e.type == 'keypress' && (e.which === 13 || e.which === 32))) {
+  showMenuPopup(e: Event) {
+    if (e.type == 'click' || (e.type == 'keypress' && ((e as KeyboardEvent).key === '13' || (e as KeyboardEvent).key === '32'))) {
       this.emitter.emit('menuExpanded', e);
       this._setState({ menuExpanded: true });
     }
@@ -330,18 +356,18 @@ class BaseChart extends Component {
     this.ref.node.querySelector('.dot-group').classList.remove('active');
   }
 
-  onMenuIconMouseIn(e) {
+  onMenuIconMouseIn(e: Event) {
     this.ref.node.querySelector('.dot-group').classList.add('active');
     if (UtilCore.isIE) {
-      e.target.setAttribute('transform', 'scale(1.5)');
+      (e.target as HTMLElement).setAttribute('transform', 'scale(1.5)');
     }
   }
 
-  onMenuIconMouseOut(e) {
+  onMenuIconMouseOut(e: Event) {
     if (!this.state.menuIconFocused) {
       this.ref.node.querySelector('.dot-group').classList.remove('active');
       if (UtilCore.isIE) {
-        e.target.setAttribute('transform', 'scale(1)');
+        (e.target as HTMLElement).setAttribute('transform', 'scale(1)');
       }
     }
   }
@@ -368,11 +394,11 @@ class BaseChart extends Component {
     }
   }
 
-  onResizeComponent(e) {
+  onResizeComponent(e: any): void {
     this.setState({ globalRenderAll: true, width: e.data.targetWidth, height: e.data.targetHeight });
   }
 
-  onRenderComponent(newOpts) {
+  onRenderComponent(newOpts: any): void {
     this.validationErrors = this.validator.validate(this.chartValidationRules, newOpts);
     if (this.validationErrors.length) {
       throw this.validationErrors;

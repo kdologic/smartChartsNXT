@@ -1,12 +1,12 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
-import UtilCore from './../core/util.core';
-import defaultConfig from './../settings/config';
+import { Component } from '../viewEngin/pview';
+import UiCore from '../core/ui.core';
+import UtilCore from '../core/util.core';
+import defaultConfig from '../settings/config';
 
 /**
- * watermark.js
+ * watermark.tsx
  * @createdOn: 05-Jan-2018
  * @author: SmartChartsNXT
  * @description:This is a component class will create watermark area.
@@ -14,7 +14,9 @@ import defaultConfig from './../settings/config';
  */
 
 class Watermark extends Component {
-  constructor(props) {
+  private titleId: string;
+
+  constructor(props: any) {
     super(props);
     this.state = {
       color: defaultConfig.theme.fontColorMedium,

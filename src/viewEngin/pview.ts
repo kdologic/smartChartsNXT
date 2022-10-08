@@ -16,6 +16,33 @@ const config = require('./config').default;
 const merge = require('deepmerge');
 const fastdom = require('fastdom');
 
+declare global {
+  interface Window {
+      __h__:any;
+  }
+}
+
+export interface IComponent {
+  node: any,
+  children: any,
+  eventStack: any,
+  self?: any
+}
+
+export interface IAttrDiff {
+  $added: any,
+  $deleted: any,
+  $updated: any,
+  $object: any,
+  $unchanged: any,
+  length?: number
+}
+
+export interface INodeDiff {
+  type: string,
+  attributes?: IAttrDiff
+}
+
 /**
  * MountTo will render virtual DOM Into Real DOM and add append element into the real DOM
  * @param {Object} node - It will be a real DOM node or Virtual node which can be mount.
@@ -24,9 +51,9 @@ const fastdom = require('fastdom');
  * @param {Object} oldNode - This is a optional param. It is used to replace a node without removing other child of parent node.
  * @param {Object} ctx Pass the existing context.
  * @param {Boolean} emptyBeforeMount Empty the target node before mount when true.
- * @returns {Object} A component object.
+ * @returns {SVGElement} A component object.
  * */
-function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {}, emptyBeforeMount = true) {
+function mountTo(node: any, targetNode: HTMLElement, nodeType: string = 'vnode', oldNode: HTMLElement | null = null, ctx: any = {}, emptyBeforeMount: boolean = true): IComponent | SVGElement {
 
   if (!node) {
     throw new TypeError('Invalid vnode in render component');
@@ -50,7 +77,7 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {},
   }
 
   if (component.eventStack && component.eventStack instanceof Array) {
-    component.eventStack.forEach(evt => evt());
+    component.eventStack.forEach((evt: any) => evt());
     delete component.eventStack;
   }
 
@@ -65,11 +92,11 @@ function mountTo(node, targetNode, nodeType = 'vnode', oldNode = null, ctx = {},
  * @param {Object} vnode Virtual Node object.
  * @returns {Object} Real DOM node.
  */
-function renderDOM(vnode) {
+function renderDOM(vnode: any): IComponent {
   if (typeof vnode === 'string' || typeof vnode === 'number') {
-    return { node: document.createTextNode(vnode), children: [], eventStack: [] };
+    return { node: document.createTextNode(vnode as string), children: [], eventStack: [] };
   }
-  let component = {
+  let component: IComponent = {
     node: undefined,
     children: [],
     eventStack: []
@@ -95,7 +122,7 @@ function renderDOM(vnode) {
         component.node.setAttribute(key, attrVal);
       }
     });
-  } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
+  } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName)) { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
     /* eslint-disable-next-line babel/no-invalid-this */
     vnode.nodeName.prototype.context = this.context || {};
@@ -132,11 +159,11 @@ function renderDOM(vnode) {
   } else if (typeof vnode.nodeName === 'function') { /* when vnode is type normal function */
     ({ node: component.node, children: component.children } = renderDOM.call({}, vnode.nodeName(vnode.attributes)));
   } else {
-    throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
+    throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component');
   }
 
   /* loop for children */
-  (vnode.children || []).forEach((c) => {
+  (vnode.children || []).forEach((c: any) => {
     /* eslint-disable-next-line babel/no-invalid-this */
     let childComp = renderDOM.call(({ context: this.context } || {}), c);
 
@@ -168,7 +195,7 @@ function renderDOM(vnode) {
  * @param {Object} replaceChildren Replace all classes of its children recursively.
  * @returns {undefined} void
  */
-function _replaceClassWithObject(subNodes, refs, replaceChildren) {
+function _replaceClassWithObject(subNodes: any, refs: any, replaceChildren: any) {
   try {
     for (let i = 0; i < subNodes.children.length; i++) {
       let subNode = subNodes.children[i];
@@ -198,7 +225,7 @@ function _replaceClassWithObject(subNodes, refs, replaceChildren) {
   }
 }
 
-function _rearrangeOldVNodes(oldVNode, newVNode, ref) {
+function _rearrangeOldVNodes(oldVNode: any, newVNode: any, ref: any) {
   if (oldVNode.children instanceof Array && newVNode.children instanceof Array) {
     for (let c = 0; c < newVNode.children.length; c++) {
       let nVNode = newVNode.children[c];
@@ -227,7 +254,7 @@ function _rearrangeOldVNodes(oldVNode, newVNode, ref) {
  * @param  {...any} args Children of the element that passed as args.
  * @returns {Object} virtual dom object of element
  */
-function __h__(nodeName, attributes, ...args) {
+export function __h__(nodeName: string, attributes: any[], ...args: any[]) {
   args = args.filter((v) => {
     return !!v;
   });
@@ -244,8 +271,8 @@ window.__h__ = window.__h__ || __h__;
  * @param  {...any} args Array of source object.
  * @return {Object} Merged object.
  */
-function _extends(dest, ...args) {
-  const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
+function _extends(dest: any, ...args: any[]) {
+  const overwriteMerge = (destinationArray: any[], sourceArray: any[], options: any) => sourceArray;
   if (!dest) {
     return {};
   } else if (args.length === 0) {
@@ -260,11 +287,11 @@ function _extends(dest, ...args) {
  * @param {JSON} objStyle style json object
  * @returns {String} return string of css
  */
-function parseStyleProps(objStyle) {
+function parseStyleProps(objStyle: any) {
   if (typeof objStyle === 'string') {
     return objStyle;
   }
-  let sArr = [];
+  let sArr: any = [];
   Object.keys(objStyle).forEach(key => {
     if (typeof objStyle[key] === 'undefined') {
       return;
@@ -284,7 +311,7 @@ function parseStyleProps(objStyle) {
  * @param {*} node Real DOM Element.
  * @returns {String} Returns List of attached events as string.
  */
-function parseEventsProps(events, node) {
+function parseEventsProps(events: any, node: any) {
   Object.keys(events).forEach((e) => {
     if (events[e].new !== undefined && events[e].new !== null && events[e].old !== undefined && events[e].old !== null) {
       node._addEventListener(e, events[e].new, false);
@@ -301,7 +328,7 @@ function parseEventsProps(events, node) {
  * @param {Object} instance Object of a class to test.
  * @returns {Boolean} true if it's a class instance otherwise returns false.
  */
-function isNativeClass(instance) {
+function isNativeClass(instance: any) {
   return instance.prototype.__proto__.constructor.name === 'Component';
 }
 
@@ -310,8 +337,13 @@ function isNativeClass(instance) {
  * All components must extends this Component class. And they should have render method.
  */
 
-class Component {
-  constructor(props) {
+abstract class Component {
+  protected props: IPropsModel;
+  protected ref: any
+  protected state: any;
+  private vnode: any;
+
+  constructor(props: IPropsModel) {
     this.props = props;
     this.state = {};
     this.ref = {};
@@ -322,7 +354,7 @@ class Component {
    * @param {Object} stateParams Update that state from this object.
    * @returns {Object} Virtual Node tree of the component.
    */
-  setState(stateParams) {
+  setState(stateParams: any): any {
     if (typeof stateParams === 'function') {
       stateParams = stateParams.call(this, this.state);
     }
@@ -346,7 +378,7 @@ class Component {
    * @param {Object} newVNode New virtual node tree of the component.
    * @returns {Object} A diff object with type.
    */
-  _detectDiff(oldVNode, newVNode) {
+  _detectDiff(oldVNode: any, newVNode: any): INodeDiff {
     if (typeof oldVNode !== 'object' && typeof newVNode !== 'object') {
       if (oldVNode !== newVNode) {
         return { type: 'NODE_TEXT_DIFF' };
@@ -355,7 +387,7 @@ class Component {
       }
     }
     if (oldVNode.nodeName === newVNode.nodeName && oldVNode.attributes.instanceId === newVNode.attributes.instanceId) {
-      let attrDiff = this._attrDiff(oldVNode.attributes, newVNode.attributes, 1, ['extChildren']);
+      let attrDiff: IAttrDiff = this._attrDiff(oldVNode.attributes, newVNode.attributes, 1, ['extChildren']);
       if (attrDiff.length) {
         return { type: 'NODE_ATTR_DIFF', attributes: attrDiff };
       } else {
@@ -374,8 +406,8 @@ class Component {
    * @param {Array} ignoreList Will ignore those attributes from this list.
    * @returns {Object} A diff object with detail of attribute differences.
    */
-  _attrDiff(obj1, obj2, level, ignoreList = []) {
-    let diff = {
+  _attrDiff(obj1: any, obj2: any, level: number, ignoreList: any[] = []) {
+    let diff: IAttrDiff = {
       $added: {},
       $deleted: {},
       $updated: {},
@@ -429,7 +461,7 @@ class Component {
    * @param {Array} array An array which need to de-duplicate.
    * @returns {Array} An array of unique elements.
    */
-  arrayUnique(array) {
+  arrayUnique(array: any[]) {
     let a = array.concat();
     for (let i = 0; i < a.length; ++i) {
       for (let j = i + 1; j < a.length; ++j) {
@@ -447,9 +479,9 @@ class Component {
    * @param {Object} newVNode Newly created virtual node that constructed recent update after passing new props.
    * @param {Object} ref Object reference of the component.
    * @param {Object} context Combination of existing self context and new context that passed from parent.
-   * @returns {undefined} void
+   * @returns {IAttrDiff | boolean}
    */
-  _reconcile(oldVNode, newVNode, ref, context = {}) {
+  _reconcile(oldVNode: any, newVNode: any, ref: any, context: any = {}): INodeDiff | boolean {
     let newRenderedVnode = undefined;
 
     if (newVNode.children && newVNode.children.length) {
@@ -494,7 +526,7 @@ class Component {
       }
     }
 
-    let differ = this._detectDiff(oldVNode, newVNode);
+    let differ: INodeDiff = this._detectDiff(oldVNode, newVNode);
 
     switch (differ.type) {
       case 'NODE_ATTR_DIFF':
@@ -506,7 +538,7 @@ class Component {
           if (ref && ref.self && typeof ref.self.afterUpdate === 'function') {
             ref.self.afterUpdate(oldVNode.attributes);
           }
-          return;
+          return false;
         } else if (typeof newVNode.nodeName === 'string') {
           this._updateAttr(ref.node, differ.attributes);
         }
@@ -525,7 +557,7 @@ class Component {
 
       for (let child = 0; child < Math.max(oldVNode.children.length, newVNode.children.length); child++) {
         if (oldVNode.children[child] && newVNode.children[child]) {
-          let reconcileDiff;
+          let reconcileDiff: INodeDiff | boolean;
           if (typeof oldVNode.nodeName === 'object' && typeof newVNode.nodeName === 'object') {
             child = Math.max(oldVNode.children.length, newVNode.children.length);
             reconcileDiff = this._reconcile(oldVNode.nodeName.vnode, newRenderedVnode, ref.self.ref, _extends({}, context));
@@ -534,10 +566,10 @@ class Component {
             reconcileDiff = this._reconcile(oldVNode.children[child], newVNode.children[child], ref.children[child], _extends({}, context));
 
             if (ref.children[child].children instanceof Array && ref.children[child].children.length) {
-              ref.children[child].children = ref.children[child].children.filter(v => v != undefined);
+              ref.children[child].children = ref.children[child].children.filter((v: any) => v != undefined);
             }
           }
-          if (reconcileDiff && reconcileDiff.type === 'NODE_NAME_DIFF') {
+          if (typeof reconcileDiff == 'object' && reconcileDiff.type === 'NODE_NAME_DIFF') {
             this._removeOldNode(child, oldVNode, ref);
             if (typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
               newVNode.children[child].nodeName = newVNode.children[child].class;
@@ -545,11 +577,11 @@ class Component {
             }
             this._createNewNode(child, newVNode, ref, context);
           }
-          if (reconcileDiff && reconcileDiff.type === 'NODE_TEXT_DIFF') {
+          if (typeof reconcileDiff == 'object' && reconcileDiff.type === 'NODE_TEXT_DIFF') {
             this._updateTextNode(child, newVNode, ref);
           }
           if (ref.children instanceof Array && ref.children.length) {
-            ref.children = ref.children.filter(v => v != undefined);
+            ref.children = ref.children.filter((v: any) => v != undefined);
           }
         } else if (!oldVNode.children[child]) {
           if (typeof newVNode.children[child].nodeName === 'object' && typeof newVNode.children[child].class === 'function') {
@@ -562,7 +594,7 @@ class Component {
         }
       }
       if (ref.children instanceof Array && ref.children.length) {
-        ref.children = ref.children.filter(v => v != undefined);
+        ref.children = ref.children.filter((v: any) => v != undefined);
       }
     }
     if (typeof newVNode.nodeName === 'object') {
@@ -580,7 +612,7 @@ class Component {
    * @param {Object} ref Object reference of component.
    * @returns {undefined} void
    */
-  _updateTextNode(nodePos = 0, newVNode, ref) {
+  _updateTextNode(nodePos: number = 0, newVNode: any, ref: any) {
     let newText = newVNode.children[nodePos];
     if (typeof newText !== 'object') {
       ref.node.textContent = newText;
@@ -596,7 +628,7 @@ class Component {
    * @param {Object} context Combination of existing self context and new context that passed from parent.
    * @returns {Object} A component object.
    */
-  _createNewNode(nodePos = 0, newVNode, ref, context) {
+  _createNewNode(nodePos: number = 0, newVNode: any, ref: any, context: any): IComponent | SVGElement {
     let newComponent = renderDOM.call({ context: context || {} }, newVNode.children[nodePos]);
     ref.children.splice(nodePos, 0, newComponent);
 
@@ -610,7 +642,7 @@ class Component {
    * @param {Object} ref Object reference of component.
    * @returns {undefined} void
    */
-  _removeOldNode(nodePos = 0, oldVNode, ref) {
+  _removeOldNode(nodePos: number = 0, oldVNode: any, ref: any) {
     let destroyableNode = oldVNode.children[nodePos], destroyableObj;
     if (typeof destroyableNode === 'string' || typeof destroyableNode === 'number') {
       ref.node.textContent = '';
@@ -652,9 +684,9 @@ class Component {
    * @param {Object} attrChanges Attributes to be modify.
    * @returns {undefined} void
    */
-  _updateAttr(dom, attrChanges) {
+  _updateAttr(dom: SVGElement, attrChanges: IAttrDiff) {
     let groups = ['$added', '$updated', '$object'];
-    groups.forEach((group) => {
+    groups.forEach((group: keyof IAttrDiff) => {
       Object.keys(attrChanges[group]).forEach((key) => {
         let attrVal = ((k) => {
           switch (k) {
@@ -719,14 +751,14 @@ class Component {
    * @returns {Object} Virtual Node tree of the component.
    */
   update() {
-    let compName;
+    let compName: string;
     if (config.debug && config.debugRenderTime) {
-      compName = this.__proto__.constructor.name;
+      compName = Object.getPrototypeOf(this).constructor.name;
       /* eslint-disable-next-line no-console */
       console.time(compName + ' update');
     }
 
-    if (!this.shouldUpdate(this.props)) {
+    if (typeof this.shouldUpdate === 'function' && !this.shouldUpdate(this.props)){
       return false;
     }
 
@@ -735,7 +767,7 @@ class Component {
     }
 
     let vnodeNow = this.render();
-    let objContext = _extends({}, this.context, (typeof this.passContext === 'function' ? this.passContext() : {}));
+    let objContext = _extends({}, (this as any).context, (typeof this.passContext === 'function' ? this.passContext() : {}));
     if (this.vnode.children && this.vnode.children.length) {
       _replaceClassWithObject(this.vnode, this.ref, true);
     }
@@ -757,68 +789,67 @@ class Component {
    * Interface that child may override - returns context that will pass on child context.
    * @returns {Object} A json object that will be pass as context to children components.
    */
-  passContext() {
-    return {};
-  }
+  protected passContext?(): Record<string, any>
 
   /**
    * Interface that child must override - return virtual DOM of the component.
    * @returns {Object} JSX object of the component that will be rendered and mount.
    */
-  render() {
-    return (<g> Your component should override this render method </g>);
-  }
+  protected abstract render(): any
 
   /* eslint-disable no-unused-vars */
   /**
    * Lifecycle event - fires just before passing props into a pre-exist Component.
    * @param {Object} nextProps New set of props.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  propsWillReceive(nextProps) { }
+  protected propsWillReceive?(nextProps: IPropsModel): void
 
   /**
    * Lifecycle event - fires before the mounting component on parent DOM.
    * @param {Object} nextProps New set of props.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  beforeMount(nextProps) { }
+  protected beforeMount?(nextProps: IPropsModel): void
 
   /**
    * Lifecycle event - fires after the component mounted on parent DOM.
    * @param {Object} nextProps New set of props.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  afterMount(nextProps) { }
+  protected afterMount?(nextProps: IPropsModel): void
 
   /**
    * Call before render and determine component update
    * @param {Object} nextProps Next set of props that will receive by component.
    * @returns {boolean} Return boolean true or false.
    */
-  shouldUpdate(nextProps = {}) {
-    return true;
-  }
+  protected shouldUpdate?(nextProps: IPropsModel): boolean
 
   /**
    * Lifecycle event - fires before the component update on parent DOM.
    * @param {Object} nextProps set of props that was there before update that component.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  beforeUpdate(nextProps = {}) { }
+  protected beforeUpdate?(nextProps: IPropsModel): void
 
   /**
    * Lifecycle event - fires after the component update on parent DOM.
    * @param {Object} prevProps set of props that was there before update that component.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  afterUpdate(prevProps) { }
+  protected afterUpdate?(prevProps: IPropsModel): void
 
   /**
    * Lifecycle event - fires before the component unmounted from parent DOM.
-   * @returns {undefined} void.
+   * @returns void.
    */
-  beforeUnmount() { }
+  protected beforeUnmount?(): void
+
+}
+
+interface IPropsModel {
+  [key: string]: any
 }
 
 export { mountTo, renderDOM, Component, parseStyleProps };

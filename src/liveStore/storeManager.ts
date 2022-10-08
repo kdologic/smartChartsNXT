@@ -1,31 +1,31 @@
 'use strict';
 
-import UtilCore from './../core/util.core';
+import UtilCore from '../core/util.core';
+import { IStoreCollection } from '../models/global.models';
 import Store from './store';
 
 /**
- * storeManager.js
+ * storeManager.ts
  * @createdOn:31-Dec-2019
  * @author:SmartChartsNXT
  * @description: This is a service class that will manage the state of multiple store.
  */
 
-let _storeCollection = {};
-
 class StoreManager {
-
+  private _storeCollection: IStoreCollection = {};
+  
   constructor() { }
 
-  createStore(storeId = UtilCore.uuidv4(), initialState = {}) {
+  createStore(storeId: string = UtilCore.uuidv4(), initialState = {}) {
     if (!storeId) {
       throw new Error('StoreManager: Invalid storeId !');
     }
-    _storeCollection[storeId] = new Store(initialState);
+    this._storeCollection[storeId] = new Store(initialState);
     return storeId;
   }
 
-  getStore(storeId) {
-    return _storeCollection[storeId];
+  getStore(storeId: string) {
+    return this._storeCollection[storeId];
   }
 }
 

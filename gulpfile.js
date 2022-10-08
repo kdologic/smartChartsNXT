@@ -55,8 +55,11 @@ function buildJSTask() {
 }
 
 function shouldInsertHeader(file) {
-  const isSourceMap = /\.map$/.test(file.path);
-  return !isSourceMap;
+  if(isProduction) {
+    const isSourceMap = /\.map$/.test(file.path);
+    return !isSourceMap;
+  }
+  return false;
 }
 
 function minifyTask() {

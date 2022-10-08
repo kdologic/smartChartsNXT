@@ -1,7 +1,9 @@
 'use strict';
 
+import { TChartType } from "../models/global.models";
+
 /**
- * globalEnums.js
+ * globalEnums.ts
  * @createdOn: 15-Jul-2019
  * @author: SmartChartsNXT
  * @description: Global enumeration values.
@@ -96,12 +98,13 @@ export class OPTIONS_TYPE {
   };
 }
 
+export const PUBLIC_SITE = 'https://www.smartchartsnxt.com';
 export class CHART_TYPE {
-  public AREA_CHART = 'AreaChart';
-  public LINE_CHART ='LineChart';
-  //STEP_CHART: 'StepChart',
-  public PIE_CHART = 'PieChart';
-  public DONUT_CHART = 'DonutChart';
-  //COLUMN_CHART: 'ColumnChart',
-  //BAR_CHART: 'BarChart'
+  public AREA_CHART: TChartType = 'AreaChart';
+  public LINE_CHART: TChartType ='LineChart';
+  //STEP_CHART: TChartType = 'StepChart',
+  public PIE_CHART: TChartType = 'PieChart';
+  public DONUT_CHART: TChartType = 'DonutChart';
+  //COLUMN_CHART: TChartType = 'ColumnChart',
+  //BAR_CHART: TChartType = 'BarChart'
 }

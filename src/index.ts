@@ -8,8 +8,14 @@ import { COLOR_STRINGS, RAINBOW_COLOR_MODEL, COLOR_MODEL } from './core/fillColo
 import defaultConfig from './settings/config';
 import * as helperMethods from './globalMethods/helperMethods';
 import Easing from './plugIns/easing';
-declare let window: any;
 StoreManager.createStore('global', {});
+
+declare global {
+  var $SC: SmartChartsNXT
+  interface Window {
+    $SC: SmartChartsNXT
+  }
+}
 
 /**
  * index.ts
@@ -30,12 +36,12 @@ class SmartChartsNXT extends Core {
   public RAINBOW_COLOR_MODEL = UtilCore.deepFreeze(RAINBOW_COLOR_MODEL);
   public HELPER = { ...helperMethods };
   public EASING = UtilCore.deepFreeze(Easing);
+  public IESupport: any;
 
   constructor() {
     super();
     window && !window.$SC && (window.$SC = this);
   }
-
 };
 
 export default new SmartChartsNXT();

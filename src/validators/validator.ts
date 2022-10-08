@@ -1,16 +1,16 @@
 'use strict';
 
 /**
- * validator.js
+ * validator.ts
  * @createdOn:06-Oct-2019
  * @author:SmartChartsNXT
  * @description: Generic Validation will validate options based on rule set.
  */
 
-class Validator {
+export class Validator {
   constructor() { }
 
-  validate(rules, opts, label = 1) {
+  validate(rules: any, opts: any, label: number = 1) {
     const labelEx = new RegExp('\\[\\[l' + label + '\\]\\]', 'gi');
     let errors = [];
     for (let prop in rules) {
@@ -43,8 +43,9 @@ class Validator {
   }
 }
 
-class CError extends Error {
-  constructor(...params) {
+export class CError extends Error {
+  public module: string;
+  constructor(...params: any[]) {
     super(...params);
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, CError);
@@ -52,5 +53,3 @@ class CError extends Error {
     this.module = '[SmartChartsNXT] ';
   }
 }
-
-export default Validator;
