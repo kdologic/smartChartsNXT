@@ -1,7 +1,9 @@
+import { IVnode } from "./viewEngin/component.model";
+
 declare global {
   namespace JSX {
     // The return type of our JSX Factory: this could be anything
-    type Element = HTMLElement;
+    type Element = IVnode;
 
     // IntrinsicElementMap grabs all the standard HTML and SVG tags in the TS DOM lib.
     interface IntrinsicElements extends IntrinsicElementMapSvg, IntrinsicElementMapHtml, IntrinsicElementMapCustom { }
@@ -26,4 +28,4 @@ declare global {
   }
 }
 
-export {};
+export { };

@@ -5,7 +5,7 @@ import font from '../styles/font-lato';
 //import Morphing from './../plugIns/morph';
 import '../plugIns/classList.shim.min';
 import Chart from '../charts/chart';
-import viewConfig from '../viewEngin/config';
+import { config } from '../viewEngin/config';
 
 /**
  * chart.core.ts
@@ -40,7 +40,7 @@ class Core {
     this._debug = isEnable;
     this.debugRenderTime = isEnable;
     this.debugEvents = isEnable;
-    viewConfig.debug = isEnable;
+    config.debug = isEnable;
   }
 
   get debug() {
@@ -49,7 +49,7 @@ class Core {
 
   set debugRenderTime(isEnable) {
     this._debugRenderTime = isEnable;
-    viewConfig.debugRenderTime = isEnable;
+    config.debugRenderTime = isEnable;
   }
 
   get debugRenderTime() {

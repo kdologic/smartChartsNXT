@@ -2,7 +2,8 @@
 
 import { Validator, CError } from '../validators/validator';
 import { validationRules } from '../settings/validationRules';
-import { IComponent, mountTo } from '../viewEngin/pview';
+import { mountTo } from '../viewEngin/pview';
+import { IComponent } from '../viewEngin/component.model';
 import BaseChart from '../base/baseChart';
 import StoreManager from '../liveStore/storeManager';
 import UtilCore from '../core/util.core';
