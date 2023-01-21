@@ -1,7 +1,5 @@
 'use strict';
 
-import { TChartType } from "../models/global.models";
-
 /**
  * globalEnums.ts
  * @createdOn: 15-Jul-2019
@@ -99,12 +97,13 @@ export class OPTIONS_TYPE {
 }
 
 export const PUBLIC_SITE = 'https://www.smartchartsnxt.com';
-export class CHART_TYPE {
-  public AREA_CHART: TChartType = 'AreaChart';
-  public LINE_CHART: TChartType ='LineChart';
+
+export enum CHART_TYPE {
+  AREA_CHART = 'AreaChart',
+  LINE_CHART ='LineChart',
   //STEP_CHART: TChartType = 'StepChart',
-  public PIE_CHART: TChartType = 'PieChart';
-  public DONUT_CHART: TChartType = 'DonutChart';
+  PIE_CHART = 'PieChart',
+  DONUT_CHART = 'DonutChart'
   //COLUMN_CHART: TChartType = 'ColumnChart',
   //BAR_CHART: TChartType = 'BarChart'
 }

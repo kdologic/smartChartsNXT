@@ -28,7 +28,7 @@ declare global {
 
 class SmartChartsNXT extends Core {
   public version = '__version__';
-  public CHART_TYPE: CHART_TYPE = new CHART_TYPE();
+  public CHART_TYPE = CHART_TYPE;
   public ENUMS: OPTIONS_TYPE = new OPTIONS_TYPE();
   public GLOBAL = { ...defaultConfig };
   public COLOR_STRINGS = UtilCore.deepFreeze({ ...COLOR_STRINGS });

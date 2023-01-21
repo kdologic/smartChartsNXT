@@ -12,7 +12,6 @@ import DataLabels from './../../components/dataLabels';
 import eventEmitter from './../../core/eventEmitter';
 import Easing from './../../plugIns/easing';
 import a11yFactory from './../../core/a11y';
-const chartTypes = new CHART_TYPE();
 const enums = new OPTIONS_TYPE();
 
 /**
@@ -223,13 +222,13 @@ class DrawConnectedPoints extends Component {
             </clipPath>
           </defs>
         }
-        {this.context.chartType === chartTypes.AREA_CHART && this.state.fillType !== 'solidColor' &&
+        {this.context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== 'solidColor' &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
         }
         {this.props.lineDropShadow &&
           UiCore.dropShadow(this.shadowId)
         }
-        {this.context.chartType === chartTypes.AREA_CHART &&
+        {this.context.chartType === CHART_TYPE.AREA_CHART &&
           <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>

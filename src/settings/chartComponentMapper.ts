@@ -5,7 +5,6 @@ import ConnectedPointBase from '../charts/connectedPointChartsType/connectedPoin
 import { config as areaChartConfig, validationRules as areaChartValidationRules } from '../charts/connectedPointChartsType/areaChart/areaChart.config';
 import { config as lineChartConfig, validationRules as lineChartValidationRules } from '../charts/connectedPointChartsType/lineChart/lineChart.config';
 import { IChartModules } from '../models/global.models';
-const chartTypes = new CHART_TYPE();
 
 /** ------- Mapping components and config with respective chart types ------- */
 /**
@@ -16,12 +15,12 @@ const chartTypes = new CHART_TYPE();
  */
 
 export const CHART_MODULES: IChartModules = {
-  [chartTypes.AREA_CHART]: {
+  [CHART_TYPE.AREA_CHART]: {
     config: areaChartConfig,
     validationRules: areaChartValidationRules,
     chart: ConnectedPointBase
   },
-  [chartTypes.LINE_CHART]: {
+  [CHART_TYPE.LINE_CHART]: {
     config: lineChartConfig,
     validationRules: lineChartValidationRules,
     chart: ConnectedPointBase
