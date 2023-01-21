@@ -1,6 +1,7 @@
 declare global {
   interface Window {
     __h__: any;
+    requestNextAnimationFrame: (callback: any) => void
   }
 }
 

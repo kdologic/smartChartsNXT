@@ -45,9 +45,8 @@ class BaseChart extends Component {
   private globalDefs: GlobalDefs;
   private emitter: CustomEvents;
 
-  protected state: any;
+  public state: any;
   private _setState: (state: any) => void;
-
 
   constructor(props: any) {
     super(props);
@@ -340,24 +339,25 @@ class BaseChart extends Component {
   hideMenuPopup() {
     this.setState({ menuExpanded: false });
     setTimeout(() => {
-      if (typeof this.ref.node.querySelector('.sc-menu-icon-bg').focus === 'function') {
-        this.ref.node.querySelector('.sc-menu-icon-bg').focus();
+      let menuIconBG = this.ref.node as Element;
+      if (typeof (menuIconBG.querySelector('.sc-menu-icon-bg') as HTMLElement).focus === 'function') {
+        (menuIconBG.querySelector('.sc-menu-icon-bg') as HTMLElement).focus();
       }
     }, 0);
   }
 
   onMenuIconFocusIn() {
     this.state.menuIconFocused = true;
-    this.ref.node.querySelector('.dot-group').classList.add('active');
+    (this.ref.node as Element).querySelector('.dot-group').classList.add('active');
   }
 
   onMenuIconFocusOut() {
     this.state.menuIconFocused = false;
-    this.ref.node.querySelector('.dot-group').classList.remove('active');
+    (this.ref.node as Element).querySelector('.dot-group').classList.remove('active');
   }
 
   onMenuIconMouseIn(e: Event) {
-    this.ref.node.querySelector('.dot-group').classList.add('active');
+    (this.ref.node as Element).querySelector('.dot-group').classList.add('active');
     if (UtilCore.isIE) {
       (e.target as HTMLElement).setAttribute('transform', 'scale(1.5)');
     }
@@ -365,7 +365,7 @@ class BaseChart extends Component {
 
   onMenuIconMouseOut(e: Event) {
     if (!this.state.menuIconFocused) {
-      this.ref.node.querySelector('.dot-group').classList.remove('active');
+      (this.ref.node as Element).querySelector('.dot-group').classList.remove('active');
       if (UtilCore.isIE) {
         (e.target as HTMLElement).setAttribute('transform', 'scale(1)');
       }
@@ -379,8 +379,8 @@ class BaseChart extends Component {
   hideBeforeSave() {
     let elemList = ['.sc-menu-icon', '.sc-redirect-icon'];
     for (let elem of elemList) {
-      if (this.ref.node.querySelector(elem)) {
-        this.ref.node.querySelector(elem).classList.add('sc-hide');
+      if ((this.ref.node as Element).querySelector(elem)) {
+        (this.ref.node as Element).querySelector(elem).classList.add('sc-hide');
       }
     }
   }
@@ -388,8 +388,8 @@ class BaseChart extends Component {
   showAfterSave() {
     let elemList = ['.sc-menu-icon', '.sc-redirect-icon'];
     for (let elem of elemList) {
-      if (this.ref.node.querySelector(elem)) {
-        this.ref.node.querySelector(elem).classList.remove('sc-hide');
+      if ((this.ref.node as Element).querySelector(elem)) {
+        (this.ref.node as Element).querySelector(elem).classList.remove('sc-hide');
       }
     }
   }

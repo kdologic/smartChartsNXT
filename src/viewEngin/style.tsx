@@ -1,6 +1,8 @@
 'use strict';
 
+import { IVnode } from './component.model';
 import { Component, parseStyleProps } from './pview';
+import { IObject } from './pview.model';
 
 /**
  * style.js
@@ -11,11 +13,11 @@ import { Component, parseStyleProps } from './pview';
  */
 
 class Style extends Component {
-  constructor(props) {
+  constructor(props: IObject) {
     super(props);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <style>
         {this.props.src && this.jsonToCss(this.props.src)}
@@ -28,7 +30,7 @@ class Style extends Component {
    * @param {Object} json  A JSON object.
    * @returns {String} String of CSS.
    */
-  jsonToCss(json) {
+  jsonToCss(json: IObject): string {
     let strCSS = '';
     for (let selector in json) {
       strCSS += selector + ' {' + parseStyleProps(json[selector]) + ' } \n';

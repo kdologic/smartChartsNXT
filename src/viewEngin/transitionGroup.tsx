@@ -1,6 +1,8 @@
 'use strict';
 
+import { IVnode } from './component.model';
 import { Component } from './pview';
+import { IObject } from './pview.model';
 
 /**
  * transitionGroup.js
@@ -17,9 +19,9 @@ import { Component } from './pview';
  *
  * transitionName='box-effect' // Name of the transition.
  *
- * transitionEnterDelay='1000' // How long the animation playes when new element added.
+ * transitionEnterDelay='1000' // How long the animation play's when new element added.
  *
- * transitionExitDelay='300' // How long the animation playes when element removed.
+ * transitionExitDelay='300' // How long the animation play's when element removed.
  *
  * applyForNew=true //If true then transition only for new elements and if false then all the existing elements also.
  *
@@ -33,7 +35,13 @@ import { Component } from './pview';
  */
 
 class TransitionGroup extends Component {
-  constructor(props) {
+  prevExtChildren: IVnode[];
+  removedExtChildren: IVnode[];
+  mergedExtChildren: IVnode[];
+  removedChildNodes: Node[];
+  newExtChildren: IVnode[];
+
+  constructor(props: IObject) {
     super(props);
     this.prevExtChildren = [];
     this.removedExtChildren = [];
@@ -56,12 +64,12 @@ class TransitionGroup extends Component {
       }) >= 0;
 
       if (this.props.applyForNew) {
-        isNewChild && childNodes[i].classList.add(this.props.transitionName + '-enter');
+        isNewChild && (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter');
       } else {
-        childNodes[i].classList.add(this.props.transitionName + '-enter');
+        (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter');
       }
 
-      isRemovedChild && childNodes[i].classList.add(this.props.transitionName + '-exit');
+      isRemovedChild && (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-exit');
     }
   }
 
@@ -75,13 +83,13 @@ class TransitionGroup extends Component {
           return c.attributes.instanceId === this.mergedExtChildren[i].attributes.instanceId;
         }) >= 0;
 
-        childNodes[i].classList.add(this.props.transitionName + '-enter-active');
-        isRemovedChild && childNodes[i].classList.add(this.props.transitionName + '-exit-active');
+        (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter-active');
+        isRemovedChild && (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-exit-active');
 
 
         (function (elem, tn, td) {
           setTimeout(() => {
-            elem && elem.classList.remove(tn + '-enter', tn + '-enter-active');
+            elem && (elem as SVGElement).classList.remove(tn + '-enter', tn + '-enter-active');
           }, td || 0);
         })(childNodes[i], this.props.transitionName, this.props.transitionEnterDelay);
 
@@ -112,35 +120,35 @@ class TransitionGroup extends Component {
   afterUpdate() {
     let childNodes = this.ref.node.childNodes;
     for (let i = 0; i < childNodes.length; i++) {
-      let childInstId = childNodes[i].getAttribute('instanceId');
+      let childInstId = (childNodes[i] as SVGElement).getAttribute('instanceId');
       let isNewChild = this.newExtChildren.findIndex(c => {
         return c.attributes.instanceId == childInstId;
       }) >= 0;
 
       if (this.props.applyForNew) {
-        isNewChild && childNodes[i].classList.add(this.props.transitionName + '-enter');
+        isNewChild && (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter');
       } else {
-        childNodes[i].classList.add(this.props.transitionName + '-enter');
+        (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter');
       }
     }
     for (let i = 0; i < this.removedChildNodes.length; i++) {
-      this.removedChildNodes[i].classList.add(this.props.transitionName + '-exit');
+      (this.removedChildNodes[i] as SVGAElement).classList.add(this.props.transitionName + '-exit');
       this.ref.node.appendChild(this.removedChildNodes[i]);
     }
 
     window.requestNextAnimationFrame(() => {
       for (let i = 0; i < childNodes.length; i++) {
-        childNodes[i].classList.add(this.props.transitionName + '-enter-active');
+        (childNodes[i] as SVGElement).classList.add(this.props.transitionName + '-enter-active');
 
         (function (elem, tn, td) {
           setTimeout(() => {
-            elem.classList.remove(tn + '-enter', tn + '-enter-active');
+            (elem as SVGElement).classList.remove(tn + '-enter', tn + '-enter-active');
           }, td || 0);
         })(childNodes[i], this.props.transitionName, this.props.transitionEnterDelay);
       }
 
       for (let i = 0; i < this.removedChildNodes.length; i++) {
-        this.removedChildNodes[i].classList.add(this.props.transitionName + '-exit-active');
+        (this.removedChildNodes[i] as SVGAElement).classList.add(this.props.transitionName + '-exit-active');
         (function (elem, td) {
           setTimeout(() => {
             elem.parentNode.removeChild(elem);
@@ -165,7 +173,7 @@ class TransitionGroup extends Component {
     if (!this.props.extChildren) {
       return [];
     }
-    return this.props.extChildren.filter(v => {
+    return this.props.extChildren.filter((v: IVnode) => {
       return this.prevExtChildren.findIndex(c => c.attributes.instanceId === v.attributes.instanceId) === -1;
     });
   }
@@ -175,18 +183,18 @@ class TransitionGroup extends Component {
       if (!this.props.extChildren) {
         return true;
       }
-      return this.props.extChildren.findIndex(c => c.attributes.instanceId === v.attributes.instanceId) === -1;
+      return this.props.extChildren.findIndex((c: IVnode) => c.attributes.instanceId === v.attributes.instanceId) === -1;
     });
   }
 
   findRemoveChildNodes() {
-    let removedNode = [];
+    let removedNode: Node[] = [];
     this.ref.node.childNodes.forEach((elem) => {
       if (!this.props.extChildren) {
         removedNode.push(elem.cloneNode(true));
         return;
       }
-      if (this.props.extChildren.findIndex(c => c.attributes.instanceId === elem.getAttribute('instanceId')) === -1) {
+      if (this.props.extChildren.findIndex((c: IVnode) => c.attributes.instanceId === (elem as SVGElement).getAttribute('instanceId')) === -1) {
         removedNode.push(elem.cloneNode(true));
       }
     });

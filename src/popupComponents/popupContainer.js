@@ -110,7 +110,7 @@ class PopupContainer extends Component {
                 touchstart: (e) => this.onMouseDown(e, popupId, data.isDraggable)
               }}></rect>
             <g style={{ 'pointerEvents': 'none' }} role="heading" aria-level="3">
-              <RichTextBox class='sc-popup-title' posX={2 * this.state.paddingX} posY={0} width={data.width - this.state.titleHeight - (2 * this.state.paddingY)} height={this.state.titleHeight} textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+              <RichTextBox class='sc-popup-title' posX={2 * this.state.paddingX} posY={0} width={data.width - this.state.titleHeight - (2 * this.state.paddingY)} height={this.state.titleHeight} textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
                 fontSize={Number.parseFloat(data.fontSize) + 1} textColor={data.fontColor} text={data.title || ''}>
               </RichTextBox>
             </g>
@@ -134,7 +134,7 @@ class PopupContainer extends Component {
 
           <g class="sc-popup-body-group" clip-path={`url(#${data.clipId})`}>
             <RichTextBox class='sc-popup-body' posX={0} posY={this.state.titleHeight} width={data.width} contentWidth={data.width} height={data.height - this.state.titleHeight}
-              textAlign={ENUMS.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={data.textVerticalAlignMiddle} overflow="scroll"
+              textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={data.textVerticalAlignMiddle} overflow="scroll"
               fontSize={data.fontSize} textColor={data.fontColor} style={{ ...{ padding: '5px' }, ...data.style }} text={data.body || ''} >
             </RichTextBox>
           </g>
