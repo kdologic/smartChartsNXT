@@ -18,6 +18,7 @@ import { PUBLIC_SITE } from '../settings/globalEnums';
 import GlobalDefs from '../styles/globalDefs';
 import a11yFactory, { A11yWriter } from '../core/a11y';
 import PopupContainer from '../popupComponents/popupContainer';
+import { IObject } from '../viewEngin/pview.model';
 
 /**
  * baseChart.tsx
@@ -31,9 +32,9 @@ class BaseChart extends Component {
   private chartType: TChartType;
   private store: Store;
   private a11yWriter: A11yWriter;
-  private CHART_OPTIONS: any;
-  private CHART_DATA: any;
-  private CHART_CONST: any;
+  private CHART_OPTIONS: IObject;
+  private CHART_DATA: IObject;
+  private CHART_CONST: IObject;
   private chartValidationRules: any;
   private validator: Validator;
   private validationErrors: CError[];
@@ -48,7 +49,7 @@ class BaseChart extends Component {
   public state: any;
   private _setState: (state: any) => void;
 
-  constructor(props: any) {
+  constructor(props: IObject) {
     super(props);
     try {
       this._setState = this.setState;

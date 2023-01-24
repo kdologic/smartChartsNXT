@@ -33,7 +33,7 @@ class EventEmitterSingleTone {
     return instance[runId] = event;
   }
 
-  getInstance(runId: string) {
+  getInstance(runId: string): CustomEvents {
     return instance[runId];
   }
 }

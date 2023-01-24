@@ -7,7 +7,7 @@ import crossfilter from 'crossfilter2';
 import defaultConfig from '../../settings/config';
 import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
-import eventEmitter from '../../core/eventEmitter';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import Draggable from '../../components/draggable';
 import LegendBox from '../../components/legendBox';
 import Heading from '../../components/heading';
@@ -26,9 +26,11 @@ import InteractivePlane from './interactivePlane';
 import StoreManager from '../../liveStore/storeManager';
 import SeriesLabel from '../../components/seriesLabel';
 import AnnotationLabels from '../../components/annotationLabels';
-import a11yFactory from '../../core/a11y';
+import a11yFactory, { A11yWriter } from '../../core/a11y';
+import { IObject } from '../../viewEngin/pview.model';
+import { IBoundingBox } from '../../models/global.models';
+import Store from '../../liveStore/store';
 const enums = new OPTIONS_TYPE();
-
 
 /**
  * connectedPointBase.js
@@ -39,11 +41,20 @@ const enums = new OPTIONS_TYPE();
  */
 
 class ConnectedPointBase extends Component {
-  constructor(props) {
+  private a11yWriter: A11yWriter;
+  private CHART_DATA: IObject;
+  private CHART_OPTIONS: IObject;
+  private CHART_CONST: IObject;
+  private yAxisDefaults: IObject;
+  private defaultMargins: IBoundingBox;
+  private store: Store;
+  private emitter: CustomEvents;
+
+  constructor(props: IObject) {
     super(props);
     try {
       let self = this;
-      this.a11yWriter = a11yFactory.getWriter(this.context.runId);
+      this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
       this.CHART_DATA = UtilCore.extends({
         chartCenter: 0,
         marginLeft: 0,
@@ -230,8 +241,8 @@ class ConnectedPointBase extends Component {
       this.eventStream = {};
       this.scrollWindowClipId = UtilCore.getRandomID();
       this.scrollOffsetClipId = UtilCore.getRandomID();
-      this.emitter = eventEmitter.getInstance(this.context.runId);
-      this.store = StoreManager.getStore(this.context.runId);
+      this.emitter = eventEmitter.getInstance((this as any).context.runId);
+      this.store = StoreManager.getStore((this as any).context.runId);
       this.onHScroll = this.onHScroll.bind(this);
       this.onHighlightPointMarker = this.onHighlightPointMarker.bind(this);
       this.onMouseLeave = this.onMouseLeave.bind(this);
@@ -254,7 +265,7 @@ class ConnectedPointBase extends Component {
       this.a11yWriter.write(this.hLabelAccId, '<div aria-hidden="false">Chart has 1 X axis displaying ' + (this.CHART_DATA.dataSet.xAxis.title || 'values') + '.</div>', false);
       this.a11yWriter.write(this.vLabelAccId, '<div aria-hidden="false">Chart has 1 Y axis displaying ' + (this.CHART_DATA.dataSet.yAxis.primary.title || 'values') + '.</div>', false);
     } catch (ex) {
-      ex.errorIn = `Error in ${this.context.chartType} with runId:${this.context.runId}`;
+      ex.errorIn = `Error in ${(this as any).context.chartType} with runId:${(this as any).context.runId}`;
       throw ex;
     }
   }
@@ -884,7 +895,7 @@ class ConnectedPointBase extends Component {
       return (
         <DrawConnectedPoints dataSet={series.valueSet} index={series.index} instanceId={'cs-' + series.index} name={series.name} posX={this.CHART_DATA.marginLeft - this.state.offsetLeftChange} posY={this.CHART_DATA.marginTop} paddingX={this.CHART_DATA.paddingX}
           width={width} height={height} maxSeriesLen={this.state.maxSeriesLen} areaFillColor={series.areaColor} lineFillColor={series.lineColor} fillOptions={series.fillOptions || {}}
-          lineDropShadow={this.context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
+          lineDropShadow={(this as any).context.chartType === CHART_TYPE.LINE_CHART && typeof series.dropShadow === 'undefined' ? true : series.dropShadow || false} strokeOpacity={series.lineOpacity || 1} opacity={series.areaOpacity || 0.2} spline={typeof series.spline === 'undefined' ? true : series.spline}
           marker={typeof series.marker === 'object' ? series.marker : {}} customizedMarkers={series.customizedMarkers || {}} centerSinglePoint={isBothSinglePoint} lineStrokeWidth={series.lineWidth} lineStyle={series.lineStyle || enums.LINE_STYLE.SOLID} lineDashArray={series.lineDashArray || 0} areaStrokeWidth={0} maxVal={maxVal} minVal={minVal}
           dataPoints={true} dataLabels={series.dataLabels} seriesLabel={series.seriesLabel} animated={series.animated == undefined ? true : !!series.animated} shouldRender={true} tooltipOpt={this.CHART_OPTIONS.tooltip} xAxisInfo={this.state.cs.dataSet.xAxis} yAxisInfo={yAxisInfo}
           totalSeriesCount={this.state.fs.dataSet.series.length} totalDataCount={seriesTotalDataCount} accessibility={true} accessibilityText={series.a11y ? series.a11y.description || '' : ''} emitScale={true}
@@ -976,7 +987,7 @@ class ConnectedPointBase extends Component {
     } else if (yAxis.positionOpposite) {
       return (
         <g>
-          <TextBox class='sc-vertical-axis-title' posX={this.context.svgWidth - 5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
+          <TextBox class='sc-vertical-axis-title' posX={(this as any).context.svgWidth - 5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
             transform={`rotate(${90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={yAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6}
             textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={yAxis.title}
             style={{
@@ -1062,7 +1073,7 @@ class ConnectedPointBase extends Component {
   updateLabelTip(e) {
     this.emitter.emitSync('updateTooltip', {
       instanceId: 'label-tooltip',
-      originPoint: UiCore.cursorPoint(this.context.rootContainerId, e),
+      originPoint: UiCore.cursorPoint((this as any).context.rootContainerId, e),
       pointData: undefined,
       line1: e.labelText,
       line2: undefined

@@ -1,4 +1,5 @@
 import ConnectedPointBase from "../charts/connectedPointChartsType/connectedPointBase";
+import { A11yWriter } from "../core/a11y";
 import { CustomEvents } from "../core/eventEmitter";
 import Store from "../liveStore/store";
 
@@ -34,4 +35,15 @@ export interface IEventStore {
 
 export interface IStoreCollection {
   [key: string]: Store
+}
+
+export interface IA11yWriterStore {
+  [key: string]: A11yWriter
+}
+
+export interface IBoundingBox {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number
 }
