@@ -1,12 +1,13 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../icons/iconCollection';
-const enums = new OPTIONS_TYPE();
+import { Component } from '../../viewEngin/pview';
+import { ICON_TYPE } from '../../settings/globalEnums';
+import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../../icons/iconCollection';
+import { IVnode } from '../../viewEngin/component.model';
+import { IMarkerIconProps } from './markerIcon.model';
 
 /**
- * markerIcon.js
+ * markerIcon.component.tsx
  * @createdOn: 08-Oct-2020
  * @author: SmartChartsNXT
  * @description:This component switch between different icon based on type.
@@ -14,11 +15,11 @@ const enums = new OPTIONS_TYPE();
  */
 
 class MarkerIcon extends Component {
-  constructor(props) {
+  constructor(props: IMarkerIconProps) {
     super(props);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g instanceId={this.props.instanceId}>
         {this.selectIcon()}
@@ -26,24 +27,19 @@ class MarkerIcon extends Component {
     );
   }
 
-  selectIcon() {
+  selectIcon(): IVnode {
     switch (this.props.type) {
-      default:
-      case enums.ICON_TYPE.CIRCLE:
-        return <CircleIcon id={this.props.index} x={this.props.x} y={this.props.y} r={this.props.width / 2} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
-
-      case enums.ICON_TYPE.TRIANGLE:
+      case ICON_TYPE.TRIANGLE:
         return <TriangleIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
-
-      case enums.ICON_TYPE.DIAMOND:
+      case ICON_TYPE.DIAMOND:
         return <DiamondIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
-
-      case enums.ICON_TYPE.STAR:
+      case ICON_TYPE.STAR:
         return <StarIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width} height={this.props.height} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
-
-      case enums.ICON_TYPE.CUSTOM:
+      case ICON_TYPE.CUSTOM:
         return <CustomIcon id={this.props.index} x={this.props.x} y={this.props.y} width={this.props.width + 2} height={this.props.height + 2} URL={this.props.URL || ''} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
-
+      case ICON_TYPE.CIRCLE:
+      default:
+        return <CircleIcon id={this.props.index} x={this.props.x} y={this.props.y} r={this.props.width / 2} fillColor={this.props.fillColor} highlighted={this.props.highlighted} strokeColor={this.props.strokeColor} onRef={this.props.onRef} />;
     }
   }
 }
