@@ -72,9 +72,15 @@ class Chart {
       this.onResize = this.onResize.bind(this);
       if (!UtilCore.isIE) {
         const resizeObserver = new ResizeObserver((entries: Array<ResizeObserverEntry>) => {
-          for (const entry of entries) {
-            this.onResize(entry.target as HTMLElement);
-          }
+          // We wrap it in requestAnimationFrame to avoid this error - ResizeObserver loop limit exceeded
+          window.requestAnimationFrame(() => {
+            if (!Array.isArray(entries) || !entries.length) {
+              return;
+            }
+            for (const entry of entries) {
+              this.onResize(entry.target as HTMLElement);
+            }
+          });
         });
         resizeObserver.observe(this.targetNode);
       } else if (window.$SC.IESupport && $SC.IESupport.ResizeObserver) {

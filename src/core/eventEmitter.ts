@@ -40,29 +40,29 @@ class EventEmitterSingleTone {
 
 /* make event emitter sync and async mode*/
 export class CustomEvents extends Events {
-  private _emit: any;
+  private _emit: (eventName: string | symbol, ...args: any[]) => boolean;
   constructor() {
     super();
     this._emit = super.emit;
   }
 
-  emit(...args: Array<any>): boolean {
+  emit(eventName: string | symbol, ...args: Array<any>): boolean {
     setTimeout(() => {
-      this.emitSync(...args);
+      this.emitSync(eventName, ...args);
     },0);
     return true;
   }
 
-  emitSync(...args: Array<any>): void {
+  emitSync(eventName: string | symbol, ...args: Array<any>): void {
     /* eslint-disable no-console */
     try {
-      $SC.debug && $SC.debugEvents && console.info('Event name:', args[0]);
-      $SC.debug && $SC.debugEvents && console.info('with data:', args[1]);
+      $SC.debug && $SC.debugEvents && console.info('Event name:', eventName);
+      $SC.debug && $SC.debugEvents && console.info('with data:', args[0]);
     }catch(ex) {
       console.error(ex);
     }
 
-    this._emit(...args);
+    this._emit(eventName, ...args);
   };
 }
 

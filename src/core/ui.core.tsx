@@ -1,10 +1,13 @@
 'use strict';
 
-import { mountTo } from './../viewEngin/pview';
-import StoreManager from './../liveStore/storeManager';
-import UtilCore from './../core/util.core';
-import patterns from './../styles/patterns';
-import gradients from './../styles/gradients';
+import { mountTo } from '../viewEngin/pview';
+import StoreManager from '../liveStore/storeManager';
+import UtilCore from './util.core';
+import patterns from '../styles/patterns/patterns';
+import gradients from '../styles/gradients/gradients';
+import { IVnode } from '../viewEngin/component.model';
+import { IFillOptions } from '../models/global.models';
+import { FILL_TYPE } from '../settings/globalEnums';
 
 /**
  * ui.core.js
@@ -22,7 +25,7 @@ class UiCore {
    * @param {String} offsetY Offset value to shift shadow by y coordinate.
    * @returns {Object} Virtual node of drop shadow component.
    */
-  static dropShadow = (shadowId, offsetX, offsetY) => {
+  static dropShadow = (shadowId: string, offsetX: number, offsetY: number): IVnode => {
     return (
       <defs>
         <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
@@ -56,7 +59,7 @@ class UiCore {
    * (-) negative indicates darker shades
    *
   */
-  static radialGradient = (gradId, cx, cy, fx, fy, r, gradArr) => {
+  static radialGradient = (gradId: string, cx: number, cy: number, fx: number, fy: number, r: number, gradArr: number[] | {offset: number, opacity: number}[]): IVnode => {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
@@ -65,14 +68,14 @@ class UiCore {
             let opacity = grad;
             let color = '#fff';
             if (typeof grad === 'object') {
-              offset = grad.offset !== 'undefined' ? grad.offset : offset;
-              opacity = grad.opacity !== 'undefined' ? grad.opacity : opacity;
+              offset = grad.offset !== undefined ? grad.offset : offset;
+              opacity = grad.opacity !== undefined ? grad.opacity : opacity;
               if (opacity < 0) {
                 color = '#000';
-                opacity = Math.abs(opacity);
+                opacity = Math.abs(opacity as number);
               }
             }
-            return <stop offset={`${offset}%`} stop-color={color} stop-opacity={opacity}></stop>;
+            return <stop instanceId={i} offset={`${offset}%`} stop-color={color} stop-opacity={opacity}></stop>;
           })}
         </radialGradient>
       </defs>
@@ -86,7 +89,7 @@ class UiCore {
    * @param {Number} maxSize Max font size bound.
    * @return {Number} Calculated font size.
    */
-  static getScaledFontSize = (totalWidth, scale, maxSize) => {
+  static getScaledFontSize = (totalWidth: number, scale: number, maxSize: number): number => {
     let fSize = totalWidth / scale;
     return fSize < maxSize ? fSize : maxSize;
   };
@@ -97,41 +100,31 @@ class UiCore {
    * @return {Number} Text width in Pixel.
    */
 
-  static getComputedTextWidth = (textNode) => {
+  static getComputedTextWidth = (textNode: IVnode): number => {
     return UiCore.getComputedBBox(textNode).width;
   };
 
   /**
    * Get text bounding box {width, height} before rendering.
-   * @param {Object} vnode - JSX of text node.
+   * @param {Object} virtualNode - JSX of text node.
    * @return {Object} Text bounding Box
    */
-  static getComputedBBox = (vnode) => {
-    let bbox = {};
+  static getComputedBBox = (virtualNode: IVnode): DOMRect => {
+    let bbox: DOMRect;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.style.visibility = 'hidden';
     svg.style.position = 'absolute';
     svg.style.left = '-10000px';
     document.body.appendChild(svg);
-    const textDOM = mountTo(vnode, svg).node;
+    const textDOM = mountTo(virtualNode, svg).node as SVGTextElement;
     if (textDOM) {
-      let box = textDOM.getBoundingClientRect();
-      bbox = {
-        bottom: box.bottom,
-        height: box.height,
-        left: box.left,
-        right: box.right,
-        top: box.top,
-        width: box.width,
-        x: box.x,
-        y: box.y
-      };
-      if (typeof textDOM.getComputedTextLength == 'function') {
+      bbox = textDOM.getBoundingClientRect();
+      if (typeof textDOM.getComputedTextLength === 'function') {
         bbox.width = textDOM.getComputedTextLength();
       }
     }
     svg.parentNode.removeChild(svg);
-    return { width: bbox.width, height: bbox.height };
+    return bbox;
   };
 
   /**
@@ -140,13 +133,21 @@ class UiCore {
    * @param {Object} evt Pointer event related to screen like mouse or touch point.
    * @return {Point} Returns a point which transform into SVG coordinate system.
    */
-  static cursorPoint = (targetElem, evt) => {
+  static cursorPoint = (targetElem: SVGGraphicsElement, evt: MouseEvent | TouchEvent): DOMPoint => {
     if (typeof targetElem === 'string') {
       targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt .sc-prime-view');
     }
-    let pt = targetElem.createSVGPoint();
-    pt.x = evt.clientX !== undefined ? evt.clientX : evt.touches[0] ? evt.touches[0].clientX : 0;
-    pt.y = evt.clientY !== undefined ? evt.clientY : evt.touches[0] ? evt.touches[0].clientY : 0;
+    let pt = new DOMPoint();
+    if(evt instanceof MouseEvent && evt.clientX !== undefined) {
+      pt.x = evt.clientX;
+      pt.y = evt.clientY;
+    }else if(evt instanceof TouchEvent &&  evt.touches[0]) {
+      pt.x = evt.touches[0].clientX;
+      pt.y = evt.touches[0].clientY;
+    }else {
+      pt.x = 0;
+      pt.y = 0;
+    }
     return pt.matrixTransform(targetElem.getScreenCTM().inverse());
   };
 
@@ -156,12 +157,13 @@ class UiCore {
    * @param {Number} percent Percent value out of total pixel
    * @return {Number} Calculated percent value.
    */
-  static percentToPixel = (total, percent = '') => {
+  static percentToPixel = (total: number, percent: string = ''): number => {
     if (percent.toString().indexOf('%') === -1) {
-      return percent;
+      return parseFloat(percent);
     }
-    if (!isNaN(percent = Number.parseFloat(percent))) {
-      return total * percent / 100;
+    const percentNumber = Number.parseFloat(percent);
+    if (!isNaN(percentNumber)) {
+      return total * percentNumber / 100;
     }
     return 0;
   };
@@ -173,7 +175,7 @@ class UiCore {
    * @return {Object} Returns interval object.
    */
 
-  static calcIntervalByMinMax = (minVal, maxVal, zeroBase) => {
+  static calcIntervalByMinMax = (minVal: number, maxVal: number, zeroBase: boolean) => {
     let arrWeight = [0.01, 0.02, 0.05];
     let weightDecimalLevel = 1;
     let minIntvCount = 6;
@@ -193,7 +195,7 @@ class UiCore {
         weightDecimalLevel *= 10;
       }
       for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
-        let hitIntv = +parseFloat(tInt * intv).toFixed(2);
+        let hitIntv = +parseFloat((tInt * intv).toString()).toFixed(2);
         if (minVal <= 0) {
           tMinVal = (Math.ceil(tMinVal / tInt) * tInt);
         } else {
@@ -222,7 +224,7 @@ class UiCore {
     }
   };
 
-  static calcIntervalByMinMaxLog = (minVal, maxVal) => {
+  static calcIntervalByMinMaxLog = (minVal: number, maxVal: number) => {
     let startWeight = 0.1;
     minVal = minVal <= 0 ? startWeight : minVal;
     maxVal = maxVal <= 0 ? 1 : maxVal;
@@ -245,7 +247,7 @@ class UiCore {
       iMax = iMax * 10;
     }
     return {
-      iVal: (i) => 10 ** i,
+      iVal: (i: number) => 10 ** i,
       iCount: iCount,
       iMax: iMax,
       iMin: iMin
@@ -258,7 +260,7 @@ class UiCore {
    * @returns String of formatted value.
    */
 
-  static formatTextValue = (value, decimalCount = 2) => {
+  static formatTextValue = (value: number, decimalCount: number = 2): string => {
     if (Math.abs(Number(value)) >= 1000000000000) {
       return (Number(value) / 1000000000000).toFixed(2) + ' T';
     } else if (Math.abs(Number(value)) >= 1000000000) {
@@ -281,7 +283,7 @@ class UiCore {
    * @config
    * position: ['beforebegin' | default: 'afterbegin' | 'beforeend' | 'afterend' ]
    */
-  static prependStyle = (parentNode, styleStr, position = 'afterbegin') => {
+  static prependStyle = (parentNode: SVGElement | HTMLElement, styleStr: string, position: InsertPosition = 'afterbegin'): void => {
     parentNode.insertAdjacentHTML(position, '<style>' + styleStr + '</style>');
   };
 
@@ -291,41 +293,43 @@ class UiCore {
    * @param {String} rid A randomly generated fill id.
    * @return {Object} Return {fillType, fillBy and fillId}
    */
-  static processFillOptions = (fillOptions = {}, rid = UtilCore.getRandomID()) => {
+  static processFillOptions = (fillOptions: IFillOptions = {}, rid = UtilCore.getRandomID()): { fillType: FILL_TYPE, fillBy: string, fillId: string } => {
     const globalDefMap = StoreManager.getStore('global').getValue('defMap');
     const gradId = 'sc-fill-grad-' + rid;
     const patternId = 'sc-fill-pattern-' + rid;
-    let fillType = 'solidColor';
+    let fillType: FILL_TYPE = FILL_TYPE.SOLID_COLOR;
     let fillBy = 'none';
     let fillId;
+  
     if (fillOptions.pattern && typeof fillOptions.pattern === 'string') {
       if (fillOptions.pattern in globalDefMap) {
-        fillType = 'patternCustom';
+        fillType = FILL_TYPE.PATTERN_CUSTOM;
         fillBy = `url(#${globalDefMap[fillOptions.pattern]})`;
         fillId = fillOptions.pattern;
       } else {
-        fillType = 'patternPreset';
+        fillType = FILL_TYPE.PATTERN_PRESET;
         fillBy = `url(#${patternId})`;
         fillId = patternId;
       }
     } else if (fillOptions.gradient && typeof fillOptions.gradient === 'string') {
       if (fillOptions.gradient in globalDefMap) {
-        fillType = 'gradientCustom';
+        fillType = FILL_TYPE.GRADIENT_CUSTOM;
         fillBy = `url(#${globalDefMap[fillOptions.gradient]})`;
         fillId = fillOptions.gradient;
       } else {
-        fillType = 'gradientPreset';
+        fillType = FILL_TYPE.GRADIENT_PRESET;
         fillBy = `url(#${gradId})`;
         fillId = gradId;
       }
     } else if (fillOptions.image && typeof fillOptions.image === 'string' && fillOptions.image in globalDefMap) {
-      fillType = 'patternImage';
+      fillType = FILL_TYPE.PATTERN_IMAGE;
       fillBy = `url(#${globalDefMap[fillOptions.image]})`;
       fillId = fillOptions.image;
     }
+  
     return { fillType, fillBy, fillId };
   };
-
+  
   /**
    * Generate the fill type pattern or gradient element.
    * @param {String} fillId Predefined ID that used refer the def element.
@@ -334,7 +338,7 @@ class UiCore {
    * @param {String} color Hex color code for pattern.
    * @return {Void} void
    */
-  static generateFillElem = (fillId, fillType, fillOptions, color) => {
+  static generateFillElem = (fillId: string, fillType: FILL_TYPE, fillOptions: IFillOptions, color: string): IVnode => {
     switch (fillType) {
       case 'patternPreset': return patterns.getType(fillOptions.pattern, fillId, color);
       case 'gradientPreset': return gradients.getType(fillOptions.gradient, fillId, color);

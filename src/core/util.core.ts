@@ -2,9 +2,10 @@
 
 import deepmerge from 'deepmerge';
 import { COLOR_MODEL, RAINBOW_COLOR_MODEL } from './fillColorModel';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import localizedFormat from 'dayjs/plugin/localizedFormat';
+import { IObject } from '../viewEngin/pview.model';
 
 dayjs.extend(customParseFormat);
 dayjs.extend(localizedFormat);
@@ -41,14 +42,15 @@ class UtilCore {
    * @param  {...any} args Array of source object.
    * @return {Object} Merged object.
    */
-  static extends = (dest, ...args) => {
+  static extends = (dest: IObject, ...args: IObject[]): IObject => {
+    // @ts-ignore
     const overwriteMerge = (destinationArray, sourceArray, options) => sourceArray;
     if (!dest) {
       return {};
     } else if (args.length === 0) {
       return dest;
     } else {
-      return dest = deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
+      return deepmerge.all([dest, ...args], { 'arrayMerge': overwriteMerge });
     }
   };
 
@@ -57,7 +59,7 @@ class UtilCore {
    * @param {Object} src Source object which needs deep copy.
    * @return {Object} Returns new copied object.
    */
-  static deepCopy = (src = {}) => {
+  static deepCopy = (src: IObject = {}): IObject => {
     if (typeof src === 'object') {
       return deepmerge.all([{}, src]);
     }
@@ -66,18 +68,18 @@ class UtilCore {
 
   /**
    * Deep Freeze object recursively.
-   * @param {Object} object Input object to be freeze.
+   * @param {Object} anyObject Input object to be freeze.
    * @returns {Object} Frozen object.
    */
-  static deepFreeze = (object) => {
-    let propNames = Object.getOwnPropertyNames(object);
+  static deepFreeze = (anyObject: IObject) => {
+    let propNames = Object.getOwnPropertyNames(anyObject);
     for (let name of propNames) {
-      let value = object[name];
+      let value = anyObject[name];
       if (value && typeof value === 'object') {
         UtilCore.deepFreeze(value);
       }
     }
-    return Object.freeze(object);
+    return Object.freeze(anyObject);
   };
 
   /**
@@ -90,7 +92,7 @@ class UtilCore {
    * Example: limit the output of this computation to between 0 and 255
    * (x * 255).clamp(0, 255)
    */
-  static clamp = (min, max, val) => {
+  static clamp = (min: number, max: number, val: number): number => {
     return Math.min(Math.max(val, min), max);
   };
 
@@ -100,7 +102,7 @@ class UtilCore {
    * @param {String} format Parsing format of input date.
    * @returns {Boolean} Return true or false.
    */
-  static isDate = (date, format) => {
+  static isDate = (date: string | number | Dayjs, format?: string): boolean => {
     if (!date) {
       return false;
     }
@@ -112,30 +114,12 @@ class UtilCore {
   };
 
   /**
-   * Memoize version of a function for faster execution.
-   * @param {Function} fn A function to memoize.
-   * @returns {Function} Return a memoize version of the function.
-   */
-  static memoize = (fn) => {
-    let cache = {};
-    return (...args) => {
-      if (args in cache) {
-        return cache[args];
-      } else {
-        let result = fn(...args);
-        cache[args] = result;
-        return result;
-      }
-    };
-  }
-
-  /**
    * Return a color HEX code from index.
    * @param {Number} index Index of color HEX code.
    * @param {Boolean} rainbowFlag Return rainbow color HEX code.
    * @returns {String} Color HEX code.
    */
-  static getColor = (index, rainbowFlag) => {
+  static getColor = (index: number, rainbowFlag?: boolean): string => {
     let colors;
     if (rainbowFlag) {
       colors = $SC.RAINBOW_COLOR_MODEL.length ? $SC.RAINBOW_COLOR_MODEL : RAINBOW_COLOR_MODEL;
@@ -145,7 +129,7 @@ class UtilCore {
     return colors[index % colors.length];
   };
 
-  static colorLuminance = (hex, lum) => {
+  static colorLuminance = (hex: string, lum: number): string => {
     /* validate hex string*/
     hex = String(hex).replace(/[^0-9a-f]/gi, '');
     if (hex.length < 6) {
@@ -162,7 +146,7 @@ class UtilCore {
     return rgb;
   };
 
-  static assemble = (literal, params) => {
+  static assemble = (literal: string, params: any) => {
     return new Function(params, 'return `' + literal + '`;'); // TODO: Proper escaping
   };
 
@@ -170,9 +154,10 @@ class UtilCore {
    * Generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant.
    * @returns {string} Return a GUID.
    */
-  static uuidv4 = () => {
+  static uuidv4 = (): string => {
     const crypto = window.crypto || window.msCrypto;
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    //@ts-ignore
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
       (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
   };
@@ -181,7 +166,7 @@ class UtilCore {
    * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested up to 10,000 ids).
    * @returns {string} Returns a unique string.
    */
-  static getRandomID = () => {
+  static getRandomID = (): string => {
     let chr4 = () => {
       return Math.random().toString(16).slice(-4);
     };
@@ -194,9 +179,9 @@ class UtilCore {
    * @param {*} mark The string which uniquely identify the time mark.
    * @return {function} Returns the curry function.
    */
-  static timeLogSync = (fn, mark) => {
+  static timeLogSync = (fn: Function, mark: string) => {
     let that = this;
-    return (...args) => {
+    return (...args: any[]) => {
       /* eslint-disable-next-line no-console */
       console.time(mark);
       if (typeof fn === 'function') {

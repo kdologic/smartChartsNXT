@@ -15,10 +15,12 @@ import LoaderView from '../components/loaderView';
 import StoreManager from '../liveStore/storeManager';
 import { Store } from '../liveStore/store';
 import { PUBLIC_SITE } from '../settings/globalEnums';
-import GlobalDefs from '../styles/globalDefs';
+import GlobalDefs from '../styles/globalDefs/globalDefs';
 import a11yFactory, { A11yWriter } from '../core/a11y';
 import PopupContainer from '../popupComponents/popupContainer';
 import { IObject } from '../viewEngin/pview.model';
+import { IConnectedPointChartConfig } from '../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { IVnode } from '../viewEngin/component.model';
 
 /**
  * baseChart.tsx
@@ -131,7 +133,7 @@ class BaseChart extends Component {
     };
   }
 
-  passContext() {
+  passContext(): IObject {
     return {
       runId: this.props.runId,
       chartType: this.chartType,
@@ -172,7 +174,7 @@ class BaseChart extends Component {
     this.store.setValue('globalRenderAll', false);
   }
 
-  render() {
+  render(): IVnode {
     this.initCanvasSize(this.state.width, this.state.height);
     const Chart = CHART_MODULES[this.chartType].chart;
     return (
@@ -216,7 +218,7 @@ class BaseChart extends Component {
             this.getMenuIcon(this.CHART_DATA.svgWidth, 0)
           }
 
-          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS)} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
+          <Chart chartOptions={UtilCore.extends({}, this.CHART_OPTIONS) as IConnectedPointChartConfig} chartData={UtilCore.extends({}, this.CHART_DATA)} chartConst={UtilCore.extends({}, this.CHART_CONST)} globalRenderAll={this.state.globalRenderAll}></Chart>
 
           <PopupContainer></PopupContainer>
 
@@ -251,7 +253,7 @@ class BaseChart extends Component {
     );
   }
 
-  getRunId() {
+  getRunId(): string {
     return this.props.runId;
   }
 
@@ -261,11 +263,11 @@ class BaseChart extends Component {
     this.CHART_DATA.svgCenter = new Point((this.CHART_DATA.svgWidth / 2), (this.CHART_DATA.svgHeight / 2));
   }
 
-  getChartId() {
+  getChartId(): string {
     return `${this.chartType}_${this.getRunId()}`;
   }
 
-  getMenuIcon(posX: number, posY: number): any {
+  getMenuIcon(posX: number, posY: number): IVnode {
     return (
       <g class='sc-menu-icon' transform={`translate(${posX},${posY})`}>
         <title>Chart Options</title>
@@ -373,7 +375,7 @@ class BaseChart extends Component {
     }
   }
 
-  getMenuIconWidth() {
+  getMenuIconWidth(): number {
     return this.CHART_DATA.svgWidth < 500 ? 3 : this.state.menuIconWidth - (2 * this.state.menuIconPadding);
   }
 

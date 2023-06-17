@@ -7,7 +7,7 @@ import { Component } from './../viewEngin/pview';
 import UiCore from '../core/ui.core';
 import UtilCore from '../core/util.core';
 import { OPTIONS_TYPE } from './../settings/globalEnums';
-import MarkerIcon from './markerIcon';
+import MarkerIcon from './marker/markerIcon.component';
 const enums = new OPTIONS_TYPE();
 
 /**
