@@ -14,6 +14,7 @@ declare global {
   var $SC: SmartChartsNXT
   interface Window {
     $SC: SmartChartsNXT
+    msCrypto: any
   }
 }
 
