@@ -95,7 +95,7 @@ function renderDOM(vnode) {
         component.node.setAttribute(key, attrVal);
       }
     });
-  } else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName, vnode.nodeName.constructor)) { /* when vnode is a class constructor of type pview component */
+  } else if (typeof vnode.nodeName === 'function' && isFunction(vnode.nodeName) === 'class') { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
     /* eslint-disable-next-line babel/no-invalid-this */
     vnode.nodeName.prototype.context = this.context || {};
@@ -129,7 +129,7 @@ function renderDOM(vnode) {
     ({ node: objComp.ref.node, children: objComp.ref.children } = component);
 
     return component;
-  } else if (typeof vnode.nodeName === 'function') { /* when vnode is type normal function */
+  } else if (typeof vnode.nodeName === 'function' && isFunction(vnode.nodeName) !== 'class') { /* when vnode is type normal function */
     ({ node: component.node, children: component.children } = renderDOM.call({}, vnode.nodeName(vnode.attributes)));
   } else {
     throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component', vnode);
@@ -303,6 +303,18 @@ function parseEventsProps(events, node) {
  */
 function isNativeClass(instance) {
   return instance.prototype.__proto__.constructor.name === 'Component';
+}
+
+function isFunction(x) {
+  return typeof x === 'function'
+    ? x.prototype
+      ? Object.getOwnPropertyDescriptor(x, 'prototype').writable
+        ? 'function'
+        : 'class'
+      : x.constructor.name === 'AsyncFunction'
+        ? 'async'
+        : 'arrow'
+    : '';
 }
 
 /**
