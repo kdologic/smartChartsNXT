@@ -100,7 +100,7 @@ export function renderDOM(vnode: IVnode): IComponent {
       }
     });
   }
-  else if (typeof vnode.nodeName === 'function' && isNativeClass(vnode.nodeName)) { /* when vnode is a class constructor of type pview component */
+  else if (typeof vnode.nodeName === 'function' && isFunction(vnode.nodeName) === 'class') { /* when vnode is a class constructor of type pview component */
     vnode.attributes.extChildren = vnode.children;
     /* eslint-disable-next-line babel/no-invalid-this */
     (vnode.nodeName as IPrototype).prototype.context = this.context || {};
@@ -140,7 +140,7 @@ export function renderDOM(vnode: IVnode): IComponent {
       children: component.children
     });
     return component;
-  } else if (typeof vnode.nodeName === 'function' && !isNativeClass(vnode.nodeName)) { /* when vnode is type normal function */
+  } else if (typeof vnode.nodeName === 'function' && isFunction(vnode.nodeName) !== 'class') { /* when vnode is type normal function */
     ({ node: component.node, children: component.children } = renderDOM.call({}, vnode.nodeName(vnode.attributes)));
   } else {
     throw new TypeError('RenderDOM method accepts html node or function with render method or class extends Component');
@@ -313,6 +313,18 @@ export function parseEventsProps(events: IObject, node: SVGElement | HTMLElement
  */
 export function isNativeClass(_class: any): boolean {
   return _class.prototype.__proto__.constructor.name === 'Component';
+}
+
+function isFunction(x: any): string {
+  return typeof x === 'function'
+    ? x.prototype
+      ? Object.getOwnPropertyDescriptor(x, 'prototype').writable
+        ? 'function'
+        : 'class'
+      : x.constructor.name === 'AsyncFunction'
+        ? 'async'
+        : 'arrow'
+    : '';
 }
 
 export { Component };
