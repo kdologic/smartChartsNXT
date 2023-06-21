@@ -1,11 +1,12 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import UtilCore from './../core/util.core';
-import eventEmitter from './../core/eventEmitter';
-import RichTextBox from './richTextBox';
-const enums = new OPTIONS_TYPE();
+import { Component } from '../../viewEngin/pview';
+import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../settings/globalEnums';
+import UtilCore from '../../core/util.core';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import RichTextBox from '../richTextBox';
+import { IMarkRegionConfig, IMarkRegionProps } from './markRegion.model';
+import { IMarkRegion } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 /**
  * markRegion.js
@@ -15,9 +16,14 @@ const enums = new OPTIONS_TYPE();
  */
 
 class MarkRegion extends Component {
-  constructor(props) {
+  private emitter: CustomEvents
+  private rid: string;
+  private clipPathId: string;
+  private config: {xRegions: IMarkRegionConfig[], yRegions: IMarkRegionConfig[]};
+
+  constructor(props: IMarkRegionProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {
@@ -35,9 +41,9 @@ class MarkRegion extends Component {
     this.onUpdateScale = this.onUpdateScale.bind(this);
   }
 
-  setConfig(props) {
-    let mapFn = (oldConfig) => (d, i) => {
-      let conf = {
+  setConfig(props: IMarkRegionProps) {
+    let mapFn = (oldConfig: IMarkRegionConfig[]) => (d: IMarkRegion, i: number) => {
+      let conf: IMarkRegionConfig = {
         fill: d.color || UtilCore.getColor(i),
         stroke: d.borderColor || 'none',
         opacity: d.opacity || 0.2,
@@ -63,7 +69,7 @@ class MarkRegion extends Component {
     }
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: IMarkRegionProps) {
     this.setConfig(nextProps);
   }
 
@@ -117,12 +123,12 @@ class MarkRegion extends Component {
 
   getYMarkRegions() {
     let scaleY = this.state.scaleY;
-    return this.props.yMarkRegions.map((region, i) => {
+    return this.props.yMarkRegions.map((region: IMarkRegion, i: number) => {
       region.from = region.from || 0;
       region.to = region.to || 0;
       let valueDiff = Math.abs(region.to - region.from);
       let startRegionY = (this.props.yInterval.iMax - Math.max(region.from, region.to)) * scaleY;
-      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC) {
+      if (this.props.yAxisType === AXIS_TYPE.LOGARITHMIC) {
         valueDiff = Math.abs(Math.log10(region.to) - Math.log10(region.from));
         startRegionY = (Math.log10(this.props.yInterval.iMax) - Math.log10(Math.max(region.from, region.to))) * scaleY;
       }
@@ -154,7 +160,7 @@ class MarkRegion extends Component {
         <g>
           <rect class="sc-y-mark-region" x={0} y={startRegionY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
               fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {
@@ -181,7 +187,7 @@ class MarkRegion extends Component {
 
   getXMarkRegions() {
     let scaleX = this.state.scaleX;
-    return this.props.xMarkRegions.map((region, i) => {
+    return this.props.xMarkRegions.map((region: IMarkRegion, i: number) => {
       region.from = region.from || 0;
       region.to = region.to || 0;
       let startFrom = Math.min(region.from, region.to) - this.props.leftIndex;
@@ -208,7 +214,7 @@ class MarkRegion extends Component {
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
           <rect x={(startFrom - 1) * scaleX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={enums.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
               rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref) => {
                 if (ref) {
@@ -233,7 +239,7 @@ class MarkRegion extends Component {
     });
   }
 
-  onUpdateScale(e) {
+  onUpdateScale(e: {scaleX: number, scaleY: number, baseLine: number} ) {
     this.setState({
       scaleX: e.scaleX,
       scaleY: e.scaleY
