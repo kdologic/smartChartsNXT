@@ -1,15 +1,16 @@
 'use strict';
 
-import defaultConfig from './../settings/config';
-import { Component } from './../viewEngin/pview';
-import eventEmitter from './../core/eventEmitter';
-import UtilCore from './../core/util.core';
-import UiCore from './../core/ui.core';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-const enums = new OPTIONS_TYPE();
+import defaultConfig from '../../settings/config';
+import { Component } from '../../viewEngin/pview';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import UtilCore from '../../core/util.core';
+import UiCore from '../../core/ui.core';
+import { AXIS_TYPE, FILL_TYPE, LINE_STYLE } from '../../settings/globalEnums';
+import { IGridProps, IUpdateHorizontalGridEvent, IUpdateVerticalGridEvent } from './grid.model';
+import { CategoryLabelType, IGridConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 /**
- * grid.js
+ * grid.component.tsx
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create a grid for the chart.
@@ -17,9 +18,14 @@ const enums = new OPTIONS_TYPE();
  */
 
 class Grid extends Component {
-  constructor(props) {
+  private emitter: CustomEvents;
+  private clipId: string;
+  private rFillId: string;
+  private config: IGridConfig;
+
+  constructor(props: IGridProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.clipId = UtilCore.getRandomID();
     this.rFillId = UtilCore.getRandomID();
     this.config = {};
@@ -32,14 +38,14 @@ class Grid extends Component {
       hLineDashArray: 0,
       zeroBaseGridIndex: undefined
     };
-    this.setConfig(this.props);
+    this.setConfig(props);
     this.updateVerticalGrid = this.updateVerticalGrid.bind(this);
     this.updateHorizontalGrid = this.updateHorizontalGrid.bind(this);
     this.emitter.on('onHorizontalLabelsRender', this.updateVerticalGrid);
     this.emitter.on('onVerticalLabelsRender', this.updateHorizontalGrid);
   }
 
-  setConfig(props) {
+  setConfig(props: IGridProps): void {
     const opts = {
       vertical: (props.opts || {}).vertical || {},
       horizontal: (props.opts || {}).horizontal || {}
@@ -47,14 +53,14 @@ class Grid extends Component {
     this.config = {
       vertical: {
         enable: typeof opts.vertical.enable === 'undefined' ? true : opts.vertical.enable,
-        lineStyle: opts.vertical.lineStyle || enums.LINE_STYLE.DASHED,
+        lineStyle: opts.vertical.lineStyle || LINE_STYLE.DASHED,
         lineColor: opts.vertical.lineColor || defaultConfig.theme.bgColorMedium,
         lineThickness: typeof opts.vertical.lineThickness === 'undefined' ? 1 : opts.vertical.lineThickness,
         lineOpacity: typeof opts.vertical.lineOpacity === 'undefined' ? 0.2 : opts.vertical.lineOpacity
       },
       horizontal: {
         enable: typeof opts.horizontal.enable === 'undefined' ? true : opts.horizontal.enable,
-        lineStyle: opts.horizontal.lineStyle || enums.LINE_STYLE.SOLID,
+        lineStyle: opts.horizontal.lineStyle || LINE_STYLE.SOLID,
         lineColor: opts.horizontal.lineColor || defaultConfig.theme.bgColorMedium,
         lineThickness: typeof opts.horizontal.lineThickness === 'undefined' ? 1 : opts.horizontal.lineThickness,
         lineOpacity: typeof opts.horizontal.lineOpacity === 'undefined' ? 0.2 : opts.horizontal.lineOpacity
@@ -65,11 +71,11 @@ class Grid extends Component {
 
     if (this.config.bgColor === 'none') {
       this.state.fillBy = this.config.bgColor;
-      this.state.fillType = 'none';
+      this.state.fillType = FILL_TYPE.NONE;
     } else {
       let fillOpt = UiCore.processFillOptions(this.props.opts.fillOptions, this.rFillId);
       if (fillOpt.fillBy === 'none') {
-        this.state.fillType = 'solidColor';
+        this.state.fillType = FILL_TYPE.SOLID_COLOR;
         this.state.fillBy = this.config.bgColor;
       } else {
         this.state.fillType = fillOpt.fillType;
@@ -77,11 +83,11 @@ class Grid extends Component {
         this.state.fillId = fillOpt.fillId;
       }
     }
-    this.state.vLineDashArray = this.config.vertical.lineStyle === enums.LINE_STYLE.DASHED ? 4 : 0;
-    this.state.hLineDashArray = this.config.horizontal.lineStyle === enums.LINE_STYLE.DASHED ? 4 : 0;
+    this.state.vLineDashArray = this.config.vertical.lineStyle === LINE_STYLE.DASHED ? 4 : 0;
+    this.state.hLineDashArray = this.config.horizontal.lineStyle === LINE_STYLE.DASHED ? 4 : 0;
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: IGridProps): void {
     this.setConfig(nextProps);
   }
 
@@ -93,7 +99,7 @@ class Grid extends Component {
   render() {
     return (
       <g class='sc-chart-grid' transform={`translate(${this.props.posX},${this.props.posY})`} >
-        {this.state.fillType !== 'none' && this.state.fillType !== 'solidColor' &&
+        {this.state.fillType !== FILL_TYPE.NONE && this.state.fillType !== FILL_TYPE.SOLID_COLOR &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.opts.fillOptions, this.config.bgColor)
         }
         <rect class='sc-grid-rect' x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' shape-rendering='optimizeSpeed' pointer-events='all' fill={this.state.fillBy} fill-opacity={this.config.bgOpacity} stroke-width='0' />
@@ -136,7 +142,7 @@ class Grid extends Component {
           stroke-width={this.config.horizontal.lineThickness} shape-rendering='optimizeSpeed' stroke-dasharray={this.state.hLineDashArray}>
         </line>
       );
-      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC) {
+      if (this.props.yAxisType === AXIS_TYPE.LOGARITHMIC) {
         for (let subGridCount = 2; subGridCount < 10; subGridCount++) {
           grids.push(
             <line instanceId={`hline-${gridCount}-${subGridCount}`} class={`sc-h-grid-line-${gridCount}-${subGridCount}`}
@@ -151,14 +157,14 @@ class Grid extends Component {
     return grids;
   }
 
-  updateVerticalGrid(vg) {
+  updateVerticalGrid(vg: IUpdateVerticalGridEvent) {
     this.setState({
       vGridCount: vg.count,
       vGridInterval: vg.intervalLen
     });
   }
 
-  updateHorizontalGrid(hg) {
+  updateHorizontalGrid(hg: IUpdateHorizontalGridEvent) {
     if (hg.isPrimary) {
       this.setState({
         hGridCount: hg.count,
@@ -167,7 +173,6 @@ class Grid extends Component {
       });
     }
   }
-
 }
 
 export default Grid;
