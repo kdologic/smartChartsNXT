@@ -11,7 +11,7 @@ import { IAxisBarProps } from './axisBar.model';
  * @description: This components will create Axis bar.
  */
 
-class AxisBar extends Component {
+class AxisBar extends Component<IAxisBarProps> {
   constructor(props: IAxisBarProps) {
     super(props);
   }

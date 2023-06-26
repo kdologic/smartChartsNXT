@@ -1,25 +1,27 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
-import Style from './../viewEngin/style';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import Style from '../../viewEngin/style';
+import { ITextBoxProps } from './textBox.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * textBox.js
+ * textBox.component.tsx
  * @createdOn: 04-May-2019
  * @author: SmartChartsNXT
  * @description: This components will create a text box area.
  * @extends: Component
  */
 
-class TextBox extends Component {
-  constructor(props) {
+class TextBox extends Component<ITextBoxProps> {
+  constructor(props: ITextBoxProps) {
     super(props);
     this.state = {};
     this.initState();
   }
 
-  initState() {
+  initState(): void {
     this.state = {
       text: this.props.text,
       textBBox: {
@@ -34,15 +36,15 @@ class TextBox extends Component {
     };
   }
 
-  afterMount() {
+  afterMount(): void {
     this.processAfterRender();
   }
 
-  afterUpdate() {
+  afterUpdate(): void {
     this.processAfterRender();
   }
 
-  processBeforeRender() {
+  processBeforeRender(): void {
     this.state.text = this.props.text;
     const textBBox = UiCore.getComputedBBox(this.getTextNode([this.state.text]));
     this.state.textWidth = textBBox.width;
@@ -53,11 +55,11 @@ class TextBox extends Component {
   }
 
   processAfterRender() {
-    const textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
+    const textNode = this.state.splitText ? this.getSplitTextNode() : this.getTextNode([this.state.text]);
     const textBBox = UiCore.getComputedBBox(textNode);
     this.state.textBBox.width = this.props.width || textBBox.width + (2 * this.props.padding || 0);
     this.state.textBBox.height = this.props.height || textBBox.height + (2 * this.props.padding || 0);
-    const bgRect = this.ref.node.querySelector('.sc-textbox-bg');
+    const bgRect = (this.ref.node as SVGElement).querySelector('.sc-textbox-bg');
     if (bgRect) {
       bgRect.setAttribute('width', this.state.textBBox.width);
       bgRect.setAttribute('height', this.state.textBBox.height);
@@ -67,7 +69,7 @@ class TextBox extends Component {
 
   render() {
     this.processBeforeRender();
-    let textNode = this.state.splitText ? this.getSplittedTextNode() : this.getTextNode([this.state.text]);
+    let textNode = this.state.splitText ? this.getSplitTextNode() : this.getTextNode([this.state.text]);
     return (
       <g transform={`translate(${this.props.posX},${this.props.posY}) ${this.props.transform || ''}`} tabindex='-1' aria-hidden='true'>
         <rect class='sc-textbox-bg' x={(this.state.textAnchor === 'middle' ? -(this.state.textBBox.width / 2) : 0)} y={0}
@@ -79,12 +81,12 @@ class TextBox extends Component {
     );
   }
 
-  getSplittedTextNode() {
+  getSplitTextNode(): IVnode {
     let lines = this.splitText(this.state.text);
     return this.getTextNode(lines);
   }
 
-  getTextNode(lines) {
+  getTextNode(lines: (string | number)[]): IVnode {
     return (
       <g>
         {this.props.style &&
@@ -99,9 +101,10 @@ class TextBox extends Component {
     );
   }
 
-  splitText(txt = '') {
-    let words = txt.split(/(\s+)/).filter(e => e.trim().length > 0);
-    let lines = [], line = [];
+  splitText(txt: string = ''): string[] {
+    let words: string[] = txt.split(/(\s+)/).filter(e => e.trim().length > 0);
+    let lines: string[] = [];
+    let line: string[] = [];
     for (let w of words) {
       let textWidth = UiCore.getComputedTextWidth(this.getTextNode([line.concat(w).join(' ')]));
       if (textWidth > this.state.textBBox.width) {

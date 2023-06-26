@@ -1,17 +1,18 @@
 'use strict';
 
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import eventEmitter from './../core/eventEmitter';
-import defaultConfig from './../settings/config';
-import UtilCore from './../core/util.core';
-import { Component } from './../viewEngin/pview';
-import Ticks from './ticks';
-import UiCore from '../core/ui.core';
-import a11yFactory from './../core/a11y';
-const enums = new OPTIONS_TYPE();
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import defaultConfig from '../../settings/config';
+import UtilCore from '../../core/util.core';
+import { Component } from '../../viewEngin/pview';
+import Ticks from '../ticks';
+import UiCore from '../../core/ui.core';
+import a11yFactory, { A11yWriter } from '../../core/a11y';
+import { IHorizontalLabelsProps, IXAxisConfigExtended } from './horizontalLabels.model';
+import { VERTICAL_ALIGN } from '../../settings/globalEnums';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * horizontalLabels.js
+ * horizontalLabels.component.tsx
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create a Horizontal Labels for the chart.
@@ -23,16 +24,23 @@ const enums = new OPTIONS_TYPE();
  * 3. hLabelExit: Fire mouse out of label text.
  */
 
-class HorizontalLabels extends Component {
+class HorizontalLabels extends Component<IHorizontalLabelsProps> {
+  private emitter: CustomEvents
+  private a11yWriter: A11yWriter;
+  private rid: string;
+  private clipPathId: string;
+  private config: IXAxisConfigExtended;
+  private defaultTickSpan: number;
+  private accId: string;
 
-  constructor(props) {
+  constructor(props: IHorizontalLabelsProps) {
     super(props);
     let self = this;
-    this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
+    this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
-    this.config = {};
+    // this.config = {};
     this.resetConfig(this.props.opts);
     this.defaultTickSpan = 6;
     this.state = {
@@ -40,7 +48,7 @@ class HorizontalLabels extends Component {
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
-            return self.props.opts.categories.parseAsDate && UtilCore.isDate(c) ? UtilCore.dateFormat(c).format(self.config.dateFormat) : c;
+            return self.props.opts.categories.parseAsDate && UtilCore.isDate(c) ? UtilCore.dateFormat(c).format(self.config.displayDateFormat) : c;
           });
         } else {
           this._categories = [];
@@ -56,7 +64,7 @@ class HorizontalLabels extends Component {
       width: this.props.maxWidth,
       height: this.props.maxHeight
     }, this.props.clip);
-    this.state.categories = this.props.categorySet;
+    this.state.categories = props.categorySet;
     this.onMouseEnter = this.onMouseEnter.bind(this);
     this.onMouseLeave = this.onMouseLeave.bind(this);
 
@@ -78,7 +86,7 @@ class HorizontalLabels extends Component {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  propsWillReceive(nextProps) {
+  propsWillReceive(nextProps: IHorizontalLabelsProps): void {
     this.resetConfig(nextProps.opts);
     this.state.categories = nextProps.categorySet;
     this.state.clip = Object.assign({
@@ -89,7 +97,13 @@ class HorizontalLabels extends Component {
     }, nextProps.clip);
   }
 
-  resetConfig(config) {
+  resetConfig(config: IXAxisConfigExtended): void {
+    let dateFormat = '';
+    if (config?.categories instanceof Array) {
+      dateFormat = defaultConfig.formatting.displayDateFormat;
+    } else {
+      dateFormat = config?.categories?.displayDateFormat;
+    }
     this.config = {
       ...this.config, ...{
         labelRotate: typeof config.labelRotate === 'undefined' ? 0 : config.labelRotate,
@@ -100,7 +114,7 @@ class HorizontalLabels extends Component {
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
-        dateFormat: config.categories.displayDateFormat || defaultConfig.formatting.displayDateFormat
+        displayDateFormat: dateFormat
       }
     };
   }
@@ -116,10 +130,10 @@ class HorizontalLabels extends Component {
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} aria-hidden='true'>
         <defs>
           <clipPath id={this.clipPathId}>
-            <rect x={this.state.clip.x - 100} y={this.state.clip.y - (this.props.opts.labelAlign === enums.VERTICAL_ALIGN.TOP ? this.state.clip.height : 0)} width={this.state.clip.width + 100} height={this.state.clip.height} />
+            <rect x={this.state.clip.x - 100} y={this.state.clip.y - (this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? this.state.clip.height : 0)} width={this.state.clip.width + 100} height={this.state.clip.height} />
           </clipPath>
           <clipPath id={this.clipPathId + '-tick'}>
-            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y - (this.props.opts.labelAlign === enums.VERTICAL_ALIGN.TOP ? (this.props.opts.tickSpan || this.defaultTickSpan) : 0)} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
+            <rect x={this.state.clip.x - this.props.paddingX} y={this.state.clip.y - (this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? (this.props.opts.tickSpan || this.defaultTickSpan) : 0)} width={this.state.clip.width + this.props.paddingX} height={this.props.opts.tickSpan || this.defaultTickSpan} />
           </clipPath>
         </defs>
         <g class='sc-horizontal-labels' transform={`translate(${this.props.paddingX}, 0)`}>
@@ -127,12 +141,12 @@ class HorizontalLabels extends Component {
             this.getLabels()
           }
         </g>
-        {this.props.opts.labelAlign === enums.VERTICAL_ALIGN.TOP &&
+        {this.props.opts.labelAlign === VERTICAL_ALIGN.TOP &&
           <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
             <Ticks posX={0} posY={-(this.props.opts.tickSpan || this.defaultTickSpan)} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
           </g>
         }
-        {this.props.opts.labelAlign === enums.VERTICAL_ALIGN.BOTTOM &&
+        {this.props.opts.labelAlign === VERTICAL_ALIGN.BOTTOM &&
           <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
             <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
           </g>
@@ -149,14 +163,14 @@ class HorizontalLabels extends Component {
     return labels;
   }
 
-  getEachLabel(val, index) {
+  getEachLabel(val: string, index: number): IVnode {
     let x = this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen;
-    let y = this.props.opts.labelAlign === enums.VERTICAL_ALIGN.TOP ? -18 : 18;
+    let y = this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? -18 : 18;
     let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
     let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
     let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
       transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
-      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: (e) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
+      <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: (e: MouseEvent) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
         {(this.props.opts.prepend ? this.props.opts.prepend : '') + val + (this.props.opts.append ? this.props.opts.append : '')}
       </tspan>
     </text>;
@@ -171,7 +185,7 @@ class HorizontalLabels extends Component {
     return label;
   }
 
-  setIntervalLength() {
+  setIntervalLength(): void {
     let interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1 || 2);
     let skipLen = Math.ceil(this.config.intervalThreshold / interval);
     if (skipLen > 0) {
@@ -182,21 +196,24 @@ class HorizontalLabels extends Component {
       this.state.categories = newCategories;
     }
     interval = skipLen * interval;
-
     this.state.intervalLen = interval;
   }
 
-  onMouseEnter(e, index) {
+  onMouseEnter(e: MouseEvent, index: number) {
     let lblIndex = index;
     let lblText = this.state.categories[lblIndex];
     if (UtilCore.isDate(this.props.categorySet[lblIndex])) {
       lblText = UtilCore.dateFormat(this.props.categorySet[lblIndex]).format('lll');
     }
-    e.labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + lblText + (this.props.opts.append ? this.props.opts.append : '');
-    this.emitter.emit('hLabelEnter', e);
+    const labelText = (this.props.opts.prepend ? this.props.opts.prepend : '') + lblText + (this.props.opts.append ? this.props.opts.append : '');
+    const eventData: { event: MouseEvent, labelText: string } = {
+      event: e,
+      labelText
+    };
+    this.emitter.emit('hLabelEnter', eventData);
   }
 
-  onMouseLeave(e) {
+  onMouseLeave(e: MouseEvent) {
     this.emitter.emit('hLabelExit', e);
   }
 
