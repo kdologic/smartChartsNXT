@@ -1,4 +1,5 @@
 import { IMarkRegion } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
+import { IYIntervalType } from "../../core/core.model";
 import { IObject } from "../../viewEngin/pview.model";
 
 export interface IMarkRegionProps {
@@ -10,7 +11,7 @@ export interface IMarkRegionProps {
   yAxisType: string;
   width: number;
   height: number;
-  yInterval: number;
+  yInterval: IYIntervalType;
   paddingX: number;
   leftIndex: number;
   vTransformX: number;

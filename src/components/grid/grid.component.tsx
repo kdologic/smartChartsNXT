@@ -7,7 +7,7 @@ import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
 import { AXIS_TYPE, FILL_TYPE, LINE_STYLE } from '../../settings/globalEnums';
 import { IGridProps, IUpdateHorizontalGridEvent, IUpdateVerticalGridEvent } from './grid.model';
-import { CategoryLabelType, IGridConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { IGridConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 /**
  * grid.component.tsx
@@ -17,7 +17,7 @@ import { CategoryLabelType, IGridConfig } from '../../charts/connectedPointChart
  * @extends: Component
  */
 
-class Grid extends Component {
+class Grid extends Component<IGridProps> {
   private emitter: CustomEvents;
   private clipId: string;
   private rFillId: string;

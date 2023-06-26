@@ -10,7 +10,7 @@ import { ISliderWindowProps } from "./sliderWindow.model";
  * @extends Component
  */
 
-class SliderWindow extends Component {
+class SliderWindow extends Component<ISliderWindowProps> {
   private titleId: string;
 
   constructor(props: ISliderWindowProps) {

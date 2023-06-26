@@ -33,7 +33,7 @@ import SliderRightHandle from './sliderRightHandle/sliderRightHandle.component';
  * hScroll : Fire when user perform scrolling.
  */
 
-class HorizontalScroller extends Component {
+class HorizontalScroller extends Component<IHorizontalScrollerProps> {
   private selectedHandler: string;
   private emitter: CustomEvents;
   private store: Store;

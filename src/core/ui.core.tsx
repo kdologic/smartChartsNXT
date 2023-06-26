@@ -6,8 +6,8 @@ import UtilCore from './util.core';
 import patterns from '../styles/patterns/patterns';
 import gradients from '../styles/gradients/gradients';
 import { IVnode } from '../viewEngin/component.model';
-import { IFillOptions } from '../models/global.models';
 import { FILL_TYPE } from '../settings/globalEnums';
+import { IFillOptions, IYIntervalType } from './core.model';
 
 /**
  * ui.core.js
@@ -59,7 +59,7 @@ class UiCore {
    * (-) negative indicates darker shades
    *
   */
-  static radialGradient = (gradId: string, cx: number, cy: number, fx: number, fy: number, r: number, gradArr: number[] | {offset: number, opacity: number}[]): IVnode => {
+  static radialGradient = (gradId: string, cx: number, cy: number, fx: number, fy: number, r: number, gradArr: number[] | { offset: number, opacity: number }[]): IVnode => {
     return (
       <defs>
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
@@ -138,13 +138,13 @@ class UiCore {
       targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt .sc-prime-view');
     }
     let pt = new DOMPoint();
-    if(evt instanceof MouseEvent && evt.clientX !== undefined) {
+    if (evt instanceof MouseEvent && evt.clientX !== undefined) {
       pt.x = evt.clientX;
       pt.y = evt.clientY;
-    }else if(evt instanceof TouchEvent &&  evt.touches[0]) {
+    } else if (evt instanceof TouchEvent && evt.touches[0]) {
       pt.x = evt.touches[0].clientX;
       pt.y = evt.touches[0].clientY;
-    }else {
+    } else {
       pt.x = 0;
       pt.y = 0;
     }
@@ -175,11 +175,11 @@ class UiCore {
    * @return {Object} Returns interval object.
    */
 
-  static calcIntervalByMinMax = (minVal: number, maxVal: number, zeroBase: boolean) => {
+  static calcIntervalByMinMax = (minVal: number, maxVal: number, zeroBase: boolean): IYIntervalType => {
     let arrWeight = [0.01, 0.02, 0.05];
     let weightDecimalLevel = 1;
-    let minIntvCount = 6;
-    let maxIntvCount = 12;
+    let minIntervalCount = 6;
+    let maxIntervalCount = 12;
     let mid = (maxVal + minVal) / 2;
     let tMinVal = minVal;
     if (zeroBase) {
@@ -194,28 +194,27 @@ class UiCore {
       if (w === arrWeight.length - 1) {
         weightDecimalLevel *= 10;
       }
-      for (let intv = minIntvCount; intv <= maxIntvCount; intv++) {
-        let hitIntv = +parseFloat((tInt * intv).toString()).toFixed(2);
+      for (let interval = minIntervalCount; interval <= maxIntervalCount; interval++) {
+        let hitInterval = +parseFloat((tInt * interval).toString()).toFixed(2);
         if (minVal <= 0) {
           tMinVal = (Math.ceil(tMinVal / tInt) * tInt);
         } else {
           tMinVal = (Math.floor(tMinVal / tInt) * tInt);
         }
-        if ((tMinVal + hitIntv) >= (maxVal + tInt)) {
-          let iMax = tMinVal + hitIntv;
+        if ((tMinVal + hitInterval) >= (maxVal + tInt)) {
+          let iMax = tMinVal + hitInterval;
           if (minVal < 0) {
             tMinVal -= (2 * tInt);
-            intv += 2;
+            interval += 2;
           } else if (Math.floor(tMinVal) == Math.floor(minVal)) {
             if (!zeroBase) {
               tMinVal -= tInt;
-              intv++;
+              interval++;
             }
           }
-
           return {
             iVal: () => tInt,
-            iCount: intv,
+            iCount: interval,
             iMax: iMax,
             iMin: tMinVal
           };
@@ -224,7 +223,7 @@ class UiCore {
     }
   };
 
-  static calcIntervalByMinMaxLog = (minVal: number, maxVal: number) => {
+  static calcIntervalByMinMaxLog = (minVal: number, maxVal: number): IYIntervalType => {
     let startWeight = 0.1;
     minVal = minVal <= 0 ? startWeight : minVal;
     maxVal = maxVal <= 0 ? 1 : maxVal;
@@ -300,7 +299,7 @@ class UiCore {
     let fillType: FILL_TYPE = FILL_TYPE.SOLID_COLOR;
     let fillBy = 'none';
     let fillId;
-  
+
     if (fillOptions.pattern && typeof fillOptions.pattern === 'string') {
       if (fillOptions.pattern in globalDefMap) {
         fillType = FILL_TYPE.PATTERN_CUSTOM;
@@ -326,10 +325,10 @@ class UiCore {
       fillBy = `url(#${globalDefMap[fillOptions.image]})`;
       fillId = fillOptions.image;
     }
-  
+
     return { fillType, fillBy, fillId };
   };
-  
+
   /**
    * Generate the fill type pattern or gradient element.
    * @param {String} fillId Predefined ID that used refer the def element.

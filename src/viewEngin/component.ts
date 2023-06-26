@@ -1,5 +1,5 @@
 import fastdom from "fastdom";
-import { IComponent, IReferenceNode, IVnode } from "./component.model";
+import { IComponent, IComponentProps, IReferenceNode, IVnode } from "./component.model";
 import { config } from "./config";
 import { mountTo, parseEventsProps, parseStyleProps, renderDOM, _extends, _rearrangeOldVNodes, _replaceClassWithObject } from "./pview";
 import { IAttrDiff, INodeDiff, IObject } from "./pview.model";
@@ -9,13 +9,13 @@ import { IAttrDiff, INodeDiff, IObject } from "./pview.model";
  * All custom components must extends this Component class. And they should have implement the render method.
  */
 
-export abstract class Component {
-  public props: IObject;
+export abstract class Component<T = IComponentProps> {
+  public props: T;
   public state: IObject;
   public ref: IReferenceNode | null;
   public vnode: IVnode;
 
-  constructor(props: IObject) {
+  constructor(props: T) {
     this.props = props;
     this.state = {};
     this.ref = {
@@ -76,7 +76,7 @@ export abstract class Component {
    * @param {IVnode[]} extChildren External children vNode
    */
   public setExternalChildren(extChildren: IVnode[]): void {
-    this.props.extChildren = extChildren;
+    (this.props as IComponentProps).extChildren = extChildren;
   }
 
   /**

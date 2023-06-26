@@ -25,3 +25,7 @@ export interface IReferenceNode {
   children: Array<IReferenceNode>,
   self?: Component
 }
+
+export interface IComponentProps extends IObject {
+  extChildren?: IVnode[];
+}

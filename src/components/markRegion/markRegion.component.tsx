@@ -15,7 +15,7 @@ import { IMarkRegion } from '../../charts/connectedPointChartsType/connectedPoin
  * @description: This components will create different color regions behind the grid to highlight significant area with label support.
  */
 
-class MarkRegion extends Component {
+class MarkRegion extends Component<IMarkRegionProps> {
   private emitter: CustomEvents
   private rid: string;
   private clipPathId: string;
@@ -162,7 +162,7 @@ class MarkRegion extends Component {
           {config.text &&
             <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
               fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
-              onRef={(ref) => {
+              onRef={(ref: RichTextBox) => {
                 if (ref) {
                   config.refId = ref.contentId;
                   this.state.yRegionsLabel[ref.contentId] = {
@@ -172,7 +172,7 @@ class MarkRegion extends Component {
                   };
                 }
               }}
-              onDestroyRef={(ref) => {
+              onDestroyRef={(ref: RichTextBox) => {
                 if (ref) {
                   delete config.refId;
                   delete this.state.yRegionsLabel[ref.contentId];
@@ -216,7 +216,7 @@ class MarkRegion extends Component {
           {config.text &&
             <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
               rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
-              onRef={(ref) => {
+              onRef={(ref: RichTextBox) => {
                 if (ref) {
                   config.refId = ref.contentId;
                   this.state.xRegionsLabel[ref.contentId] = {
@@ -226,7 +226,7 @@ class MarkRegion extends Component {
                   };
                 }
               }}
-              onDestroyRef={(ref) => {
+              onDestroyRef={(ref: RichTextBox) => {
                 if (ref) {
                   delete config.refId;
                   delete this.state.xRegionsLabel[ref.contentId];

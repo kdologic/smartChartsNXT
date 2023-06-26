@@ -19,7 +19,7 @@ import { IObject } from '../../viewEngin/pview.model';
  * @extends Component
  */
 
-class Draggable extends Component {
+class Draggable extends Component<IDraggableProps> {
   private overlappingColor: string;
   private nonOverlappingColor: string;
   private overlappingFill: string;
@@ -102,11 +102,11 @@ class Draggable extends Component {
     }
     return (
       <g class='dragger drag-handler-container' events={this.getHandlerEventMap()} transform={this.state.tranMatrix} style={{ 'pointer-events': 'all', cursor: this.state.showHandler ? 'move' : 'default' }}>
-        <g clsss='dragger drag-innter-child-container'>
+        <g class='dragger drag-inner-child-container'>
           {this.props.extChildren}
         </g>
         {this.state.showHandler &&
-          <rect class='dragger drag-handler-outerbox'
+          <rect class='dragger drag-handler-outer-box'
             x={this.state.hBBox.x} y={this.state.hBBox.y} width={this.state.hBBox.width} height={this.state.hBBox.height}
             stroke-dasharray='5, 5' fill={this.state.handlerFill} pointer-events={this.state.handlerRectPE} stroke={this.state.handlerStrokeColor} stroke-width='1' opacity='1'
           />
@@ -116,15 +116,15 @@ class Draggable extends Component {
   }
 
   getIntersectedElements(): NodeList {
-    let dragHandler = (this.ref.node as SVGElement).querySelector('.dragger.drag-handler-outerbox');
+    let dragHandler = (this.ref.node as SVGElement).querySelector('.dragger.drag-handler-outer-box');
     if (dragHandler) {
       let dragHandlerBBox = dragHandler.getBoundingClientRect();
-      let irect = this.rootSVG.createSVGRect();
-      irect.x = dragHandlerBBox.x - 6;
-      irect.y = dragHandlerBBox.y - 6;
-      irect.width = dragHandlerBBox.width;
-      irect.height = dragHandlerBBox.height;
-      return this.rootSVG.getIntersectionList(irect, null);
+      let iRect = this.rootSVG.createSVGRect();
+      iRect.x = dragHandlerBBox.x - 6;
+      iRect.y = dragHandlerBBox.y - 6;
+      iRect.width = dragHandlerBBox.width;
+      iRect.height = dragHandlerBBox.height;
+      return this.rootSVG.getIntersectionList(iRect, null);
     }
   }
 

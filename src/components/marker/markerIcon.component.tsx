@@ -14,7 +14,7 @@ import { IMarkerIconProps } from './markerIcon.model';
  * @extends: Component
  */
 
-class MarkerIcon extends Component {
+class MarkerIcon extends Component<IMarkerIconProps> {
   constructor(props: IMarkerIconProps) {
     super(props);
   }

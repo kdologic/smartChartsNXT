@@ -38,7 +38,7 @@ class UtilCore {
    * https://github.com/TehShrike/deepmerge
    * Merges the enumerable properties of two or more objects deeply.
    * It will modify the destination object.
-   * @param  {any} dest Destination object which will be extends by rest of the paramter objects.
+   * @param  {any} dest Destination object which will be extends by rest of the parameter objects.
    * @param  {...any} args Array of source object.
    * @return {Object} Merged object.
    */

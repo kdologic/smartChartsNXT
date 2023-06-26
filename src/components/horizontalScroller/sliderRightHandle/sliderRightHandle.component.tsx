@@ -10,7 +10,7 @@ import { ISliderRightHandleProps } from "./sliderRightHandle.model";
  * @extends Component
  */
 
-class SliderRightHandle extends Component {
+class SliderRightHandle extends Component<ISliderRightHandleProps> {
   private titleId: string;
   private gradId: string;
 
