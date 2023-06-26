@@ -146,10 +146,6 @@ class UtilCore {
     return rgb;
   };
 
-  static assemble = (literal: string, params: any) => {
-    return new Function(params, 'return `' + literal + '`;'); // TODO: Proper escaping
-  };
-
   /**
    * Generate Universally Unique IDentifier (UUID) RFC4122 version 4 compliant.
    * @returns {string} Return a GUID.
@@ -163,13 +159,28 @@ class UtilCore {
   };
 
   /**
-   * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested up to 10,000 ids).
+   * Generate a 14 character (xxxx-xxxx-xxxx) unique random ID (Uniqueness was tested up to 1,00,000 ids).
    * @returns {string} Returns a unique string.
    */
   static getRandomID = (): string => {
-    let chr4 = () => {
-      return Math.random().toString(16).slice(-4);
-    };
+    const crypto = window.crypto || window.msCrypto;
+    const chr4 = () => {
+      const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      const alphabets = 'abcdefghijklmnopqrstuvwxyz';
+      const randomArr = new Uint8Array(4);
+      crypto.getRandomValues(randomArr);
+      let result: string = '';
+      randomArr.forEach((value: number, index: number) => {
+        if(index === 0) {
+          const i = value % alphabets.length;
+          result += alphabets.charAt(i);
+        }else {
+          const i = value % characters.length;
+          result += characters.charAt(i);
+        }
+      })
+      return result;
+    }
     return chr4() + '-' + chr4() + '-' + chr4();
   };
 

@@ -318,10 +318,6 @@ class Tooltip extends Component {
             line1 += event.content.footer(pointData, inst, this.props.opts);
           }
           line2 = 'html';
-        } else if (typeof event.content === 'string') {
-          let tooltipContent = event.content.replace(/{{/g, '${').replace(/}}/g, '}');
-          line1 = UtilCore.assemble(tooltipContent, 'point')(pointData);
-          line2 = 'html';
         }
       }
 
