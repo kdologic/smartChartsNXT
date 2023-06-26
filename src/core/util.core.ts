@@ -171,10 +171,10 @@ class UtilCore {
       crypto.getRandomValues(randomArr);
       let result: string = '';
       randomArr.forEach((value: number, index: number) => {
-        if(index === 0) {
+        if (index === 0) {
           const i = value % alphabets.length;
           result += alphabets.charAt(i);
-        }else {
+        } else {
           const i = value % characters.length;
           result += characters.charAt(i);
         }
