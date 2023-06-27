@@ -3,7 +3,7 @@
 import { Component } from './../viewEngin/pview';
 import eventEmitter from './../core/eventEmitter';
 import UtilCore from './../core/util.core';
-import MarkerIcon from './markerIcon';
+import MarkerIcon from './marker/markerIcon.component';
 
 /**
  * dataPoints.js

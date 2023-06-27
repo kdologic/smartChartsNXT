@@ -6,7 +6,7 @@ import eventEmitter from './../core/eventEmitter';
 import { Component } from './../viewEngin/pview';
 import UtilCore from './../core/util.core';
 import UiCore from './../core/ui.core';
-import SpeechBox from './../components/speechBox';
+import SpeechBox from './../components/speechBox/speechBox.components';
 import Style from './../viewEngin/style';
 import { OPTIONS_TYPE } from './../settings/globalEnums';
 const enums = new OPTIONS_TYPE();

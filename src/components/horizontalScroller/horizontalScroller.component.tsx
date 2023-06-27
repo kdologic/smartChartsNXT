@@ -4,7 +4,7 @@ import Point, { RangePoint } from '../../core/point';
 import { Component } from '../../viewEngin/pview';
 import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import UiCore from '../../core/ui.core';
-import SpeechBox from '../../components/speechBox';
+import SpeechBox from '../../components/speechBox/speechBox.components';
 import defaultConfig from '../../settings/config';
 import StoreManager from '../../liveStore/storeManager';
 import { IHorizontalScrollerProps, IHScrollOffsetModel } from './horizontalScroller.model';

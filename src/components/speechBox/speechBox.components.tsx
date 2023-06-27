@@ -1,19 +1,25 @@
 'use strict';
 
-import Point from './../core/point';
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
+import Point from '../../core/point';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import { ISpeechBoxProps } from './speechBox.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * speechBox.js
+ * speechBox.component.jsx
  * @createdOn:23-Jan-2018
  * @author:SmartChartsNXT
  * @description:This components will create speech box with SVG by providing top-left point and c-point.
  * @extends Component
  */
 
-class SpeechBox extends Component {
-  constructor(props) {
+class SpeechBox extends Component<ISpeechBoxProps> {
+  private aHalfWidth: number;
+  private showAnchor: boolean;
+  private _cpoint: Point;
+
+  constructor(props: ISpeechBoxProps) {
     super(props);
     this.aHalfWidth = typeof this.props.anchorBaseWidth === 'undefined' ? 8 : this.props.anchorBaseWidth;
     this.showAnchor = typeof this.props.showAnchor === 'undefined' ? true : this.props.showAnchor;
@@ -33,20 +39,20 @@ class SpeechBox extends Component {
     return this._cpoint;
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: ISpeechBoxProps): void {
     this.aHalfWidth = typeof nextProps.anchorBaseWidth === 'undefined' ? 8 : nextProps.anchorBaseWidth;
     this.showAnchor = typeof nextProps.showAnchor === 'undefined' ? true : nextProps.showAnchor;
   }
 
-  render() {
+  render(): IVnode {
     this.cpoint = this.props.cpoint;
     let speechBox = this.showAnchor ?
       <path class='sc-speech-box-path' d={this.getBoxPath()} fill={this.props.bgColor} fill-opacity={typeof this.props.fillOpacity === 'undefined' ? 1 : this.props.fillOpacity}
@@ -68,7 +74,7 @@ class SpeechBox extends Component {
     );
   }
 
-  getBoxPath() {
+  getBoxPath(): string {
     const cr = this.props.cornerRadius || 0;
     let d = ['M', cr, 0];
     let topPath, bottomPath, leftPath, rightPath, cpoint = new Point(this.cpoint.x - this.props.x, this.cpoint.y - this.props.y);
@@ -155,7 +161,7 @@ class SpeechBox extends Component {
     return d.join(' ');
   }
 
-  calcAnchorDirection() {
+  calcAnchorDirection(): void {
     const cr = this.props.cornerRadius || 0;
     this.state.aTop = this.props.y > (this.cpoint.y - this.aHalfWidth - cr) ? true : false;
     this.state.aBottom = this.cpoint.y > (this.props.y + this.props.height - this.aHalfWidth - cr) ? true : false;

@@ -5,7 +5,7 @@ import UiCore from './../core/ui.core';
 import GeomCore from './../core/geom.core';
 import defaultConfig from './../settings/config';
 import { OPTIONS_TYPE } from './../settings/globalEnums';
-import SpeechBox from './../components/speechBox';
+import SpeechBox from './../components/speechBox/speechBox.components';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import UtilCore from './../core/util.core';

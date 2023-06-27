@@ -4,7 +4,7 @@ import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
 import eventEmitter from './../core/eventEmitter';
-import SpeechBox from './../components/speechBox';
+import SpeechBox from './../components/speechBox/speechBox.components';
 import saveAs from './../core/saveAs';
 
 /**

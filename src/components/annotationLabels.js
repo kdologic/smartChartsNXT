@@ -10,7 +10,7 @@ import UiCore from '../core/ui.core';
 import GeomCore from '../core/geom.core';
 import ConnectorBox from './connectorBox';
 import RichTextBox from './richTextBox';
-import SpeechBox from './speechBox';
+import SpeechBox from './speechBox/speechBox.components';
 const enums = new OPTIONS_TYPE();
 
 

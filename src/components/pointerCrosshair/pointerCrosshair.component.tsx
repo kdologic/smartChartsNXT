@@ -1,28 +1,31 @@
 'use strict';
 
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import Point from './../core/point';
-import { Component } from './../viewEngin/pview';
-import defaultConfig from './../settings/config';
-import eventEmitter from './../core/eventEmitter';
-import UiCore from './../core/ui.core';
-import SpeechBox from './../components/speechBox';
-import Style from './../viewEngin/style';
-const enums = new OPTIONS_TYPE();
+import Point from '../../core/point';
+import { Component } from '../../viewEngin/pview';
+import defaultConfig from '../../settings/config';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import UiCore from '../../core/ui.core';
+import SpeechBox from '../../components/speechBox/speechBox.components';
+import Style from '../../viewEngin/style';
+import { IPointerCrosshairConfigExtended, IPointerCrosshairProps } from './pointerCrosshair.model';
+import { IHighlightedPoint, IPointerCrosshairConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { CROSSHAIR_SPREAD, HORIZONTAL_ALIGN, VERTICAL_ALIGN } from '../../settings/globalEnums';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * pointerCrosshair.js
+ * pointerCrosshair.component.tsx
  * @createdOn:21-Apr-2018
  * @author:SmartChartsNXT
  * @description: This components will create a vertical and horizontal cross line to follow the pointer or touch location.
  * @extends Component
  */
 
-class PointerCrosshair extends Component {
-
-  constructor(props) {
+class PointerCrosshair extends Component<IPointerCrosshairProps> {
+  private emitter: CustomEvents;
+  private config: IPointerCrosshairConfigExtended;
+  constructor(props: IPointerCrosshairProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.config = { vertical: {}, horizontal: {} };
     this.setConfig(this.props.opts);
     this.state = {
@@ -45,16 +48,16 @@ class PointerCrosshair extends Component {
       isHorizontalCrosshairVisible: false,
       isVerticalCrosshairVisible: false
     };
-    this.setVCrosshairBind = this.setVCrosshair.bind(this);
-    this.setHCrosshairBind = this.setHCrosshair.bind(this);
+    this.setVCrosshair = this.setVCrosshair.bind(this);
+    this.setHCrosshair = this.setHCrosshair.bind(this);
   }
 
-  setConfig(opts) {
-    ['vertical', 'horizontal'].map(type => {
+  setConfig(opts: IPointerCrosshairConfig): void {
+    ['vertical', 'horizontal'].forEach((type: keyof IPointerCrosshairConfig) => {
       opts[type] = (opts[type] || {});
       this.config[type] = {
         ...this.config[type], ...{
-          spread: (opts[type].spread || (type === 'vertical' ? enums.CROSSHAIR_SPREAD.FULL : enums.CROSSHAIR_SPREAD.NONE)).toLocaleLowerCase(),
+          spread: (opts[type].spread || (type === 'vertical' ? CROSSHAIR_SPREAD.FULL : CROSSHAIR_SPREAD.NONE)).toLocaleLowerCase(),
           lineColor: opts[type].lineColor || '#000',
           strokeWidth: Number(opts[type].lineWidth) || 1,
           lineOpacity: Number(opts[type].lineOpacity) || 1,
@@ -69,26 +72,26 @@ class PointerCrosshair extends Component {
     });
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    this.emitter.on('setVerticalCrosshair', this.setVCrosshairBind);
-    this.emitter.on('setHorizontalCrosshair', this.setHCrosshairBind);
+    this.emitter.on('setVerticalCrosshair', this.setVCrosshair);
+    this.emitter.on('setHorizontalCrosshair', this.setHCrosshair);
   }
 
-  beforeUnmount() {
-    this.emitter.removeListener('setVerticalCrosshair', this.setVCrosshairBind);
-    this.emitter.removeListener('setHorizontalCrosshair', this.setHCrosshairBind);
+  beforeUnmount(): void {
+    this.emitter.removeListener('setVerticalCrosshair', this.setVCrosshair);
+    this.emitter.removeListener('setHorizontalCrosshair', this.setHCrosshair);
   }
 
-  propsWillReceive(nextProps) {
+  propsWillReceive(nextProps: IPointerCrosshairProps): void {
     this.setConfig(nextProps.opts);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class='sc-pointer-crosshair' style={{ 'pointerEvents': 'none' }}>
         <Style>
@@ -105,7 +108,7 @@ class PointerCrosshair extends Component {
           }}
         </Style>
         <g>
-          {this.config.horizontal.spread !== enums.CROSSHAIR_SPREAD.NONE && this.state.isHorizontalCrosshairVisible &&
+          {this.config.horizontal.spread !== CROSSHAIR_SPREAD.NONE && this.state.isHorizontalCrosshairVisible &&
             <g class='sc-crosshair-group sc-h-crosshair' transform={`translate(0, ${this.state.hy1})`}>
               <line x1={this.state.hx1} y1={0} x2={this.state.hx2} y2={0}
                 fill='none' stroke={this.config.horizontal.lineColor} stroke-width={this.config.horizontal.strokeWidth} opacity={this.config.horizontal.lineOpacity} stroke-dasharray={this.config.horizontal.dashArray} shape-rendering='optimizeSpeed' />
@@ -115,7 +118,7 @@ class PointerCrosshair extends Component {
           }
         </g>
         <g>
-          {this.config.vertical.spread !== enums.CROSSHAIR_SPREAD.NONE && this.state.isVerticalCrosshairVisible &&
+          {this.config.vertical.spread !== CROSSHAIR_SPREAD.NONE && this.state.isVerticalCrosshairVisible &&
             <g class='sc-crosshair-group sc-v-crosshair' transform={`translate(${this.state.vx1},0)`}>
               <line x1={0} y1={this.state.vy1} x2={0} y2={this.state.vy2}
                 fill='none' stroke={this.config.vertical.lineColor} stroke-width={this.config.vertical.strokeWidth} opacity={this.config.vertical.lineOpacity} stroke-dasharray={this.config.vertical.dashArray} shape-rendering='optimizeSpeed' />
@@ -128,10 +131,10 @@ class PointerCrosshair extends Component {
     );
   }
 
-  getVerticalSpeechBox() {
+  getVerticalSpeechBox(): IVnode {
     if (this.props.xAxis.positionOpposite === true) {
       let posY = this.state.vy1 + 5;
-      if (this.props.xAxis.labelAlign === enums.VERTICAL_ALIGN.TOP) {
+      if (this.props.xAxis.labelAlign === VERTICAL_ALIGN.TOP) {
         posY = this.state.vy1 - this.state.verticalLabelHeight - 5;
       }
       return (
@@ -142,7 +145,7 @@ class PointerCrosshair extends Component {
 
     } else {
       let posY = this.state.vy2 + 5;
-      if (this.props.xAxis.labelAlign === enums.VERTICAL_ALIGN.TOP) {
+      if (this.props.xAxis.labelAlign === VERTICAL_ALIGN.TOP) {
         posY = this.state.vy2 - this.state.verticalLabelHeight - 5;
       }
       return (
@@ -153,10 +156,10 @@ class PointerCrosshair extends Component {
     }
   }
 
-  getHorizontalSpeechBox() {
+  getHorizontalSpeechBox(): IVnode {
     if (this.props.yAxis.positionOpposite === true) {
       let posX = this.state.hx2 + 5;
-      if (this.props.yAxis.labelAlign === enums.HORIZONTAL_ALIGN.RIGHT) {
+      if (this.props.yAxis.labelAlign === HORIZONTAL_ALIGN.RIGHT) {
         posX = this.state.hx2 - this.state.horizontalLabelWidth - 5;
       }
       return (
@@ -165,7 +168,7 @@ class PointerCrosshair extends Component {
         </SpeechBox>);
     } else {
       let posX = this.state.hx1 - this.state.horizontalLabelWidth - 5;
-      if (this.props.yAxis.labelAlign === enums.HORIZONTAL_ALIGN.LEFT) {
+      if (this.props.yAxis.labelAlign === HORIZONTAL_ALIGN.LEFT) {
         posX = this.state.hx1 + 5;
       }
       return (
@@ -175,10 +178,10 @@ class PointerCrosshair extends Component {
     }
   }
 
-  getVerticalLabelText() {
+  getVerticalLabelText(): IVnode {
     if (this.props.xAxis.positionOpposite === true) {
       let posY = this.state.vy1 + 25;
-      if (this.props.xAxis.labelAlign === enums.VERTICAL_ALIGN.TOP) {
+      if (this.props.xAxis.labelAlign === VERTICAL_ALIGN.TOP) {
         posY = this.state.vy1 - 15;
       }
       return (
@@ -188,7 +191,7 @@ class PointerCrosshair extends Component {
       );
     } else {
       let posY = this.state.vy2 + 25;
-      if (this.props.xAxis.labelAlign === enums.VERTICAL_ALIGN.TOP) {
+      if (this.props.xAxis.labelAlign === VERTICAL_ALIGN.TOP) {
         posY = this.state.vy2 - 15;
       }
       return (
@@ -199,10 +202,10 @@ class PointerCrosshair extends Component {
     }
   }
 
-  getHorizontalLabelText() {
+  getHorizontalLabelText(): IVnode {
     if (this.props.yAxis.positionOpposite === true) {
       let posX = this.state.hx2 + (this.state.horizontalLabelWidth / 2) + 5;
-      if (this.props.yAxis.labelAlign === enums.HORIZONTAL_ALIGN.RIGHT) {
+      if (this.props.yAxis.labelAlign === HORIZONTAL_ALIGN.RIGHT) {
         posX = this.state.hx2 - (this.state.horizontalLabelWidth / 2) - 5;
       }
       return (
@@ -212,7 +215,7 @@ class PointerCrosshair extends Component {
       );
     } else {
       let posX = this.state.hx1 + (this.state.horizontalLabelWidth / 2) + 5;
-      if (this.props.yAxis.labelAlign === enums.HORIZONTAL_ALIGN.RIGHT) {
+      if (this.props.yAxis.labelAlign === HORIZONTAL_ALIGN.RIGHT) {
         posX = this.state.hx1 - (this.state.horizontalLabelWidth / 2) - 5;
       }
       return (
@@ -224,14 +227,14 @@ class PointerCrosshair extends Component {
 
   }
 
-  setVCrosshair(data) {
-    if (!data || this.config.vertical.spread === enums.CROSSHAIR_SPREAD.NONE) {
+  setVCrosshair(data: IHighlightedPoint[]): void {
+    if (!data || this.config.vertical.spread === CROSSHAIR_SPREAD.NONE) {
       this.setState({ isVerticalCrosshairVisible: false, verticalLabelText: '' });
       return;
     }
     this.state.verticalLabelText = '' + data[0].formattedLabel;
     let textWidth = UiCore.getComputedTextWidth(this.getVerticalLabelText()) + (2 * this.state.labelTextPadding);
-    let topY = this.config.vertical.spread === enums.CROSSHAIR_SPREAD.FULL ? this.props.vLineStart : Math.min(...data.map(d => d.y));
+    let topY = this.config.vertical.spread === CROSSHAIR_SPREAD.FULL ? this.props.vLineStart : Math.min(...data.map(d => d.y));
     let vState = {
       isVerticalCrosshairVisible: true,
       vx1: data[0].x,
@@ -239,11 +242,12 @@ class PointerCrosshair extends Component {
       vx2: data[0].x,
       vy2: this.props.vLineEnd,
       verticalLabelWidth: textWidth > this.config.vertical.labelMinWidth ? textWidth : this.config.vertical.labelMinWidth,
-      overflow: 0
+      overflow: 0,
+      boxLeft: 0
     };
     if (this.props.xAxis.positionOpposite === true) {
       vState.vy1 = this.props.vLineStart;
-      vState.vy2 = this.config.vertical.spread === enums.CROSSHAIR_SPREAD.FULL ? this.props.vLineEnd : Math.min(...data.map(d => d.y));
+      vState.vy2 = this.config.vertical.spread === CROSSHAIR_SPREAD.FULL ? this.props.vLineEnd : Math.min(...data.map(d => d.y));
     }
     vState.boxLeft = -(vState.verticalLabelWidth / 2);
     if (vState.vx1 - (vState.verticalLabelWidth / 2) < 0) {
@@ -251,16 +255,16 @@ class PointerCrosshair extends Component {
       vState.boxLeft = vState.boxLeft - overflow;
       vState.overflow = overflow;
     }
-    if (vState.vx1 + (vState.verticalLabelWidth / 2) > this.context.svgWidth) {
-      let overflow = (vState.vx1 + (vState.verticalLabelWidth / 2)) - this.context.svgWidth + 5;
+    if (vState.vx1 + (vState.verticalLabelWidth / 2) > (this as any).context.svgWidth) {
+      let overflow = (vState.vx1 + (vState.verticalLabelWidth / 2)) - (this as any).context.svgWidth + 5;
       vState.boxLeft = vState.boxLeft - overflow;
       vState.overflow = overflow;
     }
     this.setState(vState);
   }
 
-  setHCrosshair(data) {
-    if (!data || this.config.horizontal.spread === enums.CROSSHAIR_SPREAD.NONE) {
+  setHCrosshair(data: IHighlightedPoint[]): void {
+    if (!data || this.config.horizontal.spread === CROSSHAIR_SPREAD.NONE) {
       this.setState({ isHorizontalCrosshairVisible: false, horizontalLabelText: '' });
       return;
     }
@@ -271,12 +275,12 @@ class PointerCrosshair extends Component {
       isHorizontalCrosshairVisible: true,
       hx1: this.props.hLineStart,
       hy1: topY,
-      hx2: this.config.horizontal.spread === enums.CROSSHAIR_SPREAD.FULL ? this.props.hLineEnd : data[0].x,
+      hx2: this.config.horizontal.spread === CROSSHAIR_SPREAD.FULL ? this.props.hLineEnd : data[0].x,
       hy2: topY,
       horizontalLabelWidth: textWidth
     };
     if (this.props.yAxis.positionOpposite) {
-      hState.hx1 = this.config.horizontal.spread === enums.CROSSHAIR_SPREAD.FULL ? this.props.hLineStart : data[0].x;
+      hState.hx1 = this.config.horizontal.spread === CROSSHAIR_SPREAD.FULL ? this.props.hLineStart : data[0].x;
       hState.hx2 = this.props.hLineEnd;
     }
     this.setState(hState);
