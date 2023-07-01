@@ -8,10 +8,10 @@ export interface IGridProps {
   height: number;
   yAxisType: string;
   vTransformX: number;
-  vGridCount: number;
-  vGridInterval: number;
-  hGridCount: number;
-  hGridInterval: number;
+  vGridCount?: number;
+  vGridInterval?: number;
+  hGridCount?: number;
+  hGridInterval?: number;
 };
 
 export interface IUpdateHorizontalGridEvent { 

@@ -1,17 +1,19 @@
 'use strict';
 
-import defaultConfig from './../settings/config';
-import GeomCore from './../core/geom.core';
-import eventEmitter from './../core/eventEmitter';
-import { Component } from './../viewEngin/pview';
-import UiCore from '../core/ui.core';
-import UtilCore from '../core/util.core';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import MarkerIcon from './marker/markerIcon.component';
-const enums = new OPTIONS_TYPE();
+import defaultConfig from '../../settings/config';
+import GeomCore from '../../core/geom.core';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import UtilCore from '../../core/util.core';
+import MarkerIcon from '../marker/markerIcon.component';
+import { ILegendBoxProps, ILegendLengthData, ILegendOptions } from './legendBox.model';
+import { ILegendsConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { ALIGNMENT, DISPLAY, FLOAT, ICON_TYPE } from '../../settings/globalEnums';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * legendBox.js
+ * legendBox.component.jsx
  * @createdOn: 06-Nov-2017
  * @author: SmartChartsNXT
  * @description:This is a component class will create legend area.
@@ -34,22 +36,36 @@ const enums = new OPTIONS_TYPE();
  * 4. legendRendered - Triggered when legneds fully rendered.
  */
 
-class LegendBox extends Component {
-  constructor(props) {
+class LegendBox extends Component<ILegendBoxProps> {
+  private emitter: CustomEvents;
+  private config: ILegendsConfig;
+  private renderCount: number;
+  private padding: number;
+  private containerWidth: number;
+  private containerHeight: number;
+  private iconWidth: number;
+  private iconHeight: number;
+  private hoverHeight: number;
+  private lineHeight: number;
+  private toggleColor: string;
+  private cumulativeWidth: number;
+
+  constructor(props: ILegendBoxProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.config = {};
     this.setConfig(this.props);
     this.renderCount = 0;
     this.state = {
       legendSet: this.props.legendSet.map((lSet) => {
-        lSet.totalWidth = lSet.labelLength = 0;
+        lSet.totalWidth = 0;
+        lSet.labelLength = 0;
         lSet.isToggled = lSet.isToggled === undefined ? false : lSet.isToggled;
         lSet.transform = '';
         lSet.icon = {
           ...{
             enable: true,
-            type: enums.ICON_TYPE.CIRCLE,
+            type: ICON_TYPE.CIRCLE,
             URL: ''
           }, ...lSet.icon
         };
@@ -58,7 +74,7 @@ class LegendBox extends Component {
         lSet.defaultIconStroke = 'none';
         lSet.iconHighlight = false;
         if (!lSet.icon.enable) {
-          lSet.icon.type = 'none';
+          lSet.icon.type = ICON_TYPE.NONE;
         }
         return lSet;
       }),
@@ -66,7 +82,7 @@ class LegendBox extends Component {
       top: 0,
       trnsX: 0,
       trnsY: 0,
-      legendSetTrnsX: 0,
+      legendSetTransformX: 0,
       lineCount: 1,
       lengthSet: {
         max: {
@@ -95,14 +111,14 @@ class LegendBox extends Component {
     this.setContainerWidthHeight();
   }
 
-  setConfig(props) {
+  setConfig(props: ILegendBoxProps): void {
     this.config = {
-      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.top),
-      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : UiCore.percentToPixel(this.context.svgWidth, props.opts.left),
-      maxWidth: typeof props.opts.maxWidth === 'undefined' ? this.context.svgWidth : UiCore.percentToPixel(this.context.svgWidth, props.opts.maxWidth),
-      type: props.opts.alignment || props.type || enums.ALIGNMENT.HORIZONTAL,
-      float: props.opts.float || props.float || enums.FLOAT.NONE,
-      display: props.opts.display || props.display || enums.DISPLAY.INLINE,
+      top: typeof props.opts.top === 'undefined' ? (props.top || 0) : UiCore.percentToPixel((this as any).context.svgWidth, props.opts.top.toString()),
+      left: typeof props.opts.left === 'undefined' ? (props.left || 0) : UiCore.percentToPixel((this as any).context.svgWidth, props.opts.left.toString()),
+      maxWidth: typeof props.opts.maxWidth === 'undefined' ? (this as any).context.svgWidth : UiCore.percentToPixel((this as any).context.svgWidth, props.opts.maxWidth),
+      type: props.opts.alignment || props.type || ALIGNMENT.HORIZONTAL,
+      float: props.opts.float || props.float || FLOAT.NONE,
+      display: props.opts.display || props.display || DISPLAY.INLINE,
       textColor: props.opts.textColor || defaultConfig.theme.fontColorDark,
       bgColor: props.opts.bgColor || props.background || 'none',
       hoverColor: props.opts.hoverColor || props.hoverColor || 'none',
@@ -125,14 +141,14 @@ class LegendBox extends Component {
     this.iconHeight = this.config.hideIcon === true ? 0 : 15;
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     /* Need to re-render when float = bottom */
-    if (this.config.float === enums.FLOAT.BOTTOM || this.config.float === enums.FLOAT.RIGHT) {
+    if (this.config.float === FLOAT.BOTTOM || this.config.float === FLOAT.RIGHT) {
       this.update();
     } else {
       this.renderCount = 0;
@@ -141,7 +157,7 @@ class LegendBox extends Component {
     }
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: ILegendBoxProps) {
     this.setConfig(nextProps);
     this.calcFloatingPosition();
     UtilCore.extends(this.state.lengthSet, this.calcLegendDimensions());
@@ -151,7 +167,7 @@ class LegendBox extends Component {
 
   afterUpdate() {
     /* Need to re-render when float = bottom */
-    if ((this.config.float === enums.FLOAT.BOTTOM || this.config.float === enums.FLOAT.RIGHT) && this.renderCount < 2) {
+    if ((this.config.float === FLOAT.BOTTOM || this.config.float === FLOAT.RIGHT) && this.renderCount < 2) {
       this.update();
     } else {
       this.renderCount = 0;
@@ -160,36 +176,36 @@ class LegendBox extends Component {
     }
   }
 
-  render() {
+  render(): IVnode {
     this.cumulativeWidth = 0;
     this.renderCount++;
     return (
-      <g transform={`translate(${this.state.legendBoxTrnsX},${this.state.legendBoxTrnsY})`} role="region">
+      <g transform={`translate(${this.state.legendBoxTransformX},${this.state.legendBoxTransformY})`} role="region">
         <path class='legend-container-border' d={this.getContainerBorderPath()} fill={this.config.bgColor}
           opacity={this.config.opacity} stroke-width={this.config.strokeWidth} stroke={this.config.strokeColor} stroke-opacity={this.config.strokeOpacity}
         />
-        <g class='sc-legend-set' transform={`translate(${this.state.legendSetTrnsX})`}>
+        <g class='sc-legend-set' transform={`translate(${this.state.legendSetTransformX})`}>
           {this.getLegendSet()}
         </g>
       </g>
     );
   }
 
-  getLegendSet() {
-    return this.state.legendSet.map((data, index) => this.getLegend(data, index));
+  getLegendSet(): IVnode[] {
+    return this.state.legendSet.map((data: ILegendOptions, index: number) => this.getLegend(data, index));
   }
 
-  getLegend(data, index, withContainer = true) {
+  getLegend(data: ILegendOptions, index: number, withContainer: boolean = true): IVnode {
     return (
       <g class={`sc-legend-${index} sc-series-legend`} transform={this.state.legendSet[index].transform || ''} style={{ cursor: 'pointer' }} tabindex='0'
         role="button" aria-label={(data.isToggled ? 'Show' : 'Hide ') + data.label + ' series'} aria-pressed={data.isToggled}
         events={{
-          click: (e) => this.onClick(e, index),
-          keyup: (e) => this.onClick(e, index),
-          mouseenter: (e) => this.onHover(e, index),
-          mouseleave: (e) => this.onLeave(e, index),
-          focusin: (e) => this.onHover(e, index),
-          focusout: (e) => this.onLeave(e, index)
+          click: (e: MouseEvent) => this.onClick(e, index),
+          keyup: (e: KeyboardEvent) => this.onClick(e, index),
+          mouseenter: (e: MouseEvent) => this.onHover(e, index),
+          mouseleave: (e: MouseEvent) => this.onLeave(e, index),
+          focusin: (e: FocusEvent) => this.onHover(e, index),
+          focusout: (e: FocusEvent) => this.onLeave(e, index)
         }} >
         {withContainer &&
           <rect class={`sc-legend-${index} sc-legend-border-${index}`} x={this.state.left + (this.padding / 2)} y={this.state.top + (this.padding / 2)} rx={this.config.itemBorderRadius}
@@ -215,7 +231,7 @@ class LegendBox extends Component {
     );
   }
 
-  getLegendText(data, index) {
+  getLegendText(data: ILegendOptions, index: number) {
     return (
       <text class={`sc-legend-${index} sc-legend-txt-${index}`} stroke-width={0.5} stroke={this.config.textColor} stroke-opacity={data.strokeOpacity} font-size={this.config.fontSize} x={this.state.left + this.iconWidth + (2 * this.padding)} y={this.state.top + this.padding + 14}
         fill={this.config.textColor} font-family={this.config.fontFamily} pointer-events='none' >
@@ -228,7 +244,7 @@ class LegendBox extends Component {
     );
   }
 
-  getIcon(index, data) {
+  getIcon(index: number, data: ILegendOptions): IVnode | IVnode[] {
     const line = <line x1={this.state.left + this.padding - (this.iconWidth / 4)} y1={this.state.top + this.padding + (this.iconWidth / 2)} x2={this.state.left + this.padding + this.iconWidth + (this.iconWidth / 4)} y2={this.state.top + this.padding + (this.iconWidth / 2)} stroke={data.color} stroke-width={2} stroke-linecap="round"></line>;
     if (!data.icon.enable) {
       return line;
@@ -243,75 +259,75 @@ class LegendBox extends Component {
     }
     return [
       line,
-      <MarkerIcon id={index} type={data.icon.type} x={this.state.left + this.padding + (this.iconWidth / 2)} y={this.state.top + this.padding + (this.iconHeight / 2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" URL={data.icon.URL || ''}></MarkerIcon>
+      <MarkerIcon index={index} instanceId={index} type={data.icon.type} x={this.state.left + this.padding + (this.iconWidth / 2)} y={this.state.top + this.padding + (this.iconHeight / 2)} width={this.iconWidth} height={this.iconHeight} fillColor={data.isToggled ? this.toggleColor : data.color} highlighted={data.iconHighlight} strokeColor="#fff" URL={data.icon.URL || ''}></MarkerIcon>
     ];
   }
 
-  calcFloatingPosition() {
+  calcFloatingPosition(): void {
     switch (this.config.float) {
-      case enums.FLOAT.TOP:
-        this.state.legendBoxTrnsX = this.config.left || this.padding;
-        this.state.legendBoxTrnsY = this.padding;
+      case FLOAT.TOP:
+        this.state.legendBoxTransformX = this.config.left || this.padding;
+        this.state.legendBoxTransformY = this.padding;
         break;
-      case enums.FLOAT.BOTTOM:
-        this.state.legendBoxTrnsX = this.config.left || this.padding;
-        this.state.legendBoxTrnsY = this.context.svgHeight - this.containerHeight - this.padding;
+      case FLOAT.BOTTOM:
+        this.state.legendBoxTransformX = this.config.left || this.padding;
+        this.state.legendBoxTransformY = (this as any).context.svgHeight - this.containerHeight - this.padding;
         break;
-      case enums.FLOAT.LEFT:
-        this.state.legendBoxTrnsX = this.padding;
-        this.state.legendBoxTrnsY = this.config.top || this.padding;
+      case FLOAT.LEFT:
+        this.state.legendBoxTransformX = this.padding;
+        this.state.legendBoxTransformY = this.config.top || this.padding;
         break;
-      case enums.FLOAT.RIGHT:
-        this.state.legendBoxTrnsX = this.context.svgWidth - this.containerWidth - this.padding;
-        this.state.legendBoxTrnsY = this.config.top || this.padding;
+      case FLOAT.RIGHT:
+        this.state.legendBoxTransformX = (this as any).context.svgWidth - this.containerWidth - this.padding;
+        this.state.legendBoxTransformY = this.config.top || this.padding;
         break;
-      case enums.FLOAT.NONE:
+      case FLOAT.NONE:
       default:
-        this.state.legendBoxTrnsX = this.config.left || this.padding;
-        this.state.legendBoxTrnsY = this.config.top || this.padding;
+        this.state.legendBoxTransformX = this.config.left || this.padding;
+        this.state.legendBoxTransformY = this.config.top || this.padding;
     }
-    if (this.config.display === enums.DISPLAY.BLOCK) {
-      this.state.legendBoxTrnsX = this.padding;
+    if (this.config.display === DISPLAY.BLOCK) {
+      this.state.legendBoxTransformX = this.padding;
     }
-    this.state.legendSetTrnsX = 0;
+    this.state.legendSetTransformX = 0;
   }
 
-  calcLegendPositions() {
+  calcLegendPositions(): void {
     this.state.lineCount = 1;
     this.cumulativeWidth = 0;
     this.state.lengthSet.max.lineWidth = 0;
-    const legendBoxTrnsX = this.config.float === enums.FLOAT.RIGHT ? 0 : this.state.legendBoxTrnsX;
-    let maxAllowedWidth = this.context.svgWidth;
-    if (this.config.display !== enums.DISPLAY.BLOCK) {
-      maxAllowedWidth = this.config.left + this.config.maxWidth > this.context.svgWidth ? (this.context.svgWidth - this.config.left) : this.config.maxWidth;
+    const legendBoxTransformX = this.config.float === FLOAT.RIGHT ? 0 : this.state.legendBoxTransformX;
+    let maxAllowedWidth = (this as any).context.svgWidth;
+    if (this.config.display !== DISPLAY.BLOCK) {
+      maxAllowedWidth = this.config.left + this.config.maxWidth > (this as any).context.svgWidth ? ((this as any).context.svgWidth - this.config.left) : this.config.maxWidth;
     }
-    if (this.state.legendSet.length && this.config.type === enums.ALIGNMENT.VERTICAL) {
+    if (this.state.legendSet.length && this.config.type === ALIGNMENT.VERTICAL) {
       maxAllowedWidth = 1;
     }
     for (let index = 0; index < this.state.legendSet.length; index++) {
       const legendWidth = this.state.legendSet[index].totalWidth;
-      let trnsX = index === 0 ? 0 : this.cumulativeWidth + this.padding;
-      let trnsY = (this.state.lineCount - 1) * this.lineHeight;
-      if (legendBoxTrnsX + trnsX + legendWidth + this.padding > legendBoxTrnsX + maxAllowedWidth) {
+      let transformX = index === 0 ? 0 : this.cumulativeWidth + this.padding;
+      let transformY = (this.state.lineCount - 1) * this.lineHeight;
+      if (legendBoxTransformX + transformX + legendWidth + this.padding > legendBoxTransformX + maxAllowedWidth) {
         this.cumulativeWidth = 0;
         this.state.lineCount++;
-        trnsX = 0;
-        trnsY = (this.state.lineCount - 1) * this.lineHeight;
+        transformX = 0;
+        transformY = (this.state.lineCount - 1) * this.lineHeight;
       }
-      this.cumulativeWidth = trnsX + legendWidth;
+      this.cumulativeWidth = transformX + legendWidth;
       if (this.cumulativeWidth > this.state.lengthSet.max.lineWidth) {
         this.state.lengthSet.max.lineWidth = this.cumulativeWidth + this.padding;
       }
-      this.state.legendSet[index].transform = `translate(${trnsX}, ${trnsY})`;
+      this.state.legendSet[index].transform = `translate(${transformX}, ${transformY})`;
     }
   }
 
-  calcLegendDimensions() {
-    let lengthSet = {
+  calcLegendDimensions(): ILegendLengthData {
+    let lengthSet: ILegendLengthData = {
       totalWidth: [],
       labelLength: []
     };
-    this.state.legendSet.forEach((lSet, index) => {
+    this.state.legendSet.forEach((lSet: ILegendOptions, index: number) => {
       lengthSet.totalWidth.push(lSet.totalWidth = UiCore.getComputedBBox(this.getLegend(lSet, index, false)).width + this.padding);
       lengthSet.labelLength.push(lSet.labelLength = UiCore.getComputedTextWidth(this.getLegendText(lSet, index)));
     });
@@ -323,9 +339,9 @@ class LegendBox extends Component {
   }
 
   setContainerWidthHeight() {
-    if (this.config.display === enums.DISPLAY.BLOCK) {
-      this.containerWidth = Math.max(this.context.svgWidth - (2 * this.padding), this.state.lengthSet.max.lineWidth);
-    } else if (this.config.display === enums.DISPLAY.INLINE) {
+    if (this.config.display === DISPLAY.BLOCK) {
+      this.containerWidth = Math.max((this as any).context.svgWidth - (2 * this.padding), this.state.lengthSet.max.lineWidth);
+    } else if (this.config.display === DISPLAY.INLINE) {
       this.containerWidth = this.state.lengthSet.max.lineWidth;
     }
     this.containerHeight = (this.state.lineCount * this.lineHeight) + (this.padding / 2);
@@ -335,57 +351,60 @@ class LegendBox extends Component {
     return GeomCore.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
   }
 
-  getBBox() {
+  getBBox(): {x: number, y: number, width: number, height: number} {
     return {
       width: this.containerWidth,
       height: this.containerHeight,
-      x: this.state.legendBoxTrnsX,
-      y: this.state.legendBoxTrnsY
+      x: this.state.legendBoxTransformX,
+      y: this.state.legendBoxTransformY
     };
   }
 
-  assignLegendData(index, e) {
-    let legend = this.state.legendSet[index];
-    e.label = legend.label;
-    e.value = legend.value;
-    e.color = legend.color;
-    e.index = index;
-    e.isToggled = legend.isToggled;
-    return e;
+  assignLegendData(index: number): ILegendOptions {
+    const legend: ILegendOptions = this.state.legendSet[index];
+    let legendOptions: ILegendOptions = {
+      label: legend.label,
+      value: legend.value,
+      color: legend.color,
+      index: index,
+      icon: legend.icon,
+      isToggled: legend.isToggled
+    };
+    return legendOptions;
   }
 
-  onClick(e, index) {
-    if (e.type === 'keyup' && (e.which || e.keyCode) !== 32) {
+  onClick(e: MouseEvent | KeyboardEvent, index: number) {
+    if (e instanceof KeyboardEvent && e.type === 'keyup' && e.key !== ' ') {
       return;
     }
     if (this.config.toggleType) {
       this.state.legendSet[index].isToggled = !this.state.legendSet[index].isToggled;
       this.update();
     }
-    this.assignLegendData(index, e);
-    this.emitter.emit('legendClicked', e);
+    const selectedLegendOption = this.assignLegendData(index);
+    this.emitter.emit('legendClicked', {event: e, legendOption: selectedLegendOption});
   }
 
-  onHover(e, index) {
+  onHover(e: FocusEvent, index: number) {
     this.state.legendSet[index].bgFillOpacity = 1;
     this.state.legendSet[index].strokeOpacity = 1;
     this.state.legendSet[index].defaultIconStroke = '#000';
     this.state.legendSet[index].iconHighlight = true;
 
     this.update();
-    this.assignLegendData(index, e);
-    this.emitter.emit('legendHovered', e);
+    const selectedLegendOption = this.assignLegendData(index);
+    this.emitter.emit('legendHovered', {event: e, legendOption: selectedLegendOption});
   }
 
-  onLeave(e, index) {
+  onLeave(e: FocusEvent, index: number) {
     this.state.legendSet[index].bgFillOpacity = 0;
     this.state.legendSet[index].strokeOpacity = 0.1;
     this.state.legendSet[index].defaultIconStroke = 'none';
     this.state.legendSet[index].iconHighlight = false;
 
     this.update();
-    this.assignLegendData(index, e);
-    this.emitter.emit('legendLeaved', e);
+    const selectedLegendOption = this.assignLegendData(index);
+    this.emitter.emit('legendLeaved', {event: e, legendOption: selectedLegendOption});
   }
 }
 

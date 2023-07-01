@@ -1,10 +1,10 @@
 import { ICON_TYPE } from "../../settings/globalEnums"
 
 export interface IMarkerIconProps {
-  index: string;
+  index: number | string;
   type: ICON_TYPE;
-  instanceId: string;
-  id: string;
+  instanceId: number | string;
+  id?: string;
   x: number;
   y: number;
   width: number;
@@ -13,5 +13,5 @@ export interface IMarkerIconProps {
   highlighted: boolean;
   strokeColor: string;
   URL: string;
-  onRef: (ref: any) => void;
+  onRef?: (ref: any) => void;
 }

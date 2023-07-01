@@ -445,13 +445,13 @@ class HorizontalScroller extends Component<IHorizontalScrollerProps> {
     if(!(this.ref.node instanceof Text)) {
       switch (this.state.handlerFocused) {
         case 'left':
-          (e.target as SVGElement) = this.ref.node.querySelector('.sc-slider-left-sel');
+          (event as any).target = this.ref.node.querySelector('.sc-slider-left-sel');
           break;
         case 'right':
-          (e.target as SVGElement) = this.ref.node.querySelector('.sc-slider-right-sel');
+          (event as any).target = this.ref.node.querySelector('.sc-slider-right-sel');
           break;
         case 'window':
-          (e.target as SVGElement) = this.ref.node.querySelector('.sc-hScroll-window');
+          (event as any).target = this.ref.node.querySelector('.sc-hScroll-window');
           break;
       }
     }

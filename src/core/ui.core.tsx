@@ -25,7 +25,7 @@ class UiCore {
    * @param {String} offsetY Offset value to shift shadow by y coordinate.
    * @returns {Object} Virtual node of drop shadow component.
    */
-  static dropShadow = (shadowId: string, offsetX: number, offsetY: number): IVnode => {
+  static dropShadow = (shadowId: string, offsetX?: number, offsetY?: number): IVnode => {
     return (
       <defs>
         <filter xmlns='http://www.w3.org/2000/svg' id={shadowId} height='130%'>
@@ -133,15 +133,15 @@ class UiCore {
    * @param {Object} evt Pointer event related to screen like mouse or touch point.
    * @return {Point} Returns a point which transform into SVG coordinate system.
    */
-  static cursorPoint = (targetElem: SVGGraphicsElement, evt: MouseEvent | TouchEvent): DOMPoint => {
+  static cursorPoint = (targetElem: SVGGraphicsElement, evt: any): DOMPoint => {
     if (typeof targetElem === 'string') {
       targetElem = document.querySelector('#' + targetElem + ' .smartcharts-nxt .sc-prime-view');
     }
     let pt = new DOMPoint();
-    if (evt instanceof MouseEvent && evt.clientX !== undefined) {
+    if (evt.clientX !== undefined) {
       pt.x = evt.clientX;
       pt.y = evt.clientY;
-    } else if (evt instanceof TouchEvent && evt.touches[0]) {
+    } else if (evt.touches[0]) {
       pt.x = evt.touches[0].clientX;
       pt.y = evt.touches[0].clientY;
     } else {
