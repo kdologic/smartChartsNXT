@@ -1,12 +1,7 @@
-import { CategoryLabelType, IValueCategory, IXAxisConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
-
-export interface IXAxisConfigExtended extends IXAxisConfig {
-  displayDateFormat: string;
-  categories: IValueCategory;
-};
+import { CategoryLabelType, IXAxisConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 
 export interface IHorizontalLabelsProps {
-  opts?: IXAxisConfigExtended;
+  opts?: IXAxisConfig;
   posX: number;
   posY: number;
   maxWidth: number;
@@ -19,5 +14,10 @@ export interface IHorizontalLabelsProps {
     x: number;
     width: number;
   };
+};
+
+export interface IHorizontalLabelHoverEvent {
+  event: MouseEvent;
+  labelText: string;
 };
 

@@ -36,4 +36,22 @@ export class RangePoint extends Point {
   }
 }
 
+export class DataPoint extends Point {
+  public value: number;
+  public index: number;
+  public dist: number;
+  public highlighted: boolean;
+  public isHidden: boolean;
+  
+  constructor(x: number = 0, y: number = 0, index: number = 0, value: number = 0) {
+    super(x, y);
+    this.value = value;
+    this.index = index;
+  }
+
+  toString(): string {
+    return 'x:' + this.x + ', y:' + this.y + ', value:' + this.value + ', index:' + this.index;
+  }
+}
+
 export default Point;

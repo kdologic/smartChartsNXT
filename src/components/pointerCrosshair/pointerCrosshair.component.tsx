@@ -27,7 +27,7 @@ class PointerCrosshair extends Component<IPointerCrosshairProps> {
     super(props);
     this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.config = { vertical: {}, horizontal: {} };
-    this.setConfig(this.props.opts);
+    this.setConfig(this.props.opts || this.config);
     this.state = {
       vx1: 0,
       vy1: 0,
@@ -88,7 +88,7 @@ class PointerCrosshair extends Component<IPointerCrosshairProps> {
   }
 
   propsWillReceive(nextProps: IPointerCrosshairProps): void {
-    this.setConfig(nextProps.opts);
+    this.setConfig(nextProps.opts || this.config);
   }
 
   render(): IVnode {

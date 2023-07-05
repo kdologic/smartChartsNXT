@@ -7,9 +7,10 @@ import { Component } from '../../viewEngin/pview';
 import Ticks from '../ticks';
 import UiCore from '../../core/ui.core';
 import a11yFactory, { A11yWriter } from '../../core/a11y';
-import { IHorizontalLabelsProps, IXAxisConfigExtended } from './horizontalLabels.model';
+import { IHorizontalLabelsProps } from './horizontalLabels.model';
 import { VERTICAL_ALIGN } from '../../settings/globalEnums';
 import { IVnode } from '../../viewEngin/component.model';
+import { IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 /**
  * horizontalLabels.component.tsx
@@ -29,7 +30,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
   private a11yWriter: A11yWriter;
   private rid: string;
   private clipPathId: string;
-  private config: IXAxisConfigExtended;
+  private config: IXAxisConfig;
   private defaultTickSpan: number;
   private accId: string;
 
@@ -40,7 +41,6 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
-    // this.config = {};
     this.resetConfig(this.props.opts);
     this.defaultTickSpan = 6;
     this.state = {
@@ -78,11 +78,11 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
       '</div>', false);
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
@@ -97,7 +97,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     }, nextProps.clip);
   }
 
-  resetConfig(config: IXAxisConfigExtended): void {
+  resetConfig(config: IXAxisConfig): void {
     let dateFormat = '';
     if (config?.categories instanceof Array) {
       dateFormat = defaultConfig.formatting.displayDateFormat;
@@ -119,7 +119,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     };
   }
 
-  render() {
+  render(): IVnode {
     this.setIntervalLength();
     this.emitter.emitSync('onHorizontalLabelsRender', {
       intervalLen: this.state.intervalLen,
@@ -155,7 +155,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     );
   }
 
-  getLabels() {
+  getLabels(): IVnode[] {
     let labels = [];
     for (let i = 0; i < this.state.categories.length; i++) {
       labels.push(this.getEachLabel(this.state.categories[i], i));
@@ -199,7 +199,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     this.state.intervalLen = interval;
   }
 
-  onMouseEnter(e: MouseEvent, index: number) {
+  onMouseEnter(e: MouseEvent, index: number): void {
     let lblIndex = index;
     let lblText = this.state.categories[lblIndex];
     if (UtilCore.isDate(this.props.categorySet[lblIndex])) {
@@ -213,7 +213,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     this.emitter.emit('hLabelEnter', eventData);
   }
 
-  onMouseLeave(e: MouseEvent) {
+  onMouseLeave(e: MouseEvent): void {
     this.emitter.emit('hLabelExit', e);
   }
 

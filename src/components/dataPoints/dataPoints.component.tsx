@@ -1,23 +1,27 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import eventEmitter from './../core/eventEmitter';
-import UtilCore from './../core/util.core';
-import MarkerIcon from './marker/markerIcon.component';
+import { Component } from '../../viewEngin/pview';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import UtilCore from '../../core/util.core';
+import MarkerIcon from '../marker/markerIcon.component';
+import { IDataPointsProps, IHighlightPointMarkerEvent, INormalizeAllPointMarkerEvent } from './dataPoints.model';
+import { DataPoint } from '../../core/point';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * dataPoints.js
+ * dataPoints.component.tsx
  * @createdOn:09-Mar-2018
  * @author:SmartChartsNXT
  * @description: This components will plot data points in chart area.
  * @extends Component
  */
 
-class DataPoints extends Component {
+class DataPoints extends Component<IDataPointsProps> {
+  private emitter: CustomEvents
 
-  constructor(props) {
+  constructor(props: IDataPointsProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.state = {
       highlightedIndex: null,
       pointSet: this.props.opacity ? this.props.pointSet : [],
@@ -29,33 +33,33 @@ class DataPoints extends Component {
     this.normalize = this.normalize.bind(this);
   }
 
-  propsWillReceive(newProps) {
+  propsWillReceive(newProps: IDataPointsProps): void {
     this.state.pointSet = newProps.opacity ? newProps.pointSet : [];
     this.state.opacity = newProps.opacity;
     this.state.icons = {};
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('highlightPointMarker', this.doHighlight);
     this.emitter.on('normalizeAllPointMarker', this.normalize);
   }
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     this.emitter.removeListener('highlightPointMarker', this.doHighlight);
     this.emitter.removeListener('normalizeAllPointMarker', this.normalize);
     this.state.icons = {};
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class='sc-data-points' aria-hidden={false}>
         {
-          this.state.pointSet.map((point) => {
+          this.state.pointSet.map((point: DataPoint) => {
             if (point.isHidden) {
               return (<g class='sc-icon sc-hide'></g>);
             }
@@ -74,7 +78,7 @@ class DataPoints extends Component {
     );
   }
 
-  drawPoint(point) {
+  drawPoint(point: DataPoint): IVnode {
     let iconType = this.props.type;
     let iconURL = this.props.markerURL;
     let iconWidth = this.props.markerWidth;
@@ -87,7 +91,7 @@ class DataPoints extends Component {
       iconHeight = marker.height;
     }
     return (
-      <MarkerIcon index={iconType + '_' + this.props.instanceId + '_' + point.index} type={iconType} instanceId={point.index} id={point.index} x={point.x} y={point.y} width={iconWidth} height={iconHeight}
+      <MarkerIcon index={iconType + '_' + this.props.instanceId + '_' + point.index} type={iconType} instanceId={point.index} id={point.index.toString()} x={point.x} y={point.y} width={iconWidth} height={iconHeight}
         fillColor={this.props.fillColor} highlighted={point.highlighted} strokeColor="#fff" URL={iconURL || ''}
         onRef={ref => {
           this.state.icons[point.index] = ref;
@@ -96,8 +100,8 @@ class DataPoints extends Component {
     );
   }
 
-  normalize(e) {
-    if (this.props.instanceId !== e.seriesIndex || !this.state.icons[this.state.highlightedIndex]) {
+  normalize(eventData: INormalizeAllPointMarkerEvent): void {
+    if (this.props.instanceId !== eventData.seriesIndex.toString() || !this.state.icons[this.state.highlightedIndex]) {
       return;
     }
     if (this.props.opacity === 0) {
@@ -114,15 +118,15 @@ class DataPoints extends Component {
     this.state.highlightedIndex = null;
   }
 
-  doHighlight(e) {
-    let index = e.highlightedPoint.pointIndex;
-    if (index == undefined || index == null || isNaN(index) || e.highlightedPoint.seriesIndex !== this.props.instanceId) {
+  doHighlight(eventData: IHighlightPointMarkerEvent): void {
+    let index = eventData.highlightedPoint.pointIndex;
+    if (index == undefined || index == null || isNaN(index) || eventData.highlightedPoint.seriesIndex.toString() !== this.props.instanceId) {
       return;
     }
     if (this.props.opacity === 0) {
       let pData = {
-        x: e.highlightedPoint.relX,
-        y: e.highlightedPoint.relY, index
+        x: eventData.highlightedPoint.relX,
+        y: eventData.highlightedPoint.relY, index
       };
       this.setState({ pointSet: [pData] });
       this.state.highlightedIndex = index;
@@ -144,8 +148,8 @@ class DataPoints extends Component {
       }
       formattedLabel = `${(this.props.xAxisInfo.prepend || '') + formattedLabel + (this.props.xAxisInfo.append || '')}`;
       let point = {
-        ...e.highlightedPoint,
-        ...{ value: this.state.pointSet.filter((v) => v.index == index)[0].value },
+        ...eventData.highlightedPoint,
+        ...{ value: this.state.pointSet.filter((v: DataPoint) => v.index == index)[0].value },
         ...{ label, formattedLabel }
       };
       let icon = {
@@ -157,15 +161,15 @@ class DataPoints extends Component {
       if (this.props.customizedMarkers[index]) {
         icon = { ...icon, ...this.props.customizedMarkers[index] };
       }
-      let hotspotElem = <circle id={hpId} class="sc-hotspot" cx={e.highlightedPoint.relX - e.highlightedPoint.offsetLeft} cy={e.highlightedPoint.relY} r={icon.width / 2 + 8} fill="red" fill-opacity={0.0001} style={{ 'cursor': 'pointer' }}
+      let hotspotElem = <circle id={hpId} class="sc-hotspot" cx={eventData.highlightedPoint.relX - eventData.highlightedPoint.offsetLeft} cy={eventData.highlightedPoint.relY} r={icon.width / 2 + 8} fill="red" fill-opacity={0.0001} style={{ 'cursor': 'pointer' }}
         events={{
-          click: (event) => {
+          click: (event: MouseEvent) => {
             events.click.bind({
-              x: e.highlightedPoint.relX - e.highlightedPoint.offsetLeft,
-              y: e.highlightedPoint.relY,
+              x: eventData.highlightedPoint.relX - eventData.highlightedPoint.offsetLeft,
+              y: eventData.highlightedPoint.relY,
               color: this.props.fillColor,
               seriesName: this.props.seriesName,
-              seriesIndex: e.highlightedPoint.seriesIndex,
+              seriesIndex: eventData.highlightedPoint.seriesIndex,
               pointIndex: index,
               point: point,
               icon: icon

@@ -17,7 +17,7 @@ export interface IGridProps {
 export interface IUpdateHorizontalGridEvent { 
   isPrimary: boolean,
   intervalLen: number,
-  intervalValue: number,
+  intervalValue: (param: number) => number,
   zeroBaseIndex: number,
   values: number,
   count: number
