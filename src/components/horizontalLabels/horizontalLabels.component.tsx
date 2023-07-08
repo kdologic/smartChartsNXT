@@ -4,7 +4,7 @@ import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import defaultConfig from '../../settings/config';
 import UtilCore from '../../core/util.core';
 import { Component } from '../../viewEngin/pview';
-import Ticks from '../ticks';
+import Ticks from '../ticks/ticks.component';
 import UiCore from '../../core/ui.core';
 import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IHorizontalLabelsProps } from './horizontalLabels.model';

@@ -5,7 +5,7 @@ import UiCore from '../../core/ui.core';
 import UtilCore from '../../core/util.core';
 import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import defaultConfig from '../../settings/config';
-import Ticks from '../ticks';
+import Ticks from '../ticks/ticks.component';
 import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IVerticalLabelsProps } from './verticalLabels.model';
 import { IYAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';

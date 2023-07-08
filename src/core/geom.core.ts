@@ -1,9 +1,11 @@
 'use strict';
 
-import Point from './point';
+import { IEllipticalArc, ILineIntersection } from './core.model';
+import Point, { DataPoint } from './point';
+import Rect from './rect';
 
 /**
- * geom.core.js
+ * geom.core.ts
  * @createdOn: 07-Apr-2016
  * @author: SmartChartsNXT
  * @description:SmartChartsNXT Core Library components. That contains geometric functionality.
@@ -20,7 +22,7 @@ class GeomCore {
    * @param {Number} radius Corner radius of the rect.
    * @returns {Array} Returns path of the rounded rect in array.
    */
-  static describeRoundedRect = (x, y, width, height, radius) => {
+  static describeRoundedRect = (x: number, y: number, width: number, height: number, radius: number): (number | string)[] => {
     return [
       'M', (x + radius), y, 'h', (width - (2 * radius)), 'a', radius, radius, ' 0 0 1 ', radius, radius, 'v', (height - (2 * radius)), 'a', radius, radius, ' 0 0 1 ', -radius, radius, 'h', ((2 * radius) - width), 'a', radius, radius, ' 0 0 1 ', -radius, -radius, 'v', ((2 * radius) - height), 'a', radius, radius, ' 0 0 1 ', radius, -radius, 'z'
     ];
@@ -33,11 +35,11 @@ class GeomCore {
    * @param {Boolean} ignoreY if --true then only consider the x axis distance, y axis distance will be ignored.
    * @return {Point} Return the closest point by distance.
    */
-  static findClosestPoint = (pSet, pt, ignoreY) => {
+  static findClosestPoint = (pSet: DataPoint[], pt: DataPoint, ignoreY: boolean): DataPoint => {
     let halfLen = Math.ceil(pSet.length / 2);
     let lSet = pSet.slice(0, halfLen);
     let rSet = pSet.slice(halfLen);
-    let nearPoint = {};
+    let nearPoint: DataPoint = new DataPoint();
     if (halfLen < 3) {
       let min = Number.MAX_SAFE_INTEGER;
       for (let p of pSet) {
@@ -64,7 +66,7 @@ class GeomCore {
    * @param {Point} p2 Input point 2.
    * @returns {Number} Returns distance.
    */
-  static xDist = (p1, p2) => {
+  static xDist = (p1: Point, p2: Point): number => {
     return Math.abs(p1.x - p2.x);
   };
 
@@ -74,7 +76,7 @@ class GeomCore {
    * @param {Point} p2 Ending point.
    * @return {Number} Returns the distance between two points.
    */
-  static getDistanceBetween = (p1, p2) => {
+  static getDistanceBetween = (p1: Point, p2: Point): number => {
     return Math.sqrt(Math.pow((p1.x - p2.x), 2) + Math.pow((p1.y - p2.y), 2)) || 0;
   }
 
@@ -86,11 +88,11 @@ class GeomCore {
    * @param {Number} angleInDegrees Angle of polar coordinate in degree.
    * @returns {Point} Returns point(x,y) in cartesian coordinate.
    */
-  static polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-    let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  static polarToCartesian = (centerX: number, centerY: number, radius: number, angleInDegrees: number): Point => {
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
     return new Point(
-      centerX + (radius * Math.cos(angleInRadians).toFixed(4)),
-      centerY + (radius * Math.sin(angleInRadians).toFixed(4))
+      centerX + (radius * Number(Math.cos(angleInRadians).toFixed(4))),
+      centerY + (radius * Number(Math.sin(angleInRadians).toFixed(4)))
     );
   };
 
@@ -100,16 +102,23 @@ class GeomCore {
    * @param {Point} point2 Ending point value.
    * @return {Point} Returns mid point value between two points.
    */
-  static getMidPoint = (point1, point2) => {
+  static getMidPoint = (point1: Point, point2: Point): Point => {
     return new Point((point1.x + point2.x) / 2, (point1.y + point2.y) / 2);
   };
 
-  static getEllipticalRadius = (rx, ry, angleInDegrees) => {
+  /**
+   * Return Radius of an ellipse based on x radius, y radius and angle in degree.
+   * @param rx x radius of the ellipse
+   * @param ry y radius of the ellipse
+   * @param angleInDegrees Angle in degree for radius to calculate
+   * @returns 
+   */
+  static getEllipticalRadius = (rx: number, ry: number, angleInDegrees: number): number => {
     if (!rx || !ry) {
       return 0;
     }
-    let angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
-    let r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+    const r = (rx * ry) / Math.sqrt(((rx * rx) * (Math.sin(angleInRadians) * Math.sin(angleInRadians))) + ((ry * ry) * (Math.cos(angleInRadians) * Math.cos(angleInRadians))));
     return r;
   };
 
@@ -121,10 +130,10 @@ class GeomCore {
    * @param {Number} ry Y radius of arc.
    * @param {Number} startAngle Arc start angle.
    * @param {Number} endAngle Arc end angle.
-   * @param {Boolean} sweepFlag Sweep flag for clock or anti-clock.
+   * @param {Number} sweepFlag Sweep flag for clock or anti-clock.
    * @returns {Object} Path of elliptical arc.
    */
-  static describeEllipticalArc = (cx, cy, rx, ry, startAngle, endAngle, sweepFlag) => {
+  static describeEllipticalArc = (cx: number, cy: number, rx: number, ry: number, startAngle: number, endAngle: number, sweepFlag: 0 | 1): IEllipticalArc => {
     let fullArc = false;
     if (startAngle % 360 === endAngle % 360) {
       endAngle--;
@@ -143,7 +152,7 @@ class GeomCore {
       d.push('L', start.x, start.y);
     }
     d.push('L', cx, cy, 'Z');
-    let path = {
+    let path: IEllipticalArc = {
       d: d.join(' '),
       arc: [rx, ry, 0, largeArcFlag, sweepFlag, end.x, end.y].join(' '),
       start: start,
@@ -157,9 +166,9 @@ class GeomCore {
     return path;
   };
 
-  static checkLineIntersection = (line1StartX, line1StartY, line1EndX, line1EndY, line2StartX, line2StartY, line2EndX, line2EndY) => {
+  static checkLineIntersection = (line1StartX: number, line1StartY: number, line1EndX: number, line1EndY: number, line2StartX: number, line2StartY: number, line2EndX: number, line2EndY: number): ILineIntersection => {
     /* if the lines intersect, the result contains the x and y of the intersection (treating the lines as infinite) and booleans for whether line segment 1 or line segment 2 contain the point*/
-    let denominator, a, b, numerator1, numerator2, result = {
+    let denominator, a, b, numerator1, numerator2, result: ILineIntersection = {
       x: null,
       y: null,
       onLine1: false,
@@ -197,9 +206,83 @@ class GeomCore {
   };
 
   /**
+   * Catmull-Rom to Cubic Bezier conversion matrix
+
+   * A = 2d1^2a + 3d1^a * d2^a + d3^2a
+   * B = 2d3^2a + 3d3^a * d2^a + d2^2a
+
+   * [   0             1            0          0          ]
+   * [   -d2^2a /N     A/N          d1^2a /N   0          ]
+   * [   0             d3^2a /M     B/M        -d2^2a /M  ]
+   * [   0             0            1          0          ]
+   * 
+   * @param p0 Adjacent starting control Point
+   * @param p1 Control Point 1
+   * @param p2 Control Point 2
+   * @param p3 Adjacent ending control Point
+   * @param alpha Alpha value[ 0 ~ 1]. If 'alpha' is 0.5 then the 'Centripetal' variant is used and 1 for 'Chordal'.
+   * @returns 
+   */
+
+  static calculatePoint = (p0: Point, p1: Point, p2: Point, p3: Point, alpha: number): {bp1: Point, bp2: Point, pp2: Point} => {
+    const d1 = Math.sqrt((p0.x - p1.x) ** 2 + (p0.y - p1.y) ** 2);
+    const d2 = Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+    const d3 = Math.sqrt((p2.x - p3.x) ** 2 + (p2.y - p3.y) ** 2);
+
+    const d3powA = Math.pow(d3, alpha);
+    const d3pow2A = Math.pow(d3, 2 * alpha);
+    const d2powA = Math.pow(d2, alpha);
+    const d2pow2A = Math.pow(d2, 2 * alpha);
+    const d1powA = Math.pow(d1, alpha);
+    const d1pow2A = Math.pow(d1, 2 * alpha);
+
+    const A = 2 * d1pow2A + 3 * d1powA * d2powA + d2pow2A;
+    const B = 2 * d3pow2A + 3 * d3powA * d2powA + d2pow2A;
+
+    let N = 3 * d1powA * (d1powA + d2powA);
+    if (N > 0) {
+      N = 1 / N;
+    }
+
+    let M = 3 * d3powA * (d3powA + d2powA);
+    if (M > 0) {
+      M = 1 / M;
+    }
+
+    let bp1 = new Point(
+      (-d2pow2A * p0.x + A * p1.x + d1pow2A * p2.x) * N, 
+      (-d2pow2A * p0.y + A * p1.y + d1pow2A * p2.y) * N
+    );
+    
+
+    let bp2 = new Point(
+      (d3pow2A * p1.x + B * p2.x - d2pow2A * p3.x) * M,
+      (d3pow2A * p1.y + B * p2.y - d2pow2A * p3.y) * M
+    );
+
+    if (bp1.x === 0 && bp1.y === 0) {
+      bp1 = p1;
+    }
+    if (bp2.x === 0 && bp2.y === 0) {
+      bp2 = p2;
+    }
+
+    return {
+      bp1,
+      bp2,
+      pp2: p2
+    };
+  };
+
+  /**
    * https://gist.github.com/nicholaswmin/c2661eb11cad5671d816
+   * Catmull-Rom spline is a type of interpolation curve that passes through a set of given points.
    * Interpolates a Catmull-Rom Spline through a series of x/y points
    * Converts the CR Spline to Cubic Bezier for use with SVG items
+   * 
+   * Catmull-Rom spline, we need a set of control points. 
+   * Given four consecutive control points P0, P1, P2, and P3, the Catmull-Rom spline generates a curve segment that smoothly connects P1 and P2. 
+   * The spline is influenced by the positions of the adjacent control points, P0 and P3, which contribute to the tangent direction of the curve at P1 and P2, respectively.
    *
    * If 'alpha' is 0.5 then the 'Centripetal' variant is used
    * If 'alpha' is 1 then the 'Chordal' variant is used
@@ -209,76 +292,24 @@ class GeomCore {
    * @param {Number} alpha - Alpha value[ 0 ~ 1]. If 'alpha' is 0.5 then the 'Centripetal' variant is used and 1 for 'Chordal'.
    * @return {String} d - SVG string with cubic bezier curves representing the Catmull-Rom Spline
    */
-  static catmullRomFitting = (data, alpha) => {
-    if (alpha == 0 || alpha === undefined) {
+
+  static catmullRomFitting = (data: Point[], alpha: number): (string | number)[] | false => {
+    if (alpha === 0 || alpha === undefined) {
       return false;
-    } else {
-      let p0, p1, p2, p3, bp1, bp2, d1, d2, d3, A, B, N, M;
-      let d3powA, d2powA, d3pow2A, d2pow2A, d1pow2A, d1powA;
-      let d = ['M', Math.round(data[0].x), Math.round(data[0].y)];
-
-      let length = data.length;
-      for (let i = 0; i < length - 1; i++) {
-
-        p0 = i == 0 ? data[0] : data[i - 1];
-        p1 = data[i];
-        p2 = data[i + 1];
-        p3 = i + 2 < length ? data[i + 2] : p2;
-
-        d1 = Math.sqrt(Math.pow(p0.x - p1.x, 2) + Math.pow(p0.y - p1.y, 2));
-        d2 = Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-        d3 = Math.sqrt(Math.pow(p2.x - p3.x, 2) + Math.pow(p2.y - p3.y, 2));
-
-        // Catmull-Rom to Cubic Bezier conversion matrix
-
-        // A = 2d1^2a + 3d1^a * d2^a + d3^2a
-        // B = 2d3^2a + 3d3^a * d2^a + d2^2a
-
-        // [   0             1            0          0          ]
-        // [   -d2^2a /N     A/N          d1^2a /N   0          ]
-        // [   0             d3^2a /M     B/M        -d2^2a /M  ]
-        // [   0             0            1          0          ]
-
-        d3powA = Math.pow(d3, alpha);
-        d3pow2A = Math.pow(d3, 2 * alpha);
-        d2powA = Math.pow(d2, alpha);
-        d2pow2A = Math.pow(d2, 2 * alpha);
-        d1powA = Math.pow(d1, alpha);
-        d1pow2A = Math.pow(d1, 2 * alpha);
-
-        A = 2 * d1pow2A + 3 * d1powA * d2powA + d2pow2A;
-        B = 2 * d3pow2A + 3 * d3powA * d2powA + d2pow2A;
-        N = 3 * d1powA * (d1powA + d2powA);
-        if (N > 0) {
-          N = 1 / N;
-        }
-        M = 3 * d3powA * (d3powA + d2powA);
-        if (M > 0) {
-          M = 1 / M;
-        }
-
-        bp1 = {
-          x: (-d2pow2A * p0.x + A * p1.x + d1pow2A * p2.x) * N,
-          y: (-d2pow2A * p0.y + A * p1.y + d1pow2A * p2.y) * N
-        };
-
-        bp2 = {
-          x: (d3pow2A * p1.x + B * p2.x - d2pow2A * p3.x) * M,
-          y: (d3pow2A * p1.y + B * p2.y - d2pow2A * p3.y) * M
-        };
-
-        if (bp1.x == 0 && bp1.y == 0) {
-          bp1 = p1;
-        }
-        if (bp2.x == 0 && bp2.y == 0) {
-          bp2 = p2;
-        }
-
-        d.push('C ' + bp1.x + ' ' + bp1.y + ' ' + bp2.x + ' ' + bp2.y + ' ' + p2.x + ' ' + p2.y);
-      }
-
-      return d;
     }
+
+    const d = ['M', Math.round(data[0].x), Math.round(data[0].y)];
+    const length = data.length;
+
+    for (let i = 0; i < length - 1; i++) {
+      const p0 = i === 0 ? data[0] : data[i - 1];
+      const p1 = data[i];
+      const p2 = data[i + 1];
+      const p3 = i + 2 < length ? data[i + 2] : p2;
+      const { bp1, bp2, pp2 } = this.calculatePoint(p0, p1, p2, p3, alpha);
+      d.push(`C ${bp1.x} ${bp1.y} ${bp2.x} ${bp2.y} ${pp2.x} ${pp2.y}`);
+    }
+    return d;
   };
 
   /**
@@ -287,7 +318,7 @@ class GeomCore {
    * @param {Object} rect2 Second rect object with x, y, width and height.
    * @returns {Boolean} Return true if the rect1 overlap with rect2 otherwise returns false.
    */
-  static isRectOverlapping = (rect1, rect2) => {
+  static isRectOverlapping = (rect1: Rect, rect2: Rect): boolean => {
     if (rect2.width > rect1.width) {
       let r = { ...rect1 };
       rect1 = { ...rect2 };
@@ -314,7 +345,7 @@ class GeomCore {
    * @param {Object} point Point object which need check overlapping with the rect object.
    * @returns {Boolean} Return true if the point is inside the rect otherwise returns false.
    */
-  static isPointInsideRect = (rect, point) => {
+  static isPointInsideRect = (rect: Rect, point: Point): boolean => {
     if (point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height) {
       return true;
     }

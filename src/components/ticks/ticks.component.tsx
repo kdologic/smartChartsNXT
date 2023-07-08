@@ -1,20 +1,22 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
+import { IVnode } from '../../viewEngin/component.model';
+import { Component } from '../../viewEngin/pview';
+import { ITicksProps } from './ticks.model';
 
 /**
- * tick.js
+ * tick.component.tsx
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create a tick mark for the chart.
  */
 
-class Ticks extends Component {
-  constructor(props) {
+class Ticks extends Component<ITicksProps> {
+  constructor(props: ITicksProps) {
     super(props);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class='sc-tick-mark' transform={`translate(${this.props.posX},${this.props.posY})`} >
         {this.props.type === 'vertical' ? this.drawTickLinesVertical() : this.drawTickLinesHorizontal()}
@@ -22,7 +24,7 @@ class Ticks extends Component {
     );
   }
 
-  drawTickLinesVertical() {
+  drawTickLinesVertical(): IVnode[] {
     let ticks = [];
     for (let tickCount = 0; tickCount < this.props.tickCount; tickCount++) {
       ticks.push(<line instanceId={`tick-${tickCount}`} class={`sc-tick-line-${tickCount}`}
@@ -33,7 +35,7 @@ class Ticks extends Component {
     return ticks;
   }
 
-  drawTickLinesHorizontal() {
+  drawTickLinesHorizontal(): IVnode[] {
     let ticks = [];
     for (let tickCount = 0; tickCount < this.props.tickCount; tickCount++) {
       ticks.push(<line instanceId={`tick-${tickCount}`} class={`sc-tick-line-${tickCount}`}
