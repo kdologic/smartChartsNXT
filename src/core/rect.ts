@@ -25,5 +25,9 @@ export class Rect {
   }
 }
 
+export class RectPoint {
+  constructor(public X1: number, public X2: number, public Y1: number, public Y2: number) {}
+}
+
 
 export default Rect;
