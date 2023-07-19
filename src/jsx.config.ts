@@ -23,7 +23,8 @@ declare global {
 
     //support custom html element with lower-case name
     type IntrinsicElementMapCustom = {
-      ['x-div']: any
+      ['x-div']: any,
+      ['remove-before-save']: any
     }
   }
 }

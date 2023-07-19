@@ -1,30 +1,36 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
-import GeomCore from './../core/geom.core';
-import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import SpeechBox from './../components/speechBox/speechBox.components';
-import Point from '../core/point';
-import StoreManager from './../liveStore/storeManager';
-import UtilCore from './../core/util.core';
-const enums = new OPTIONS_TYPE();
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import GeomCore from '../../core/geom.core';
+import defaultConfig from '../../settings/config';
+import SpeechBox from '../../components/speechBox/speechBox.components';
+import Point, { DataPoint } from '../../core/point';
+import StoreManager from '../../liveStore/storeManager';
+import UtilCore from '../../core/util.core';
+import { IDataLabelConfig, IDataLabelData, IDataLabelsProps } from './dataLabels.model';
+import Store from '../../liveStore/store';
+import { FLOAT, TEXT_ANCHOR } from '../../settings/globalEnums';
+import { IDataLabel } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * dataLabels.js
+ * dataLabels.component.tsx
  * @createdOn: 12-Jul-2020
  * @author:SmartChartsNXT
  * @description: This components will create data labels correspond to data points.
  * @extends Component
  */
-class DataLabels extends Component {
+class DataLabels extends Component<IDataLabelsProps> {
+  private store: Store;
+  private config: IDataLabelConfig;
+  private allLabelsData: IDataLabelData[];
 
-  constructor(props) {
+  constructor(props: IDataLabelsProps) {
     super(props);
-    this.store = StoreManager.getStore(this.context.runId);
+    this.store = StoreManager.getStore((this as any).context.runId);
     this.config = {
-      float: enums.FLOAT.TOP,
+      float: FLOAT.TOP,
       classes: [],
       labelOverlap: false,
       textColor: defaultConfig.theme.fontColorDark,
@@ -59,21 +65,21 @@ class DataLabels extends Component {
     this.resetConfig(this.props.opts);
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     this.store.setValue('labelsData', {[this.props.instanceId]: []});
   }
 
-  propsWillReceive(nextProps) {
+  propsWillReceive(nextProps: IDataLabelsProps): void {
     this.state.labelsData = [];
-    let globalLabels = UtilCore.deepCopy(this.store.getValue('labelsData'));
+    let globalLabels: {[key: string]: IDataLabelData[]} = UtilCore.deepCopy(this.store.getValue('labelsData'));
     this.allLabelsData = [];
     for(let key in globalLabels) {
       if(key !== this.props.instanceId) {
@@ -83,13 +89,13 @@ class DataLabels extends Component {
     this.resetConfig(nextProps.opts);
   }
 
-  resetConfig(config) {
+  resetConfig(config: IDataLabel): void {
     this.config = {
       ...this.config, ...config
     };
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class={['sc-data-label-container', ...this.config.classes].join(' ')} style={{ pointerEvents: 'none' , ...this.config.style}} aria-hidden={true}>
         {this.getLabels()}
@@ -97,9 +103,9 @@ class DataLabels extends Component {
     );
   }
 
-  getLabels() {
-    let labels = [];
-    this.props.pointSet.map((point, i) => {
+  getLabels(): IVnode[] {
+    let labels: IVnode[] = [];
+    this.props.pointSet.forEach((point: DataPoint, i: number) => {
       if(typeof this.props.opts.filter === 'function' && !this.props.opts.filter(point.value, i)) {
         return;
       }
@@ -112,36 +118,38 @@ class DataLabels extends Component {
     return labels;
   }
 
-  getEachLabel(data, index) {
-    let labelAlign = 'middle';
-    let margin = 20;
-    let labelX, labelY;
+  getEachLabel(data: DataPoint, index: number) {
+    let labelAlign: TEXT_ANCHOR =  TEXT_ANCHOR.MIDDLE;
+    let margin: number = 20;
+    let labelX: number;
+    let labelY: number;
     switch (this.config.float) {
-      default:
-      case enums.FLOAT.TOP:
-        labelX = data.x + this.config.offsetX;
-        labelY = data.y - margin + this.config.offsetY;
-        break;
-      case enums.FLOAT.BOTTOM:
+     
+      case FLOAT.BOTTOM:
         labelX = data.x + this.config.offsetX;
         labelY = data.y + margin + this.config.offsetY;
         break;
-      case enums.FLOAT.LEFT:
+      case FLOAT.LEFT:
         margin = 10;
         labelX = data.x - margin + this.config.offsetX;
         labelY = data.y + this.config.offsetY;
-        labelAlign = 'end';
+        labelAlign = TEXT_ANCHOR.END;
         break;
-      case enums.FLOAT.RIGHT:
+      case FLOAT.RIGHT:
         margin = 10;
         labelX = data.x + margin + this.config.offsetX;
         labelY = data.y + this.config.offsetY;
-        labelAlign = 'start';
+        labelAlign = TEXT_ANCHOR.START;
+        break;
+      case FLOAT.TOP:
+      default:
+        labelX = data.x + this.config.offsetX;
+        labelY = data.y - margin + this.config.offsetY;
         break;
     }
 
     let transform = 'translate(' + labelX + ',' + labelY + ')';
-    let value = data.value;
+    let value: number | string = data.value;
     if(typeof this.props.opts.formatter === 'function') {
       value = this.props.opts.formatter(value, index);
     }
@@ -151,28 +159,28 @@ class DataLabels extends Component {
           {value}
         </tspan>
       </text>;
-    let labelDim = UiCore.getComputedBBox(label);
-    ({labelX, labelY, labelAlign} = this.adjustLabelPosition(label, labelDim, labelX, labelY, labelAlign));
+    let labelDim: DOMRect = UiCore.getComputedBBox(label);
+    ({labelX, labelY} = this.adjustLabelPosition(label, labelDim, labelX, labelY, labelAlign));
     let speechBoxX, speechBoxY;
     let speechBoxWidth = labelDim.width + (2 * this.config.xPadding);
     let speechBoxHeight = labelDim.height + (2 * this.config.yPadding);
     switch (this.config.float) {
-      default:
-      case enums.FLOAT.TOP:
-      case enums.FLOAT.BOTTOM:
-        speechBoxX = labelX - (labelDim.width / 2) - this.config.xPadding;
-        speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
-        break;
-      case enums.FLOAT.LEFT:
+      case FLOAT.LEFT:
         speechBoxX = labelX - (labelDim.width) - this.config.xPadding;
         speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
-      case enums.FLOAT.RIGHT:
+      case FLOAT.RIGHT:
         speechBoxX = labelX - this.config.xPadding;
         speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
         break;
+      case FLOAT.TOP:
+      case FLOAT.BOTTOM:
+      default:
+        speechBoxX = labelX - (labelDim.width / 2) - this.config.xPadding;
+        speechBoxY = labelY - (labelDim.height / 2) - this.config.yPadding;
+        break;
     }
-    let labelData = {
+    let labelData: IDataLabelData = {
       x: speechBoxX,
       y: speechBoxY,
       width: speechBoxWidth,
@@ -198,7 +206,7 @@ class DataLabels extends Component {
     );
   }
 
-  adjustLabelPosition(label, labelDim, labelX, labelY, labelAlign) {
+  adjustLabelPosition(label: IVnode, labelDim: DOMRect, labelX: number, labelY: number, labelAlign: TEXT_ANCHOR): {labelX: number, labelY: number, labelAlign: TEXT_ANCHOR}  {
     if(labelX - (labelDim.width/2) < this.config.xPadding + this.props.clip.x) {
       labelX = this.config.xPadding + this.props.clip.x + (labelDim.width/2) + this.config.borderWidth;
     }
@@ -212,13 +220,12 @@ class DataLabels extends Component {
       labelY = labelY - (labelY + (labelDim.height/2) + this.config.yPadding + this.config.borderWidth - this.props.clip.height);
     }
     label.attributes.transform = 'translate(' + labelX + ',' + labelY + ')';
-    label.children[0].attributes['text-anchor'] = labelAlign;
+    (label.children[0] as IVnode).attributes['text-anchor'] = labelAlign;
     return {labelX, labelY, labelAlign};
   }
 
-  checkOverlapping(existingLabels, label) {
-    for (let i = 0; i < existingLabels.length; i++) {
-      let existingLabel = existingLabels[i];
+  checkOverlapping(existingLabels: IDataLabelData[], label: IDataLabelData) {
+    for (let existingLabel of existingLabels) {
       if(GeomCore.isRectOverlapping(existingLabel, label)) {
         return true;
       }

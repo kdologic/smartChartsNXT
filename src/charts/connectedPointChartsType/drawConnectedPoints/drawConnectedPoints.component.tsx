@@ -1,21 +1,27 @@
 'use strict';
 
-import { CHART_TYPE, OPTIONS_TYPE } from './../../settings/globalEnums';
-import Point from './../../core/point';
-import { Component } from './../../viewEngin/pview';
-import GeomCore from './../../core/geom.core';
-import UiCore from './../../core/ui.core';
-import UtilCore from './../../core/util.core';
-import StoreManager from './../../liveStore/storeManager';
-import DataPoints from './../../components/dataPoints';
-import DataLabels from './../../components/dataLabels';
-import eventEmitter from './../../core/eventEmitter';
-import Easing from './../../plugIns/easing';
-import a11yFactory from './../../core/a11y';
-const enums = new OPTIONS_TYPE();
+import { AXIS_TYPE, CHART_TYPE, FILL_TYPE, ICON_TYPE, LINE_STYLE } from '../../../settings/globalEnums';
+import { DataPoint } from '../../../core/point';
+import { Component } from '../../../viewEngin/pview';
+import GeomCore from '../../../core/geom.core';
+import UiCore from '../../../core/ui.core';
+import UtilCore from '../../../core/util.core';
+import StoreManager from '../../../liveStore/storeManager';
+import DataPoints from '../../../components/dataPoints/dataPoints.component';
+import DataLabels from '../../../components/dataLabels/dataLabels.component';
+import eventEmitter, { CustomEvents } from '../../../core/eventEmitter';
+import Easing from '../../../plugIns/easing';
+import a11yFactory, { A11yWriter } from '../../../core/a11y';
+import { IInteractiveKeyboardEvent, IInteractiveMouseEvent } from '../interactivePlane/interactivePlane.model';
+import { IHighlightPointMarkerEvent } from '../../../components/dataPoints/dataPoints.model';
+import { HIGHLIGHT_EVENT_TYPE, IDrawConnectedPointsProps, IHighlightConfigEvent } from './drawConnectedPoints.model';
+import Store from '../../../liveStore/store';
+import { CategoryLabelType } from '../connectedPointChartsType.model';
+import { IVnode } from '../../../viewEngin/component.model';
+import { IPathSegment } from '../../../core/core.model';
 
 /**
- * drawConnectedPoints.js
+ * drawConnectedPoints.component.tsx
  * @createdOn:08-Feb-2018
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
@@ -24,12 +30,22 @@ const enums = new OPTIONS_TYPE();
  * 1. onUpdateScale : update scaleX and scaleY.
  */
 
-class DrawConnectedPoints extends Component {
-  constructor(props) {
+class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
+  private emitter: CustomEvents;
+  private store: Store;
+  private a11yWriter: A11yWriter;
+  private rid: string;
+  private clipPathId: string;
+  private shadowId: string;
+  private defaultMarkerWidth: number;
+  private defaultMarkerHeight: number;
+  private liveRegionId: string;
+
+  constructor(props: IDrawConnectedPointsProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
-    this.store = StoreManager.getStore(this.context.runId);
-    this.a11yWriter = a11yFactory.getWriter(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
+    this.store = StoreManager.getStore((this as any).context.runId);
+    this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
@@ -47,7 +63,7 @@ class DrawConnectedPoints extends Component {
         pointIndex: null
       },
       animated: this.props.animated,
-      fillType: 'solidColor',
+      fillType: FILL_TYPE.SOLID_COLOR,
       fillBy: this.props.areaFillColor,
       hasDataLabels: this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false
     };
@@ -55,7 +71,7 @@ class DrawConnectedPoints extends Component {
     this.defaultMarkerWidth = 12;
     this.defaultMarkerHeight = 12;
 
-    if (this.props.lineStyle === enums.LINE_STYLE.DASHED) {
+    if (this.props.lineStyle === LINE_STYLE.DASHED) {
       this.state.lineDashArray = this.props.lineDashArray || 4;
     }
 
@@ -68,7 +84,7 @@ class DrawConnectedPoints extends Component {
 
     let fillOpt = UiCore.processFillOptions(this.props.fillOptions, this.rid);
     if (fillOpt.fillBy === 'none') {
-      this.state.fillType = 'solidColor';
+      this.state.fillType = FILL_TYPE.SOLID_COLOR;
       this.state.fillBy = this.props.areaFillColor;
     } else {
       this.state.fillType = fillOpt.fillType;
@@ -85,10 +101,10 @@ class DrawConnectedPoints extends Component {
     this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
     this.store.setValue('pointsData', { [this.props.instanceId]: this.state.pointSet });
 
-    this.mouseMoveBind = this.interactiveMouseMove.bind(this);
-    this.mouseLeaveBind = this.interactiveMouseLeave.bind(this);
+    this.interactiveMouseMove = this.interactiveMouseMove.bind(this);
+    this.interactiveMouseLeave = this.interactiveMouseLeave.bind(this);
     this.interactiveKeyPress = this.interactiveKeyPress.bind(this);
-    this.changeAreaBrightnessBind = this.changeAreaBrightness.bind(this);
+    this.changeAreaBrightness = this.changeAreaBrightness.bind(this);
 
     /* For accessibility */
     if (this.props.accessibility) {
@@ -103,25 +119,26 @@ class DrawConnectedPoints extends Component {
     }
   }
 
-  shouldUpdate() {
+  shouldUpdate(): boolean {
     return this.props.shouldRender;
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    this.emitter.on('interactiveMouseMove', this.mouseMoveBind);
-    this.emitter.on('interactiveMouseLeave', this.mouseLeaveBind);
+    this.emitter.on('interactiveMouseMove', this.interactiveMouseMove);
+    this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave);
     this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
-    this.emitter.on('changeAreaBrightness', this.changeAreaBrightnessBind);
+    this.emitter.on('changeAreaBrightness', this.changeAreaBrightness);
     this.state.animated = false;
   }
 
-  afterUpdate() {
-    let rangeStart = '', rangeEnd = '';
+  afterUpdate(): void {
+    let rangeStart: CategoryLabelType = '';
+    let rangeEnd: CategoryLabelType = '';
     if (this.props.accessibility) {
       rangeStart = this.props.xAxisInfo.selectedCategories[0];
       if (this.props.xAxisInfo.categories.parseAsDate && UtilCore.isDate(rangeStart)) {
@@ -135,19 +152,19 @@ class DrawConnectedPoints extends Component {
     }
   }
 
-  beforeUnmount() {
-    this.emitter.removeListener('interactiveMouseMove', this.mouseMoveBind);
-    this.emitter.removeListener('interactiveMouseLeave', this.mouseLeaveBind);
+  beforeUnmount(): void {
+    this.emitter.removeListener('interactiveMouseMove', this.interactiveMouseMove);
+    this.emitter.removeListener('interactiveMouseLeave', this.interactiveMouseLeave);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
-    this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightnessBind);
+    this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightness);
     this.store.setValue('pointsData', { [this.props.instanceId]: [] });
   }
 
-  propsWillReceive(nextProps) {
+  propsWillReceive(nextProps: IDrawConnectedPointsProps): void {
     this.prepareData(nextProps);
     let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
     if (fillOpt.fillBy === 'none') {
-      this.state.fillType = 'solidColor';
+      this.state.fillType = FILL_TYPE.SOLID_COLOR;
       this.state.fillBy = this.props.areaFillColor;
     } else {
       this.state.fillType = fillOpt.fillType;
@@ -163,14 +180,14 @@ class DrawConnectedPoints extends Component {
       width: nextProps.width,
       height: nextProps.height
     }, nextProps.clip);
-    if (nextProps.lineStyle === enums.LINE_STYLE.DASHED) {
+    if (nextProps.lineStyle === LINE_STYLE.DASHED) {
       this.state.lineDashArray = nextProps.lineDashArray || 4;
     }
     this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
     this.store.setValue('pointsData', { [nextProps.instanceId]: this.state.pointSet });
   }
 
-  prepareData(props) {
+  prepareData(props: IDrawConnectedPointsProps) {
     this.state.valueSet = props.dataSet;
     this.state.scaleX = props.scaleX;
     this.state.scaleY = props.scaleY;
@@ -180,7 +197,7 @@ class DrawConnectedPoints extends Component {
       this.state.marker = {
         ...{
           enable: true,
-          type: enums.ICON_TYPE.CIRCLE,
+          type: ICON_TYPE.CIRCLE,
           width: this.defaultMarkerWidth,
           height: this.defaultMarkerHeight,
           URL: '',
@@ -199,10 +216,10 @@ class DrawConnectedPoints extends Component {
     }
   }
 
-  render() {
+  render(): IVnode {
     let ariaLabel = '';
     if (this.props.accessibility) {
-      ariaLabel = `Series ${this.props.name}, ${this.context.chartType.replace('Chart', '')} ${this.props.index + 1} of ${this.props.totalSeriesCount} with ${this.props.totalDataCount} data points. ${this.props.accessibilityText || ''}`;
+      ariaLabel = `Series ${this.props.name}, ${(this as any).context.chartType.replace('Chart', '')} ${this.props.index + 1} of ${this.props.totalSeriesCount} with ${this.props.totalDataCount} data points. ${this.props.accessibilityText || ''}`;
     }
     return (
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}
@@ -214,7 +231,6 @@ class DrawConnectedPoints extends Component {
             </style>
           }
         </remove-before-save>
-        {/* {<path d={GeomCore.describeRoundedRect(5, 5, 100, 100, 10).join(' ')} fill="yellow"></path>} */}
         {this.props.clipId === undefined &&
           <defs>
             <clipPath id={this.clipPathId}>
@@ -222,13 +238,13 @@ class DrawConnectedPoints extends Component {
             </clipPath>
           </defs>
         }
-        {this.context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== 'solidColor' &&
+        {(this as any).context.chartType === CHART_TYPE.AREA_CHART && this.state.fillType !== FILL_TYPE.SOLID_COLOR &&
           UiCore.generateFillElem(this.state.fillId, this.state.fillType, this.props.fillOptions, this.props.areaFillColor)
         }
         {this.props.lineDropShadow &&
           UiCore.dropShadow(this.shadowId)
         }
-        {this.context.chartType === CHART_TYPE.AREA_CHART &&
+        {(this as any).context.chartType === CHART_TYPE.AREA_CHART &&
           <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>
@@ -239,46 +255,47 @@ class DrawConnectedPoints extends Component {
           </path>
         }
         {this.props.dataPoints && !this.state.isAnimationPlaying && this.state.marker.enable &&
-          <DataPoints instanceId={this.props.index} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
+          <DataPoints instanceId={this.props.index.toString()} pointSet={this.state.pointSet} seriesName={this.props.name} xAxisInfo={this.props.xAxisInfo} yAxisInfo={this.props.yAxisInfo}
             type={this.state.marker.type} markerWidth={this.state.marker.width} markerHeight={this.state.marker.height} markerURL={this.state.marker.URL || ''} customizedMarkers={this.props.customizedMarkers}
             fillColor={this.props.lineFillColor || this.props.areaFillColor} opacity={this.state.marker.opacity} events={this.state.marker.events || {}} >
           </DataPoints>
         }
-        {this.state.hasDataLabels && !this.state.isAnimationPlaying &&
+        {this.state.hasDataLabels && !this.state.isAnimationPlaying && this.props.dataLabels &&
           <DataLabels instanceId={'dl' + this.props.index} pointSet={this.state.pointSet} opts={this.props.dataLabels} clip={this.state.clip} />
         }
       </g>
     );
   }
 
-  getAreaPath(lineSegments) {
+  getAreaPath(lineSegments: IPathSegment[]): IPathSegment {
     let linePath = [];
     for (let i = 0; i < lineSegments.length; i++) {
-      let segment = lineSegments[i];
+      let segment: IPathSegment = lineSegments[i];
       if (segment.length === 0) {
         continue;
       }
       let startSegIndex = i === 0 ? 0 : this.state.lineSegments.segmentIndexes[i - 1] + 1;
       let endSegIndex = this.state.lineSegments.segmentIndexes[i];
-      for (let s = 0; s < segment.length; s++) {
-        linePath.push(segment[s]);
+      for (let s of segment) {
+        linePath.push(s);
       }
       linePath.push('L', this.state.pointSet[endSegIndex - 1].x, this.state.baseLine, 'L', this.state.pointSet[startSegIndex].x, this.state.baseLine, 'Z');
     }
     return linePath;
   }
 
-  getLinePath(props) {
-    let path = [];
-    let pathSegment = [];
-    let segmentIndexes = [], sIndex = 0;
-    this.state.pointSet = this.state.valueSet.map((data, i) => {
-      if (this.props.yAxisInfo.type === enums.AXIS_TYPE.LOGARITHMIC && data !== null) {
+  getLinePath(props: IDrawConnectedPointsProps): {pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[]} {
+    let path: IPathSegment[] = [];
+    let pathSegment: IPathSegment = [];
+    let segmentIndexes: number[] = [];
+    let sIndex: number = 0;
+    this.state.pointSet = this.state.valueSet.map((data: number, i: number) => {
+      if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let point: DataPoint = new DataPoint((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+        point = new DataPoint(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       if (data === null) {
         sIndex = -1;
@@ -307,17 +324,18 @@ class DrawConnectedPoints extends Component {
     };
   }
 
-  getCurvedLinePath(props) {
-    let path = [], pointSegments = [];
-    let pathSegment = [];
-    let segmentIndexes = [];
-    this.state.pointSet = this.state.valueSet.map((data, i) => {
-      if (this.props.yAxisInfo.type === enums.AXIS_TYPE.LOGARITHMIC && data !== null) {
+  getCurvedLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[] } {
+    let path: IPathSegment[] = []; 
+    let pointSegments: DataPoint[][] = [];
+    let pathSegment: DataPoint[] = [];
+    let segmentIndexes: number[] = [];
+    this.state.pointSet = this.state.valueSet.map((data: number, i: number) => {
+      if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let point = new Point((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let point: DataPoint = new DataPoint((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new Point(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+        point = new DataPoint(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       if (data === null) {
         segmentIndexes.push(i);
@@ -332,14 +350,13 @@ class DrawConnectedPoints extends Component {
       return point;
     });
     pointSegments.push(pathSegment);
-    for (let i = 0; i < pointSegments.length; i++) {
-      let pointSegment = pointSegments[i];
+    for (let pointSegment of pointSegments) {
       if (pointSegment.length === 0) {
         path.push([]);
       } else if (pointSegment.length === 1) {
         path.push(['M', this.state.pointSet[0].x, this.state.pointSet[0].y]);
       } else {
-        path.push(GeomCore.catmullRomFitting(pointSegment, 0.1));
+        path.push(GeomCore.catmullRomFitting(pointSegment, 0.1) as IPathSegment);
       }
     }
     segmentIndexes.push(this.state.pointSet.length);
@@ -350,13 +367,25 @@ class DrawConnectedPoints extends Component {
     };
   }
 
-  interactiveMouseMove(e) {
+  interactiveMouseMove(eventData: IInteractiveMouseEvent): void {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
-      return;
+      return void 0;
     }
-    let evt = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    const mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
-    const pt = new Point(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
+    let highlightEventData: IHighlightPointMarkerEvent = {
+      event: eventData.event,
+      highlightedPoint: {
+        x: 0,
+        y: 0,
+        relX: 0,
+        relY: 0,
+        dist: 0,
+        pointIndex: null,
+        seriesIndex: 0,
+        offsetLeft: 0
+      }
+    };
+    const mousePos = eventData.mousePos;
+    const pt = new DataPoint(mousePos.x - this.props.posX, mousePos.y - this.props.posY);
     let pointSet = this.state.pointSet;
     if (this.props.clip.offsetLeft > this.state.marker.width / 2) {
       pointSet = pointSet.slice(1);
@@ -364,11 +393,11 @@ class DrawConnectedPoints extends Component {
     if (pointSet.length && +pointSet[pointSet.length - 1].x.toFixed(3) > +(this.state.clip.x + this.state.clip.width).toFixed(3)) {
       pointSet = pointSet.slice(0, pointSet.length - 1);
     }
-    const nearPoint = GeomCore.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
+    const nearPoint: DataPoint = GeomCore.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
     this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
-    const pointerVicinity = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
+    const pointerVicinity: number = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
     if (nearPoint.dist <= pointerVicinity) {
-      evt.highlightedPoint = {
+      highlightEventData.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),
         y: (this.props.posY + nearPoint.y),
         relX: nearPoint.x,
@@ -379,26 +408,36 @@ class DrawConnectedPoints extends Component {
         offsetLeft: this.state.clip.offsetLeft
       };
     } else {
-      evt.highlightedPoint = {
-        pointIndex: null
-      };
+      highlightEventData.highlightedPoint.pointIndex = null;
     }
-    this.state.currentHighlightedPoint = evt.highlightedPoint;
-    this.emitter.emitSync('highlightPointMarker', evt);
+    this.state.currentHighlightedPoint = highlightEventData.highlightedPoint;
+    this.emitter.emitSync('highlightPointMarker', highlightEventData);
   }
 
-  interactiveMouseLeave() {
+  interactiveMouseLeave(): void {
     if (this.props.dataPoints && !this.state.isAnimationPlaying) {
       this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
     }
   }
 
-  interactiveKeyPress(e) {
+  interactiveKeyPress(eventData: IInteractiveKeyboardEvent): void {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return void 0;
     }
-    let evt = UtilCore.extends({}, e); // Deep Clone event for prevent call-by-ref
-    if (e.which == 37 || e.which == 39) {
+    if (eventData.event.key == 'ArrowLeft' || eventData.event.key == 'ArrowRight') {
+      let highlightEventData: IHighlightPointMarkerEvent = {
+        event: eventData.event,
+        highlightedPoint: {
+          x: 0,
+          y: 0,
+          relX: 0,
+          relY: 0,
+          dist: 0,
+          pointIndex: null,
+          seriesIndex: 0,
+          offsetLeft: 0
+        }
+      };
       let pointSet = this.state.pointSet;
       if (this.props.clip.offsetLeft > this.state.marker.width / 2) {
         pointSet = pointSet.slice(1);
@@ -410,14 +449,14 @@ class DrawConnectedPoints extends Component {
         return void 0;
       }
       let nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[0].index : this.state.currentHighlightedPoint.pointIndex + 1;
-      if (e.which == 37) {
+      if (eventData.event.key == 'ArrowLeft') {
         nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[pointSet.length - 1].index : this.state.currentHighlightedPoint.pointIndex - 1;
       }
 
-      const nearPoint = pointSet.find((p) => p.index === nextPointIndex);
+      const nearPoint: DataPoint = pointSet.find((p: DataPoint) => p.index === nextPointIndex);
       if (nearPoint) {
         this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
-        evt.highlightedPoint = {
+        highlightEventData.highlightedPoint = {
           x: (this.props.posX + nearPoint.x),
           y: (this.props.posY + nearPoint.y),
           relX: nearPoint.x,
@@ -428,23 +467,20 @@ class DrawConnectedPoints extends Component {
           offsetLeft: this.state.clip.offsetLeft
         };
       } else {
-        evt.highlightedPoint = {
-          pointIndex: null
-        };
+        highlightEventData.highlightedPoint.pointIndex = null;
       }
-
-      this.state.currentHighlightedPoint = evt.highlightedPoint;
-      this.emitter.emitSync('highlightPointMarker', evt);
+      this.state.currentHighlightedPoint = highlightEventData.highlightedPoint;
+      this.emitter.emitSync('highlightPointMarker', highlightEventData);
     }
   }
 
-  changeAreaBrightness(e) {
-    if (this.props.instanceId === e.instanceId && e.strokeOpacity) {
-      this.setState({ strokeOpacity: e.strokeOpacity, strokeWidth: e.type === 'highlight' && this.props.lineStrokeWidth ? this.props.lineStrokeWidth + 1 : (this.props.lineStrokeWidth || 0), opacity: e.opacity || this.props.opacity || 1 });
+  changeAreaBrightness(event: IHighlightConfigEvent): void {
+    if (this.props.instanceId === event.instanceId && event.strokeOpacity) {
+      this.setState({ strokeOpacity: event.strokeOpacity, strokeWidth: event.type === HIGHLIGHT_EVENT_TYPE.HIGHLIGHT && this.props.lineStrokeWidth ? this.props.lineStrokeWidth + 1 : (this.props.lineStrokeWidth || 0), opacity: event.opacity || this.props.opacity || 1 });
     }
   }
 
-  getScaleKeyframe() {
+  getScaleKeyframe(): string {
     return (`
       ${this.generateAnimKeyframe(600, 100)}
       .sc-area-fill-${this.props.instanceId} {
@@ -454,9 +490,8 @@ class DrawConnectedPoints extends Component {
     `);
   }
 
-  generateAnimKeyframe(duration, steps = 10) {
+  generateAnimKeyframe(duration: number, steps: number = 10): string {
     let aStage = duration / steps;
-
     let keyFrame = `@keyframes scale-easeOutElastic-${this.props.instanceId} {`;
     for (let i = 0; i < steps; i++) {
       let stageNow = aStage * i;
