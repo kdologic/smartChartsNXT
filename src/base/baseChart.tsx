@@ -9,7 +9,7 @@ import defaultConfig from '../settings/config';
 import { CHART_MODULES } from '../settings/chartComponentMapper';
 import { Validator, CError } from '../validators/validator';
 import CommonStyles from '../styles/commonStyles';
-import Watermark from '../components/watermark';
+import Watermark from '../components/watermark/watermark.component';
 import Menu from '../components/menu';
 import LoaderView from '../components/loaderView';
 import StoreManager from '../liveStore/storeManager';

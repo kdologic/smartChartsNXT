@@ -1,22 +1,23 @@
 'use strict';
 
-import { Component } from '../viewEngin/pview';
-import UiCore from '../core/ui.core';
-import UtilCore from '../core/util.core';
-import defaultConfig from '../settings/config';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import UtilCore from '../../core/util.core';
+import defaultConfig from '../../settings/config';
+import { IWatermarkProps } from './watermark.model';
 
 /**
- * watermark.tsx
+ * watermark.component.tsx
  * @createdOn: 05-Jan-2018
  * @author: SmartChartsNXT
  * @description:This is a component class will create watermark area.
  * @extends: Component
  */
 
-class Watermark extends Component {
+class Watermark extends Component<IWatermarkProps> {
   private titleId: string;
 
-  constructor(props: any) {
+  constructor(props: IWatermarkProps) {
     super(props);
     this.state = {
       color: defaultConfig.theme.fontColorMedium,
@@ -33,7 +34,7 @@ class Watermark extends Component {
   }
 
   afterMount() {
-    let textWidth = this.ref.node.querySelector('.watermark-text').getBBox().width;
+    let textWidth = (this.ref.node as any).querySelector('.watermark-text').getBBox().width;
     if (this.state.textWidth !== textWidth) {
       this.setState({
         linkIconX: textWidth + 5,

@@ -1,31 +1,34 @@
 'use strict';
 
-import { OPTIONS_TYPE } from './../settings/globalEnums';
-import defaultConfig from '../settings/config';
-import { Component } from '../viewEngin/pview';
-import Point from '../core/point';
-import eventEmitter from './../core/eventEmitter';
-import UtilCore from '../core/util.core';
-import UiCore from '../core/ui.core';
-import GeomCore from '../core/geom.core';
-import ConnectorBox from './connectorBox';
-import RichTextBox from './richTextBox';
-import SpeechBox from './speechBox/speechBox.components';
-const enums = new OPTIONS_TYPE();
+import defaultConfig from '../../settings/config';
+import { Component } from '../../viewEngin/pview';
+import Point from '../../core/point';
+import UtilCore from '../../core/util.core';
+import UiCore from '../../core/ui.core';
+import GeomCore from '../.././core/geom.core';
+import ConnectorBox from '../connectorBox';
+import RichTextBox from '../richTextBox';
+import SpeechBox from '../speechBox/speechBox.components';
+import { IAnnotationLabelsProps } from './annotationLabels.model';
+import { AXIS_TYPE, FLOAT, HORIZONTAL_ALIGN } from '../../settings/globalEnums';
+import { IVnode } from '../../viewEngin/component.model';
+import { IAnnotationConfig, IAnnotationLabel, IAnnotationOptions } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 
 /**
- * annotationLabels.js
+ * annotationLabels.component.tsx
  * @createdOn:28-Aug-2021
  * @author:SmartChartsNXT
  * @description: This components will create annotation labels at the various point of interest.
  * @extends: Component
  */
 
-class AnnotationLabels extends Component {
-  constructor(props) {
+class AnnotationLabels extends Component<IAnnotationLabelsProps> {
+  private rid: string;
+  private clipPathId: string;
+
+  constructor(props: IAnnotationLabelsProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.state = {
@@ -46,26 +49,26 @@ class AnnotationLabels extends Component {
     this.labelMouseUp = this.labelMouseUp.bind(this);
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: IAnnotationLabelsProps): void {
     this.state.scaleX = nextProps.scaleX || 0;
     this.state.scaleY = nextProps.scaleY || 0;
     this.state.baseLine = nextProps.baseLine || 0;
   }
 
-  createAnnotationState(props) {
+  createAnnotationState(props: IAnnotationLabelsProps) {
     let annotations = props.annotations;
     this.state.annotations = [];
     this.state.scaleX = props.scaleX || 0;
     this.state.scaleY = props.scaleY || 0;
     this.state.baseLine = props.baseLine || 0;
-    let defaultOpt = {
+    let defaultOpt: IAnnotationOptions = {
       isDraggable: true,
-      isCollapsable: true, //After collapse the annotation label become small plus icon
+      isCollapsible: true, //After collapse the annotation label become small plus icon
       offsetX: 0, // Move entire label along with anchor point to left or right
       offsetY: -10, // Move entire label along with anchor point to top or bottom
       xPadding: 5, // Create x padding inside label box
       yPadding: 5, // Create y padding inside label box
-      float: enums.FLOAT.TOP,
+      float: FLOAT.TOP,
       textColor: defaultConfig.theme.fontColorDark,
       bgColor: defaultConfig.theme.bgColorLight,
       fontSize: 12,
@@ -79,32 +82,32 @@ class AnnotationLabels extends Component {
       minHeight: 30,
       rotate: 0
     };
-    for (let i = 0; i < annotations.length; i++) {
-      for (let j = 0; j < annotations[i].labels.length; j++) {
-        if (annotations[i].labels[j].isMinimized === undefined) {
-          annotations[i].labels[j].isMinimized = false;
+    for (let annotation of annotations) {
+      for (let label of annotation.labels) {
+        if (label.isMinimized === undefined) {
+          label.isMinimized = false;
         }
-        if (!annotations[i].labels[j].topOffset) {
-          annotations[i].labels[j].topOffset = 0;
-          annotations[i].labels[j].nextTopOffset = 0;
+        if (!label.topOffset) {
+          label.topOffset = 0;
+          label.nextTopOffset = 0;
         }
-        if (!annotations[i].labels[j].leftOffset) {
-          annotations[i].labels[j].leftOffset = 0;
-          annotations[i].labels[j].nextLeftOffset = 0;
+        if (!label.leftOffset) {
+          label.leftOffset = 0;
+          label.nextLeftOffset = 0;
         }
       }
-      if (annotations[i].options.isDraggable && annotations[i].options.bgColor === 'none') {
-        annotations[i].options.opacity = 0.0001;
-        annotations[i].options.bgColor = '#FFF';
+      if (annotation.options.isDraggable && annotation.options.bgColor === 'none') {
+        annotation.options.opacity = 0.0001;
+        annotation.options.bgColor = '#FFF';
       }
       this.state.annotations.push({
-        options: { ...defaultOpt, ...annotations[i].options },
-        labels: [...annotations[i].labels]
+        options: { ...defaultOpt, ...annotation.options },
+        labels: [...annotation.labels]
       });
     }
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class='sc-annotation-labels-container' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`}>
         {this.getStyle()}
@@ -122,29 +125,29 @@ class AnnotationLabels extends Component {
         {this.drawAnnotationGroup()}
         <rect class="sc-annotation-drag-plane" x={0} y={0} width={this.props.width} height={this.props.height} stroke='none' fill={this.state.mouseDown ? '#fff' : 'none'} fill-opacity={0}
           events={{
-            mousemove: (e) => this.labelMouseMove(e),
-            mouseup: (e) => this.labelMouseUp(e)
+            mousemove: (e: MouseEvent) => this.labelMouseMove(e),
+            mouseup: (e: MouseEvent) => this.labelMouseUp(e)
           }} >
         </rect>
       </g>
     );
   }
 
-  drawAnnotationGroup() {
-    return this.state.annotations.map((annotations, index) => {
+  drawAnnotationGroup(): IVnode {
+    return this.state.annotations.map((annotation: IAnnotationConfig, index: number) => {
       return (
         <g class={`sc-annotation-label-group-${index}`} transform={`translate(${this.props.vTransformX}, 0)`}>
-          {this.drawAnnotationLabels(annotations, index)}
+          {this.drawAnnotationLabels(annotation, index)}
         </g>
       );
     });
   }
 
-  drawAnnotationLabels(annotations, grpIndex) {
-    let config = annotations.options;
-    return annotations.labels.map((label, index) => {
+  drawAnnotationLabels(annotation: IAnnotationConfig, grpIndex: number): IVnode[] {
+    let config = annotation.options;
+    return annotation.labels.map((label: IAnnotationLabel, index: number) => {
       let valueY = label.y;
-      if (this.props.yAxisType === enums.AXIS_TYPE.LOGARITHMIC && valueY > 0) {
+      if (this.props.yAxisType === AXIS_TYPE.LOGARITHMIC && valueY > 0) {
         valueY = Math.log10(valueY);
       }
       let dataPoint = new Point(
@@ -159,11 +162,10 @@ class AnnotationLabels extends Component {
       } else if (label.image) {
         return this.drawAnnotationTypeImage(grpIndex, index, label, config, dataPoint);
       }
-
     });
   }
 
-  drawAnnotationTypeShape(grpIndex, index, label, config, dataPoint) {
+  drawAnnotationTypeShape(grpIndex: number, index: number, label: IAnnotationLabel, config: IAnnotationOptions, dataPoint: Point): IVnode {
     return (
       <g class={`sc-annotation-label-${grpIndex}-${index}`} transform={`rotate(${config.rotate}, ${dataPoint.x}, ${dataPoint.y}) translate(${dataPoint.x}, ${dataPoint.y})`}>
         {config.dropShadow && UiCore.dropShadow('sc-annotation-shape-drop-shadow')}
@@ -174,7 +176,7 @@ class AnnotationLabels extends Component {
     );
   }
 
-  drawAnnotationTypeImage(grpIndex, index, label, config, dataPoint) {
+  drawAnnotationTypeImage(grpIndex: number, index: number, label: IAnnotationLabel, config: IAnnotationOptions, dataPoint: Point): IVnode {
     return (
       <g class={`sc-annotation-label-${grpIndex}-${index}`} transform={`rotate(${config.rotate}, ${dataPoint.x}, ${dataPoint.y}) translate(${dataPoint.x}, ${dataPoint.y})`}>
         {config.dropShadow && UiCore.dropShadow('sc-annotation-image-drop-shadow')}
@@ -185,22 +187,22 @@ class AnnotationLabels extends Component {
     );
   }
 
-  drawAnnotationTypeText(grpIndex, index, label, config, dataPoint, isDataVisible) {
-    let boxWidth = label.contentWidth ? (label.contentWidth + (2 * config.xPadding)) : config.maxWidth;
-    let boxHeight = label.contentHeight ? (label.contentHeight + (2 * config.yPadding) + 5) : config.minHeight;
-    const hasRotation = config.rotate !== 0;
-    const hasSpeechBubble = !(label.speechBubble === false) && !hasRotation;
+  drawAnnotationTypeText(grpIndex: number, index: number, label: IAnnotationLabel, config: IAnnotationOptions, dataPoint: Point, isDataVisible: boolean): IVnode {
+    let boxWidth: number = label.contentWidth ? (label.contentWidth + (2 * config.xPadding)) : config.maxWidth;
+    let boxHeight: number = label.contentHeight ? (label.contentHeight + (2 * config.yPadding) + 5) : config.minHeight;
+    const hasRotation: boolean = config.rotate !== 0;
+    const hasSpeechBubble: boolean = !(label.speechBubble === false) && !hasRotation;
 
-    const noFloat = !hasSpeechBubble;
+    const noFloat: boolean = !hasSpeechBubble;
     if (label.isMinimized === true) {
       boxWidth = 30;
       boxHeight = 30;
     }
-    const boxCenter = new Point(boxWidth / 2, boxHeight / 2);
-    const labelBoxPos = this.getLabelPosition(dataPoint, boxWidth, boxHeight, config, noFloat);
-    const anchorPoint = new Point(dataPoint.x - labelBoxPos.x + label.leftOffset + label.nextLeftOffset + config.offsetX, dataPoint.y - labelBoxPos.y + label.topOffset + label.nextTopOffset + config.offsetY);
-    const anchorDistance = GeomCore.getDistanceBetween(boxCenter, anchorPoint);
-    let labelBox;
+    const boxCenter: Point = new Point(boxWidth / 2, boxHeight / 2);
+    const labelBoxPos: Point = this.getLabelPosition(dataPoint, boxWidth, boxHeight, config, noFloat);
+    const anchorPoint: Point = new Point(dataPoint.x - labelBoxPos.x + label.leftOffset + label.nextLeftOffset + config.offsetX, dataPoint.y - labelBoxPos.y + label.topOffset + label.nextTopOffset + config.offsetY);
+    const anchorDistance: number = GeomCore.getDistanceBetween(boxCenter, anchorPoint);
+    let labelBox: IVnode;
     if (noFloat) {
       labelBox = <g class='sc-annotation-label-box-bg'>
         {config.dropShadow && UiCore.dropShadow('sc-annotation-bg-drop-shadow')}
@@ -226,14 +228,14 @@ class AnnotationLabels extends Component {
         <g class={`sc-annotation-label-${grpIndex}-${index}`}></g>
       );
     }
-    if (label.isMinimized === true && config.isCollapsable) {
+    if (label.isMinimized === true && config.isCollapsible) {
       return (
         <g class={`sc-annotation-label-${grpIndex}-${index}`} transform={`translate(${labelBoxPos.x},${labelBoxPos.y})`}>
           <title>Maximize</title>
           <g>
             <rect class='sc-maximize-icon-bg' x={0} y={0} width={boxWidth} height={boxWidth} rx="5" fill="url('#mIconGradInactive')" stroke="none" fill-opacity={0.5}
               events={{
-                click: (e) => this.maximizeLabel(e, grpIndex, index)
+                click: (e: MouseEvent) => this.maximizeLabel(e, grpIndex, index)
               }}>
             </rect>
           </g>
@@ -246,35 +248,35 @@ class AnnotationLabels extends Component {
     return (
       <g class={`sc-annotation-label-${grpIndex}-${index}`} transform={`rotate(${config.rotate}, ${labelBoxPos.x}, ${labelBoxPos.y}) translate(${labelBoxPos.x},${labelBoxPos.y})`} tabindex={0}>
         <g class='sc-annotation-label-box' style={{ 'cursor': config.isDraggable ? 'move' : 'initial' }}
-          events={{ mousedown: (e) => this.labelMouseDown(e, grpIndex, index) }}>
+          events={{ mousedown: (e: MouseEvent) => this.labelMouseDown(e, grpIndex, index) }}>
           {labelBox}
         </g>
         <RichTextBox class='sc-annotation-label-text' posX={config.xPadding} posY={config.yPadding} contentWidth={config.maxWidth - (2 * config.xPadding)}
-          textAlign={enums.HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={true} fontSize={config.fontSize} textColor={config.textColor} text={label.text || ''}
-          onRef={(ref) => {
+          textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={true} fontSize={config.fontSize} textColor={config.textColor} text={label.text || ''}
+          onRef={(ref: RichTextBox) => {
             if (ref) {
-              let textDim = ref.getContentDim();
+              let textDim: { width: number, height: number } = ref.getContentDim();
               label.contentWidth = textDim.width;
               label.contentHeight = textDim.height;
             }
           }}>
         </RichTextBox>
-        {config.isCollapsable && this.getMinimizeIcon(boxWidth, config.borderRadius, grpIndex, index)}
+        {config.isCollapsible && this.getMinimizeIcon(boxWidth, config.borderRadius, grpIndex, index)}
       </g>
     );
   }
 
-  getMinimizeIcon(boxWidth, radius, grpIndex, labelIndex) {
-    let iconWidth = 20;
-    let iconHeight = 20;
-    let iconPath = ['M', 0, 0, 'L', iconWidth - radius, 0, 'a', radius, radius, ' 0 0 1 ', radius, radius, 'L', iconWidth, iconHeight, 'Z'];
+  getMinimizeIcon(boxWidth: number, radius: number, grpIndex: number, labelIndex: number): IVnode {
+    let iconWidth: number = 20;
+    let iconHeight: number = 20;
+    let iconPath: (string | number)[] = ['M', 0, 0, 'L', iconWidth - radius, 0, 'a', radius, radius, ' 0 0 1 ', radius, radius, 'L', iconWidth, iconHeight, 'Z'];
     return (
       <g class="sc-minimize-icon-group" transform={`translate(${boxWidth - iconWidth}, ${0})`}>
         <title>Minimize</title>
         <g>
           <path class='sc-minimize-icon-bg' d={iconPath.join(' ')} fill="#000" fill-opacity={0.5}
             events={{
-              click: (e) => this.minimizeLabel(e, grpIndex, labelIndex)
+              click: (e: MouseEvent) => this.minimizeLabel(e, grpIndex, labelIndex)
             }}>
           </path>
         </g>
@@ -282,14 +284,14 @@ class AnnotationLabels extends Component {
     );
   }
 
-  getMaximizeIcon(boxWidth, grpIndex, labelIndex) {
+  getMaximizeIcon(boxWidth: number, grpIndex: number, labelIndex: number): IVnode {
     return (
       <g class="sc-maximize-icon-group">
         <title>Maximize</title>
         <g>
           <rect class='sc-maximize-icon-bg' x={0} y={0} width={boxWidth} height={boxWidth} rx="5" fill="url('#mIconGradInactive')" stroke="none" fill-opacity={0.5}
             events={{
-              click: (e) => this.maximizeLabel(e, grpIndex, labelIndex)
+              click: (e: MouseEvent) => this.maximizeLabel(e, grpIndex, labelIndex)
             }}>
           </rect>
         </g>
@@ -300,36 +302,36 @@ class AnnotationLabels extends Component {
     );
   }
 
-  minimizeLabel(e, grpIndex, labelIndex) {
+  minimizeLabel(e: MouseEvent, grpIndex: number, labelIndex: number): void {
     this.state.annotations[grpIndex].labels[labelIndex].isMinimized = true;
     this.update();
   }
 
-  maximizeLabel(e, grpIndex, labelIndex) {
+  maximizeLabel(e: MouseEvent, grpIndex: number, labelIndex: number): void {
     this.state.annotations[grpIndex].labels[labelIndex].isMinimized = false;
     this.update();
   }
 
-  getLabelPosition(dataPoint, boxWidth, boxHeight, config, noFloat, recursion = 1) {
-    let labelBoxPos;
-    let anchorHeight = 7;
+  getLabelPosition(dataPoint: Point, boxWidth: number, boxHeight: number, config: IAnnotationOptions, noFloat: boolean, recursion: number = 1): Point {
+    let labelBoxPos: Point;
+    let anchorHeight: number = 7;
     if (noFloat) {
       labelBoxPos = new Point(dataPoint.x, dataPoint.y);
     } else {
       switch (config.float) {
-        case enums.FLOAT.TOP: {
+        case FLOAT.TOP: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth / 2), dataPoint.y - (boxHeight + anchorHeight));
           break;
         }
-        case enums.FLOAT.BOTTOM: {
+        case FLOAT.BOTTOM: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth / 2), dataPoint.y + (anchorHeight));
           break;
         }
-        case enums.FLOAT.LEFT: {
+        case FLOAT.LEFT: {
           labelBoxPos = new Point(dataPoint.x - (boxWidth + anchorHeight), dataPoint.y - (boxHeight / 2));
           break;
         }
-        case enums.FLOAT.RIGHT: {
+        case FLOAT.RIGHT: {
           labelBoxPos = new Point(dataPoint.x + anchorHeight, dataPoint.y - (boxHeight / 2));
           break;
         }
@@ -339,11 +341,11 @@ class AnnotationLabels extends Component {
 
       if (recursion <= 4) {
         if (labelBoxPos.y < 0) {
-          let cnf = { ...config, ...{ float: enums.FLOAT.BOTTOM } };
+          let cnf = { ...config, ...{ float: FLOAT.BOTTOM } };
           return this.getLabelPosition(dataPoint, boxWidth, boxHeight, cnf, noFloat, recursion + 1);
         }
         if (labelBoxPos.y + boxHeight > this.props.height) {
-          let cnf = { ...config, ...{ float: enums.FLOAT.TOP } };
+          let cnf = { ...config, ...{ float: FLOAT.TOP } };
           return this.getLabelPosition(dataPoint, boxWidth, boxHeight, cnf, noFloat, recursion + 1);
         }
       }
@@ -354,7 +356,7 @@ class AnnotationLabels extends Component {
       if (labelBoxPos.x + boxWidth + this.props.paddingX + this.props.vTransformX > this.props.width) {
         let diff = (labelBoxPos.x + boxWidth + this.props.paddingX + this.props.vTransformX) - this.props.width;
         labelBoxPos.x -= diff;
-        if (config.float === enums.FLOAT.BOTTOM && labelBoxPos.y < 0) {
+        if (config.float === FLOAT.BOTTOM && labelBoxPos.y < 0) {
           labelBoxPos.y = 0;
         }
       }
@@ -362,8 +364,8 @@ class AnnotationLabels extends Component {
     return labelBoxPos;
   }
 
-  getDataPointVisibility(dataPoint) {
-    let isVisible = true;
+  getDataPointVisibility(dataPoint: Point): boolean {
+    let isVisible: boolean = true;
     if (dataPoint.x < 0 || (dataPoint.x == 0 && this.props.vTransformX < 0)) {
       isVisible = false;
     }
@@ -373,11 +375,11 @@ class AnnotationLabels extends Component {
     return isVisible;
   }
 
-  labelMouseDown(e, grpIndex, labelIndex) {
+  labelMouseDown(e: MouseEvent, grpIndex: number, labelIndex: number): void {
     if (!this.state.annotations[grpIndex].options.isDraggable) {
       return;
     }
-    let mouseDownPos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    let mouseDownPos: DOMPoint = UiCore.cursorPoint((this as any).context.rootContainerId, e);
     let label = this.state.annotations[grpIndex].labels[labelIndex];
     if (!label.mouseDownPos) {
       label.mouseDownPos = mouseDownPos;
@@ -390,9 +392,9 @@ class AnnotationLabels extends Component {
     });
   }
 
-  labelMouseMove(e) {
+  labelMouseMove(event: MouseEvent): void {
     if (this.state.mouseDown) {
-      let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
+      let mousePosNow = UiCore.cursorPoint((this as any).context.rootContainerId, event);
       let movingLabel = this.state.annotations[this.state.grpIndex].labels[this.state.labelIndex];
       let nextLeftOffset = movingLabel.mouseDownPos.x - mousePosNow.x;
       let nextTopOffset = movingLabel.mouseDownPos.y - mousePosNow.y;
@@ -402,7 +404,7 @@ class AnnotationLabels extends Component {
     }
   }
 
-  labelMouseUp() {
+  labelMouseUp(event: MouseEvent): void {
     let movingLabel = this.state.annotations[this.state.grpIndex].labels[this.state.labelIndex];
     movingLabel.leftOffset += movingLabel.nextLeftOffset;
     movingLabel.topOffset += movingLabel.nextTopOffset;
@@ -416,7 +418,7 @@ class AnnotationLabels extends Component {
     });
   }
 
-  getStyle() {
+  getStyle(): IVnode {
     return (
       <style>
         {`
