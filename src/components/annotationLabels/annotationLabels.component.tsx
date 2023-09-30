@@ -6,7 +6,7 @@ import Point from '../../core/point';
 import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
 import GeomCore from '../.././core/geom.core';
-import ConnectorBox from '../connectorBox';
+import ConnectorBox from '../connectorBox/connectorBox.component';
 import RichTextBox from '../richTextBox';
 import SpeechBox from '../speechBox/speechBox.components';
 import { IAnnotationLabelsProps } from './annotationLabels.model';

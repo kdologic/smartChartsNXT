@@ -8,7 +8,7 @@ import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import UtilCore from './../core/util.core';
 import GeomCore from './../core/geom.core';
-import ConnectorBox from './connectorBox';
+import ConnectorBox from './connectorBox/connectorBox.component';
 const enums = new OPTIONS_TYPE();
 
 /**

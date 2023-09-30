@@ -1,33 +1,37 @@
 'use strict';
 
-import Point from './../core/point';
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
+import Point from '../../core/point';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import { IConnectorBoxProps } from './connectorBox.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * connectorBox.js
+ * connectorBox.component.tsx
  * @createdOn:22-Aug-2020
  * @author:SmartChartsNXT
  * @description:This components will create connector box which join by connector line.
  * @extends Component
  */
 
-class ConnectorBox extends Component {
-  constructor(props) {
+class ConnectorBox extends Component<IConnectorBoxProps> {
+  private cpoint: Point;
+
+  constructor(props: IConnectorBoxProps) {
     super(props);
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  render() {
+  render(): IVnode {
     this.cpoint = this.props.cpoint;
-    let showConnectorLine = this.props.showConnectorLine || typeof this.props.showConnectorLine === 'undefined';
+    const showConnectorLine = this.props.showConnectorLine || typeof this.props.showConnectorLine === 'undefined';
     return (
       <g id={this.props.id || ''} class='sc-connector-box' >
         {this.props.shadow && UiCore.dropShadow('sc-connector-box-drop-shadow')}
@@ -44,19 +48,19 @@ class ConnectorBox extends Component {
     );
   }
 
-  getConnectorLinePath() {
-    let cpoint = this.props.cpoint;
-    let path = ['M', cpoint.x, cpoint.y];
-    let dash = 5;
-    let leftCT = new Point(this.props.x, this.props.y + this.props.height/2);
-    let leftCTPath = ['L', leftCT.x - dash, leftCT.y, 'h', dash];
-    let rightCT = new Point(this.props.x + this.props.width, this.props.y + this.props.height/2);
-    let rightCTPath = ['L', rightCT.x + dash, rightCT.y, 'h',-dash];
-    let topCT = new Point(this.props.x + this.props.width/2, this.props.y);
-    let topCTPath = ['L', topCT.x , topCT.y - dash, 'v', dash];
-    let bottomCT = new Point(this.props.x + this.props.width/2, this.props.y + this.props.height);
-    let bottomCTPath = ['L', bottomCT.x, bottomCT.y + dash, 'v', -dash];
-    let connectPoint = [];
+  getConnectorLinePath(): string {
+    const cpoint = this.props.cpoint;
+    const dash = 5;
+    const leftCT = new Point(this.props.x, this.props.y + this.props.height/2);
+    const leftCTPath = ['L', leftCT.x - dash, leftCT.y, 'h', dash];
+    const rightCT = new Point(this.props.x + this.props.width, this.props.y + this.props.height/2);
+    const rightCTPath = ['L', rightCT.x + dash, rightCT.y, 'h',-dash];
+    const topCT = new Point(this.props.x + this.props.width/2, this.props.y);
+    const topCTPath = ['L', topCT.x , topCT.y - dash, 'v', dash];
+    const bottomCT = new Point(this.props.x + this.props.width/2, this.props.y + this.props.height);
+    const bottomCTPath = ['L', bottomCT.x, bottomCT.y + dash, 'v', -dash];
+    let path: (string | number)[] = ['M', cpoint.x, cpoint.y];
+    let connectPoint: (string | number)[] = [];
 
     if(cpoint.x < leftCT.x) {
       connectPoint = leftCTPath;
