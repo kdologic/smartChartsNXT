@@ -9,7 +9,7 @@ import UtilCore from '../../core/util.core';
 import MarkerIcon from '../marker/markerIcon.component';
 import { ILegendBoxProps, ILegendLengthData, ILegendOptions } from './legendBox.model';
 import { ILegendsConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
-import { ALIGNMENT, DISPLAY, FLOAT, ICON_TYPE } from '../../settings/globalEnums';
+import { ALIGNMENT, DISPLAY, FLOAT, ICON_TYPE } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 
 /**

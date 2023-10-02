@@ -8,7 +8,7 @@ import Ticks from '../ticks/ticks.component';
 import UiCore from '../../core/ui.core';
 import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IHorizontalLabelsProps } from './horizontalLabels.model';
-import { VERTICAL_ALIGN } from '../../settings/globalEnums';
+import { VERTICAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 import { IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 

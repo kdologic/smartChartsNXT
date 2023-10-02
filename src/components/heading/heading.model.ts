@@ -1,5 +1,5 @@
 import { ISubtitleConfig, ITitleConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
-import { HORIZONTAL_ALIGN } from "../../settings/globalEnums";
+import { HORIZONTAL_ALIGN } from "../../global/global.enums";
 
 export interface IHeadingProps {
   instanceId: string;

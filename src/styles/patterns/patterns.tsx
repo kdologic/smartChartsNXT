@@ -1,7 +1,7 @@
 'use strict';
 
 import { IVnode } from '../../viewEngin/component.model';
-import { PATTERN } from './../../settings/globalEnums';
+import { PATTERN } from './../../global/global.enums';
 import { IDefImageFill, IPattern, IPatternChild } from './patterns.model';
 
 /**

@@ -2,7 +2,7 @@
 
 import { Component, parseStyleProps } from './../viewEngin/pview';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../global/global.enums';
 import UtilCore from '../core/util.core';
 import UiCore from '../core/ui.core';
 const enums = new OPTIONS_TYPE();

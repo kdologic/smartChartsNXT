@@ -9,7 +9,7 @@ import saveAs from '../../core/saveAs';
 import { IMenuItem, IMenuOptions, IMenuProps } from './menu.model';
 import { IMainMenu } from '../../global/global.models';
 import { IVnode } from '../../viewEngin/component.model';
-import { SAVE_AS } from '../../settings/globalEnums';
+import { SAVE_AS } from '../../global/global.enums';
 
 /**
  * menu.component.tsx

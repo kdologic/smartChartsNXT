@@ -5,7 +5,7 @@
  * @description:This will be the default Line chart config and validation rule set.
  */
 
-import { CHART_TYPE } from '../../../settings/globalEnums';
+import { CHART_TYPE } from '../../../global/global.enums';
 
 export const config = {
   name: 'Line Chart',

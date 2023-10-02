@@ -1,5 +1,5 @@
 import { IMainMenu } from "../../global/global.models";
-import { SAVE_AS } from "../../settings/globalEnums";
+import { SAVE_AS } from "../../global/global.enums";
 
 export interface IMenuProps {
   opts: IMainMenu;

@@ -1,5 +1,5 @@
 import { IAnnotationConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
-import { AXIS_TYPE } from "../../settings/globalEnums";
+import { AXIS_TYPE } from "../../global/global.enums";
 
 export interface IAnnotationLabelsProps {
   annotations: IAnnotationConfig[];

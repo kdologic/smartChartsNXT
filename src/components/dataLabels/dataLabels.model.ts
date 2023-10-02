@@ -1,6 +1,6 @@
 import { IDataLabel } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 import { DataPoint } from "../../core/point";
-import { FLOAT } from "../../settings/globalEnums";
+import { FLOAT } from "../../global/global.enums";
 
 export interface IDataLabelsProps {
   instanceId: string;

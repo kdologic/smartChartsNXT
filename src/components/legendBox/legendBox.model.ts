@@ -1,5 +1,5 @@
 import { ILegendsConfig, IMarkerIcon } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
-import { ALIGNMENT, DISPLAY, FLOAT } from "../../settings/globalEnums";
+import { ALIGNMENT, DISPLAY, FLOAT } from "../../global/global.enums";
 
 export interface ILegendBoxProps {
   legendSet: ILegendOptions[]; // Replace 'any' with the actual type of 'legendSet'

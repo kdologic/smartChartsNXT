@@ -1,5 +1,5 @@
 import Store from "../liveStore/store";
-import { GRADIENT, PATTERN } from "../settings/globalEnums";
+import { GRADIENT, PATTERN } from "../global/global.enums";
 import { A11yWriter } from "./a11y";
 import { CustomEvents } from "./eventEmitter";
 import Point from "./point";

@@ -10,7 +10,7 @@ import StoreManager from '../../liveStore/storeManager';
 import UtilCore from '../../core/util.core';
 import { IDataLabelConfig, IDataLabelData, IDataLabelsProps } from './dataLabels.model';
 import Store from '../../liveStore/store';
-import { FLOAT, TEXT_ANCHOR } from '../../settings/globalEnums';
+import { FLOAT, TEXT_ANCHOR } from '../../global/global.enums';
 import { IDataLabel } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 import { IVnode } from '../../viewEngin/component.model';
 

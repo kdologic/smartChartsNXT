@@ -1,6 +1,6 @@
 'use strict';
 
-import { GRADIENT } from '../../settings/globalEnums';
+import { GRADIENT } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 import { IGradient, IGradientStop } from './gradients.model';
 

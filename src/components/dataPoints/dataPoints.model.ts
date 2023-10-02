@@ -1,6 +1,6 @@
 import { IMarkerIcon, IXAxisConfig, IYAxisConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 import { DataPoint } from "../../core/point";
-import { ICON_TYPE } from "../../settings/globalEnums";
+import { ICON_TYPE } from "../../global/global.enums";
 
 export interface IDataPointsProps {
   instanceId: string;

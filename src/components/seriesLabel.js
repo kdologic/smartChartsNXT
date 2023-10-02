@@ -3,7 +3,7 @@
 import { Component } from './../viewEngin/pview';
 import UiCore from './../core/ui.core';
 import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../global/global.enums';
 import Point from '../core/point';
 import StoreManager from './../liveStore/storeManager';
 import UtilCore from './../core/util.core';

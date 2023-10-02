@@ -5,7 +5,7 @@ import { Component } from '../../viewEngin/pview';
 import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
-import { AXIS_TYPE, FILL_TYPE, LINE_STYLE } from '../../settings/globalEnums';
+import { AXIS_TYPE, FILL_TYPE, LINE_STYLE } from '../../global/global.enums';
 import { IGridProps, IUpdateHorizontalGridEvent, IUpdateVerticalGridEvent } from './grid.model';
 import { IGridConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 

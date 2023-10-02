@@ -3,7 +3,7 @@
 import StoreManager from './liveStore/storeManager';
 import Core from './core/chart.core';
 import UtilCore from './core/util.core';
-import { OPTIONS_TYPE, CHART_TYPE } from './settings/globalEnums';
+import { OPTIONS_TYPE, CHART_TYPE } from './global/global.enums';
 import { COLOR_STRINGS, RAINBOW_COLOR_MODEL, COLOR_MODEL } from './core/fillColorModel';
 import defaultConfig from './settings/config';
 import * as helperMethods from './global/helperMethods';

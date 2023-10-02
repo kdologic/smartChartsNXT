@@ -9,7 +9,7 @@ import SpeechBox from '../../components/speechBox/speechBox.components';
 import Style from '../../viewEngin/style';
 import { IPointerCrosshairConfigExtended, IPointerCrosshairProps } from './pointerCrosshair.model';
 import { IHighlightedPoint, IPointerCrosshairConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
-import { CROSSHAIR_SPREAD, HORIZONTAL_ALIGN, VERTICAL_ALIGN } from '../../settings/globalEnums';
+import { CROSSHAIR_SPREAD, HORIZONTAL_ALIGN, VERTICAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 
 /**

@@ -10,7 +10,7 @@ import ConnectorBox from '../connectorBox/connectorBox.component';
 import RichTextBox from '../richTextBox';
 import SpeechBox from '../speechBox/speechBox.components';
 import { IAnnotationLabelsProps } from './annotationLabels.model';
-import { AXIS_TYPE, FLOAT, HORIZONTAL_ALIGN } from '../../settings/globalEnums';
+import { AXIS_TYPE, FLOAT, HORIZONTAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 import { IAnnotationConfig, IAnnotationLabel, IAnnotationOptions } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 

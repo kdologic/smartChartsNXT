@@ -1,4 +1,4 @@
-import { ICON_TYPE } from "../../settings/globalEnums"
+import { ICON_TYPE } from "../../global/global.enums"
 
 export interface IMarkerIconProps {
   index: number | string;

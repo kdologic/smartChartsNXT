@@ -1,6 +1,6 @@
 'use strict';
 
-import { CHART_TYPE } from './globalEnums';
+import { CHART_TYPE } from '../global/global.enums';
 
 /**
  * validationRules.js

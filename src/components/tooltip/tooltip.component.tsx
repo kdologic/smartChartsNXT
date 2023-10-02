@@ -11,7 +11,7 @@ import Style from '../../viewEngin/style';
 import { ITooltipConfigExtended, ITooltipInstances, ITooltipProps, IUpdateTooltipEvent } from './tooltip.model';
 import { IVnode } from '../../viewEngin/component.model';
 import { IHighlightedPoint } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
-import { TOOLTIP_ALIGN, TOOLTIP_POSITION } from '../../settings/globalEnums';
+import { TOOLTIP_ALIGN, TOOLTIP_POSITION } from '../../global/global.enums';
 import { IInteractiveMouseEvent } from '../../charts/connectedPointChartsType/interactivePlane/interactivePlane.model';
 import { RectPoint } from '../../core/rect';
 

@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from '../../viewEngin/pview';
-import { ICON_TYPE } from '../../settings/globalEnums';
+import { ICON_TYPE } from '../../global/global.enums';
 import { CircleIcon, TriangleIcon, DiamondIcon, StarIcon, CustomIcon } from '../../icons/iconCollection';
 import { IVnode } from '../../viewEngin/component.model';
 import { IMarkerIconProps } from './markerIcon.model';

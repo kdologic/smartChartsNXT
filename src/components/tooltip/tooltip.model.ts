@@ -1,6 +1,6 @@
 import { IHighlightedPoint, ITooltipConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 import Point from "../../core/point";
-import { TOOLTIP_ALIGN } from "../../settings/globalEnums";
+import { TOOLTIP_ALIGN } from "../../global/global.enums";
 
 export interface ITooltipProps {
   instanceId: string;

@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from '../../viewEngin/pview';
-import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../settings/globalEnums';
+import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../global/global.enums';
 import UtilCore from '../../core/util.core';
 import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import RichTextBox from '../richTextBox';

@@ -6,7 +6,7 @@ import UtilCore from './util.core';
 import patterns from '../styles/patterns/patterns';
 import gradients from '../styles/gradients/gradients';
 import { IVnode } from '../viewEngin/component.model';
-import { FILL_TYPE } from '../settings/globalEnums';
+import { FILL_TYPE } from '../global/global.enums';
 import { IFillOptions, IYIntervalType } from './core.model';
 
 /**

@@ -2,7 +2,7 @@
 
 import Point from './../core/point';
 import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE } from './../settings/globalEnums';
+import { OPTIONS_TYPE } from './../global/global.enums';
 import UiCore from './../core/ui.core';
 import GeomCore from './../core/geom.core';
 import UtilCore from './../core/util.core';

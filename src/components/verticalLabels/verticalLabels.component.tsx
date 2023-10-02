@@ -9,7 +9,7 @@ import Ticks from '../ticks/ticks.component';
 import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IVerticalLabelsProps } from './verticalLabels.model';
 import { IYAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
-import { AXIS_TYPE, HORIZONTAL_ALIGN, TEXT_ANCHOR } from '../../settings/globalEnums';
+import { AXIS_TYPE, HORIZONTAL_ALIGN, TEXT_ANCHOR } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 
 /**

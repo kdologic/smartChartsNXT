@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * globalEnums.ts
+ * global.enums.ts
  * @createdOn: 15-Jul-2019
  * @author: SmartChartsNXT
  * @description: Global enumeration values.

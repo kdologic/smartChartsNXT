@@ -6,7 +6,7 @@ import RichTextBox from '../richTextBox';
 import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
 import { HeadingTypeMap, IHeadingConfig, IHeadingProps } from './heading.model';
-import { HORIZONTAL_ALIGN } from '../../settings/globalEnums';
+import { HORIZONTAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 
 /**
