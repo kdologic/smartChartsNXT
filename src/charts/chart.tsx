@@ -4,12 +4,12 @@ import { Validator, CError } from '../validators/validator';
 import { validationRules } from '../settings/validationRules';
 import { mountTo } from '../viewEngin/pview';
 import { IComponent } from '../viewEngin/component.model';
-import BaseChart from '../base/baseChart';
+import BaseChart from '../base/baseChart.component';
 import StoreManager from '../liveStore/storeManager';
 import UtilCore from '../core/util.core';
 import eventEmitter, { CustomEvents } from '../core/eventEmitter';
 import ErrorView from '../components/errorView';
-import a11yFactory, { A11yWriter } from '../core/a11y';
+import a11yFactory from '../core/a11y';
 import { Store } from '../liveStore/store';
 
 /*eslint-disable  no-console*/
@@ -30,7 +30,6 @@ class Chart {
   private targetNodeWidth: number;
   private targetNodeHeight: number;
   private events: CustomEvents;
-  private a11yService: A11yWriter;
   private core: SVGElement | IComponent;
   private oldTargetWidth: number;
   private oldTargetHeight: number;
@@ -65,7 +64,7 @@ class Chart {
       this.targetNode.setAttribute('role', 'region');
       this.targetNode.setAttribute('aria-hidden', 'false');
       this.targetNode.setAttribute('aria-label', 'SmartchartsNXT interactive ' + this.config.getState().type);
-      this.a11yService = a11yFactory.createInstance(this.runId, this.targetNode);
+      a11yFactory.createInstance(this.runId, this.targetNode);
       this.core = mountTo(<BaseChart opts={this.config.getState()} runId={this.runId} width={this.targetNodeWidth} height={this.targetNodeHeight} />, this.targetNode, 'vnode', null, {}, false);
 
       /* Detect the element resize and re-draw accordingly */

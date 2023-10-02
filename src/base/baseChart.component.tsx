@@ -6,6 +6,7 @@ import UtilCore from '../core/util.core';
 import eventEmitter, { CustomEvents } from '../core/eventEmitter';
 import { Component } from '../viewEngin/pview';
 import defaultConfig from '../settings/config';
+import { PUBLIC_SITE } from '../global/global.constants';
 import { CHART_MODULES } from '../settings/chartComponentMapper';
 import { Validator, CError } from '../validators/validator';
 import CommonStyles from '../styles/commonStyles';
@@ -14,22 +15,22 @@ import Menu from '../components/menu/menu.component';
 import LoaderView from '../components/loaderView';
 import StoreManager from '../liveStore/storeManager';
 import { Store } from '../liveStore/store';
-import { PUBLIC_SITE } from '../settings/globalEnums';
 import GlobalDefs from '../styles/globalDefs/globalDefs';
 import a11yFactory, { A11yWriter } from '../core/a11y';
 import PopupContainer from '../popupComponents/popupContainer';
 import { IObject } from '../viewEngin/pview.model';
 import { IConnectedPointChartConfig } from '../charts/connectedPointChartsType/connectedPointChartsType.model';
 import { IVnode } from '../viewEngin/component.model';
+import { IBaseChartProps } from './baseChart.model';
 
 /**
- * baseChart.tsx
+ * baseChart.component.tsx
  * @createdOn: 10-May-2017
  * @author: SmartChartsNXT
  * @description:This is base chart with default config and this will initiate loading of a specific chart type.
  */
 
-class BaseChart extends Component {
+class BaseChart extends Component<IBaseChartProps> {
 
   private chartType: TChartType;
   private store: Store;
@@ -37,12 +38,11 @@ class BaseChart extends Component {
   private CHART_OPTIONS: IObject;
   private CHART_DATA: IObject;
   private CHART_CONST: IObject;
-  private chartValidationRules: any;
+  private chartValidationRules: IObject;
   private validator: Validator;
   private validationErrors: CError[];
   private titleId: string;
   private descId: string;
-  private blurFilterId: string;
   private menuIconGradId: string;
   private htmlContainerIE: string;
   private globalDefs: GlobalDefs;
@@ -51,7 +51,7 @@ class BaseChart extends Component {
   public state: any;
   private _setState: (state: any) => void;
 
-  constructor(props: IObject) {
+  constructor(props: IBaseChartProps) {
     super(props);
     try {
       this._setState = this.setState;
@@ -99,7 +99,6 @@ class BaseChart extends Component {
       };
       this.titleId = UtilCore.getRandomID();
       this.descId = UtilCore.getRandomID();
-      this.blurFilterId = UtilCore.getRandomID();
       this.menuIconGradId = UtilCore.getRandomID();
       this.htmlContainerIE = 'sc-html-container-ie-' + UtilCore.getRandomID();
       this.initCanvasSize(this.state.width, this.state.height);

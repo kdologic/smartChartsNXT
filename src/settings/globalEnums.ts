@@ -143,8 +143,6 @@ export class OPTIONS_TYPE {
   public TEXT_ANCHOR = TEXT_ANCHOR;
 };
 
-export const PUBLIC_SITE = 'https://www.smartchartsnxt.com';
-
 export enum CHART_TYPE {
   AREA_CHART = 'AreaChart',
   LINE_CHART = 'LineChart',
