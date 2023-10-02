@@ -4,7 +4,7 @@ import { CHART_TYPE } from './globalEnums';
 import ConnectedPointBase from '../charts/connectedPointChartsType/connectedPointBase';
 import { config as areaChartConfig, validationRules as areaChartValidationRules } from '../charts/connectedPointChartsType/areaChart/areaChart.config';
 import { config as lineChartConfig, validationRules as lineChartValidationRules } from '../charts/connectedPointChartsType/lineChart/lineChart.config';
-import { IChartModules } from '../models/global.models';
+import { IChartModules } from '../global/global.models';
 
 /** ------- Mapping components and config with respective chart types ------- */
 /**

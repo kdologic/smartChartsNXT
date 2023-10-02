@@ -1,14 +1,18 @@
 'use strict';
 
-import Point from './../core/point';
-import { Component } from './../viewEngin/pview';
-import defaultConfig from './../settings/config';
-import eventEmitter from './../core/eventEmitter';
-import SpeechBox from './../components/speechBox/speechBox.components';
-import saveAs from './../core/saveAs';
+import Point from '../../core/point';
+import { Component } from '../../viewEngin/pview';
+import defaultConfig from '../../settings/config';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import SpeechBox from '../../components/speechBox/speechBox.components';
+import saveAs from '../../core/saveAs';
+import { IMenuItem, IMenuOptions, IMenuProps } from './menu.model';
+import { IMainMenu } from '../../global/global.models';
+import { IVnode } from '../../viewEngin/component.model';
+import { SAVE_AS } from '../../settings/globalEnums';
 
 /**
- * menu.js
+ * menu.component.tsx
  * @createdOn:06-Jan-2018
  * @author:SmartChartsNXT
  * @description:This will generate a menu in chart.
@@ -16,10 +20,19 @@ import saveAs from './../core/saveAs';
  */
 
 
-class Menu extends Component {
-  constructor(props) {
+class Menu extends Component<IMenuProps> {
+  private emitter: CustomEvents;
+  private menuItemWidth: number;
+  private menuItemHeight: number;
+  private menuAnchor: number;
+  private menuPaddingTop: number;
+  private menuPosition: Point;
+  private menuFontSize: number;
+  private menuOpt: IMenuOptions;
+
+  constructor(props: IMenuProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.state = {
       menuItem: [],
       menuIconWidth: 30,
@@ -38,13 +51,13 @@ class Menu extends Component {
         label: 'Save As JPG',
         hotKey: 8,
         bottomLine: true,
-        type: 'jpg',
+        type: SAVE_AS.JPG,
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'jpg');
+            this.onMenuSelect.call(this, e, SAVE_AS.JPG);
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'jpg');
+            this.onMenuSelect.call(this, e, SAVE_AS.JPG);
           }
         }
       }, {
@@ -52,13 +65,13 @@ class Menu extends Component {
         label: 'Save As PNG',
         hotKey: 9,
         bottomLine: true,
-        type: 'png',
+        type: SAVE_AS.PNG,
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'png');
+            this.onMenuSelect.call(this, e, SAVE_AS.PNG);
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'png');
+            this.onMenuSelect.call(this, e, SAVE_AS.PNG);
           }
         }
       }, {
@@ -66,13 +79,13 @@ class Menu extends Component {
         label: 'Save As SVG',
         hotKey: 9,
         bottomLine: true,
-        type: 'svg',
+        type: SAVE_AS.SVG,
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'svg');
+            this.onMenuSelect.call(this, e, SAVE_AS.SVG);
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'svg');
+            this.onMenuSelect.call(this, e, SAVE_AS.SVG);
           }
         }
       }, {
@@ -80,13 +93,13 @@ class Menu extends Component {
         label: 'Save As PDF',
         hotKey: 9,
         bottomLine: true,
-        type: 'pdf',
+        type: SAVE_AS.PDF,
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'pdf');
+            this.onMenuSelect.call(this, e, SAVE_AS.PDF);
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'pdf');
+            this.onMenuSelect.call(this, e, SAVE_AS.PDF);
           }
         }
       }, {
@@ -94,19 +107,19 @@ class Menu extends Component {
         label: 'Print',
         hotKey: 0,
         bottomLine: false,
-        type: 'print',
+        type: SAVE_AS.PRINT,
         events: {
           click: (e) => {
-            this.onMenuSelect.call(this, e, 'print');
+            this.onMenuSelect.call(this, e, SAVE_AS.PRINT);
           },
           keydown: (e) => {
-            this.onMenuSelect.call(this, e, 'print');
+            this.onMenuSelect.call(this, e, SAVE_AS.PRINT);
           }
         }
       }]
     };
 
-    let splitAt = (str, i) => [str.slice(0, i), str.slice(i, i + 1), str.slice(i + 1)];
+    const splitAt = (str: string, i: number) => [str.slice(0, i), str.slice(i, i + 1), str.slice(i + 1)];
     this.hideMenuItems = this.hideMenuItems.bind(this);
     this.onMenuItemFocusIn = this.onMenuItemFocusIn.bind(this);
     this.onMenuItemFocusOut = this.onMenuItemFocusOut.bind(this);
@@ -118,26 +131,26 @@ class Menu extends Component {
     this.configureMenuItems(this.props.opts);
   }
 
-  afterMount() {
-    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
-      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+  afterMount(): void {
+    if (!(this.ref.node instanceof Text) && typeof (this.ref.node.querySelector('.item-' + this.state.focusIndex) as any).focus === 'function') {
+      (this.ref.node.querySelector('.item-' + this.state.focusIndex) as any).focus();
     }
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: IMenuProps): void {
     this.configureMenuItems(nextProps.opts);
   }
 
-  configureMenuItems(opts) {
+  configureMenuItems(opts: IMainMenu): void {
     this.state.menuItems = [];
-    this.menuOpt.menu.map((item) => {
-      if(opts[item.id]) {
+    this.menuOpt.menu.map((item: IMenuItem) => {
+      if (opts[item.id]) {
         this.state.menuItems.push(item);
       }
     });
   }
 
-  render() {
+  render(): IVnode {
     this.menuPosition = new Point(this.props.x, this.props.y);
     return (
       <g class='sc-menu-context'
@@ -152,21 +165,21 @@ class Menu extends Component {
     );
   }
 
-  generateMenuItems() {
+  generateMenuItems(): IVnode {
     let xPos = -(this.menuItemWidth + this.menuAnchor + (2 * this.state.padding));
     return (
       <g role='menu' transform={`translate(${this.menuPosition.x},${this.menuPosition.y})`}>
         <SpeechBox x={xPos} y={this.menuPaddingTop} width={this.menuItemWidth} height={(this.state.menuItems.length * this.menuItemHeight)} cpoint={new Point(this.menuAnchor, 12)}
-          bgColor='#fff' opacity='1' shadow={true} strokeColor='none'>
+          bgColor='#fff' fillOpacity='1' shadow={true} strokeColor='none'>
         </SpeechBox>
         {
-          this.state.menuItems.map((menu, index) => this.getEachItem.call(this, menu, index, xPos))
+          this.state.menuItems.map((menu: IMenuItem, index: number) => this.getEachItem.call(this, menu, index, xPos))
         }
       </g>
     );
   }
 
-  getEachItem(menu, index, xPos) {
+  getEachItem(menu: IMenuItem, index: number, xPos: number): IVnode {
     let yPos = (index * this.menuItemHeight) + this.menuPaddingTop;
     let txtPLeft = 12;
     return (
@@ -191,7 +204,7 @@ class Menu extends Component {
     );
   }
 
-  getStyle() {
+  getStyle(): string {
     return (`
       .menu-item:hover .menu-item-rect, .menu-item:focus .menu-item-rect {
         fill: #555;
@@ -205,7 +218,7 @@ class Menu extends Component {
     `);
   }
 
-  getCloseIcon() {
+  getCloseIcon(): IVnode {
     return (
       <g class='sc-menu-close-icon' transform={`translate(${this.props.svgWidth},${0})`} >
         <title>Close</title>
@@ -239,15 +252,15 @@ class Menu extends Component {
     );
   }
 
-  onMenuSelect(e, type) {
-    if (e.type == 'keydown') {
-      if (e.which == 9) {
+  onMenuSelect(e: MouseEvent | KeyboardEvent, type: SAVE_AS): void {
+    if (e instanceof KeyboardEvent && e.type == 'keydown') {
+      if (e.code === 'Tab') {
         e.preventDefault();
-        if(typeof this.ref.node.querySelector('.sc-menu-close-icon-bg').focus === 'function') {
-          this.ref.node.querySelector('.sc-menu-close-icon-bg').focus();
+        if (!(this.ref.node instanceof Text) && typeof (this.ref.node.querySelector('.sc-menu-close-icon-bg') as any)?.focus === 'function') {
+          (this.ref.node.querySelector('.sc-menu-close-icon-bg') as any)?.focus();
         }
         return;
-      } else if ([13, 32].indexOf(e.which) === -1) {
+      } else if (['Enter', 'Space'].indexOf(e.code) === -1) {
         return;
       }
     }
@@ -258,37 +271,37 @@ class Menu extends Component {
     saveAs[type].call(saveAs, eventOpts);
   }
 
-  hideMenuItems(e) {
-    if (e.type == 'click' || (e.type == 'keydown' && (e.which === 13 || e.which === 32))) {
+  hideMenuItems(e: MouseEvent | KeyboardEvent) {
+    if (e.type === 'click' || (e instanceof KeyboardEvent && e.type === 'keydown' && (e.code === 'Enter' || e.code === 'Space'))) {
       e.stopPropagation();
       this.emitter.emitSync('menuClosed', e);
-    } else if (e.type == 'keydown' && e.which === 9 && e.shiftKey) {
+    } else if (e instanceof KeyboardEvent && e.type == 'keydown' && e.code === 'Tab' && e.shiftKey) {
       e.preventDefault();
-      if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
-        this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
-      }
+      this.setItemFocus();
     }
   }
 
-  onMenuItemKeyUp(e) {
-    if (e.which === 38) {
+  onMenuItemKeyUp(e: KeyboardEvent) {
+    if (e.code === 'ArrowUp') {
       this.state.focusIndex = this.state.focusIndex - 1;
       if (this.state.focusIndex < 0) {
         this.state.focusIndex = this.state.menuItems.length - 1;
       }
-    } else if (e.which === 40) {
+    } else if (e.code === 'ArrowDown') {
       this.state.focusIndex = (this.state.focusIndex + 1) % this.state.menuItems.length;
     }
-    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
-      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
-    }
+    this.setItemFocus();
   }
 
-  onMenuItemFocusIn(e) {
-    let menuItemIndex = +e.target.getAttribute('data-item-index');
+  onMenuItemFocusIn(e: MouseEvent | KeyboardEvent) {
+    let menuItemIndex = +(e.target as HTMLElement).getAttribute('data-item-index');
     this.state.focusIndex = menuItemIndex;
-    if(typeof this.ref.node.querySelector('.item-' + this.state.focusIndex).focus === 'function') {
-      this.ref.node.querySelector('.item-' + this.state.focusIndex).focus();
+    this.setItemFocus();
+  }
+
+  setItemFocus(): void {
+    if (!(this.ref.node instanceof Text) && typeof (this.ref.node.querySelector('.item-' + this.state.focusIndex) as any).focus === 'function') {
+      (this.ref.node.querySelector('.item-' + this.state.focusIndex) as any).focus();
     }
   }
 
@@ -296,25 +309,30 @@ class Menu extends Component {
     // nothing to do here now
   }
 
-  processHotKeys(e) {
+  processHotKeys(e: KeyboardEvent) {
     if (e.type === 'keydown') {
-      if (e.which == 27) {
-        let evt = document.createEvent('MouseEvents');
-        evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-        this.ref.node.querySelector('.sc-menu-close-icon-bg').dispatchEvent(evt);
+      if (e.code == 'Escape') {
+        let event = new MouseEvent('click', {
+          bubbles: true,
+          cancelable: true,
+          view: window
+        });
+        (this.ref.node as HTMLElement).querySelector('.sc-menu-close-icon-bg').dispatchEvent(event);
       } else {
         for (let i = 0; i < this.state.menuItems.length; i++) {
           let menu = this.state.menuItems[i];
           if (e.key.toString().toLowerCase() == menu.splitLabel[1].toString().toLowerCase()) {
-            let evt = document.createEvent('MouseEvents');
-            evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-            this.ref.node.querySelector('.item-' + i).dispatchEvent(evt);
+            let event = new MouseEvent('click', {
+              bubbles: true,
+              cancelable: true,
+              view: window
+            });
+            (this.ref.node as HTMLElement).querySelector('.item-' + i).dispatchEvent(event);
           }
         }
       }
     }
   }
-
 }
 
 export default Menu;

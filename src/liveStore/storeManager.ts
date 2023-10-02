@@ -1,7 +1,7 @@
 'use strict';
 
+import { IStoreCollection } from '../core/core.model';
 import UtilCore from '../core/util.core';
-import { IStoreCollection } from '../models/global.models';
 import Store from './store';
 
 /**

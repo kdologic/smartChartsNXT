@@ -12,7 +12,8 @@ export enum ICON_TYPE {
   TRIANGLE = 'triangle',
   DIAMOND = 'diamond',
   STAR = 'star',
-  CUSTOM = 'custom'
+  CUSTOM = 'custom',
+  NONE = 'none'
 }
 
 export enum LINE_STYLE {
@@ -29,6 +30,12 @@ export enum HORIZONTAL_ALIGN {
   RIGHT = 'right',
   LEFT = 'left',
   CENTER = 'center'
+};
+
+export enum TEXT_ANCHOR {
+  START = 'start',
+  MIDDLE = 'middle',
+  END = 'end'
 };
 
 export enum VERTICAL_ALIGN {
@@ -60,6 +67,13 @@ export enum CROSSHAIR_SPREAD {
 export enum TOOLTIP_POSITION {
   STATIC = 'static',
   DYNAMIC = 'dynamic'
+};
+
+export enum TOOLTIP_ALIGN {
+  TOP = 'top',
+  BOTTOM = 'bottom',
+  LEFT = 'left',
+  RIGHT = 'right'
 };
 
 export enum GRADIENT {
@@ -103,6 +117,15 @@ export enum FILL_TYPE {
   GRADIENT_PRESET = 'gradientPreset',
   PATTERN_IMAGE = 'patternImage'
 };
+
+export enum SAVE_AS {
+  JPG = 'jpg',
+  PNG = 'png',
+  SVG = 'svg',
+  PDF = 'pdf',
+  PRINT = 'print'
+};
+
 export class OPTIONS_TYPE {
   public ICON_TYPE = ICON_TYPE;
   public LINE_STYLE = LINE_STYLE;
@@ -113,10 +136,12 @@ export class OPTIONS_TYPE {
   public FLOAT = FLOAT;
   public CROSSHAIR_SPREAD = CROSSHAIR_SPREAD;
   public TOOLTIP_POSITION = TOOLTIP_POSITION;
+  public TOOLTIP_ALIGN = TOOLTIP_ALIGN
   public GRADIENT = GRADIENT;
   public PATTERN = PATTERN;
   public AXIS_TYPE = AXIS_TYPE;
-}
+  public TEXT_ANCHOR = TEXT_ANCHOR;
+};
 
 export const PUBLIC_SITE = 'https://www.smartchartsnxt.com';
 

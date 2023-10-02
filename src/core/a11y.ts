@@ -1,7 +1,7 @@
 'use strict';
 
-import { IA11yWriterStore } from "../models/global.models";
 import { IObject } from "../viewEngin/pview.model";
+import { IA11yWriterStore } from "./core.model";
 
 
 /**

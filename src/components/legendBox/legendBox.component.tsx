@@ -374,7 +374,7 @@ class LegendBox extends Component<ILegendBoxProps> {
   }
 
   onClick(e: MouseEvent | KeyboardEvent, index: number) {
-    if (e instanceof KeyboardEvent && e.type === 'keyup' && e.key !== ' ') {
+    if (e instanceof KeyboardEvent && e.type === 'keyup' && e.code !== 'Space') {
       return;
     }
     if (this.config.toggleType) {

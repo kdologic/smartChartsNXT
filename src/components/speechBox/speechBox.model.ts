@@ -12,7 +12,7 @@ export interface ISpeechBoxProps {
   fillOpacity: number | string;
   shadow: boolean;
   strokeColor: string;
-  strokeWidth: number | string;
+  strokeWidth?: number | string;
   showAnchor?: boolean;
   cornerRadius?: number | string;
   strokeOpacity?: number | string;

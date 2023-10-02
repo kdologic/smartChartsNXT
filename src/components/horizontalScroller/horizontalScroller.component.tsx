@@ -458,11 +458,11 @@ class HorizontalScroller extends Component<IHorizontalScrollerProps> {
     
 
     // left arrow pressed
-    if (e.key === 'ArrowLeft') {
+    if (e.code === 'ArrowLeft') {
       this.onMouseDown(event as MouseEvent);
       event.clientX = this.state.leftOffset - 10;
       // right arrow pressed
-    } else if (e.key == 'ArrowRight') {
+    } else if (e.code == 'ArrowRight') {
       this.onMouseDown(event as MouseEvent);
       event.clientX = this.state.leftOffset + 10;
     }

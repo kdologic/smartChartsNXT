@@ -1,6 +1,6 @@
 'use strict';
 
-import { TChartType } from '../models/global.models';
+import { TChartType } from '../global/global.models';
 import Point from '../core/point';
 import UtilCore from '../core/util.core';
 import eventEmitter, { CustomEvents } from '../core/eventEmitter';
@@ -10,7 +10,7 @@ import { CHART_MODULES } from '../settings/chartComponentMapper';
 import { Validator, CError } from '../validators/validator';
 import CommonStyles from '../styles/commonStyles';
 import Watermark from '../components/watermark/watermark.component';
-import Menu from '../components/menu';
+import Menu from '../components/menu/menu.component';
 import LoaderView from '../components/loaderView';
 import StoreManager from '../liveStore/storeManager';
 import { Store } from '../liveStore/store';
@@ -211,7 +211,7 @@ class BaseChart extends Component {
           </g>
 
           {this.CHART_OPTIONS.creditsWatermark.enable &&
-            <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={10} posY={12} link={PUBLIC_SITE} title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
+            <Watermark svgWidth={this.CHART_DATA.svgWidth} svgHeight={this.CHART_DATA.svgHeight} posX={15} posY={15} link={PUBLIC_SITE} title='Javascript chart created using SmartChartsNXT Library'>SmartChartsNXT</Watermark>
           }
 
           {this.CHART_OPTIONS.menu.mainMenu.enable && this.CHART_OPTIONS.showMenu !== false &&
@@ -332,8 +332,8 @@ class BaseChart extends Component {
     );
   }
 
-  showMenuPopup(e: Event) {
-    if (e.type == 'click' || (e.type == 'keypress' && ((e as KeyboardEvent).key === '13' || (e as KeyboardEvent).key === '32'))) {
+  showMenuPopup(e: MouseEvent | KeyboardEvent) {
+    if (e.type == 'click' || (e.type == 'keypress' && ((e as KeyboardEvent).code === 'Enter' || (e as KeyboardEvent).code === 'Space'))) {
       this.emitter.emit('menuExpanded', e);
       this._setState({ menuExpanded: true });
     }

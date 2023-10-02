@@ -1,7 +1,7 @@
 'use strict';
 
 import Events from 'events';
-import { IEventStore } from '../models/global.models';
+import { IEventStore } from './core.model';
 const MAX_LIMIT = 100;
 let instance: IEventStore = {};
 
