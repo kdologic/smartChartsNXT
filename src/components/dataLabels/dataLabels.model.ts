@@ -1,4 +1,4 @@
-import { IDataLabel } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
+import { IClipArea, IDataLabel } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 import { DataPoint } from "../../core/point";
 import { FLOAT } from "../../global/global.enums";
 
@@ -6,14 +6,7 @@ export interface IDataLabelsProps {
   instanceId: string;
   pointSet: DataPoint[];
   opts: IDataLabel;
-  clip: {
-    x: number;
-    y?: number;
-    width: number;
-    height?: number;
-    offsetLeft: number;
-    offsetRight: number;
-  };
+  clip: IClipArea;
   onRef?: (param: any) => any;
 };
 

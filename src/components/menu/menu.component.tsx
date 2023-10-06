@@ -44,7 +44,7 @@ class Menu extends Component<IMenuProps> {
     this.menuAnchor = 3;
     this.menuPaddingTop = 12;
     this.menuPosition = new Point(this.props.x, this.props.y);
-    this.menuFontSize = 10;
+    this.menuFontSize = defaultConfig.theme.fontSizeMedium;
     this.menuOpt = {
       menu: [{
         id: 'itemSaveAsJPG',
@@ -194,7 +194,7 @@ class Menu extends Component<IMenuProps> {
         <rect class='menu-item-rect' x={xPos} y={yPos} width={this.menuItemWidth} height={this.menuItemHeight}
           opacity='1' stroke='#000' stroke-width='0' fill='#fff' style={{ 'cursor': 'pointer' }}>
         </rect>
-        <text class='item-text' text-rendering='geometricPrecision' font-size='12' font-family={defaultConfig.theme.fontFamily} pointer-events='none'>
+        <text class='item-text' text-rendering='geometricPrecision' font-size={this.menuFontSize} font-family={defaultConfig.theme.fontFamily} pointer-events='none'>
           <tspan text-anchor='start' class='menu-item-text' x={xPos + txtPLeft} y={yPos + (this.menuItemHeight / 2)} dy='5'>{menu.splitLabel[0]}<tspan text-decoration='underline' word-spacing='-2'> {menu.splitLabel[1]} </tspan>{menu.splitLabel[2]}</tspan>
         </text>
         {(menu.bottomLine || menu.topLine) &&

@@ -1,4 +1,4 @@
-import { CategoryLabelType, IXAxisConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
+import { CategoryLabelType, IClipArea, IXAxisConfig } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 
 export interface IHorizontalLabelsProps {
   opts?: IXAxisConfig;
@@ -10,10 +10,7 @@ export interface IHorizontalLabelsProps {
   paddingX: number;
   accessibilityId?: string;
   onRef?: (param: any) => any;
-  clip?: {
-    x: number;
-    width: number;
-  };
+  clip?: IClipArea;
 };
 
 export interface IHorizontalLabelHoverEvent {
