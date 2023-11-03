@@ -33,7 +33,7 @@ export interface IHeadingConfig {
   offsetLeft: number;
   fontSize: string;
   textColor: string;
-  textAlign: string;
+  textAlign: HORIZONTAL_ALIGN;
   responsive?: {
     reducer?: (chartWidth: number, chartHeight: number) => { text?: string };
   };

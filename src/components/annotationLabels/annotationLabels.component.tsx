@@ -7,7 +7,7 @@ import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
 import GeomCore from '../.././core/geom.core';
 import ConnectorBox from '../connectorBox/connectorBox.component';
-import RichTextBox from '../richTextBox';
+import RichTextBox from '../richTextBox/richTextBox.component';
 import SpeechBox from '../speechBox/speechBox.components';
 import { IAnnotationLabelsProps } from './annotationLabels.model';
 import { AXIS_TYPE, FLOAT, HORIZONTAL_ALIGN } from '../../global/global.enums';

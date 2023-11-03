@@ -1,14 +1,15 @@
 'use strict';
 
-import { Component, parseStyleProps } from './../viewEngin/pview';
-import defaultConfig from './../settings/config';
-import { OPTIONS_TYPE } from './../global/global.enums';
-import UtilCore from '../core/util.core';
-import UiCore from '../core/ui.core';
-const enums = new OPTIONS_TYPE();
+import { Component, parseStyleProps } from '../../viewEngin/pview';
+import defaultConfig from '../../settings/config';
+import UtilCore from '../../core/util.core';
+import UiCore from '../../core/ui.core';
+import { IDimension, IRichTextBoxProps, IStyleConfig } from './richTextBox.model';
+import { HORIZONTAL_ALIGN, TEXT_ANCHOR, VERTICAL_ALIGN } from '../../global/global.enums';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * richTextBox.js
+ * richTextBox.component.tsx
  * @createdOn: 23-Oct-2020
  * @author: SmartChartsNXT
  * @description: This components can display rich text which may contains HTML tags.
@@ -20,8 +21,14 @@ const enums = new OPTIONS_TYPE();
  * Before download in IE all rich text will be converted into plain text to render it into main svg.
  */
 
-class RichTextBox extends Component {
-  constructor(props) {
+class RichTextBox extends Component<IRichTextBoxProps> {
+  public contentId: string;
+  private contentElem: HTMLElement | null;
+  private defaultStyle: IStyleConfig;
+  private textStyleIE: string;
+  private htmlContainerIE: HTMLElement | null;
+
+  constructor(props: IRichTextBoxProps) {
     super(props);
     this.state = {};
     this.contentId = 'text-' + UtilCore.getRandomID();
@@ -36,19 +43,24 @@ class RichTextBox extends Component {
     this.resetState(props);
   }
 
-  resetState(props) {
+  resetState(props: IRichTextBoxProps): void {
     this.state = {
-      style: this.props.style,
-      fontSize: this.props.fontSize ? this.props.fontSize : defaultConfig.theme.fontSizeMedium + 'px',
+      style: props.style,
+      fontSize: props.fontSize ? props.fontSize : defaultConfig.theme.fontSizeMedium + 'px',
       textColor: props.textColor || defaultConfig.theme.fontColorDark,
       text: props.text || '',
-      textAlign: props.textAlign || enums.HORIZONTAL_ALIGN.LEFT,
+      textAlign: props.textAlign || HORIZONTAL_ALIGN.LEFT,
       verticalAlignMiddle: props.verticalAlignMiddle === undefined ? false : props.verticalAlignMiddle,
-      rotation: props.rotation || 0
+      rotation: props.rotation || 0,
+      class: ['sc-rich-textbox', props.class]
     };
     const styleString = parseStyleProps({
       ...this.defaultStyle,
-      ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', maxWidth: (props.contentWidth ? props.contentWidth + 'px' : 'initial') },
+      ...{
+        color: this.state.textColor,
+        fontSize: this.state.fontSize + 'px',
+        maxWidth: (props.contentWidth ? props.contentWidth + 'px' : 'initial')
+      },
       ...props.style
     });
     this.textStyleIE = parseStyleProps({
@@ -57,31 +69,31 @@ class RichTextBox extends Component {
       fill: this.state.textColor,
       ...props.style
     });
-    let dim = this.calcContentDim(props.text || '', styleString);
+    let dim: IDimension = this.calcContentDim(props.text || '', styleString);
     this.state.contentWidth = dim.width;
     this.state.contentHeight = dim.height;
     this.state.width = props.width || dim.width;
     this.state.height = props.height || dim.height;
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
-    this.contentElem = this.ref.node.querySelector('#' + this.contentId);
+    this.contentElem = (this.ref.node as HTMLElement).querySelector('#' + this.contentId);
     if (UtilCore.isIE) {
       setTimeout(() => {
-        let acutalTextPos = this.ref.node.querySelector('.sc-text-node').getBoundingClientRect();
-        let svgPos = document.querySelector('#' + this.context.rootSvgId).getBoundingClientRect();
-        let left = acutalTextPos.left - svgPos.left;
-        let top = acutalTextPos.top - svgPos.top;
-        if (this.state.textAlign === 'center') {
-          left = left - this.props.width / 2 + acutalTextPos.width / 2;
+        const actualTextPos: DOMRect = (this.ref.node as HTMLElement).querySelector('.sc-text-node').getBoundingClientRect();
+        const svgPos: DOMRect = document.querySelector('#' + (this as any).context.rootSvgId).getBoundingClientRect();
+        let left: number = actualTextPos.left - svgPos.left;
+        let top: number = actualTextPos.top - svgPos.top;
+        if (this.state.textAlign === VERTICAL_ALIGN.CENTER) {
+          left = left - this.state.width / 2 + actualTextPos.width / 2;
         }
-        let strHtml = `<div id="${this.contentId}" style="position: absolute; width: ${this.props.contentWidth || this.state.width}px; height: ${this.state.height}px; transform-origin: left top;transform: translate(${left}px, ${top}px) ${this.state.rotation ? 'rotate(' + this.state.rotation + 'deg)' : ''}; overflow-y: ${this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll' : 'visible'}; pointer-events: ${this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'all' : 'none'};"></div>`;
-        this.htmlContainerIE = document.getElementById(this.context.htmlContainerIE);
+        let strHtml: string = `<div id="${this.contentId}" style="position: absolute; width: ${this.props.contentWidth || this.state.width}px; height: ${this.state.height}px; transform-origin: left top;transform: translate(${left}px, ${top}px) ${this.state.rotation ? 'rotate(' + this.state.rotation + 'deg)' : ''}; overflow-y: ${this.props.overflow === 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll' : 'visible'}; pointer-events: ${this.props.overflow === 'scroll' && this.state.contentHeight >= this.state.height ? 'all' : 'none'};"></div>`;
+        this.htmlContainerIE = document.getElementById((this as any).context.htmlContainerIE);
         this.htmlContainerIE.insertAdjacentHTML('beforeend', strHtml);
         this.contentElem = this.htmlContainerIE.querySelector(`#${this.contentId}`);
         if (this.contentElem) {
@@ -93,24 +105,24 @@ class RichTextBox extends Component {
     }
   }
 
-  beforeUpdate(props) {
+  beforeUpdate(props: IRichTextBoxProps): void {
     this.resetState(props);
   }
 
-  afterUpdate() {
+  afterUpdate(): void {
     if (UtilCore.isIE && this.contentElem) {
       setTimeout(() => {
         this.contentElem.style.width = (this.props.contentWidth || this.state.width) + 'px';
         this.contentElem.style.height = this.state.height + 'px';
-        let actualTextPos = this.ref.node.querySelector('.sc-text-node').getBoundingClientRect();
-        let svgPos = document.querySelector('#' + this.context.rootSvgId).getBoundingClientRect();
+        const actualTextPos: DOMRect = (this.ref.node as HTMLElement).querySelector('.sc-text-node').getBoundingClientRect();
+        const svgPos: DOMRect = document.querySelector('#' + (this as any).context.rootSvgId).getBoundingClientRect();
         let left = actualTextPos.left - svgPos.left;
         let top = actualTextPos.top - svgPos.top;
         if (this.state.rotation) {
           top = top + actualTextPos.height;
         }
-        if (this.state.textAlign === 'center') {
-          left = left - this.props.width / 2 + actualTextPos.width / 2;
+        if (this.state.textAlign === HORIZONTAL_ALIGN.CENTER) {
+          left = left - this.state.width / 2 + actualTextPos.width / 2;
         }
         this.contentElem.style.transform = `translate(${left}px, ${top}px) ${this.state.rotation ? 'rotate(' + this.state.rotation + 'deg)' : ''}`;
         if (this.contentElem) {
@@ -122,19 +134,19 @@ class RichTextBox extends Component {
     }
   }
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     typeof this.props.onDestroyRef === 'function' && this.props.onDestroyRef(this);
     if (UtilCore.isIE && this.contentElem) {
       this.contentElem.parentNode.removeChild(this.contentElem);
     }
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class={this.props.class || ''} transform={`translate(${this.props.posX},${this.props.posY})`}>
         {!UtilCore.isIE &&
           <foreignObject id={this.contentId} x={0} y={0} width={this.state.width || this.state.contentWidth} height={this.state.height} innerHTML={this.state.text}
-            style={{ 'overflowY': this.props.overflow == 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll' : 'hidden' }}
+            style={{ 'overflowY': this.props.overflow === 'scroll' && this.state.contentHeight >= this.state.height ? 'scroll' : 'hidden' }}
             transform={this.state.rotation ? `rotate(${this.state.rotation}, 0, ${this.state.contentHeight})` : ''}>
           </foreignObject>
         }
@@ -145,8 +157,8 @@ class RichTextBox extends Component {
     );
   }
 
-  updateInnerHTML() {
-    const styleString = parseStyleProps({
+  updateInnerHTML(): void {
+    const styleString: string = parseStyleProps({
       ...this.defaultStyle,
       ...{ color: this.state.textColor, fontSize: this.state.fontSize + 'px', textAlign: this.state.textAlign },
       ...this.props.style
@@ -154,7 +166,7 @@ class RichTextBox extends Component {
     this.contentElem.innerHTML = `<div style='${styleString}' class=${this.state.verticalAlignMiddle && !UtilCore.isIE ? 'sc-vertical-center' : ''}>${this.state.text}</div>`;
   }
 
-  calcContentDim(strContents, styleString) {
+  calcContentDim(strContents: string, styleString: string): IDimension {
     let temp = document.createElement('div');
     temp.setAttribute('style', styleString);
     temp.innerHTML = strContents;
@@ -169,25 +181,25 @@ class RichTextBox extends Component {
     return containBox;
   }
 
-  getContentDim() {
+  getContentDim(): IDimension {
     return {
       width: this.state.contentWidth,
       height: this.state.contentHeight
     };
   }
 
-  getDownloadableTextForIE() {
-    let ieTextPosX = 0;
-    let ieTextPosY = this.props.verticalAlignMiddle ? this.state.height / 2 : 14;
-    let ieTextAnchor = 'start';
+  getDownloadableTextForIE(): IVnode {
+    let ieTextPosX: number = 0;
+    let ieTextPosY: number = this.props.verticalAlignMiddle ? this.state.height / 2 : 14;
+    let ieTextAnchor: TEXT_ANCHOR = TEXT_ANCHOR.START;
     switch (this.state.textAlign) {
-      case 'center':
+      case HORIZONTAL_ALIGN.CENTER:
         ieTextPosX = this.state.width / 2;
-        ieTextAnchor = 'middle';
+        ieTextAnchor = TEXT_ANCHOR.MIDDLE;
         break;
-      case 'end':
+      case HORIZONTAL_ALIGN.RIGHT:
         ieTextPosX = this.state.width;
-        ieTextAnchor = 'end';
+        ieTextAnchor = TEXT_ANCHOR.END;
     }
     let lines = this.splitLines(this.extractContent(this.state.text));
     return (
@@ -201,7 +213,7 @@ class RichTextBox extends Component {
     );
   }
 
-  extractContent(html, space = true) {
+  extractContent(html: string, space: boolean = true): string {
     let span = document.createElement('span');
     span.innerHTML = html;
     if (space) {
@@ -210,18 +222,17 @@ class RichTextBox extends Component {
         if (children[i].textContent) {
           children[i].textContent += ' ';
         } else {
-          children[i].innerText += ' ';
+          (children[i] as HTMLElement).innerText += ' ';
         }
       }
     }
     return [span.textContent || span.innerText].toString().replace(/ +/g, ' ');
   }
 
-  splitLines(text) {
-    let splitText = text.split(' ');
-    let lines = [], line = [];
-    for (let i = 0; i < splitText.length; i++) {
-      let word = splitText[i];
+  splitLines(text: string): string[] {
+    let splitText: string[] = text.split(' ');
+    let lines: string[] = [], line: string[] = [];
+    for (let word of splitText) {
       line.push(word);
       if (Math.round(UiCore.getComputedTextWidth(<text style={this.textStyleIE}>{line.join(' ')}</text>)) > Math.round(this.props.contentWidth || this.state.width)) {
         line.pop();

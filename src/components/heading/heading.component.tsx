@@ -2,7 +2,7 @@
 
 import defaultConfig from '../../settings/config';
 import { Component } from '../../viewEngin/pview';
-import RichTextBox from '../richTextBox';
+import RichTextBox from '../richTextBox/richTextBox.component';
 import UtilCore from '../../core/util.core';
 import UiCore from '../../core/ui.core';
 import { HeadingTypeMap, IHeadingConfig, IHeadingProps } from './heading.model';
@@ -47,22 +47,22 @@ class Heading extends Component<IHeadingProps> {
     this.config.top = this.config.offsetTop;
 
     switch (this.config.textAlign) {
-      case 'left': {
+      case HORIZONTAL_ALIGN.LEFT: {
         this.config.left = this.config.offsetLeft;
         break;
       }
-      case 'right':{
+      case HORIZONTAL_ALIGN.RIGHT: {
         this.config.left = ((this as any).context.svgWidth - this.config.width) + this.config.offsetLeft;
         break;
       }
-      case 'center':
+      case HORIZONTAL_ALIGN.CENTER:
       default: {
         this.config.left = ((this as any).context.svgWidth - this.config.width) / 2 + this.config.offsetLeft;
         break;
       }
     }
 
-    let modifiedConfig: {text?: string};
+    let modifiedConfig: { text?: string };
     if (typeof this.config.responsive.reducer === 'function') {
       modifiedConfig = this.config.responsive.reducer((this as any).context.svgWidth, (this as any).context.svgHeight) || {};
       this.state.text = modifiedConfig.text || props.opts.text;

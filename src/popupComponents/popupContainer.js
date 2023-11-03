@@ -7,7 +7,7 @@ import UiCore from './../core/ui.core';
 import GeomCore from './../core/geom.core';
 import UtilCore from './../core/util.core';
 import eventEmitter from './../core/eventEmitter';
-import RichTextBox from './../components/richTextBox';
+import RichTextBox from './../components/richTextBox/richTextBox.component';
 import Easing from './../plugIns/easing';
 const enums = new OPTIONS_TYPE();
 

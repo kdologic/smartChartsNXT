@@ -4,12 +4,12 @@ import { Component } from '../../viewEngin/pview';
 import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../global/global.enums';
 import UtilCore from '../../core/util.core';
 import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
-import RichTextBox from '../richTextBox';
+import RichTextBox from '../richTextBox/richTextBox.component';
 import { IMarkRegionConfig, IMarkRegionProps } from './markRegion.model';
 import { IMarkRegion } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 
 /**
- * markRegion.js
+ * markRegion.component.tsx
  * @createdOn:12-Dec-2020
  * @author:SmartChartsNXT
  * @description: This components will create different color regions behind the grid to highlight significant area with label support.
@@ -19,7 +19,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
   private emitter: CustomEvents
   private rid: string;
   private clipPathId: string;
-  private config: {xRegions: IMarkRegionConfig[], yRegions: IMarkRegionConfig[]};
+  private config: { xRegions: IMarkRegionConfig[], yRegions: IMarkRegionConfig[] };
 
   constructor(props: IMarkRegionProps) {
     super(props);
@@ -239,7 +239,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
     });
   }
 
-  onUpdateScale(e: {scaleX: number, scaleY: number, baseLine: number} ) {
+  onUpdateScale(e: { scaleX: number, scaleY: number, baseLine: number }) {
     this.setState({
       scaleX: e.scaleX,
       scaleY: e.scaleY
