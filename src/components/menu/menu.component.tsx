@@ -272,7 +272,7 @@ class Menu extends Component<IMenuProps> {
   }
 
   hideMenuItems(e: MouseEvent | KeyboardEvent) {
-    if (e.type === 'click' || (e instanceof KeyboardEvent && e.type === 'keydown' && (e.code === 'Enter' || e.code === 'Space'))) {
+    if (e.type === 'click' || (e instanceof KeyboardEvent && e.type === 'keydown' && (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space'))) {
       e.stopPropagation();
       this.emitter.emitSync('menuClosed', e);
     } else if (e instanceof KeyboardEvent && e.type == 'keydown' && e.code === 'Tab' && e.shiftKey) {

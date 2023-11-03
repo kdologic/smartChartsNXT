@@ -1,22 +1,26 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import eventEmitter from './../core/eventEmitter';
-import GeomCore from './../core/geom.core';
-import defaultConfig from './../settings/config';
+import { Component } from '../../viewEngin/pview';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import GeomCore from '../../core/geom.core';
+import defaultConfig from '../../settings/config';
+import { IZoomoutBoxProps } from './zoomOutBox.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 /**
- * zoomOutBox.js
+ * zoomOutBox.component.tsx
  * @createdOn:14-Jul-2017
  * @author:SmartChartsNXT
  * @description: This components will create zoom out box area for the chart. Used full zoom out.
  * @extends Component
  */
 
-class ZoomOutBox extends Component {
-  constructor(props) {
+class ZoomOutBox extends Component<IZoomoutBoxProps> {
+  private emitter: CustomEvents;
+
+  constructor(props: IZoomoutBoxProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.state = {
       isFocused: false,
       isMouseHover: false,
@@ -36,7 +40,7 @@ class ZoomOutBox extends Component {
     this.showIcon = this.showIcon.bind(this);
   }
 
-  propsWillReceive(nextProps) {
+  propsWillReceive(nextProps: IZoomoutBoxProps): void {
     this.state = Object.assign({}, {
       width: nextProps.width,
       height: nextProps.height,
@@ -45,21 +49,21 @@ class ZoomOutBox extends Component {
     });
   }
 
-  afterMount() {
+  afterMount(): void {
     this.emitter.on('beforePrint', this.hideIcon);
     this.emitter.on('afterPrint', this.showIcon);
     this.emitter.on('beforeSave', this.hideIcon);
     this.emitter.on('afterSave', this.showIcon);
   }
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     this.emitter.removeListener('beforePrint', this.hideIcon);
     this.emitter.removeListener('afterPrint', this.showIcon);
     this.emitter.removeListener('beforeSave', this.hideIcon);
     this.emitter.removeListener('afterSave', this.showIcon);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class='sc-zoomout-box-container' transform={`translate(${this.props.posX},${this.props.posY})`} role='button' aria-label='Zoom out' tabindex='0' style='cursor:pointer;'
         events={{
@@ -79,38 +83,38 @@ class ZoomOutBox extends Component {
     );
   }
 
-  onClick() {
+  onClick(): void {
     this.emitter.emit('onZoomout');
   }
 
-  onMouseOver() {
+  onMouseOver(): void {
     this.setState({ isMouseHover: true });
   }
 
-  onMouseLeave() {
+  onMouseLeave(): void {
     this.setState({ isMouseHover: false });
   }
 
-  onFocusIn() {
+  onFocusIn(): void {
     this.setState({ isFocused: true });
   }
 
-  onFocusOut() {
+  onFocusOut(): void {
     this.setState({ isFocused: false });
   }
 
-  onKeyPress(e) {
-    if (e.which === 13 || e.which === 32) {
+  onKeyPress(e: KeyboardEvent): void {
+    if (e.code === 'Enter' || e.code === 'NumpadEnter' || e.code === 'Space') {
       this.emitter.emit('onZoomout');
     }
   }
 
-  hideIcon() {
-    this.ref.node.classList.add('sc-hide');
+  hideIcon(): void {
+    (this.ref.node as HTMLElement).classList.add('sc-hide');
   }
 
-  showIcon() {
-    this.ref.node.classList.remove('sc-hide');
+  showIcon(): void {
+    (this.ref.node as HTMLElement).classList.remove('sc-hide');
   }
 }
 
