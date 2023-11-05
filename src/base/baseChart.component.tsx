@@ -12,7 +12,7 @@ import { Validator, CError } from '../validators/validator';
 import CommonStyles from '../styles/commonStyles';
 import Watermark from '../components/watermark/watermark.component';
 import Menu from '../components/menu/menu.component';
-import LoaderView from '../components/loaderView';
+import LoaderView from '../components/loaderView/loaderView.component';
 import StoreManager from '../liveStore/storeManager';
 import { Store } from '../liveStore/store';
 import GlobalDefs from '../styles/globalDefs/globalDefs';

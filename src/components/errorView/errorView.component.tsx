@@ -1,22 +1,24 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import UiCore from './../core/ui.core';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import { IErrorViewProps } from './errorView.model';
+import { IVnode } from '../../viewEngin/component.model';
 
 
 /**
- * errorView.js
+ * errorView.component.tsx
  * @createdOn:28-Dec-2017
  * @author:SmartChartsNXT
  * @description: This components will show error screen.
  */
 
-class ErrorView extends Component {
-  constructor(props) {
+class ErrorView extends Component<IErrorViewProps> {
+  constructor(props: IErrorViewProps) {
     super(props);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <svg xmlns='http://www.w3.org/2000/svg'
         version={1.1}
@@ -47,7 +49,7 @@ class ErrorView extends Component {
     );
   }
 
-  getUpperBoxPath() {
+  getUpperBoxPath(): (string | number)[] {
     return [
       'M', 0, 0,
       'H', this.props.width,
@@ -56,7 +58,7 @@ class ErrorView extends Component {
     ];
   }
 
-  getLowerBoxPath() {
+  getLowerBoxPath(): (string | number)[] {
     return [
       'M', 0, this.props.height,
       'H', this.props.width,
@@ -65,7 +67,7 @@ class ErrorView extends Component {
     ];
   }
 
-  getZigZagPath() {
+  getZigZagPath(): (string | number)[] {
     let zigzagPath = [];
     for (let i = this.props.width, counter = 0; i >= 0; i -= 10, counter++) {
       zigzagPath.push('l', -10, (counter % 2 === 0 ? -10 : 10));
