@@ -1,9 +1,18 @@
 'use strict';
 
+import { MIME_TYPE, PDF_LIB_SRC } from '../global/global.constants';
+import { SAVE_AS } from '../global/global.enums';
+import { IObject } from '../viewEngin/pview.model';
+import { IRemoveNodeInfo, ISaveAsOptions } from './core.model';
 import UtilCore from './util.core';
+declare global {
+  interface Window {
+    jsPDF: any
+  }
+}
 
 /**
- * saveAs.js
+ * saveAs.ts
  * @createdOn:02-Feb-2018
  * @author:SmartChartsNXT
  * @description:This will convert HTML/SVG into downloadable image or PDF or print the Chart.
@@ -35,59 +44,26 @@ import UtilCore from './util.core';
 */
 
 class SaveAs {
+  private mimeTypeMap: { [key: string]: string } = MIME_TYPE;
+  private removedNodesForIE: IRemoveNodeInfo[] = [];
+  public print = this.saveAsByType;
+  public pdf = this.saveAsByType;
+  public jpg = this.saveAsByType;
+  public png = this.saveAsByType;
+  public svg = this.saveAsByType;
 
-  mimeTypeMap = {
-    'jpg': 'image/jpeg',
-    'jpeg': 'image/jpeg',
-    'png': 'image/png',
-    'bmp': 'image/bmp',
-    'gif': 'image/gif',
-    'svg': 'image/svg+xml'
-  };
-
-  removedNodesForIE = [];
-
-  print(opts) {
-    opts.type = 'print';
+  saveAsByType(opts: ISaveAsOptions): void {
     if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emitSync('beforePrint');
+      if (opts.type === SAVE_AS.PRINT) {
+        opts.emitter.emitSync('beforePrint');
+      } else {
+        opts.emitter.emitSync('beforeSave', { type: opts.type });
+      }
     }
     this.doConvert(opts);
   }
 
-  pdf(opts) {
-    opts.type = 'pdf';
-    if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emitSync('beforeSave', { type: opts.type });
-    }
-    this.doConvert(opts);
-  }
-
-  jpg(opts) {
-    opts.type = 'jpg';
-    if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emitSync('beforeSave', { type: opts.type });
-    }
-    this.doConvert(opts);
-  }
-
-  png(opts) {
-    opts.type = 'png';
-    if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emitSync('beforeSave', { type: opts.type });
-    }
-    this.doConvert(opts);
-  }
-
-  svg(opts) {
-    opts.type = 'svg';
-    if (opts.emitter && typeof opts.emitter.emit === 'function') {
-      opts.emitter.emitSync('beforeSave', { type: opts.type });
-    }
-    this.doConvert(opts);
-  }
-
-  serialize(elemNode) {
+  serialize(elemNode: SVGAElement): Promise<string> {
     return new Promise((resolve, reject) => {
       this.removedNodesForIE = [];
       elemNode.querySelectorAll('remove-before-save').forEach((node) => {
@@ -102,23 +78,26 @@ class SaveAs {
         node.classList.remove('sc-hide-ie');
       });
 
-      let allImages = elemNode.querySelectorAll('image');
+      const allImages = elemNode.querySelectorAll('image');
       if (UtilCore.isIE || allImages.length === 0) {
         resolve(new XMLSerializer().serializeToString(elemNode));
         return;
       }
 
       /* async Download and convert to Base64 for all external images that used in chart */
-      let allPromises = [];
+      let allPromises: Promise<string | void>[] = [];
       allImages.forEach((image) => {
         const imgHref = image.getAttribute('href');
         const ext = (imgHref.match(/\.([^.]*?)(?=\?|#|$)/) || [])[1];
         if (imgHref && ext) {
           allPromises.push(
             this.toDataURL(imgHref, this.mimeTypeMap[ext])
-              .then((base64url) => {
-                image.insertAdjacentHTML('afterend', '<image class="image-converted" x="' + (image.getAttribute('x') || 0) + '" y="' + (image.getAttribute('y') || 0) + '" width="' + (image.getAttribute('width') || 0) + '" height="' + (image.getAttribute('height') || 0) + '" href="' + base64url + '" preserveAspectRatio="' + (image.getAttribute('preserveAspectRatio') || 'none') + '"></image>');
-                image.parentNode.removeChild(image);
+              .then((base64url: string) => {
+                if (base64url) {
+                  image.insertAdjacentHTML('afterend', '<image class="image-converted" x="' + (image.getAttribute('x') || 0) + '" y="' + (image.getAttribute('y') || 0) + '" width="' + (image.getAttribute('width') || 0) + '" height="' + (image.getAttribute('height') || 0) + '" href="' + base64url + '" preserveAspectRatio="' + (image.getAttribute('preserveAspectRatio') || 'none') + '"></image>');
+                  image.parentNode?.removeChild(image);
+                }
+                return base64url;
               })
               .catch((ex) => {
                 reject(ex);
@@ -136,39 +115,39 @@ class SaveAs {
     });
   }
 
-  setDPI(canvas, dpi) {
+  setDPI(canvas: HTMLCanvasElement, dpi: number): CanvasRenderingContext2D {
     canvas.style.width = canvas.style.width || canvas.width + 'px';
     canvas.style.height = canvas.style.height || canvas.height + 'px';
-    let scaleFactor = dpi / 96;
+    const scaleFactor: number = dpi / 96;
     canvas.width = Math.ceil(canvas.width * scaleFactor);
     canvas.height = Math.ceil(canvas.height * scaleFactor);
-    let ctx = canvas.getContext('2d');
+    const ctx: CanvasRenderingContext2D = canvas.getContext('2d');
     ctx.scale(scaleFactor, scaleFactor);
     return ctx;
   }
 
-  doConvert(opts) {
-    let today = new Date();
-    let tzoffset = (today).getTimezoneOffset() * 60000; //offset in milliseconds
-    today = (new Date(Date.now() - tzoffset));
-    const fileName = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
-    let svgRoot = document.querySelector(opts.srcElem);
+  doConvert(opts: ISaveAsOptions) {
+    let today: Date = new Date();
+    const timeZoneOffset: number = (today).getTimezoneOffset() * 60000; //offset in milliseconds
+    today = (new Date(Date.now() - timeZoneOffset));
+    const fileName: string = 'smartChartsNXT_' + today.toISOString().split('.')[0].replace('T', '_') + '.' + opts.type;
+    const svgRoot: SVGAElement = document.querySelector(opts.srcElem);
 
     /*
       CloneNode in IE 11 create erroneous values on patterns elements that fails Canvg to work properly so remove for IE 11.
       Also drop shadow filter, create distorted and faded canvas images. Better to avoid it for IE 11.
     */
-    let elemNode = UtilCore.isIE ? svgRoot : svgRoot.cloneNode(true);
+    let elemNode: SVGAElement = (UtilCore.isIE ? svgRoot : svgRoot.cloneNode(true)) as SVGAElement;
     this.serialize(elemNode)
-      .then((serializedString) => {
+      .then((serializedString: string) => {
         let svgString = this.normalizeCSS(serializedString);
-        if (opts.type === 'print') {
+        if (opts.type === SAVE_AS.PRINT) {
           let iframe = document.createElement('iframe');
           iframe.name = 'chartFrame';
           iframe.id = 'chartFrame';
-          iframe.width = opts.width;
-          iframe.height = opts.height;
-          iframe.frameBorder = 0;
+          iframe.width = opts.width.toString();
+          iframe.height = opts.height.toString();
+          iframe.frameBorder = '0';
           if (!UtilCore.isIE) {
             iframe.srcdoc = svgString;
           }
@@ -181,7 +160,7 @@ class SaveAs {
             if (opts.width > opts.height) {
               let css = '@page { size: landscape; }';
               let frameHead = frameDoc.head || frameDoc.getElementsByTagName('head')[0];
-              let style = frameDoc.createElement('style');
+              let style: any = frameDoc.createElement('style');
 
               style.type = 'text/css';
               style.media = 'print';
@@ -194,8 +173,8 @@ class SaveAs {
               frameHead.appendChild(style);
             }
 
-            window.frames['chartFrame'].focus();
-            window.frames['chartFrame'].print();
+            (window.frames as any)['chartFrame'].focus();
+            (window.frames as any)['chartFrame'].print();
 
             setTimeout(() => iframe.parentNode.removeChild(iframe));
 
@@ -205,12 +184,12 @@ class SaveAs {
           };
           document.body.appendChild(iframe);
         } else {
-          let img = new Image();
+          let img: HTMLImageElement = new Image();
           img.setAttribute('crossOrigin', 'anonymous');
           img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgString)));
           img.onload = () => {
-            let imgAsURL;
-            if (opts.type === 'svg') {
+            let imgAsURL: string;
+            if (opts.type === SAVE_AS.SVG) {
               if (UtilCore.isIE) {
                 imgAsURL = svgString;
               } else {
@@ -222,23 +201,24 @@ class SaveAs {
               }
             } else {
               this.createCanvasForDownload(img, svgString, opts)
-                .then((data) => {
+                .then((data: { canvas: HTMLCanvasElement, vector?: IObject }) => {
                   let { canvas, vector } = data;
                   if (opts.type === 'pdf') {
                     if (opts.emitter && typeof opts.emitter.emit === 'function') {
                       opts.emitter.emit('showLoader');
                     }
-                    let head = document.getElementsByTagName('head')[0];
-                    let pdfLib = document.createElement('script');
+                    const head = document.getElementsByTagName('head')[0];
+                    const pdfLib = document.createElement('script');
                     pdfLib.type = 'text/javascript';
-                    pdfLib.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js';
+                    pdfLib.src = PDF_LIB_SRC;
                     pdfLib.onload = () => {
-                      let imgAsURL = canvas.toDataURL('image/jpeg');
-                      let orientation = opts.width > opts.height ? 'landscape' : 'portrait';
-                      /* eslint-disable-next-line new-cap, no-undef */
-                      let doc = new jsPDF(orientation, 'pt', [opts.width, opts.height]);
-                      doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
-                      doc.output('save', fileName);
+                      const imgAsURL: string = canvas.toDataURL('image/jpeg');
+                      const orientation = opts.width > opts.height ? 'landscape' : 'portrait';
+                      if (window.jsPDF) {
+                        let doc = new window.jsPDF(orientation, 'pt', [opts.width, opts.height]);
+                        doc.addImage(imgAsURL, 'JPEG', 0, 0, opts.width, opts.height);
+                        doc.output('save', fileName);
+                      }
                       if (UtilCore.isIE && vector) {
                         canvas.parentElement.removeChild(canvas);
                       }
@@ -267,7 +247,7 @@ class SaveAs {
         }
       })
       .then(() => {
-        this.removedNodesForIE.map((nodeElem) => {
+        this.removedNodesForIE.forEach((nodeElem: IRemoveNodeInfo) => {
           nodeElem.parentNode.appendChild(nodeElem.node);
         });
         elemNode.querySelectorAll('.show-before-save').forEach((node) => {
@@ -278,8 +258,8 @@ class SaveAs {
       });
   }
 
-  createCanvasForDownload(img, svgString, opts) {
-    let canvas;
+  createCanvasForDownload(img: HTMLImageElement, svgString: string, opts: ISaveAsOptions): Promise<{ canvas: HTMLCanvasElement, vector?: IObject }> {
+    let canvas: HTMLCanvasElement;
     return new Promise((resolve, reject) => {
       if (UtilCore.isIE) {
         if ($SC.IESupport && $SC.IESupport.Canvg) {
@@ -291,10 +271,10 @@ class SaveAs {
           document.body.appendChild(canvas);
           let ctx = this.setDPI(canvas, 1.5 * 96);
           $SC.IESupport.Canvg.from(ctx, svgString, { anonymousCrossOrigin: true })
-            .then((v) => {
+            .then((v: IObject) => { // vector is type Canvg
               v.render().then(() => resolve({ canvas, vector: v }));
             })
-            .catch((ex) => {
+            .catch((ex: Error) => {
               reject(ex);
             });
         } else {
@@ -317,16 +297,16 @@ class SaveAs {
     });
   }
 
-  download(base64Data, fileName, mimeType) {
+  download(base64Data: string, fileName: string, mimeType: string) {
     const link = document.createElement('a');
     mimeType = mimeType || 'application/octet-stream';
-    if (navigator.msSaveBlob) { // IE10, IE11
+    if ((navigator as any).msSaveBlob) { // for IE10, IE11
       if (mimeType === 'image/svg+xml') {
         const blob = new Blob([base64Data], { type: 'image/svg+xml;charset=utf-8' });
-        return navigator.msSaveBlob(blob, fileName);
+        return (navigator as any).msSaveBlob(blob, fileName);
       }
       const imageBlob = this.b64toBlob(base64Data.replace(/^[^,]+,/, '').replace('data:' + mimeType + ';base64,', ''), mimeType);
-      return navigator.msSaveBlob(imageBlob, fileName);
+      return (navigator as any).msSaveBlob(imageBlob, fileName);
     }
 
     if ('download' in link) { //html5 A[download]
@@ -352,18 +332,18 @@ class SaveAs {
     return true;
   }
 
-  toDataURL(src, outputFormat) {
+  toDataURL(src: string, outputFormat: string): Promise<string> {
     return new Promise((resolve, reject) => {
       try {
-        let img = new Image();
+        let img: HTMLImageElement = new Image();
         img.setAttribute('crossOrigin', 'anonymous');
         img.onload = function () {
-          let canvas = document.createElement('CANVAS');
+          let canvas: HTMLCanvasElement = document.createElement('canvas');
           let ctx = canvas.getContext('2d');
-          canvas.height = this.naturalHeight;
-          canvas.width = this.naturalWidth;
-          ctx.drawImage(this, 0, 0);
-          let dataURL = canvas.toDataURL(outputFormat);
+          canvas.height = (this as HTMLImageElement).naturalHeight;
+          canvas.width = (this as HTMLImageElement).naturalWidth;
+          ctx.drawImage((this as HTMLImageElement), 0, 0);
+          let dataURL: string = canvas.toDataURL(outputFormat);
           resolve(dataURL);
         };
         img.src = src;
@@ -378,7 +358,7 @@ class SaveAs {
     });
   }
 
-  b64toBlob(b64Data, contentType = '', sliceSize = 512) {
+  b64toBlob(b64Data: string, contentType: string = '', sliceSize: number = 512) {
     const byteCharacters = atob(b64Data);
     const byteArrays = [];
 
@@ -398,7 +378,7 @@ class SaveAs {
     return blob;
   }
 
-  normalizeCSS(strSVG) {
+  normalizeCSS(strSVG: string) {
     return strSVG
       .replace(/cursor:(.*?);/gi, 'cursor:auto;');
   }

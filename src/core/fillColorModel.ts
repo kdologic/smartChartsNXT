@@ -1,13 +1,13 @@
 'use strict';
 
 /**
- * fillColorModel.js
+ * fillColorModel.ts
  * @createdOn:09-SEP-2019
  * @author:SmartChartsNXT
  * @description: Fill color model along with color string constants.
  */
 
-export const COLOR_STRINGS = {
+export const COLOR_STRINGS: {[key: string]: string} = {
   'LIGHT_BLUE': '#95CEFF',
   'LIGHT_ORANGE': '#ff9e01',
   'OLIVE_GREEN': '#b0de09',
@@ -26,7 +26,7 @@ export const COLOR_STRINGS = {
   'ORCHID': '#DA70D6'
 };
 
-export const RAINBOW_COLOR_STRINGS = {
+export const RAINBOW_COLOR_STRINGS: {[key: string]: string} = {
   'RED': '#ff0f00',
   'ORANGE': '#ff6600',
   'YELLOW': '#fcd202',

@@ -46,7 +46,20 @@ export interface ILineIntersection {
   y: number | null,
   onLine1: boolean,
   onLine2: boolean
-}
+};
+
+export interface IRemoveNodeInfo {
+  parentNode: Node;
+  node: Node;
+};
+
+export interface ISaveAsOptions {
+  type: string;
+  emitter: CustomEvents;
+  width: number;
+  height: number;
+  srcElem: string;
+};
 
 export type TransformMatrix = (string | number)[][];
 
