@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * helperMethods.js
+ * helperMethods.ts
  * @createdOn:26-Apr-2020
  * @author:SmartChartsNXT
  * @description: This file is the collection of different utility methods that help in runtime.

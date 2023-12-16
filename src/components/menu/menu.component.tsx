@@ -10,6 +10,7 @@ import { IMenuItem, IMenuOptions, IMenuProps } from './menu.model';
 import { IMainMenu } from '../../global/global.models';
 import { IVnode } from '../../viewEngin/component.model';
 import { SAVE_AS } from '../../global/global.enums';
+import { ISaveAsOptions } from '../../core/core.model';
 
 /**
  * menu.component.tsx
@@ -265,7 +266,13 @@ class Menu extends Component<IMenuProps> {
       }
     }
 
-    let eventOpts = { emitter: this.emitter, width: this.props.svgWidth, height: this.props.svgHeight, srcElem: this.props.rootNode };
+    const eventOpts: ISaveAsOptions = { 
+      type: type,
+      emitter: this.emitter, 
+      width: this.props.svgWidth, 
+      height: this.props.svgHeight, 
+      srcElem: this.props.rootNode 
+    };
 
     this.hideMenuItems(e);
     saveAs[type].call(saveAs, eventOpts);

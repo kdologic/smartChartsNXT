@@ -1,41 +1,43 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
+import { IVnode } from '../../viewEngin/component.model';
+import { Component } from '../../viewEngin/pview';
+import { IDiamondIconProps } from './diamond.icon.model';
 
 /**
- * diamond.icon.js
+ * diamond.icon.component.tsx
  * @createdOn:24-Apr-2020
  * @author:SmartChartsNXT
  * @description: Create Diamond Shape icon.
  */
 
-class DiamondIcon extends Component {
-  constructor(props) {
+class DiamondIcon extends Component<IDiamondIconProps> {
+  constructor(props: IDiamondIconProps) {
     super(props);
     this.state = {
       highlighted: this.props.highlighted ? 0.5 : 0
     };
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  afterUpdate() {
+  afterUpdate(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
   }
 
-  beforeUpdate(nextProps) {
+  beforeUpdate(nextProps: IDiamondIconProps): void {
     if(this.props.highlighted !== nextProps.highlighted) {
       this.state.highlighted = nextProps.highlighted ? 0.5 : 0;
     }
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class={`sc-icon-triangle-${this.props.id || 0}`} transform={`translate(${this.props.x - (this.props.width/2)},${this.props.y - (this.props.height/2)})`}>
         <path d={this.getDiamondPath(-8, -8, this.props.width + 8, this.props.height + 8).join(' ')} class='sc-outer-highlighter' fill={this.props.fillColor} stroke-width='1' stroke='#fff' fill-opacity={this.state.highlighted} stroke-opacity={this.state.highlighted} style={{ 'transition': 'fill-opacity 0.2s linear' }} />
@@ -45,10 +47,10 @@ class DiamondIcon extends Component {
     );
   }
 
-  getDiamondPath(x, y, width, height) {
+  getDiamondPath(x: number, y: number, width: number, height: number): (number | string)[] {
     const sx = x/2;
     const sy = y/2;
-    let d = [
+    const d: (string | number)[] = [
       'M', sx + (width/2), sy,
       'L', sx + width, sy + (height/2),
       'L', sx + (width/2), sy + height,
@@ -58,11 +60,11 @@ class DiamondIcon extends Component {
     return d;
   }
 
-  normalize() {
+  normalize(): void {
     this.setState({highlighted : 0});
   }
 
-  highlight() {
+  highlight(): void {
     this.setState({highlighted : 0.5});
   }
 }
