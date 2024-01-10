@@ -38,3 +38,10 @@ export interface IMainMenu {
 export interface IMenuConfig {
   mainMenu: IMainMenu;
 };
+
+export interface IDimensionBox {
+  x: number,
+  y: number,
+  width: number,
+  height: number
+};

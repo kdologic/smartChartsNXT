@@ -126,6 +126,11 @@ export enum SAVE_AS {
   PRINT = 'print'
 };
 
+export enum AXIS_PRIORITY {
+  PRIMARY = 'primary',
+  SECONDARY = 'secondary'
+}
+
 export class OPTIONS_TYPE {
   public ICON_TYPE = ICON_TYPE;
   public LINE_STYLE = LINE_STYLE;

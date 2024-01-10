@@ -1,6 +1,6 @@
 import { IFillOptions } from "../../../core/core.model";
-import { LINE_STYLE } from "../../../settings/globalEnums";
-import { IDataLabel, IMarkerIcon, ISeriesLabel, ITooltipConfig, IXAxisConfig, IYAxisConfig } from "../connectedPointChartsType.model";
+import { LINE_STYLE } from "../../../global/global.enums";
+import { IClipArea, IDataLabel, IMarkerIcon, ISeriesLabelConfig, ITooltipConfig, IXAxisConfig, IYAxisConfig } from "../connectedPointChartsType.model";
 
 export interface IDrawConnectedPointsProps {
   dataSet: (number | null)[];
@@ -17,41 +17,36 @@ export interface IDrawConnectedPointsProps {
   lineFillColor: string;
   fillOptions: IFillOptions;
   lineDropShadow: boolean;
-  strokeOpacity: number;
+  strokeOpacity?: number;
   opacity: number;
   spline: boolean;
   marker: IMarkerIcon;
-  customizedMarkers: IMarkerIcon[];
+  customizedMarkers: IMarkerIcon[] | [];
   centerSinglePoint: boolean;
   lineStrokeWidth: number;
   lineStyle: LINE_STYLE;
-  lineDashArray: number;
+  lineDashArray: string;
   areaStrokeWidth: number;
   maxVal: number;
   minVal: number;
   dataPoints: boolean;
   dataLabels: IDataLabel | false;
-  seriesLabel: ISeriesLabel;
+  seriesLabel: ISeriesLabelConfig | false;
   animated: boolean;
   shouldRender: boolean;
-  tooltipOpt: ITooltipConfig;
+  tooltipOpt?: ITooltipConfig;
   xAxisInfo: IXAxisConfig;
   yAxisInfo: IYAxisConfig;
-  totalSeriesCount: number;
-  totalDataCount: number;
+  totalSeriesCount?: number;
+  totalDataCount?: number;
   accessibility: boolean;
-  accessibilityText: string;
+  accessibilityText?: string;
   emitScale: boolean;
   scaleX: number;
   scaleY: number;
   baseLine: number;
   clipId?: string;
-  clip: {
-    x: number;
-    width: number;
-    offsetLeft: number;
-    offsetRight: number;
-  };
+  clip?: IClipArea;
   onRef?: (param: any) => any;
 };
 

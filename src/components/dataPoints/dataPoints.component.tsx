@@ -83,7 +83,7 @@ class DataPoints extends Component<IDataPointsProps> {
     let iconURL = this.props.markerURL;
     let iconWidth = this.props.markerWidth;
     let iconHeight = this.props.markerHeight;
-    if (this.props.customizedMarkers[point.index]) {
+    if (this.props.customizedMarkers instanceof Array && this.props.customizedMarkers.length && this.props.customizedMarkers[point.index]) {
       let marker = this.props.customizedMarkers[point.index];
       iconType = marker.type;
       iconURL = marker.URL;

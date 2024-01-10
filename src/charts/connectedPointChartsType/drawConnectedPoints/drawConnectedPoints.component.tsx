@@ -1,6 +1,6 @@
 'use strict';
 
-import { AXIS_TYPE, CHART_TYPE, FILL_TYPE, ICON_TYPE, LINE_STYLE } from '../../../settings/globalEnums';
+import { AXIS_TYPE, CHART_TYPE, FILL_TYPE, ICON_TYPE, LINE_STYLE } from '../../../global/global.enums';
 import { DataPoint } from '../../../core/point';
 import { Component } from '../../../viewEngin/pview';
 import GeomCore from '../../../core/geom.core';
@@ -284,7 +284,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     return linePath;
   }
 
-  getLinePath(props: IDrawConnectedPointsProps): {pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[]} {
+  getLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[] } {
     let path: IPathSegment[] = [];
     let pathSegment: IPathSegment = [];
     let segmentIndexes: number[] = [];
@@ -325,7 +325,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   }
 
   getCurvedLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[] } {
-    let path: IPathSegment[] = []; 
+    let path: IPathSegment[] = [];
     let pointSegments: DataPoint[][] = [];
     let pathSegment: DataPoint[] = [];
     let segmentIndexes: number[] = [];
@@ -424,7 +424,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     if (!this.props.dataPoints || this.state.isAnimationPlaying) {
       return void 0;
     }
-    if (eventData.event.key == 'ArrowLeft' || eventData.event.key == 'ArrowRight') {
+    if (eventData.event.code == 'ArrowLeft' || eventData.event.code == 'ArrowRight') {
       let highlightEventData: IHighlightPointMarkerEvent = {
         event: eventData.event,
         highlightedPoint: {
@@ -449,7 +449,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
         return void 0;
       }
       let nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[0].index : this.state.currentHighlightedPoint.pointIndex + 1;
-      if (eventData.event.key == 'ArrowLeft') {
+      if (eventData.event.code == 'ArrowLeft') {
         nextPointIndex = this.state.currentHighlightedPoint.pointIndex === null ? pointSet[pointSet.length - 1].index : this.state.currentHighlightedPoint.pointIndex - 1;
       }
 

@@ -11,6 +11,7 @@ import { ILegendBoxProps, ILegendLengthData, ILegendOptions } from './legendBox.
 import { ILegendsConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 import { ALIGNMENT, DISPLAY, FLOAT, ICON_TYPE } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
+import { IDimensionBox } from '../../global/global.models';
 
 /**
  * legendBox.component.jsx
@@ -152,7 +153,7 @@ class LegendBox extends Component<ILegendBoxProps> {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() }) as ILegendsConfig & IDimensionBox;
       setTimeout(() => this.emitter.emit('legendRendered', configData));
     }
   }
@@ -171,7 +172,7 @@ class LegendBox extends Component<ILegendBoxProps> {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData: bBoxILegendsConfig = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       this.emitter.emit('legendRendered', configData);
     }
   }
@@ -351,7 +352,7 @@ class LegendBox extends Component<ILegendBoxProps> {
     return GeomCore.describeRoundedRect(this.state.left, this.state.top, this.containerWidth, this.containerHeight, 10).join(' ');
   }
 
-  getBBox(): {x: number, y: number, width: number, height: number} {
+  getBBox(): IDimensionBox {
     return {
       width: this.containerWidth,
       height: this.containerHeight,
@@ -382,7 +383,7 @@ class LegendBox extends Component<ILegendBoxProps> {
       this.update();
     }
     const selectedLegendOption = this.assignLegendData(index);
-    this.emitter.emit('legendClicked', {event: e, legendOption: selectedLegendOption});
+    this.emitter.emit('legendClicked', { event: e, legendOption: selectedLegendOption });
   }
 
   onHover(e: FocusEvent, index: number) {
@@ -393,7 +394,7 @@ class LegendBox extends Component<ILegendBoxProps> {
 
     this.update();
     const selectedLegendOption = this.assignLegendData(index);
-    this.emitter.emit('legendHovered', {event: e, legendOption: selectedLegendOption});
+    this.emitter.emit('legendHovered', { event: e, legendOption: selectedLegendOption });
   }
 
   onLeave(e: FocusEvent, index: number) {
@@ -404,7 +405,7 @@ class LegendBox extends Component<ILegendBoxProps> {
 
     this.update();
     const selectedLegendOption = this.assignLegendData(index);
-    this.emitter.emit('legendLeaved', {event: e, legendOption: selectedLegendOption});
+    this.emitter.emit('legendLeaved', { event: e, legendOption: selectedLegendOption });
   }
 }
 
