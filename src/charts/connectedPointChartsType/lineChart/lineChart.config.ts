@@ -1,5 +1,5 @@
 /**
- * lineChart.config.js
+ * lineChart.config.ts
  * @createdOn:14-May-2020
  * @author:SmartChartsNXT
  * @description:This will be the default Line chart config and validation rule set.

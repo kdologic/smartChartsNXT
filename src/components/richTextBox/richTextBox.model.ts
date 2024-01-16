@@ -15,8 +15,8 @@ export interface IRichTextBoxProps {
   overflow?: string;
   style?: Record<string, any>;
   text: string;
-  onRef?: (ref: any) => void;
-  onDestroyRef?: (ref: any) => void;
+  onRef?: (ref: any) => any;
+  onDestroyRef?: (ref: any) => any;
 };
 
 export interface IStyleConfig {

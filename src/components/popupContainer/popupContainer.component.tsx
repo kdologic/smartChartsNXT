@@ -1,26 +1,34 @@
 'use strict';
 
-import Point from './../core/point';
-import { Component } from './../viewEngin/pview';
-import { OPTIONS_TYPE } from './../global/global.enums';
-import UiCore from './../core/ui.core';
-import GeomCore from './../core/geom.core';
-import UtilCore from './../core/util.core';
-import eventEmitter from './../core/eventEmitter';
-import RichTextBox from './../components/richTextBox/richTextBox.component';
-import Easing from './../plugIns/easing';
-const enums = new OPTIONS_TYPE();
+import Point from '../../core/point';
+import { Component } from '../../viewEngin/pview';
+import UiCore from '../../core/ui.core';
+import GeomCore from '../../core/geom.core';
+import UtilCore from '../../core/util.core';
+import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
+import RichTextBox from '../../components/richTextBox/richTextBox.component';
+import Easing from '../../plugIns/easing';
+import { IPopupConfig, IPopupContainerProps } from './popupContainer.model';
+import { IVnode } from '../../viewEngin/component.model';
+import { HORIZONTAL_ALIGN } from '../../global/global.enums';
+import { IResizeEvent } from '../../global/global.models';
 
 /**
- * popupContainer.js
+ * popupContainer.component.tsx
  * @createdOn:22-Dec-2020
  * @author:SmartChartsNXT
  * @description:This is a base component to show SVG based popup.
  * @extends Component
  */
 
-class PopupContainer extends Component {
-  constructor(props) {
+class PopupContainer extends Component<IPopupContainerProps> {
+  private rid: string;
+  private shadowId: string;
+  private emitter: CustomEvents;
+  private activePopup: string;
+  private mousePos: DOMPoint;
+
+  constructor(props: IPopupContainerProps) {
     super(props);
     this.rid = UtilCore.getRandomID();
     this.shadowId = 'shadow-' + this.rid;
@@ -34,7 +42,7 @@ class PopupContainer extends Component {
     };
     this.activePopup = null;
     this.mousePos = null;
-    this.emitter = eventEmitter.getInstance(this.context.runId);
+    this.emitter = eventEmitter.getInstance((this as any).context.runId);
     this.createPopup = this.createPopup.bind(this);
     this.onClose = this.onClose.bind(this);
     this.onCloseIconMouseIn = this.onCloseIconMouseIn.bind(this);
@@ -46,28 +54,28 @@ class PopupContainer extends Component {
     this.onEscPress = this.onEscPress.bind(this);
   }
 
-  beforeMount() {
+  beforeMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(undefined);
   }
 
-  afterMount() {
+  afterMount(): void {
     typeof this.props.onRef === 'function' && this.props.onRef(this);
     this.emitter.on('createPopup', this.createPopup);
     this.emitter.on('resize', this.onResize);
     document.addEventListener('keyup', this.onEscPress, false);
   }
 
-  beforeUnmount() {
+  beforeUnmount(): void {
     this.emitter.removeListener('createPopup', this.createPopup);
     this.emitter.removeListener('resize', this.onResize);
     document.removeEventListener('keyup', this.onEscPress, false);
   }
 
-  render() {
+  render(): IVnode {
     return (
       <g class="sc-popup-container" aria-live="polite">
         {this.state.hasModal &&
-          <rect class="sc-popup-backdrop" x={0} y={0} width={this.context.svgWidth} height={this.context.svgHeight} fill={'#000'} fill-opacity={0.2} style={{ 'pointer-events': 'all' }}></rect>
+          <rect class="sc-popup-backdrop" x={0} y={0} width={(this as any).context.svgWidth} height={(this as any).context.svgHeight} fill={'#000'} fill-opacity={0.2} style={{ 'pointer-events': 'all' }}></rect>
         }
         {this.getStyle()}
         {UiCore.dropShadow(this.shadowId, 5, 5)}
@@ -76,15 +84,15 @@ class PopupContainer extends Component {
     );
   }
 
-  renderAllPopups() {
-    let popups = [];
+  renderAllPopups(): IVnode[] {
+    let popups: IVnode[] = [];
     for (let popupId of this.state.popupQueue) {
       let data = this.state.popupData[popupId];
       if (data.x === undefined) {
-        data.x = data.draggedX = this.context.svgCenter.x - (data.width / 2);
+        data.x = data.draggedX = (this as any).context.svgCenter.x - (data.width / 2);
       }
       if (data.y === undefined) {
-        data.y = data.draggedY = this.context.svgCenter.y - (data.height / 2);
+        data.y = data.draggedY = (this as any).context.svgCenter.y - (data.height / 2);
       }
       popups.push(
         <g class={`sc-popup-inst-${popupId}`} instanceId={popupId} id={popupId} transform={`translate(${data.draggedX}, ${data.draggedY})`} >
@@ -106,11 +114,11 @@ class PopupContainer extends Component {
           <g class="sc-popup-title-bar" clip-path={`url(#${data.clipId})`} >
             <rect class='sc-popup-title-bg' x={0} y={0} width={data.width} height={this.state.titleHeight} fill="#fff" stroke="none" shape-rendering="optimizeSpeed" style={{ 'cursor': data.isDraggable ? 'move' : 'default' }}
               events={{
-                mousedown: (e) => this.onMouseDown(e, popupId, data.isDraggable),
-                touchstart: (e) => this.onMouseDown(e, popupId, data.isDraggable)
+                mousedown: (e: MouseEvent) => this.onMouseDown(e, popupId, data.isDraggable),
+                touchstart: (e: TouchEvent) => this.onMouseDown(e, popupId, data.isDraggable)
               }}></rect>
             <g style={{ 'pointerEvents': 'none' }} role="heading" aria-level="3">
-              <RichTextBox class='sc-popup-title' posX={2 * this.state.paddingX} posY={0} width={data.width - this.state.titleHeight - (2 * this.state.paddingY)} height={this.state.titleHeight} textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+              <RichTextBox class='sc-popup-title' posX={2 * this.state.paddingX} posY={0} width={data.width - this.state.titleHeight - (2 * this.state.paddingY)} height={this.state.titleHeight} textAlign={HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
                 fontSize={Number.parseFloat(data.fontSize) + 1} textColor={data.fontColor} text={data.title || ''}>
               </RichTextBox>
             </g>
@@ -118,11 +126,11 @@ class PopupContainer extends Component {
               <title>Close(Esc)</title>
               <rect class='sc-close-icon-bg' x={0} y={0} width={this.state.titleHeight} height={this.state.titleHeight} fill="#d73e4d" stroke="none" fill-opacity={0.0001}
                 events={{
-                  click: (e) => this.onClose(e, popupId),
-                  mouseenter: (e) => this.onCloseIconMouseIn(e, popupId),
-                  mouseleave: (e) => this.onCloseIconMouseOut(e, popupId),
-                  focusin: (e) => this.onCloseIconMouseIn(e, popupId),
-                  focusout: (e) => this.onCloseIconMouseOut(e, popupId)
+                  click: (e: MouseEvent) => this.onClose(e, popupId),
+                  mouseenter: (e: MouseEvent) => this.onCloseIconMouseIn(e, popupId),
+                  mouseleave: (e: MouseEvent) => this.onCloseIconMouseOut(e, popupId),
+                  focusin: (e: FocusEvent) => this.onCloseIconMouseIn(e, popupId),
+                  focusout: (e: FocusEvent) => this.onCloseIconMouseOut(e, popupId)
                 }}>
               </rect>
               <text class='sc-close-cross' text-rendering='geometricPrecision' stroke='#000' fill='#000' font-size='22' pointer-events='none'>
@@ -134,7 +142,7 @@ class PopupContainer extends Component {
 
           <g class="sc-popup-body-group" clip-path={`url(#${data.clipId})`}>
             <RichTextBox class='sc-popup-body' posX={0} posY={this.state.titleHeight} width={data.width} contentWidth={data.width} height={data.height - this.state.titleHeight}
-              textAlign={enums.HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={data.textVerticalAlignMiddle} overflow="scroll"
+              textAlign={HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={data.textVerticalAlignMiddle} overflow="scroll"
               fontSize={data.fontSize} textColor={data.fontColor} style={{ ...{ padding: '5px' }, ...data.style }} text={data.body || ''} >
             </RichTextBox>
           </g>
@@ -145,7 +153,7 @@ class PopupContainer extends Component {
     return popups;
   }
 
-  createPopup(data) {
+  createPopup(data: IPopupConfig): void {
     const popupId = 'popup-' + UtilCore.getRandomID();
     this.state.popupQueue.push(popupId);
     let popupData = this.parsePopupData(data);
@@ -156,7 +164,7 @@ class PopupContainer extends Component {
     this.update();
   }
 
-  destroyPopup(popupId) {
+  destroyPopup(popupId: string): void {
     if (this.state.popupData[popupId]) {
       delete this.state.popupData[popupId];
       this.state.popupQueue.splice(this.state.popupQueue.indexOf(popupId), 1);
@@ -170,10 +178,12 @@ class PopupContainer extends Component {
     }
   }
 
-  parsePopupData(data) {
-    let defaults = {
+  parsePopupData(data: IPopupConfig): IPopupConfig {
+    let defaults: IPopupConfig = {
       x: undefined,
       y: undefined,
+      draggedX: undefined,
+      draggedY: undefined,
       width: 300,
       height: 200,
       title: '',
@@ -193,7 +203,7 @@ class PopupContainer extends Component {
     return mergedData;
   }
 
-  getStyle() {
+  getStyle(): IVnode {
     return (
       <style>
         {`
@@ -226,9 +236,9 @@ class PopupContainer extends Component {
     );
   }
 
-  getScaleKeyframe(id, popupData) {
+  getScaleKeyframe(id: string, popupData: IPopupConfig): string {
     return (`
-      ${this.generateAnimKeyframe(600, 100, id, popupData)}
+      ${this.generateAnimKeyframe(600, id, popupData, 100)}
       .sc-popup-inst-${id} {
         transform: translate(${this.props.posX}px, ${this.props.posY}px);
         animation: scale-easeOutElastic-${id} 1s linear both;
@@ -236,14 +246,14 @@ class PopupContainer extends Component {
     `);
   }
 
-  generateAnimKeyframe(duration, steps = 10, id, popupData) {
-    let aStage = duration / steps;
+  generateAnimKeyframe(duration: number, id: string, popupData: IPopupConfig, steps: number = 10): string {
+    const aStage = duration / steps;
 
-    let keyFrame = `@keyframes scale-easeOutElastic-${id} {`;
+    let keyFrame: string = `@keyframes scale-easeOutElastic-${id} {`;
     for (let i = 0; i < steps; i++) {
-      let stageNow = aStage * i;
-      let scaleD = Easing.easeOutElastic(stageNow / duration).toFixed(2);
-      let frame = `${Math.round(100 / steps * i)}% {
+      const stageNow = aStage * i;
+      const scaleD = Easing.easeOutElastic(stageNow / duration).toFixed(2);
+      const frame = `${Math.round(100 / steps * i)}% {
         transform: translate(${popupData.x}px, ${popupData.y}px) translate(${popupData.width / 2}px, ${popupData.height}px) scale(${scaleD}, ${scaleD}) translate(${-popupData.width / 2}px, ${-popupData.height}px);
       }`;
       keyFrame += frame;
@@ -252,17 +262,17 @@ class PopupContainer extends Component {
     return keyFrame;
   }
 
-  rearrangePopupQueue() {
-    let activeIndex = this.state.popupQueue.indexOf(this.activePopup);
+  rearrangePopupQueue(): void {
+    const activeIndex = this.state.popupQueue.indexOf(this.activePopup);
     this.state.popupQueue.splice(activeIndex, 1);
     this.state.popupQueue.push(this.activePopup);
   }
 
-  onMouseDown(e, popupId, isDraggable) {
+  onMouseDown(e: MouseEvent|TouchEvent, popupId: string, isDraggable: boolean): void {
     if (!isDraggable) {
       return;
     }
-    this.mousePos = UiCore.cursorPoint(this.context.rootContainerId, e);
+    this.mousePos = UiCore.cursorPoint((this as any).context.rootContainerId, e);
     this.activePopup = popupId;
     this.rearrangePopupQueue();
     window.addEventListener('mousemove', this.onMouseMove, false);
@@ -271,10 +281,10 @@ class PopupContainer extends Component {
     window.addEventListener('touchend', this.onMouseUp, false);
   }
 
-  onMouseMove(e) {
+  onMouseMove(e: MouseEvent|TouchEvent): void {
     if (this.activePopup) {
-      let mousePosNow = UiCore.cursorPoint(this.context.rootContainerId, e);
-      let mouseMoved = new Point(mousePosNow.x - this.mousePos.x, mousePosNow.y - this.mousePos.y);
+      const mousePosNow = UiCore.cursorPoint((this as any).context.rootContainerId, e);
+      const mouseMoved = new Point(mousePosNow.x - this.mousePos.x, mousePosNow.y - this.mousePos.y);
       let popupData = this.state.popupData[this.activePopup];
       popupData.draggedX = popupData.x + mouseMoved.x;
       popupData.draggedY = popupData.y + mouseMoved.y;
@@ -282,8 +292,8 @@ class PopupContainer extends Component {
     }
   }
 
-  onMouseUp() {
-    let popupData = this.state.popupData[this.activePopup];
+  onMouseUp(): void {
+    const popupData = this.state.popupData[this.activePopup];
     popupData.x = popupData.draggedX;
     popupData.y = popupData.draggedY;
     this.activePopup = null;
@@ -293,23 +303,23 @@ class PopupContainer extends Component {
     window.removeEventListener('touchend', this.onMouseUp);
   }
 
-  onClose(e, popupId) {
+  onClose(e: MouseEvent|TouchEvent|KeyboardEvent, popupId: string): void {
     this.destroyPopup(popupId);
   }
 
-  onCloseIconMouseIn(e, popupId) {
-    let crossText = this.ref.node.querySelector('#' + popupId + ' .sc-close-cross');
+  onCloseIconMouseIn(e: FocusEvent, popupId: string): void {
+    let crossText = (this.ref.node as any).querySelector('#' + popupId + ' .sc-close-cross');
     crossText.style.fill = '#fff';
     crossText.style.stroke = '#fff';
   }
 
-  onCloseIconMouseOut(e, popupId) {
-    let crossText = this.ref.node.querySelector('#' + popupId + ' .sc-close-cross');
+  onCloseIconMouseOut(e: FocusEvent, popupId: string): void {
+    let crossText = (this.ref.node as any).querySelector('#' + popupId + ' .sc-close-cross');
     crossText.style.fill = '#000';
     crossText.style.stroke = '#000';
   }
 
-  onResize(e) {
+  onResize(e: IResizeEvent): void {
     let resizeInfo = e.data;
     for (let key in this.state.popupData) {
       let popupData = this.state.popupData[key];
@@ -321,8 +331,8 @@ class PopupContainer extends Component {
     this.update();
   }
 
-  onEscPress(e) {
-    if (e.keyCode === 27 && this.state.popupQueue.length) {
+  onEscPress(e: KeyboardEvent) {
+    if (e.code === 'Escape' && this.state.popupQueue.length) {
       this.onClose(e, this.state.popupQueue[this.state.popupQueue.length - 1]);
     }
   }

@@ -1,5 +1,5 @@
 /**
- * areaChart.config.js
+ * areaChart.config.ts
  * @createdOn:12-Dec-2017
  * @author:SmartChartsNXT
  * @description:This will be the default Area chart config and validation rule set.

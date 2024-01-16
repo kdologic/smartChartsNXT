@@ -172,7 +172,7 @@ class LegendBox extends Component<ILegendBoxProps> {
       this.update();
     } else {
       this.renderCount = 0;
-      const configData: bBoxILegendsConfig = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
+      const configData: ILegendsConfig = UtilCore.extends({}, this.config, { bBox: this.getBBox() });
       this.emitter.emit('legendRendered', configData);
     }
   }

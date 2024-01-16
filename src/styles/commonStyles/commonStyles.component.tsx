@@ -1,12 +1,13 @@
 'use strict';
 
-import { Component } from './../viewEngin/pview';
-import Style from './../viewEngin/style';
-import { fontFaceStatic } from './font-lato';
-import defaultConfig from './../settings/config';
+import { Component } from '../../viewEngin/pview';
+import Style from '../../viewEngin/style';
+import { fontFaceStatic } from '../font-lato';
+import defaultConfig from '../../settings/config';
+import { IObject } from '../../viewEngin/pview.model';
 
 /**
- * commonStyles.js
+ * commonStyles.component.tsx
  * @createdOn:09-Apr-2019
  * @author:SmartChartsNXT
  * @description: This components will create common styles for chart.
@@ -14,7 +15,7 @@ import defaultConfig from './../settings/config';
  */
 
 class CommonStyles extends Component {
-  constructor(props) {
+  constructor(props: IObject) {
     super(props);
   }
 

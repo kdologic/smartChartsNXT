@@ -45,3 +45,12 @@ export interface IDimensionBox {
   width: number,
   height: number
 };
+
+export interface IResizeEvent {
+  data: {
+    oldTargetWidth: number;
+    oldTargetHeight: number;
+    targetWidth: number;
+    targetHeight: number;
+  };
+} 

@@ -2,7 +2,7 @@
 'use strict';
 
 /**
- * config.js
+ * config.ts
  * @createdOn:24-Nov-2017
  * @author:SmartChartsNXT
  * @description:This will be the Global default configuration for all charts.

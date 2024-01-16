@@ -3,7 +3,7 @@
 import { CHART_TYPE } from '../global/global.enums';
 
 /**
- * validationRules.js
+ * validationRules.ts
  * @createdOn:06-Oct-2019
  * @author:SmartChartsNXT
  * @description: Validation rule set.

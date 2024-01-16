@@ -1,4 +1,5 @@
 import UtilCore from '../core/util.core';
+declare let PRODUCTION: boolean;
 
 /* latin */
 export const fontFaceDynamic = `
