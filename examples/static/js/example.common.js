@@ -27,3 +27,10 @@ function generateRandomDataArray(count, range) {
 	}
   return dataSet;
 }
+
+(function bindIFC() {
+  window.addEventListener('message', function(event) {
+    document.body.style.backgroundColor = event.data.backgroundColor;
+    document.body.style.marginTop = event.data.marginTop;
+  });
+})();
