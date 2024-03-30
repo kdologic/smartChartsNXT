@@ -12,7 +12,7 @@ class Polyfills {
     this.performanceNowSHIM();
     this.requestAnimFrameSHIM();
     this.requestNextAnimationFrameSHIM();
-    this.supportEventLisenerList();
+    this.supportEventListenerList();
   }
 
   /*window.performance.now() SHIM for all browser*/
@@ -99,7 +99,7 @@ class Polyfills {
    * to avoid possible momory leak.
    * @return {void}
    */
-  supportEventLisenerList() {
+  supportEventListenerList() {
     Element.prototype._addEventListener = function (eventName, handle, useCapture) {
       if (useCapture == undefined) {
         useCapture = false;
