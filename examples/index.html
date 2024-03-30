@@ -1,73 +1,387 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
+
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="SmartChartsNXT">
   <title>Chart List | SmartChartsNXT</title>
+  <link rel="icon" type="image/x-icon" href="./static/images/favicon.ico">
+  <link href="./static/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    h2 {
-      font: 400 40px/1.5 Helvetica, Verdana, sans-serif;
-      margin: 0;
-      padding: 0;
+    body {
+      min-height: 100vh;
+      min-height: -webkit-fill-available;
+      overflow: hidden;
     }
 
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
+    html {
+      height: -webkit-fill-available;
     }
 
-    li {
-      padding: 5px 20px;
-      font: 200 20px/1.5 Helvetica, Verdana, sans-serif;
-      border-bottom: 1px solid #ccc;
-      -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
-      -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
-      -o-transition: font-size 0.3s ease, background-color 0.3s ease;
-      -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
-      transition: font-size 0.3s ease, background-color 0.3s ease;
+    main {
+      height: 100vh;
+      height: -webkit-fill-available;
+      min-height: 100vh;
+      overflow-x: auto;
+      overflow-y: hidden;
     }
 
-    li:last-child {
-      border: none;
+    .dropdown-toggle {
+      outline: 0;
     }
 
-    li a {
-      text-decoration: none;
-      color: #000;
-      display: block;
-      
+    .btn-toggle {
+      padding: .25rem .5rem;
+      font-weight: 600;
+      color: var(--bs-emphasis-color);
+      background-color: transparent;
     }
 
-    li:hover {
-      font-size: 24px;
-      background: #f6f6f6;
+    .btn-toggle:hover,
+    .btn-toggle:focus,
+    .btn-toggle.active {
+      color: rgba(var(--bs-emphasis-color-rgb), .85);
+      background-color: #8be2e2;
     }
+
+    .btn-toggle::before {
+      width: 1.25em;
+      line-height: 0;
+      content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%280,0,0,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+      transition: transform .35s ease;
+      transform-origin: .5em 50%;
+    }
+
+    [data-bs-theme="dark"] .btn-toggle::before {
+      content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba%28255,255,255,.5%29' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M5 14l6-6-6-6'/%3e%3c/svg%3e");
+    }
+
+    .btn-toggle[aria-expanded="true"] {
+      color: rgba(var(--bs-emphasis-color-rgb), .85);
+    }
+
+    .btn-toggle[aria-expanded="true"]::before {
+      transform: rotate(90deg);
+    }
+
+    .btn-toggle-nav a {
+      padding: .1875rem .5rem;
+      margin-top: .125rem;
+      margin-left: 1.25rem;
+    }
+
+    .btn-toggle-nav a:hover,
+    .btn-toggle-nav a:focus,
+    .btn-toggle-nav a.active {
+      background-color: #8be2e2;
+    }
+
+    .sidepanel {
+      width: 300px;
+      margin-left: -300px;
+      background: azure;
+      transition: all 0.3s;
+    }
+
+    .sidepanel.active {
+      margin-left: 0;
+    }
+
+    .sidepanel .sidepanel-title-bar {
+      justify-content: space-between;
+    }
+
+    .sidepanel .header-title {
+      background: #8be2e2;
+      flex-grow: 2;
+      margin-bottom: 0 !important;
+    }
+
+    .sidepanel .btn-toggle-sidepanel:hover, 
+    .sidepanel .btn-toggle-sidepanel:focus {
+      background-color: #e93352;
+    } 
+
+    .sidepanel .sidepanel-chart-list {
+      height: 86%;
+      overflow: auto;
+      padding-top: 1rem;
+    }
+
+    .content-body {
+      height: 100vh;
+      min-height: 100vh;
+    }
+
+    .content-body .navbar {
+      padding: 0.8rem;
+      background-color: #1eb8b8;
+      min-height: 62px;
+    }
+
+    .content-body .navbar .container-fluid {
+      padding-left: 0;
+      justify-content: center;
+    }
+
+    .content-body .container-fluid .brand-logo{
+      width: 30px;
+      margin-right: 10px;
+      margin-bottom: 3px;
+    }
+
+    .content-body .btn-toggle-sidepanel {
+      position: absolute;
+      left: 8px;
+      background-color: #8be2e2;
+    }
+
+    .content-body .btn-toggle-sidepanel #menuIcon {
+      display: inline-block;
+      vertical-align: -0.15em;
+    } 
+
+    .content-body .btn-toggle-sidepanel.close-active {
+      display: none;
+    }
+
+    .sidepanel .btn-toggle-sidepanel {
+      border-radius: 0;
+      background: #8be2e2;
+      /* margin-bottom: 1rem; */
+    }
+
+    .sidepanel .btn-toggle-sidepanel #closeIcon {
+      display: inline-block;
+      vertical-align: -0.1em;
+    }
+
+    .scrollarea {
+      overflow-y: auto;
+    }
+
+    .anchor-link {
+      display: none !important;
+    }
+
   </style>
 
-  <script>
-    
-  </script>
 </head>
 
 <body>
+  <main class="d-flex flex-nowrap">
+    <div id="sidePanel" class="sidepanel d-flex flex-column flex-shrink-0 active">
+      <div class="sidepanel-title-bar d-flex">
+        <span
+          class="header-title d-flex align-items-center pb-3 pt-3 mb-3 link-body-emphasis text-decoration-none">
+          <svg class="bi pe-none me-2" width="30" height="24">
+          </svg>
+          <span class="fs-5 fw-semibold">Examples</span>
+        </span>
+        <button type="button" id="sidepanelCollapse" onclick="toggleSidePanel();"
+          class="btn btn-toggle-sidepanel">
+          <svg id="closeIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+            class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path
+              d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+          </svg>
+        </button>
+      </div>
+      <div class="sidepanel-chart-list">
+        <ul class="list-unstyled ps-0">
+          <li class="mb-1 chart-list-item">
+            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed active"
+              data-bs-toggle="collapse" data-bs-target="#home-collapse" aria-expanded="true">
+              Area Charts
+            </button>
+            <div class="collapse show" id="home-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a href="#" onclick="viewChart(event, './AreaChart/annotation-area-chart.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded active">Annotation Area</a>
+                  <a href="./AreaChart/annotation-area-chart.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/area-with-custom-fill.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Area with custom fill</a>
+                  <a href="./AreaChart/area-with-custom-fill.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/area-with-large-dataset.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Area with large dataset</a>
+                  <a href="./AreaChart/area-with-large-dataset.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/area-with-missing-data.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Area with missing data</a>
+                  <a href="./AreaChart/area-with-missing-data.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/browser-usage-stat.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Browser usage stat</a>
+                  <a href="./AreaChart/browser-usage-stat.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/multi-area-chart.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Multi area chart</a>
+                  <a href="./AreaChart/multi-area-chart.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/normalized-iq-distribution.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Normalized IQ distribution</a>
+                  <a href="./AreaChart/normalized-iq-distribution.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a onclick="viewChart(event, './AreaChart/stock-area-chart.html')" href="#"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Stock area chart</a>
+                  <a href="./AreaChart/stock-area-chart.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li class="mb-1 chart-list-item">
+            <button class="btn btn-toggle d-inline-flex align-items-center rounded border-0 collapsed"
+              data-bs-toggle="collapse" data-bs-target="#dashboard-collapse" aria-expanded="false">
+              Line charts
+            </button>
+            <div class="collapse" id="dashboard-collapse">
+              <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/line-chart-custom-symbol.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Line chart with custom symbol</a>
+                  <a href="./LineChart/line-chart-custom-symbol.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/line-gradient-stroke.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Line chart gradient Stroke</a>
+                  <a href="./LineChart/line-gradient-stroke.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/line-log-scale.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Line chart log axis</a>
+                  <a href="./LineChart/line-log-scale.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/line-multi-yaxis.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Line with multi Y axis</a>
+                  <a href="./LineChart/line-multi-yaxis.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/multi-line-chart.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Multi line chart</a>
+                  <a href="./LineChart/multi-line-chart.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="viewChart(event, './LineChart/population-growth-analysis.html')"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded">Population growth analysis</a>
+                  <a href="./LineChart/population-growth-analysis.html"
+                    class="link-body-emphasis d-inline-flex text-decoration-none rounded anchor-link">
+                    <img alt="redirect to" src="./static/images/icons/icon_redirect.svg">
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="content-body d-flex flex-column flex-fill">
+      <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+          <button type="button" id="sidepanelActive" onclick="toggleSidePanel();"
+            class="btn btn-toggle-sidepanel close-active">
+            <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-bar-right" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M6 8a.5.5 0 0 0 .5.5h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L12.293 7.5H6.5A.5.5 0 0 0 6 8m-2.5 7a.5.5 0 0 1-.5-.5v-13a.5.5 0 0 1 1 0v13a.5.5 0 0 1-.5.5"></path>
+            </svg>
+          </button>
+          <img class="brand-logo" src="./static/images/sc_logo.png" alt="Smart charts NXT logo"/>
+          <h3>SmartchartsNXT Demo</h3>
+        </div>
+      </nav>
+      <iframe id="chartPreviewFrame" src="./AreaChart/annotation-area-chart.html" width="100%" height="100%"
+        title="smart chart nxt demo frame" onload="afterFrameLoad(this)"></iframe>
+    </div>
+  </main>
 
-  <div>
-    <h2>Chart List</h2>
-    <ul>
-      <li><a href="./areachart/area-chart.html">Area Chart</a></li>
-      <li><a href="./areachart/multi-area-chart.html">Multi Area Chart</a></li>
-      <li><a href="./areachart/browser-usage-stat.html">Browser Usage Stat</a></li>
-      <li><a href="./areachart/stock-area-chart.html">Stock Area Chart</a></li>
-      <li><a href="./linechart/line-chart.html">Line Chart</a></li>
-      <li><a href="./linechart/multi-line-chart.html">Multi Line Chart</a></li>
-      <li><a href="./stepchart/step-chart.html">Step Chart</a></li>
-      <li><a href="./stepchart/multi-series-step-chart.html">Multi Line Step Chart</a></li>
-      <li><a href="./piechart/pie-chart-2d.html">Pie Chart</a></li>
-      <li><a href="./donutchart/donut-chart-with-legend.html">Donut Chart with legend</a></li>
-      <li><a href="./columnchart/column-chart.html">Column Chart</a></li>
-      <li><a href="./columnchart/group-column-chart.html">Group Column Chart</a></li>
-    </ul>
-  </div>
+
+  <script src="./static/js/bootstrap.bundle.min.js"></script>
+  <script>
+    function viewChart(event, link) {
+      Array.from(document.querySelectorAll('.btn-toggle-nav a')).forEach((elem) => {
+        elem.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      Array.from(document.querySelectorAll('#sidepanel .btn-toggle')).forEach((elem) => {
+        elem.classList.remove('active');
+      });
+      event.target.closest('li.chart-list-item').querySelector('button').classList.add('active');
+      const chartPreviewFrame = document.querySelector('#chartPreviewFrame');
+      if (chartPreviewFrame) {
+        chartPreviewFrame.setAttribute('src', link);
+      }
+    }
+
+    function toggleSidePanel() {
+      document.querySelector('#sidePanel').classList.toggle('active');
+      document.querySelector('#sidepanelActive').classList.toggle('close-active');
+    }
+
+    function afterFrameLoad(frame) {
+      // frame.contentWindow.document.body.style.backgroundColor = '#1eb8b8';
+      // frame.contentWindow.document.body.style.marginTop = '0';
+
+      // Sending window/frame
+      const message = {
+        backgroundColor: '#1eb8b8',
+        marginTop: 0
+      };
+      frame.contentWindow.postMessage(message, '*');
+      if(window.innerWidth < 1024) {
+        toggleSidePanel();
+      }
+    }
+  </script>
 </body>
 
 </html>
-
