@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /types
+/examples/dist
 
 # Runtime data
 pids
