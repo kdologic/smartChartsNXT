@@ -5,6 +5,7 @@
 /tmp
 /out-tsc
 /types
+/examples/dist
 
 # Runtime data
 pids
@@ -96,3 +97,8 @@ lerna-debug.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Custom
+.angular
+.scannerwork
+sonar-project.properties
