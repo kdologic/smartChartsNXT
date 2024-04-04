@@ -75,7 +75,7 @@ class SpeechBox extends Component<ISpeechBoxProps> {
   }
 
   getBoxPath(): string {
-    const cr = this.props.cornerRadius || 0;
+    const cr: number = +(this.props.cornerRadius) || 0;
     let d = ['M', cr, 0];
     let topPath, bottomPath, leftPath, rightPath, cpoint = new Point(this.cpoint.x - this.props.x, this.cpoint.y - this.props.y);
 
@@ -162,7 +162,7 @@ class SpeechBox extends Component<ISpeechBoxProps> {
   }
 
   calcAnchorDirection(): void {
-    const cr = this.props.cornerRadius || 0;
+    const cr = +(this.props.cornerRadius) || 0;
     this.state.aTop = this.props.y > (this.cpoint.y - this.aHalfWidth - cr) ? true : false;
     this.state.aBottom = this.cpoint.y > (this.props.y + this.props.height - this.aHalfWidth - cr) ? true : false;
     this.state.aRight = this.cpoint.x > (this.props.x + this.props.width - this.aHalfWidth - cr) ? true : false;
