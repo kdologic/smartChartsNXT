@@ -89,7 +89,7 @@ const production = {
               'corejs': 3,
               'debug': true,
               'targets': {
-                'browsers': ['> 1% and not dead']
+                'browsers': ['> 0.5%', 'last 2 versions', 'Firefox ESR', 'not dead']
               }
             }]
           ]

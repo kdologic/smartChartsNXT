@@ -2,7 +2,7 @@
   "name": "smartcharts-nxt",
   "title": "SmartChartsNXT",
   "description": "Lightweight, simple and flexible Ultra fast SVG based js chart library for Mobile, Web and App.",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.3",
   "main": "./dist/smartchartsnxt.js",
   "types": "./dist/types/index.d.ts",
   "files": [
@@ -61,7 +61,7 @@
     "babel-loader": "^8.2.5",
     "core-js": "^3.25.2",
     "crossfilter2": "^1.4.7",
-    "css-loader": "^3.6.0",
+    "css-loader": "^6.8.1",
     "dayjs": "^1.9.2",
     "deepmerge": "^4.0.0",
     "eslint": "^7.5.0",
