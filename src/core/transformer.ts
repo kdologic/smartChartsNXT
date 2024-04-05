@@ -1,5 +1,6 @@
 'use strict';
 
+import { IObject } from "../viewEngin/pview.model";
 import { TransformMatrix } from "./core.model";
 
 /**
@@ -153,7 +154,7 @@ class Transformer {
    * @param {String} strTransform String value of transformation matrix.
    * @return {void} undefined
    */
-  setElementTransformation(element: SVGElement | HTMLElement, strTransform: string) {
+  setElementTransformation(element: IObject, strTransform: string) {
     if (element) {
       element.style['-webkit-transform'] = strTransform;
       element.style['-moz-transform'] = strTransform;

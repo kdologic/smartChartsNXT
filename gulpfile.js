@@ -19,15 +19,17 @@ const tsProject = ts.createProject('tsconfig.json');
 const pkg = require('./package.json');
 const srcDir = './src/';
 const buildDir = './dist/';
-const tsSrc = ['src/**/*.js','src/**/*.ts'];
+const externalBuildDir = './examples/dist';
+const tsSrc = ['src/**/*.js', 'src/**/*.ts'];
 const tsBuildDir = './dist/types/';
+const externalTsBuildDir = './examples/dist/types/';
 const testDir = './test/';
 const libName = 'smartchartsnxt';
 
 
 const isProduction = process.env.NODE_ENV == 'production';
 let buildType = isProduction ? 'Production Build' : 'Development Build';
-buildType += ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' , hour:'numeric', minute:'numeric', second:'numeric'});
+buildType += ' - ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
 
 const header = `/**
 * ${pkg.title}
@@ -35,7 +37,7 @@ const header = `/**
 * Version: ${pkg.version}
 * ${buildType}
 *
-* Copyright 2022 (c) ${pkg.author.name}<${pkg.author.email}>
+* Copyright ${new Date().getFullYear()} (c) ${pkg.author.name}<${pkg.author.email}>
 * Released under the ${pkg.license} license
 * https://github.com/kdologic/smartChartsNXT/blob/develop/LICENSE
 */
@@ -51,11 +53,11 @@ function buildJSTask() {
     .pipe(replace('__version__', pkg.version));
 
   stream = stream.pipe(gulpIf(shouldInsertHeader, insert.prepend(header)));
-  return stream.pipe(dest(buildDir));
+  return stream.pipe(dest(buildDir)).pipe(dest(externalBuildDir));
 }
 
 function shouldInsertHeader(file) {
-  if(isProduction) {
+  if (isProduction) {
     const isSourceMap = /\.map$/.test(file.path);
     return !isSourceMap;
   }
@@ -78,28 +80,36 @@ function minifyTask() {
     }))
     .pipe(rename(`${libName}.min.js`))
     .pipe(insert.prepend(header))
-    .pipe(dest(buildDir));
+    .pipe(dest(buildDir))
+    .pipe(dest(externalBuildDir));
 }
 
 function typeDefTask() {
   return src(tsSrc)
     .pipe(tsProject())
-    .pipe(dest(tsBuildDir));
+    .pipe(dest(tsBuildDir))
+    .pipe(dest(externalTsBuildDir));
 }
 
 function cleanTask() {
-  return src(buildDir, {read: false, allowEmpty: true})
+  return src(buildDir, { read: false, allowEmpty: true })
+    .pipe(clean());
+}
+
+function cleanExternalTask() {
+  return src(externalBuildDir, { read: false, allowEmpty: true })
     .pipe(clean());
 }
 
 function watchTask() {
-  return watch('./src/**', { events: 'all' }, series(buildJSTask));
+  return watch('./src/**', { events: 'all' }, series([typeDefTask, buildJSTask]));
 }
 
 exports.clean = cleanTask;
+exports.cleanExt = cleanExternalTask;
 exports.minify = minifyTask;
 exports.watch = watchTask;
 exports.buildJS = buildJSTask;
 exports.typeDef = typeDefTask;
-exports.build = series(cleanTask, typeDefTask, buildJSTask, minifyTask);
-exports.default = series(cleanTask, buildJSTask, watchTask);
+exports.build = series(cleanTask, cleanExternalTask, typeDefTask, buildJSTask, minifyTask);
+exports.default = series(cleanTask, cleanExternalTask, typeDefTask, buildJSTask, watchTask);
