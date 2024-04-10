@@ -1,5 +1,7 @@
 # SmartChartsNXT [![Build Status](https://travis-ci.org/kdologic/smartChartsNXT.svg?branch=develop)](https://travis-ci.org/kdologic/smartChartsNXT) [![](https://data.jsdelivr.com/v1/package/npm/smartcharts-nxt/badge)](https://www.jsdelivr.com/package/npm/smartcharts-nxt)
-<p align="center"><img src="https://www.smartchartsnxt.com/images/SmartChartsNXT_logo_200x200.png"></p>
+<p align="center">
+<img src="https://github.com/kdologic/smartChartsNXT/blob/develop/examples/static/images/sc_logo.png?raw=true" alt="SmartChartsNxt Logo" width="100px" height="100px" />
+</p>
 
 
 A powerful yet simple Javascript chart library, built on top of JavaScript and JSON which unleash the power of SVG to create Smart, Interactive, Responsive, High Performance Charts. 
