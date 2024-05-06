@@ -104,8 +104,12 @@ export function renderDOM(vnode: IVnode): IComponent {
     vnode.attributes.extChildren = vnode.children;
     /* eslint-disable-next-line babel/no-invalid-this */
     (vnode.nodeName as IPrototype).prototype.context = this.context || {};
+
     /* eslint-disable-next-line new-cap*/
     let objComp: Component = new vnode.nodeName(vnode.attributes);
+    (objComp as any).context = (vnode.nodeName as IPrototype).prototype.context;
+    delete (vnode.nodeName as IPrototype).prototype.context;
+
     let objChildContext: IObject = _extends({}, (objComp as any).context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let renderedComp: IComponent = renderDOM.call({ context: objChildContext }, objComp.getVirtualNode());
 
@@ -121,7 +125,7 @@ export function renderDOM(vnode: IVnode): IComponent {
   } else if (vnode.nodeName instanceof Component && vnode.nodeName.getRef()?.node) { /* when vnode is type of object which is previously constructed */
     let objComp: Component = vnode.nodeName;
     /* eslint-disable-next-line babel/no-invalid-this */
-    (objComp as any).__proto__.context = this.context || {};
+    (objComp as any).context = this.context || {};
     let objChildContext: IObject = _extends({}, (objComp as any).context, (typeof objComp.passContext === 'function' ? objComp.passContext() : {}));
     let subNodes: IVnode = objComp.getVirtualNode();
 

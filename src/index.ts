@@ -28,13 +28,13 @@ declare global {
  */
 
 class SmartChartsNXT extends Core {
-  public version = '__version__';
+  public version: string = '__version__';
   public CHART_TYPE = CHART_TYPE;
   public ENUMS: OPTIONS_TYPE = new OPTIONS_TYPE();
   public GLOBAL = { ...defaultConfig };
   public COLOR_STRINGS = UtilCore.deepFreeze({ ...COLOR_STRINGS });
-  public COLOR_MODEL = UtilCore.deepFreeze(COLOR_MODEL);
-  public RAINBOW_COLOR_MODEL = UtilCore.deepFreeze(RAINBOW_COLOR_MODEL);
+  public COLOR_MODEL = UtilCore.deepFreeze(COLOR_MODEL) as string[];
+  public RAINBOW_COLOR_MODEL = UtilCore.deepFreeze(RAINBOW_COLOR_MODEL) as string[];
   public HELPER = { ...helperMethods };
   public EASING = UtilCore.deepFreeze(Easing);
   public IESupport: any;

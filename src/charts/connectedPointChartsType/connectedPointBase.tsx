@@ -95,6 +95,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
       }, props.chartData);
 
       this.yAxisDefaults = {
+        enable: true,
         type: AXIS_TYPE.LINEAR,
         title: 'Value-axis',
         zeroBase: false,
@@ -125,6 +126,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
         },
         dataSet: {
           xAxis: {
+            enable: true,
             type: AXIS_TYPE.LINEAR,
             title: 'Label-axis',
             labelAlign: VERTICAL_ALIGN.BOTTOM,
@@ -522,7 +524,6 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
       this.CHART_DATA.dataSet.series[i].data = this.CHART_OPTIONS.dataSet.series[i].data.map(dataMapFn);
       this.CHART_DATA.dataSet.series[i].turboData = crossfilter(this.CHART_DATA.dataSet.series[i].data);
       this.CHART_DATA.dataSet.series[i].dataDimIndex = this.CHART_DATA.dataSet.series[i].turboData.dimension((d: ILabelValue) => d.index);
-      this.CHART_DATA.dataSet.series[i].dataDimValue = this.CHART_DATA.dataSet.series[i].turboData.dimension((d: ILabelValue) => d.value);
     }
   }
 
@@ -572,7 +573,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
         secondaryMinSet.push(minVal);
       }
       dataSet.series[i].index = i;
-      dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1.5 : dataSet.series[i].lineWidth;
+      dataSet.series[i].lineWidth = typeof dataSet.series[i].lineWidth === 'undefined' ? 1 : dataSet.series[i].lineWidth;
       this.setSeriesColor(i, dataSet.series[i]);
       dataSet.series[i].customizedMarkers = customizedMarkers;
     }
@@ -630,7 +631,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
           for (let seriesKey in series) {
             if (seriesKey === 'data') {
               s[seriesKey as keyof ISeriesConfig] = series.dataDimIndex.bottom(Infinity);
-            } else if (['turboData', 'dataDimIndex', 'dataDimValue'].indexOf(seriesKey) === -1) {
+            } else if (['turboData', 'dataDimIndex'].indexOf(seriesKey) === -1) {
               s[seriesKey as keyof ISeriesConfig] = UtilCore.deepCopy(series[seriesKey as keyof ISeriesConfig]);
             }
           }
@@ -749,14 +750,15 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
           {this.drawSeries()}
         </g>
 
-        {this.drawYAxis(this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY], AXIS_PRIORITY.PRIMARY)}
+        {this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY].enable &&
+          this.drawYAxis(this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY], AXIS_PRIORITY.PRIMARY)}
 
-        {this.state.cs.dataSet.yAxis[AXIS_PRIORITY.SECONDARY] &&
+        {this.state.cs.dataSet.yAxis[AXIS_PRIORITY.SECONDARY] && this.state.cs.dataSet.yAxis[AXIS_PRIORITY.SECONDARY].enable &&
           this.drawYAxis(this.state.cs.dataSet.yAxis[AXIS_PRIORITY.SECONDARY], AXIS_PRIORITY.SECONDARY)
         }
 
-        {this.state.cs.dataSet.xAxis.positionOpposite === false &&
-          <g>
+        {this.state.cs.dataSet.xAxis.enable && this.state.cs.dataSet.xAxis.positionOpposite === false &&
+          <g class="sc-x-axis-group">
             <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
               posY={(this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight + (this.CHART_DATA.dataSet.xAxis.labelAlign === VERTICAL_ALIGN.BOTTOM ? (this.CHART_DATA.hLabelHeight / 2) : 0) + 5)}
               bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={this.CHART_DATA.dataSet.xAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
@@ -782,12 +784,12 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
           </g>
         }
 
-        {this.state.cs.dataSet.xAxis.positionOpposite === true &&
-          <g>
-            <TextBox class='sc-horizontal-axis-title' posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
+        {this.state.cs.dataSet.xAxis.enable && this.state.cs.dataSet.xAxis.positionOpposite === true &&
+          <g class="sc-x-axis-group">
+            <TextBox class="sc-horizontal-axis-title" posX={(this.CHART_DATA.marginLeft + (this.CHART_DATA.gridBoxWidth / 2))}
               posY={(this.CHART_DATA.marginTop - (this.CHART_DATA.dataSet.xAxis.labelAlign === VERTICAL_ALIGN.TOP ? this.CHART_DATA.hLabelHeight : this.CHART_DATA.hLabelHeight / 2) - 5)}
               bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={this.CHART_DATA.dataSet.xAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6} borderRadius={1} padding={5} stroke='none'
-              textAnchor='middle' fontWeight='bold' text={this.CHART_DATA.dataSet.xAxis.title}
+              textAnchor="middle" fontWeight="bold" text={this.CHART_DATA.dataSet.xAxis.title}
               style={{
                 '.sc-horizontal-axis-title': {
                   'font-size': UiCore.getScaledFontSize(this.CHART_OPTIONS.width, 30, 14) + 'px'
@@ -982,7 +984,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
   drawYAxis(yAxis: IYAxisConfig, priority: AXIS_PRIORITY): IVnode {
     if (yAxis.positionOpposite === false) {
       return (
-        <g>
+        <g class="sc-y-axis-group">
           <TextBox class='sc-vertical-axis-title' posX={5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
             transform={`rotate(${-90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={yAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6}
             textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={yAxis.title}
@@ -995,14 +997,14 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
             width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight}>
           </AxisBar>
           <VerticalLabels instanceId="v-label-left" opts={yAxis || {}} priority={priority}
-            posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
+            posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
             labelCount={this.state.hGridCount[priority]} intervalLen={this.state.gridHeight[priority]} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
           </VerticalLabels>
         </g>
       );
     } else if (yAxis.positionOpposite) {
       return (
-        <g>
+        <g class="sc-y-axis-group">
           <TextBox class='sc-vertical-axis-title' posX={(this as any).context.svgWidth - 5} posY={(this.CHART_DATA.marginTop + (this.CHART_DATA.gridBoxHeight / 2))}
             transform={`rotate(${90})`} bgColor={this.CHART_OPTIONS.bgColor || '#fff'} textColor={yAxis.titleColor || defaultConfig.theme.fontColorDark} bgOpacity={0.6}
             textAnchor='middle' borderRadius={1} padding={5} stroke='none' fontWeight='bold' text={yAxis.title}
@@ -1016,7 +1018,7 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
           </AxisBar>
 
           <VerticalLabels instanceId="v-label-right" opts={yAxis || {}} priority={priority}
-            posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
+            posX={this.CHART_DATA.marginLeft + this.CHART_DATA.gridBoxWidth} posY={this.CHART_DATA.marginTop + this.CHART_DATA.gridBoxHeight} maxVal={this.state.cs[priority].yInterval.iMax} minVal={this.state.cs[priority].yInterval.iMin} valueInterval={this.state.cs[priority].valueInterval}
             labelCount={this.state.hGridCount[priority]} intervalLen={this.state.gridHeight[priority]} maxWidth={this.CHART_DATA.vLabelWidth} accessibilityId={this.vLabelAccId} >
           </VerticalLabels>
         </g>

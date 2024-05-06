@@ -146,6 +146,7 @@ export interface IHorizontalScrollerConfig {
 };
 
 export interface IXAxisConfig {
+  enable?: boolean;
   type: AXIS_TYPE;
   title?: string;
   categories?: IValueCategory;
@@ -175,6 +176,7 @@ export interface IXAxisConfigExtended extends Omit<IXAxisConfig, 'categories'> {
 };
 
 export interface IYAxisConfig {
+  enable?: boolean;
   type?: AXIS_TYPE;
   title?: string;
   prepend?: string;
@@ -222,7 +224,6 @@ export interface ISeriesConfig {
   valueSet: number[];
   turboData: any;
   dataDimIndex: any;
-  dataDimValue: any;
 };
 
 export interface ISeriesLabelConfig {

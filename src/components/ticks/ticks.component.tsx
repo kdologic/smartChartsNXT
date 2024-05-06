@@ -27,10 +27,10 @@ class Ticks extends Component<ITicksProps> {
   drawTickLinesVertical(): IVnode[] {
     let ticks = [];
     for (let tickCount = 0; tickCount < this.props.tickCount; tickCount++) {
-      ticks.push(<line instanceId={`tick-${tickCount}`} class={`sc-tick-line-${tickCount}`}
-        x1={0} y1={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval}
-        x2={this.props.span} y2={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} fill='none' stroke={this.props.stroke || this.props.color || '#000'}
-        stroke-width='1' stroke-opacity={this.props.opacity} shape-rendering='optimizeSpeed' />);
+      ticks.push(<line instanceId={`tick-${tickCount}`} class={`sc-tick sc-tick-line-${tickCount}`} transform={`translate(0, ${this.props.tickCount === 1 ? this.props.tickInterval : -(tickCount * this.props.tickInterval)})`}
+        x1={0} y1={0}
+        x2={this.props.span} y2={0} fill='none' stroke={this.props.stroke || this.props.color || '#000'}
+        stroke-width='0.5' stroke-opacity={this.props.opacity} shape-rendering='crispedges' />);
     }
     return ticks;
   }
@@ -41,7 +41,7 @@ class Ticks extends Component<ITicksProps> {
       ticks.push(<line instanceId={`tick-${tickCount}`} class={`sc-tick-line-${tickCount}`}
         x1={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} y1={this.props.span}
         x2={this.props.tickCount === 1 ? this.props.tickInterval : tickCount * this.props.tickInterval} y2={0} fill='none' stroke={this.props.stroke || this.props.color || '#000'}
-        stroke-width='1' stroke-opacity={this.props.opacity} shape-rendering='optimizeSpeed' />);
+        stroke-width='0.5' stroke-opacity={this.props.opacity} shape-rendering='crispedges' />);
     }
     return ticks;
   }

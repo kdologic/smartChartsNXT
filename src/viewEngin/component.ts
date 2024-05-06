@@ -217,7 +217,7 @@ export abstract class Component<T = IComponentProps> {
       }
 
       if (ref && ref.self) {
-        Object.getPrototypeOf(ref.self).context = context;
+        (ref.self as any).context = context;
       }
 
       if (ref && ref.self && typeof ref.self.beforeUpdate === 'function') {

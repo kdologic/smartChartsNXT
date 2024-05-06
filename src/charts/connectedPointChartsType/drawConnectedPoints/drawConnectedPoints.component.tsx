@@ -3,6 +3,7 @@
 import { AXIS_TYPE, CHART_TYPE, FILL_TYPE, ICON_TYPE, LINE_STYLE } from '../../../global/global.enums';
 import { DataPoint } from '../../../core/point';
 import { Component } from '../../../viewEngin/pview';
+import defaultConfig from '../../../settings/config';
 import GeomCore from '../../../core/geom.core';
 import UiCore from '../../../core/ui.core';
 import UtilCore from '../../../core/util.core';
@@ -37,9 +38,10 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   private rid: string;
   private clipPathId: string;
   private shadowId: string;
-  private defaultMarkerWidth: number;
-  private defaultMarkerHeight: number;
+  private defaultMarkerWidth: number = 12;
+  private defaultMarkerHeight: number = 12;
   private liveRegionId: string;
+  private animationDuration = 500;
 
   constructor(props: IDrawConnectedPointsProps) {
     super(props);
@@ -55,51 +57,32 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       baseLine: 0,
       pointSet: [],
       valueSet: [],
-      strokeOpacity: this.props.strokeOpacity || 1,
-      strokeWidth: this.props.lineStrokeWidth || 0,
+      lineSegments: [],
+      linePath: [],
+      straightLinePath: [],
+      areaPath: [],
+      straightAreaPath: [],
+      strokeOpacity: 1,
+      strokeWidth: 0,
       lineDashArray: 0,
-      opacity: typeof this.props.opacity === 'undefined' ? 1 : this.props.opacity,
+      opacity: 1,
       currentHighlightedPoint: {
         pointIndex: null
       },
-      animated: this.props.animated,
+      animated: true,
+      isAnimationPlaying: true,
+      addStraightPathClass: true,
       fillType: FILL_TYPE.SOLID_COLOR,
-      fillBy: this.props.areaFillColor,
-      hasDataLabels: this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false
+      fillBy: defaultConfig.theme.fontColorHighlight,
+      hasDataLabels: true
     };
 
-    this.defaultMarkerWidth = 12;
-    this.defaultMarkerHeight = 12;
-
-    if (this.props.lineStyle === LINE_STYLE.DASHED) {
-      this.state.lineDashArray = this.props.lineDashArray || 4;
-    }
-
-    this.state.clip = Object.assign({
-      x: 0,
-      y: 0,
-      width: this.props.width,
-      height: this.props.height
-    }, this.props.clip);
-
-    let fillOpt = UiCore.processFillOptions(this.props.fillOptions, this.rid);
-    if (fillOpt.fillBy === 'none') {
-      this.state.fillType = FILL_TYPE.SOLID_COLOR;
-      this.state.fillBy = this.props.areaFillColor;
-    } else {
-      this.state.fillType = fillOpt.fillType;
-      this.state.fillBy = fillOpt.fillBy;
-      this.state.fillId = fillOpt.fillId;
-    }
     if (typeof this.store.getValue('pointsData') === 'undefined') {
       this.store.setValue('pointsData', {});
     }
-
-    this.prepareData(this.props);
-    this.state.lineSegments = this.props.spline ? this.getCurvedLinePath(this.props) : this.getLinePath(this.props);
-    this.state.linePath = this.state.lineSegments.path;
-    this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
-    this.store.setValue('pointsData', { [this.props.instanceId]: this.state.pointSet });
+    this.prepareStateData(this.props);
+    this.state.animated = this.props.animated;
+    this.state.isAnimationPlaying = !!props.animated;
 
     this.interactiveMouseMove = this.interactiveMouseMove.bind(this);
     this.interactiveMouseLeave = this.interactiveMouseLeave.bind(this);
@@ -133,7 +116,10 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     this.emitter.on('interactiveMouseLeave', this.interactiveMouseLeave);
     this.emitter.on('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.on('changeAreaBrightness', this.changeAreaBrightness);
-    this.state.animated = false;
+    this.setState({ addStraightPathClass: false });
+    setTimeout(() => {
+      this.setState({ animated: false, isAnimationPlaying: false });
+    }, this.animationDuration);
   }
 
   afterUpdate(): void {
@@ -161,37 +147,34 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   }
 
   propsWillReceive(nextProps: IDrawConnectedPointsProps): void {
-    this.prepareData(nextProps);
-    let fillOpt = UiCore.processFillOptions(this.props.fillOptions);
-    if (fillOpt.fillBy === 'none') {
+    this.prepareStateData(nextProps);
+  }
+
+  prepareStateData(props: IDrawConnectedPointsProps) {
+    this.state = {
+      ...this.state,
+      ...{
+        valueSet: props.dataSet,
+        scaleX: props.scaleX,
+        scaleY: props.scaleY,
+        baseLine: props.baseLine,
+        strokeOpacity: props.strokeOpacity || 1,
+        strokeWidth: props.lineStrokeWidth || 0,
+        opacity: typeof props.opacity === 'undefined' ? 1 : props.opacity,
+        fillBy: props.areaFillColor,
+        hasDataLabels: props.dataLabels ? (typeof props.dataLabels.enable === 'undefined' ? true : !!props.dataLabels.enable) : false
+      }
+    };
+
+    const fillOpt = UiCore.processFillOptions(props.fillOptions, this.rid);
+    if (fillOpt.fillBy === FILL_TYPE.NONE) {
       this.state.fillType = FILL_TYPE.SOLID_COLOR;
-      this.state.fillBy = this.props.areaFillColor;
+      this.state.fillBy = props.areaFillColor;
     } else {
       this.state.fillType = fillOpt.fillType;
       this.state.fillBy = fillOpt.fillBy;
       this.state.fillId = fillOpt.fillId;
     }
-    this.state.lineSegments = nextProps.spline ? this.getCurvedLinePath(nextProps) : this.getLinePath(nextProps);
-    this.state.linePath = this.state.lineSegments.path;
-    this.state.areaPath = this.getAreaPath(this.state.lineSegments.pathSegments.slice());
-    this.state.clip = Object.assign({
-      x: 0,
-      y: 0,
-      width: nextProps.width,
-      height: nextProps.height
-    }, nextProps.clip);
-    if (nextProps.lineStyle === LINE_STYLE.DASHED) {
-      this.state.lineDashArray = nextProps.lineDashArray || 4;
-    }
-    this.state.hasDataLabels = this.props.dataLabels ? (typeof this.props.dataLabels.enable === 'undefined' ? true : !!this.props.dataLabels.enable) : false;
-    this.store.setValue('pointsData', { [nextProps.instanceId]: this.state.pointSet });
-  }
-
-  prepareData(props: IDrawConnectedPointsProps) {
-    this.state.valueSet = props.dataSet;
-    this.state.scaleX = props.scaleX;
-    this.state.scaleY = props.scaleY;
-    this.state.baseLine = props.baseLine;
 
     if (typeof props.marker === 'object') {
       this.state.marker = {
@@ -206,8 +189,27 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       };
     }
 
+    this.state.clip = Object.assign({
+      x: 0,
+      y: 0,
+      width: props.width,
+      height: props.height
+    }, props.clip);
+
+    if (props.lineStyle === LINE_STYLE.DASHED) {
+      this.state.lineDashArray = props.lineDashArray || 4;
+    }
+
     this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
-    if (this.props.emitScale) {
+    this.state.lineSegments = props.spline ? this.getCurvedLinePath(props) : this.getLinePath(props);
+    this.state.linePath = this.state.lineSegments.path;
+    this.state.straightLinePath = this.state.lineSegments.straightPathSegments.flat();
+    let area = this.getAreaPath(this.state.lineSegments.pathSegments.slice(), this.state.lineSegments.straightPathSegments.slice());
+    this.state.areaPath = area.areaPath;
+    this.state.straightAreaPath = area.straightAreaPath;
+
+    this.store.setValue('pointsData', { [props.instanceId]: this.state.pointSet });
+    if (props.emitScale) {
       this.emitter.emitSync('onUpdateScale', {
         scaleX: this.state.scaleX,
         scaleY: this.state.scaleY,
@@ -225,9 +227,24 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       <g class={`sc-area-fill-${this.props.instanceId}`} transform={`translate(${this.props.posX}, ${this.props.posY})`} clip-path={`url(#${this.props.clipId || this.clipPathId})`}
         role='region' tabindex='-1' aria-hidden={!this.props.accessibility} aria-label={ariaLabel}>
         <remove-before-save>
-          {this.props.animated &&
+          {this.props.animated && UtilCore.isSafari &&
             <style>
               {this.getScaleKeyframe()}
+            </style>
+          }
+          {this.state.animated && !UtilCore.isSafari &&
+            <style>
+              {`
+                .sc-series-area-path-${this.props.index}.animate, .sc-series-line-path-${this.props.index}.animate {
+                  transition: d ${this.animationDuration / 1000}s ease;
+                }
+                .sc-series-area-path-${this.props.index}.flat-path {
+                  d: path("${this.state.straightAreaPath.join(' ')}");
+                }
+                .sc-series-line-path-${this.props.index}.flat-path {
+                  d: path("${this.state.straightLinePath.join(' ')}");
+                }
+              `}
             </style>
           }
         </remove-before-save>
@@ -245,12 +262,12 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
           UiCore.dropShadow(this.shadowId)
         }
         {(this as any).context.chartType === CHART_TYPE.AREA_CHART &&
-          <path class={`sc-series-area-path-${this.props.index}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
+          <path class={`sc-series-area-path-${this.props.index}${this.state.addStraightPathClass ? ' flat-path' : ''}${this.state.animated ? ' animate' : ''}`} stroke={this.props.areaFillColor} fill={this.state.fillBy}
             d={this.state.areaPath.join(' ')} stroke-width={this.props.areaStrokeWidth || 0} opacity={this.state.opacity} >
           </path>
         }
         {typeof this.props.lineStrokeWidth !== 'undefined' &&
-          <path class={`sc-series-line-path-${this.props.index}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
+          <path class={`sc-series-line-path-${this.props.index}${this.state.addStraightPathClass ? ' flat-path' : ''}${this.state.animated ? ' animate' : ''}`} stroke={this.props.lineFillColor} stroke-opacity={this.state.strokeOpacity} d={this.state.linePath.join(' ')}
             filter={this.props.lineDropShadow ? `url(#${this.shadowId})` : ''} stroke-width={this.state.strokeWidth || 0} fill='none' opacity='1' stroke-dasharray={this.state.lineDashArray} stroke-linecap="round">
           </path>
         }
@@ -267,8 +284,9 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     );
   }
 
-  getAreaPath(lineSegments: IPathSegment[]): IPathSegment {
-    let linePath = [];
+  getAreaPath(lineSegments: IPathSegment[], straightLineSegments: IPathSegment[]): { areaPath: IPathSegment, straightAreaPath: IPathSegment } {
+    let areaPath: IPathSegment = [];
+    let straightAreaPath: IPathSegment = [];
     for (let i = 0; i < lineSegments.length; i++) {
       let segment: IPathSegment = lineSegments[i];
       if (segment.length === 0) {
@@ -277,16 +295,26 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       let startSegIndex = i === 0 ? 0 : this.state.lineSegments.segmentIndexes[i - 1] + 1;
       let endSegIndex = this.state.lineSegments.segmentIndexes[i];
       for (let s of segment) {
-        linePath.push(s);
+        areaPath.push(s);
       }
-      linePath.push('L', this.state.pointSet[endSegIndex - 1].x, this.state.baseLine, 'L', this.state.pointSet[startSegIndex].x, this.state.baseLine, 'Z');
+      for (let s of straightLineSegments[i]) {
+        straightAreaPath.push(s);
+      }
+      let joiningPoint: IPathSegment = ['L', this.state.pointSet[endSegIndex - 1].x, this.state.baseLine, 'L', this.state.pointSet[startSegIndex].x, this.state.baseLine, 'Z'];
+      areaPath.push(...joiningPoint);
+      straightAreaPath.push(...joiningPoint);
     }
-    return linePath;
+    return {
+      areaPath: areaPath,
+      straightAreaPath: straightAreaPath
+    };
   }
 
-  getLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[] } {
+  getLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, straightPathSegments: IPathSegment[], segmentIndexes: number[] } {
     let path: IPathSegment[] = [];
+    let straightPath: IPathSegment[] = [];
     let pathSegment: IPathSegment = [];
+    let straightPathSegment: IPathSegment = [];
     let segmentIndexes: number[] = [];
     let sIndex: number = 0;
     this.state.pointSet = this.state.valueSet.map((data: number, i: number) => {
@@ -301,13 +329,17 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
         sIndex = -1;
         segmentIndexes.push(i);
         path.push(pathSegment.slice());
+        straightPath.push(straightPathSegment.slice());
         pathSegment = [];
+        straightPathSegment = [];
         point.isHidden = true;
       } else {
         if (sIndex === 0) {
           pathSegment.push('M', point.x, point.y);
+          straightPathSegment.push('M', point.x, this.state.baseLine);
         } else {
           pathSegment.push('L', point.x, point.y);
+          straightPathSegment.push('L', point.x, this.state.baseLine);
         }
       }
       sIndex++;
@@ -316,16 +348,19 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       return point;
     });
     path.push(pathSegment);
+    straightPath.push(straightPathSegment);
     segmentIndexes.push(this.state.pointSet.length);
     return {
       pathSegments: path,
       path: path.flat(),
+      straightPathSegments: straightPath,
       segmentIndexes
     };
   }
 
-  getCurvedLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, segmentIndexes: number[] } {
+  getCurvedLinePath(props: IDrawConnectedPointsProps): { pathSegments: IPathSegment[], path: IPathSegment, straightPathSegments: IPathSegment[], segmentIndexes: number[] } {
     let path: IPathSegment[] = [];
+    let straightPath: IPathSegment[] = [];
     let pointSegments: DataPoint[][] = [];
     let pathSegment: DataPoint[] = [];
     let segmentIndexes: number[] = [];
@@ -353,16 +388,20 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     for (let pointSegment of pointSegments) {
       if (pointSegment.length === 0) {
         path.push([]);
+        straightPath.push([]);
       } else if (pointSegment.length === 1) {
         path.push(['M', this.state.pointSet[0].x, this.state.pointSet[0].y]);
+        straightPath.push(['M', this.state.pointSet[0].x, this.state.baseLine]);
       } else {
         path.push(GeomCore.catmullRomFitting(pointSegment, 0.1) as IPathSegment);
+        straightPath.push(['L', this.state.pointSet[0].x, this.state.baseLine]);
       }
     }
     segmentIndexes.push(this.state.pointSet.length);
     return {
       pathSegments: path,
       path: path.flat(),
+      straightPathSegments: straightPath,
       segmentIndexes
     };
   }

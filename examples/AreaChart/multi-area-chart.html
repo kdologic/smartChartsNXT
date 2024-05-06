@@ -142,15 +142,15 @@
             "enable": true,                             // [ default: true | false ]
             "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.(SOLID | default: DASHED) ]
             "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
-            "lineThickness": 1,                         // [ default: 1 ]
-            "lineOpacity": 0.2                          // [ default: 0.2 ]
+            "lineThickness": 0.5,                       // [ default: 0.5 ]
+            "lineOpacity": 0.5                          // [ default: 0.5 ]
           },
           "horizontal": {
             "enable": true,                             // [ default: true | false ]
             "lineStyle": $SC.ENUMS.LINE_STYLE.SOLID,    // [ $SC.ENUMS.LINE_STYLE.(default: SOLID | DASHED) ]
             "lineColor": "#000",                        // [ $SC.theme.bgColorMedium ]
-            "lineThickness": 1,                         // [ default: 1 ]
-            "lineOpacity": 0.2                          // [ default: 0.2 ]
+            "lineThickness": 0.5,                       // [ default: 0.5 ]
+            "lineOpacity": 0.5                          // [ default: 0.5 ]
           },
           "bgColor": "#9DE5FF",                         // [ default: none ]
           "fillOptions": {                              // pattern have and highest priority then gradient and image has the lowest priority.
@@ -309,6 +309,7 @@
         },
         "dataSet": {
           "xAxis": {
+            "enable": true,                             // [ default: true | false ]
             "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR ] Note: Log x-axis not supported yet.
             "title": "Date",                            // [ default: Label-axis ]
             // To resolve a category it uses multiple try-n-error logic. Categories inside series[i].data[j].label have the highest priority, 
@@ -355,6 +356,7 @@
             }]
           },
           "yAxis": [{
+            "enable": true,                             // [ default: true | false ]
             "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR | $SC.ENUMS.AXIS_TYPE.LOGARITHMIC ]
             "title": "Total Sales",                     // [ default: Value-axis ]
             "prepend": "\u20B9 ",                       // [ default: "" ]
@@ -392,7 +394,7 @@
             "a11y": {
               "description": "Showing his performance as a sales representative"   // [ default: ""]
             },
-            "lineWidth": 1.5,                           // [ default: 1.5 ]
+            "lineWidth": 1,                             // [ default: 1 ]
             "lineOpacity": 1,                           // [ default: 1 ]
             "lineColor": $SC.COLOR_STRINGS.MAT_BLUE,    // [ default: $SC.COLOR_MODEL[series_index] ] Note: lineColor and areaColor both optional, can be given differently.
             "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED,   // [ $SC.ENUMS.LINE_STYLE.(default: SOLID | DASHED)]
