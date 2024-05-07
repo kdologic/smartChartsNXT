@@ -203,25 +203,25 @@ class Tooltip extends Component<ITooltipProps> {
       transitionFunction = 'none';
     }
     return (
-      <Style>
-        {{
-          ['.sc-tip-' + this.instances[index].tipId]: {
-            WebkitTransition: transitionFunction,
-            MozTransition: transitionFunction,
-            OTransition: transitionFunction,
-            transition: transitionFunction,
-            transform: this.instances[index].transform
-          },
-          ['.sc-tip-' + this.instances[index].tipId + ' .sc-tooltip-content']: {
-            color: this.config.textColor,
-            fontSize: this.config.fontSize + 'px',
-            fontFamily: this.config.fontFamily,
-            overflow: 'hidden',
-            opacity: this.config.opacity,
-            borderRadius: this.config.borderRadius + 'px'
+      <style>
+        {`
+          #${(this as any).context.rootSvgId} .sc-tip-${this.instances[index].tipId} {
+            -webkit-transition: ${transitionFunction};
+            -moz-transition: ${transitionFunction};
+            -o-transition: ${transitionFunction};
+            transition: ${transitionFunction};
+            transform: ${this.instances[index].transform};
           }
-        }}
-      </Style>);
+          #${(this as any).context.rootSvgId} .sc-tip-${this.instances[index].tipId} .sc-tooltip-content {
+            color: ${this.config.textColor};
+            font-size: ${this.config.fontSize}px;
+            font-family: ${this.config.fontFamily};
+            overflow: hidden;
+            opacity: ${this.config.opacity};
+            border-radius: ${this.config.borderRadius}px;
+          }
+        `}
+      </style>);
   }
 
   createTooltipContent(line1: string, line2: string): string {

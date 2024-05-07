@@ -235,13 +235,13 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
           {this.state.animated && !UtilCore.isSafari &&
             <style>
               {`
-                .sc-series-area-path-${this.props.index}.animate, .sc-series-line-path-${this.props.index}.animate {
+                #${(this as any).context.rootSvgId} .sc-series-area-path-${this.props.index}.animate, .sc-series-line-path-${this.props.index}.animate {
                   transition: d ${this.animationDuration / 1000}s ease;
                 }
-                .sc-series-area-path-${this.props.index}.flat-path {
+                #${(this as any).context.rootSvgId} .sc-series-area-path-${this.props.index}.flat-path {
                   d: path("${this.state.straightAreaPath.join(' ')}");
                 }
-                .sc-series-line-path-${this.props.index}.flat-path {
+                #${(this as any).context.rootSvgId} .sc-series-line-path-${this.props.index}.flat-path {
                   d: path("${this.state.straightLinePath.join(' ')}");
                 }
               `}
@@ -522,7 +522,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   getScaleKeyframe(): string {
     return (`
       ${this.generateAnimKeyframe(600, 100)}
-      .sc-area-fill-${this.props.instanceId} {
+      #${(this as any).context.rootSvgId} .sc-area-fill-${this.props.instanceId} {
         transform: translate(${this.props.posX}px, ${this.props.posY}px);
         animation: scale-easeOutElastic-${this.props.instanceId} 1.5s linear both;
       }

@@ -94,19 +94,19 @@ class PointerCrosshair extends Component<IPointerCrosshairProps> {
   render(): IVnode {
     return (
       <g class='sc-pointer-crosshair' style={{ 'pointerEvents': 'none' }}>
-        <Style>
-          {{
-            '.sc-crosshair-group': {
-              transition: 'transform 0.3s cubic-bezier(.03,.26,.32,1)'
-            },
-            '.sc-crosshair-group.sc-h-crosshair': {
-              transform: `translate(0, ${this.state.hy1}px)`
-            },
-            '.sc-crosshair-group.sc-v-crosshair': {
-              transform: `translate(${this.state.vx1}px,0)`
+        <style>
+          {`
+            #${(this as any).context.rootSvgId} .sc-crosshair-group {
+              transition: transform 0.3s cubic-bezier(.03,.26,.32,1);
             }
-          }}
-        </Style>
+            #${(this as any).context.rootSvgId} .sc-crosshair-group.sc-h-crosshair {
+              transform: translate(0, ${this.state.hy1}px);
+            }
+            #${(this as any).context.rootSvgId} .sc-crosshair-group.sc-v-crosshair {
+              transform: translate(${this.state.vx1}px,0);
+            }
+          `}
+        </style>
         <g>
           {this.config.horizontal.spread !== CROSSHAIR_SPREAD.NONE && this.state.isHorizontalCrosshairVisible &&
             <g class='sc-crosshair-group sc-h-crosshair' transform={`translate(0, ${this.state.hy1})`}>

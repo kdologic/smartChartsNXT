@@ -422,25 +422,25 @@ class AnnotationLabels extends Component<IAnnotationLabelsProps> {
     return (
       <style>
         {`
-          .sc-annotation-label-text {
+          #${(this as any).context.rootSvgId} .sc-annotation-label-text {
             pointer-events: none;
           }
-          .sc-minimize-icon-bg {
+          #${(this as any).context.rootSvgId} .sc-minimize-icon-bg {
             transition-duration: .15s;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-property: fill-opacity;
             cursor:pointer;
           }
-          .sc-minimize-icon-bg:hover, .sc-minimize-icon-bg:focus {
+          #${(this as any).context.rootSvgId} .sc-minimize-icon-bg:hover, #${(this as any).context.rootSvgId} .sc-minimize-icon-bg:focus {
             fill-opacity: 1;
           }
-          .sc-maximize-icon-bg {
+          #${(this as any).context.rootSvgId} .sc-maximize-icon-bg {
             transition-duration: .15s;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-property: fill-opacity;
             cursor:pointer;
           }
-          .sc-maximize-icon-bg:hover, .sc-maximize-icon-bg:focus {
+          #${(this as any).context.rootSvgId} .sc-maximize-icon-bg:hover, #${(this as any).context.rootSvgId} .sc-maximize-icon-bg:focus {
             fill-opacity: 1;
           }
         `}
