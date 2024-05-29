@@ -3,10 +3,11 @@
 import { Component } from '../../viewEngin/pview';
 import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../global/global.enums';
 import UtilCore from '../../core/util.core';
-import eventEmitter, { CustomEvents } from '../../core/eventEmitter';
 import RichTextBox from '../richTextBox/richTextBox.component';
 import { IMarkRegionConfig, IMarkRegionProps } from './markRegion.model';
 import { IMarkRegion } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import Store from '../../liveStore/store';
+import storeManager from '../../liveStore/storeManager';
 
 /**
  * markRegion.component.tsx
@@ -16,14 +17,14 @@ import { IMarkRegion } from '../../charts/connectedPointChartsType/connectedPoin
  */
 
 class MarkRegion extends Component<IMarkRegionProps> {
-  private emitter: CustomEvents
   private rid: string;
   private clipPathId: string;
   private config: { xRegions: IMarkRegionConfig[], yRegions: IMarkRegionConfig[] };
+  private storeData: Store;
 
   constructor(props: IMarkRegionProps) {
     super(props);
-    this.emitter = eventEmitter.getInstance((this as any).context.runId);
+    this.storeData = storeManager.getStore((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.config = {
@@ -32,13 +33,10 @@ class MarkRegion extends Component<IMarkRegionProps> {
     };
     this.setConfig(props);
     this.state = {
-      scaleX: 0,
-      scaleY: 0,
       xRegionsLabel: {},
       yRegionsLabel: {},
       reRender: false
     };
-    this.onUpdateScale = this.onUpdateScale.bind(this);
   }
 
   setConfig(props: IMarkRegionProps) {
@@ -63,7 +61,6 @@ class MarkRegion extends Component<IMarkRegionProps> {
   }
 
   afterMount() {
-    this.emitter.on('onUpdateScale', this.onUpdateScale);
     if (this.state.reRender) {
       this.setState({ reRender: false });
     }
@@ -74,7 +71,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
   }
 
   afterUpdate() {
-    if (this.state.scaleX) {
+    if (this.storeData.getValue('scaleX')) {
       for (let refId in this.state.xRegionsLabel) {
         let xRegion = this.state.xRegionsLabel[refId];
         let textDim = xRegion.textDim = xRegion.obj.getContentDim();
@@ -122,7 +119,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
   }
 
   getYMarkRegions() {
-    let scaleY = this.state.scaleY;
+    let scaleY = this.storeData.getValue('scaleY');
     return this.props.yMarkRegions.map((region: IMarkRegion, i: number) => {
       region.from = region.from || 0;
       region.to = region.to || 0;
@@ -185,19 +182,61 @@ class MarkRegion extends Component<IMarkRegionProps> {
     });
   }
 
-  getXMarkRegions() {
-    let scaleX = this.state.scaleX;
-    return this.props.xMarkRegions.map((region: IMarkRegion, i: number) => {
-      region.from = region.from || 0;
-      region.to = region.to || 0;
-      let startFrom = Math.min(region.from, region.to) - this.props.leftIndex;
-      let valueDiff = Math.abs(region.to - region.from);
-      if (startFrom < 0) {
-        valueDiff += startFrom;
-        startFrom = 0;
-        valueDiff = valueDiff < 0 ? 0 : valueDiff;
+  getXRegionValueFromIndex(region: IMarkRegion) {
+    if(!region.from) {
+      region.from = 1
+    }
+    if(!region.to) {
+      region.to = this.props.allCategorySet.length
+    }
+    if(region.from > region.to) {
+      let from = region.from;
+      region.from = region.to;
+      region.to = from;
+    }
+    let allCategories = this.props.allCategorySet;
+    let startFromPosX = 0;
+    let endToPosX = 0;
+    const parseAsNumber = this.storeData.getValue('parseAsNumber');
+    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    if(parseAsNumber) {
+      if(region.from > allCategories.length || region.to > allCategories.length) {
+        return {
+          startFromPosX,
+          endToPosX
+        };
       }
-      let width = valueDiff * scaleX;
+      let extractRegionCategoryValue = (regionIndexValue: number) => {
+        let value = 0;
+        let regionLowerCategoryValue = allCategories[Math.floor(regionIndexValue) - 1] as number;
+        let regionFractionalPart = (regionIndexValue - Math.floor(regionIndexValue));
+        if(regionFractionalPart > 0) {
+          let regionUpperCategoryValue = allCategories[Math.ceil(regionIndexValue) -1] as number;
+          let valueDiff = regionUpperCategoryValue - regionLowerCategoryValue;
+          value = regionLowerCategoryValue + (valueDiff * regionFractionalPart); 
+        }else {
+          value = regionLowerCategoryValue;
+        }
+        return value;
+      }
+      let startFromValue = extractRegionCategoryValue(region.from);
+      let endToValue = extractRegionCategoryValue(region.to);
+      startFromPosX = xPositionWithDynamicScaleFn(region.from, startFromValue);
+      endToPosX = xPositionWithDynamicScaleFn(region.to, endToValue);
+    }else {
+      startFromPosX = xPositionWithDynamicScaleFn(region.from - this.props.leftIndex);
+      endToPosX = xPositionWithDynamicScaleFn(region.to - this.props.leftIndex);
+    }
+    return {
+      startFromPosX,
+      endToPosX
+    };
+  }
+
+  getXMarkRegions() {
+    return this.props.xMarkRegions.map((region: IMarkRegion, i: number) => {
+      let {startFromPosX, endToPosX} = this.getXRegionValueFromIndex(region);
+      let width = endToPosX - startFromPosX;
       let posY = 10;
       let textWidth = undefined;
       let config = this.config.xRegions[i];
@@ -212,9 +251,9 @@ class MarkRegion extends Component<IMarkRegionProps> {
 
       return (
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
-          <rect x={(startFrom - 1) * scaleX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
+          <rect x={startFromPosX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={(startFrom - 1) * scaleX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={startFromPosX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
               rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref: RichTextBox) => {
                 if (ref) {
@@ -236,13 +275,6 @@ class MarkRegion extends Component<IMarkRegionProps> {
           }
         </g>
       );
-    });
-  }
-
-  onUpdateScale(e: { scaleX: number, scaleY: number, baseLine: number }) {
-    this.setState({
-      scaleX: e.scaleX,
-      scaleY: e.scaleY
     });
   }
 }

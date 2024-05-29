@@ -224,6 +224,8 @@ export interface ISeriesConfig {
   valueSet: number[];
   turboData: any;
   dataDimIndex: any;
+  categoryDim: any;
+  allCategories: CategoryLabelType[];
 };
 
 export interface ISeriesLabelConfig {

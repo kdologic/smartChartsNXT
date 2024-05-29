@@ -166,6 +166,7 @@ class BaseChart extends Component<IBaseChartProps> {
     this.emitter.removeListener('beforeSave', this.hideBeforeSave);
     this.emitter.removeListener('afterSave', this.showAfterSave);
     this.emitter.removeListener('resize', this.onResizeComponent);
+    this.emitter.removeListener('render', this.onRenderComponent);
   }
 
   afterUpdate() {

@@ -7,7 +7,7 @@ import defaultConfig from '../../../settings/config';
 import GeomCore from '../../../core/geom.core';
 import UiCore from '../../../core/ui.core';
 import UtilCore from '../../../core/util.core';
-import StoreManager from '../../../liveStore/storeManager';
+import storeManager from '../../../liveStore/storeManager';
 import DataPoints from '../../../components/dataPoints/dataPoints.component';
 import DataLabels from '../../../components/dataLabels/dataLabels.component';
 import eventEmitter, { CustomEvents } from '../../../core/eventEmitter';
@@ -27,13 +27,11 @@ import { IPathSegment } from '../../../core/core.model';
  * @author:SmartChartsNXT
  * @description: This components will create an area based on input points.
  * @extends Component
- * @event
- * 1. onUpdateScale : update scaleX and scaleY.
  */
 
 class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   private emitter: CustomEvents;
-  private store: Store;
+  private storeData: Store;
   private a11yWriter: A11yWriter;
   private rid: string;
   private clipPathId: string;
@@ -46,13 +44,12 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
   constructor(props: IDrawConnectedPointsProps) {
     super(props);
     this.emitter = eventEmitter.getInstance((this as any).context.runId);
-    this.store = StoreManager.getStore((this as any).context.runId);
+    this.storeData = storeManager.getStore((this as any).context.runId);
     this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
     this.shadowId = 'sc-area-fill-shadow-' + this.rid;
     this.state = {
-      scaleX: 0,
       scaleY: 0,
       baseLine: 0,
       pointSet: [],
@@ -77,12 +74,12 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       hasDataLabels: true
     };
 
-    if (typeof this.store.getValue('pointsData') === 'undefined') {
-      this.store.setValue('pointsData', {});
+    if (typeof this.storeData.getValue('pointsData') === 'undefined') {
+      this.storeData.setValue('pointsData', {});
     }
     this.prepareStateData(this.props);
     this.state.animated = this.props.animated;
-    this.state.isAnimationPlaying = !!props.animated;
+    this.state.isAnimationPlaying = !!this.props.animated;
 
     this.interactiveMouseMove = this.interactiveMouseMove.bind(this);
     this.interactiveMouseLeave = this.interactiveMouseLeave.bind(this);
@@ -143,7 +140,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     this.emitter.removeListener('interactiveMouseLeave', this.interactiveMouseLeave);
     this.emitter.removeListener('interactiveKeyPress', this.interactiveKeyPress);
     this.emitter.removeListener('changeAreaBrightness', this.changeAreaBrightness);
-    this.store.setValue('pointsData', { [this.props.instanceId]: [] });
+    this.storeData.setValue('pointsData', { [this.props.instanceId]: [] });
   }
 
   propsWillReceive(nextProps: IDrawConnectedPointsProps): void {
@@ -155,7 +152,6 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       ...this.state,
       ...{
         valueSet: props.dataSet,
-        scaleX: props.scaleX,
         scaleY: props.scaleY,
         baseLine: props.baseLine,
         strokeOpacity: props.strokeOpacity || 1,
@@ -189,6 +185,13 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       };
     }
 
+    if (this.storeData.getValue('parseAsNumber')) {
+      this.state.marker.opacity = (this.state.valueSet.length * this.state.marker.width) / 1.5 > this.props.width ? 0 : this.state.marker.opacity;
+    } else {
+      const scaleX = this.storeData.getValue('scaleX');
+      this.state.marker.opacity = scaleX < 15 ? 0 : this.state.marker.opacity;
+    }
+
     this.state.clip = Object.assign({
       x: 0,
       y: 0,
@@ -200,7 +203,6 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
       this.state.lineDashArray = props.lineDashArray || 4;
     }
 
-    this.state.marker.opacity = this.state.scaleX < 15 ? 0 : this.state.marker.opacity;
     this.state.lineSegments = props.spline ? this.getCurvedLinePath(props) : this.getLinePath(props);
     this.state.linePath = this.state.lineSegments.path;
     this.state.straightLinePath = this.state.lineSegments.straightPathSegments.flat();
@@ -208,14 +210,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     this.state.areaPath = area.areaPath;
     this.state.straightAreaPath = area.straightAreaPath;
 
-    this.store.setValue('pointsData', { [props.instanceId]: this.state.pointSet });
-    if (props.emitScale) {
-      this.emitter.emitSync('onUpdateScale', {
-        scaleX: this.state.scaleX,
-        scaleY: this.state.scaleY,
-        baseLine: this.state.baseLine
-      });
-    }
+    this.storeData.setValue('pointsData', { [props.instanceId]: this.state.pointSet });
   }
 
   render(): IVnode {
@@ -317,17 +312,19 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     let straightPathSegment: IPathSegment = [];
     let segmentIndexes: number[] = [];
     let sIndex: number = 0;
-    this.state.pointSet = this.state.valueSet.map((data: number, i: number) => {
+    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    this.state.pointSet = this.state.valueSet.map((data: number, index: number) => {
       if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let point: DataPoint = new DataPoint((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let x = xPositionWithDynamicScaleFn(index);
+      let point: DataPoint = new DataPoint((x) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new DataPoint(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+        point = new DataPoint(x + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       if (data === null) {
         sIndex = -1;
-        segmentIndexes.push(i);
+        segmentIndexes.push(index);
         path.push(pathSegment.slice());
         straightPath.push(straightPathSegment.slice());
         pathSegment = [];
@@ -343,7 +340,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
         }
       }
       sIndex++;
-      point.index = i;
+      point.index = index;
       point.value = data;
       return point;
     });
@@ -364,23 +361,26 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     let pointSegments: DataPoint[][] = [];
     let pathSegment: DataPoint[] = [];
     let segmentIndexes: number[] = [];
-    this.state.pointSet = this.state.valueSet.map((data: number, i: number) => {
+    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+
+    this.state.pointSet = this.state.valueSet.map((data: number, index: number) => {
       if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let point: DataPoint = new DataPoint((i * this.state.scaleX) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+      let x = xPositionWithDynamicScaleFn(index);
+      let point: DataPoint = new DataPoint((x) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
-        point = new DataPoint(this.state.scaleX + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
+        point = new DataPoint(x + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       }
       if (data === null) {
-        segmentIndexes.push(i);
+        segmentIndexes.push(index);
         pointSegments.push(pathSegment.slice());
         pathSegment = [];
         point.isHidden = true;
       } else {
         pathSegment.push(point);
       }
-      point.index = i;
+      point.index = index;
       point.value = data;
       return point;
     });
@@ -434,7 +434,7 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     }
     const nearPoint: DataPoint = GeomCore.findClosestPoint(pointSet, pt, this.props.tooltipOpt.grouped);
     this.emitter.emitSync('normalizeAllPointMarker', { seriesIndex: this.props.index });
-    const pointerVicinity: number = this.props.tooltipOpt.pointerVicinity || (this.state.scaleX / 2);
+    const pointerVicinity: number = this.props.tooltipOpt.pointerVicinity;
     if (nearPoint.dist <= pointerVicinity) {
       highlightEventData.highlightedPoint = {
         x: (this.props.posX + nearPoint.x),

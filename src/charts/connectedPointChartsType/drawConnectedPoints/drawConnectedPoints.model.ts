@@ -41,8 +41,6 @@ export interface IDrawConnectedPointsProps {
   totalDataCount?: number;
   accessibility: boolean;
   accessibilityText?: string;
-  emitScale: boolean;
-  scaleX: number;
   scaleY: number;
   baseLine: number;
   clipId?: string;

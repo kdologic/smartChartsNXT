@@ -32,6 +32,7 @@ class Grid extends Component<IGridProps> {
     this.state = {
       vGridCount: this.props.vGridCount,
       vGridInterval: this.props.vGridInterval,
+      vGridValues: [],
       vLineDashArray: 0,
       hGridCount: this.props.hGridCount,
       hGridInterval: this.props.hGridInterval,
@@ -41,7 +42,7 @@ class Grid extends Component<IGridProps> {
     this.setConfig(props);
     this.updateVerticalGrid = this.updateVerticalGrid.bind(this);
     this.updateHorizontalGrid = this.updateHorizontalGrid.bind(this);
-    this.emitter.on('onHorizontalLabelsRender', this.updateVerticalGrid);
+    this.emitter.on('onPrepareCategories', this.updateVerticalGrid);
     this.emitter.on('onVerticalLabelsRender', this.updateHorizontalGrid);
   }
 
@@ -92,7 +93,7 @@ class Grid extends Component<IGridProps> {
   }
 
   beforeUnmount() {
-    this.emitter.removeListener('onHorizontalLabelsRender', this.updateVerticalGrid);
+    this.emitter.removeListener('onPrepareCategories', this.updateVerticalGrid);
     this.emitter.removeListener('onVerticalLabelsRender', this.updateHorizontalGrid);
   }
 
@@ -121,9 +122,10 @@ class Grid extends Component<IGridProps> {
   drawVGridLines() {
     let grids = [];
     for (let gridCount = 0; gridCount < this.state.vGridCount; gridCount++) {
+      let xPos = this.state.vGridInterval(gridCount, this.state.vGridValues[gridCount]);
       grids.push(
         <line instanceId={`vline-${gridCount}`} class={`sc-v-grid-line-${gridCount}`}
-          x1={gridCount * this.state.vGridInterval} y1={0} x2={gridCount * this.state.vGridInterval} y2={this.props.height}
+          x1={xPos} y1={0} x2={xPos} y2={this.props.height}
           fill='none' stroke={this.config.vertical.lineColor} stroke-opacity={this.config.vertical.lineOpacity}
           stroke-width={this.config.vertical.lineThickness} shape-rendering='crispedges' stroke-dasharray={this.state.vLineDashArray}>
         </line>
@@ -160,7 +162,8 @@ class Grid extends Component<IGridProps> {
   updateVerticalGrid(vg: IUpdateVerticalGridEvent) {
     this.setState({
       vGridCount: vg.count,
-      vGridInterval: vg.intervalLen
+      vGridInterval: vg.intervalLen,
+      vGridValues: vg.values
     });
   }
 
