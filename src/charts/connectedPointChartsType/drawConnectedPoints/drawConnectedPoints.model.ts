@@ -1,9 +1,10 @@
 import { IFillOptions } from "../../../core/core.model";
 import { LINE_STYLE } from "../../../global/global.enums";
-import { IClipArea, IDataLabel, IMarkerIcon, ISeriesLabelConfig, ITooltipConfig, IXAxisConfig, IYAxisConfig } from "../connectedPointChartsType.model";
+import { CategoryLabelType, IClipArea, IDataLabel, IMarkerIcon, ISeriesLabelConfig, ITooltipConfig, IXAxisConfig, IYAxisConfig } from "../connectedPointChartsType.model";
 
 export interface IDrawConnectedPointsProps {
   dataSet: (number | null)[];
+  categorySet: CategoryLabelType[];
   index: number;
   instanceId: string;
   name: string;
@@ -46,6 +47,7 @@ export interface IDrawConnectedPointsProps {
   clipId?: string;
   clip?: IClipArea;
   onRef?: (param: any) => any;
+  isFS?: boolean;
 };
 
 export enum HIGHLIGHT_EVENT_TYPE {

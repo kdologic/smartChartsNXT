@@ -222,10 +222,12 @@ export interface ISeriesConfig {
   dataLabels?: IDataLabel;
   data: ISeriesData;
   valueSet: number[];
+  categorySet: CategoryLabelType[];
   turboData: any;
   dataDimIndex: any;
   categoryDim: any;
   allCategories: CategoryLabelType[];
+  parseAsNumber?: boolean;
 };
 
 export interface ISeriesLabelConfig {

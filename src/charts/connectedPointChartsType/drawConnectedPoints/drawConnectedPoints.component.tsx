@@ -312,12 +312,12 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     let straightPathSegment: IPathSegment = [];
     let segmentIndexes: number[] = [];
     let sIndex: number = 0;
-    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    const xPositionWithDynamicScaleFn = this.props.isFS ? this.storeData.getValue('xPositionWithDynamicFSScaleFn') : this.storeData.getValue('xPositionWithDynamicScaleFn');
     this.state.pointSet = this.state.valueSet.map((data: number, index: number) => {
       if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let x = xPositionWithDynamicScaleFn(index);
+      let x = xPositionWithDynamicScaleFn(index, this.props.categorySet[index]);
       let point: DataPoint = new DataPoint((x) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new DataPoint(x + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
@@ -361,13 +361,13 @@ class DrawConnectedPoints extends Component<IDrawConnectedPointsProps> {
     let pointSegments: DataPoint[][] = [];
     let pathSegment: DataPoint[] = [];
     let segmentIndexes: number[] = [];
-    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    const xPositionWithDynamicScaleFn = this.props.isFS ? this.storeData.getValue('xPositionWithDynamicFSScaleFn') : this.storeData.getValue('xPositionWithDynamicScaleFn');
 
     this.state.pointSet = this.state.valueSet.map((data: number, index: number) => {
       if (this.props.yAxisInfo.type === AXIS_TYPE.LOGARITHMIC && data !== null) {
         data = Math.log10(data);
       }
-      let x = xPositionWithDynamicScaleFn(index);
+      let x = xPositionWithDynamicScaleFn(index, this.props.categorySet[index]);
       let point: DataPoint = new DataPoint((x) + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
       if (props.centerSinglePoint && this.state.valueSet.length === 1) {
         point = new DataPoint(x + props.paddingX, (this.state.baseLine) - (data * this.state.scaleY));
