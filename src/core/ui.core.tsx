@@ -65,7 +65,7 @@ class UiCore {
         <radialGradient id={gradId} cx={cx} cy={cy} fx={fx} fy={fy} r={r} gradientUnits='userSpaceOnUse'>
           {gradArr.map((grad, i) => {
             let offset = i / gradArr.length * 100;
-            let opacity = grad;
+            let opacity;
             let color = '#fff';
             if (typeof grad === 'object') {
               offset = grad.offset !== undefined ? grad.offset : offset;
@@ -74,6 +74,8 @@ class UiCore {
                 color = '#000';
                 opacity = Math.abs(opacity as number);
               }
+            }else {
+              opacity = grad;
             }
             return <stop instanceId={i} offset={`${offset}%`} stop-color={color} stop-opacity={opacity}></stop>;
           })}

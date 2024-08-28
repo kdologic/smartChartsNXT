@@ -146,12 +146,14 @@ export interface IHorizontalScrollerConfig {
 };
 
 export interface IXAxisConfig {
+  enable?: boolean;
   type: AXIS_TYPE;
   title?: string;
   categories?: IValueCategory;
   selectedCategories?: CategoryLabelType[];
   prepend?: string;
   append?: string;
+  modifier?: (value: CategoryLabelType) => CategoryLabelType;
   displayDateFormat?: string;
   labelRotate?: number;
   intervalThreshold?: number;
@@ -175,10 +177,12 @@ export interface IXAxisConfigExtended extends Omit<IXAxisConfig, 'categories'> {
 };
 
 export interface IYAxisConfig {
+  enable?: boolean;
   type?: AXIS_TYPE;
   title?: string;
   prepend?: string;
   append?: string;
+  modifier?: (value: number | string) => number | string;
   labelRotate?: number;
   titleColor?: string;
   tickOpacity?: number;
@@ -220,9 +224,12 @@ export interface ISeriesConfig {
   dataLabels?: IDataLabel;
   data: ISeriesData;
   valueSet: number[];
+  categorySet: CategoryLabelType[];
   turboData: any;
   dataDimIndex: any;
-  dataDimValue: any;
+  categoryDim: any;
+  allCategories: CategoryLabelType[];
+  parseAsNumber?: boolean;
 };
 
 export interface ISeriesLabelConfig {
@@ -278,6 +285,8 @@ export interface IMarkRegion {
     fontSize?: number;
     color?: string;
     style?: IObject;
+    verticalTextAlign?: VERTICAL_ALIGN; 
+    horizontalTextAlign?: HORIZONTAL_ALIGN; 
   };
 };
 

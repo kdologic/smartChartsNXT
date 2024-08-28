@@ -10,7 +10,9 @@ import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IHorizontalLabelsProps } from './horizontalLabels.model';
 import { VERTICAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
-import { IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { CategoryLabelType, IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import Store from '../../liveStore/store';
+import storeManager from '../../liveStore/storeManager';
 
 /**
  * horizontalLabels.component.tsx
@@ -20,9 +22,8 @@ import { IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPoi
  * @extends Component
  *
  * @event
- * 1. onHorizontalLabelsRender : Fire when horizontal labels draws.
- * 2. hLabelEnter: Fire when mouse hover on label text.
- * 3. hLabelExit: Fire mouse out of label text.
+ * 1. hLabelEnter: Fire when mouse hover on label text.
+ * 2. hLabelExit: Fire mouse out of label text.
  */
 
 class HorizontalLabels extends Component<IHorizontalLabelsProps> {
@@ -33,6 +34,7 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
   private config: IXAxisConfig;
   private defaultTickSpan: number;
   private accId: string;
+  private storeData: Store;
 
   constructor(props: IHorizontalLabelsProps) {
     super(props);
@@ -41,10 +43,11 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     this.a11yWriter = a11yFactory.getWriter((this as any).context.runId);
     this.rid = UtilCore.getRandomID();
     this.clipPathId = 'sc-clip-' + this.rid;
+    this.storeData = storeManager.getStore((this as any).context.runId);
+
     this.resetConfig(this.props.opts);
     this.defaultTickSpan = 6;
     this.state = {
-      intervalLen: this.config.intervalThreshold,
       set categories(cat) {
         if (cat instanceof Array && cat.length > 0) {
           this._categories = cat.map((c) => {
@@ -56,7 +59,8 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
       },
       get categories() {
         return this._categories;
-      }
+      },
+      parseAsNumber: false
     };
     this.state.clip = Object.assign({
       x: 0,
@@ -113,19 +117,13 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        intervalThreshold: typeof config.intervalThreshold === 'undefined' ? 30 : config.intervalThreshold,
-        displayDateFormat: dateFormat
+        displayDateFormat: dateFormat,
+        modifier: typeof config.modifier === 'function' ? config.modifier : (value: CategoryLabelType) => value
       }
     };
   }
 
   render(): IVnode {
-    this.setIntervalLength();
-    this.emitter.emitSync('onHorizontalLabelsRender', {
-      intervalLen: this.state.intervalLen,
-      values: this.state.categories,
-      count: this.state.categories.length
-    });
     return (
       <g class='sc-horizontal-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} clip-path={`url(#${this.clipPathId})`} aria-hidden='true'>
         <defs>
@@ -143,12 +141,16 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
         </g>
         {this.props.opts.labelAlign === VERTICAL_ALIGN.TOP &&
           <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
-            <Ticks posX={0} posY={-(this.props.opts.tickSpan || this.defaultTickSpan)} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+            <Ticks posX={0} posY={-(this.props.opts.tickSpan || this.defaultTickSpan)} span={this.props.opts.tickSpan || this.defaultTickSpan}
+              tickCount={this.state.categories.length} categorySet={this.state.categories} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'>
+            </Ticks>
           </g>
         }
         {this.props.opts.labelAlign === VERTICAL_ALIGN.BOTTOM &&
           <g class={'sc-horizontal-ticks'} transform={`translate(${this.props.paddingX}, 0)`} clip-path={`url(#${this.clipPathId}-tick)`}>
-            <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.state.intervalLen} tickCount={this.state.categories.length} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'></Ticks>
+            <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan}
+              tickCount={this.state.categories.length} categorySet={this.state.categories} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='horizontal'>
+            </Ticks>
           </g>
         }
       </g>
@@ -163,11 +165,13 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     return labels;
   }
 
-  getEachLabel(val: string, index: number): IVnode {
-    let x = this.state.categories.length === 1 ? this.state.intervalLen : index * this.state.intervalLen;
-    let y = this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? -18 : 18;
-    let opacity = x - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
-    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + x + ',' + y + ') translate(' + x + ',' + y + ')' : 'translate(' + x + ',' + y + ')';
+  getEachLabel(val: CategoryLabelType, index: number): IVnode {
+    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    val = this.config.modifier(val);
+    let xPos = xPositionWithDynamicScaleFn(index, val, true);
+    let yPos = this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? -18 : 18;
+    let opacity = xPos - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;
+    let transform = this.config.labelRotate ? 'rotate(' + this.config.labelRotate + ',' + xPos + ',' + yPos + ') translate(' + xPos + ',' + yPos + ')' : 'translate(' + xPos + ',' + yPos + ')';
     let label = <text class="sc-horizontal-label" font-family={this.config.fontFamily} fill={this.config.labelColor} x={0} y={0}
       transform={transform} font-size={this.config.fontSize} opacity={opacity} stroke='none' text-rendering='geometricPrecision' >
       <tspan class={`sc-hlabel-${index} sc-label-text`} labelIndex={index} text-anchor={this.config.labelRotate ? 'end' : 'middle'} dy='0.4em' events={{ mouseenter: (e: MouseEvent) => this.onMouseEnter(e, index), mouseleave: this.onMouseLeave }}>
@@ -177,26 +181,12 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
 
     if (index === this.state.categories.length - 1 && !this.config.labelRotate) {
       let labelWidth = UiCore.getComputedTextWidth(label);
-      if (x + (labelWidth) > this.props.maxWidth) {
-        let diff = x + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
-        label.attributes.transform = 'translate(' + (x - diff) + ',' + y + ')';
+      if (xPos + (labelWidth) > this.props.maxWidth) {
+        let diff = xPos + (labelWidth / 2) + this.props.paddingX - this.props.maxWidth;
+        label.attributes.transform = 'translate(' + (xPos - diff) + ',' + yPos + ')';
       }
     }
     return label;
-  }
-
-  setIntervalLength(): void {
-    let interval = (this.props.maxWidth - (2 * this.props.paddingX)) / (this.props.categorySet.length - 1 || 2);
-    let skipLen = Math.ceil(this.config.intervalThreshold / interval);
-    if (skipLen > 0) {
-      let newCategories = [];
-      for (let i = 0; i < this.props.categorySet.length; i += skipLen) {
-        newCategories.push(this.props.categorySet[i]);
-      }
-      this.state.categories = newCategories;
-    }
-    interval = skipLen * interval;
-    this.state.intervalLen = interval;
   }
 
   onMouseEnter(e: MouseEvent, index: number): void {

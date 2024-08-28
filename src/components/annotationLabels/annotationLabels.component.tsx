@@ -13,6 +13,8 @@ import { IAnnotationLabelsProps } from './annotationLabels.model';
 import { AXIS_TYPE, FLOAT, HORIZONTAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
 import { IAnnotationConfig, IAnnotationLabel, IAnnotationOptions } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import Store from '../../liveStore/store';
+import storeManager from '../../liveStore/storeManager';
 
 
 /**
@@ -26,15 +28,14 @@ import { IAnnotationConfig, IAnnotationLabel, IAnnotationOptions } from '../../c
 class AnnotationLabels extends Component<IAnnotationLabelsProps> {
   private rid: string;
   private clipPathId: string;
+  private storeData: Store;
 
   constructor(props: IAnnotationLabelsProps) {
     super(props);
     this.rid = UtilCore.getRandomID();
+    this.storeData = storeManager.getStore((this as any).context.runId);
     this.clipPathId = 'sc-clip-' + this.rid;
     this.state = {
-      scaleX: 0,
-      scaleY: 0,
-      baseLine: 0,
       annotations: [],
       mouseDown: false,
       mouseDownPos: null,
@@ -49,18 +50,9 @@ class AnnotationLabels extends Component<IAnnotationLabelsProps> {
     this.labelMouseUp = this.labelMouseUp.bind(this);
   }
 
-  beforeUpdate(nextProps: IAnnotationLabelsProps): void {
-    this.state.scaleX = nextProps.scaleX || 0;
-    this.state.scaleY = nextProps.scaleY || 0;
-    this.state.baseLine = nextProps.baseLine || 0;
-  }
-
   createAnnotationState(props: IAnnotationLabelsProps) {
     let annotations = props.annotations;
     this.state.annotations = [];
-    this.state.scaleX = props.scaleX || 0;
-    this.state.scaleY = props.scaleY || 0;
-    this.state.baseLine = props.baseLine || 0;
     let defaultOpt: IAnnotationOptions = {
       isDraggable: true,
       isCollapsible: true, //After collapse the annotation label become small plus icon
@@ -143,17 +135,41 @@ class AnnotationLabels extends Component<IAnnotationLabelsProps> {
     });
   }
 
+  getXPositionValueFromIndex(indexValue: number) {
+    let allCategories = this.props.allCategorySet;
+    const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    let xPosCategoryValue = 0;
+    let lowerCategoryValue = allCategories[Math.floor(indexValue) - 1] as number;
+    let fractionalPart = (indexValue - Math.floor(indexValue));
+    if (fractionalPart > 0) {
+      let upperCategoryValue = allCategories[Math.ceil(indexValue) - 1] as number;
+      let valueDiff = upperCategoryValue - lowerCategoryValue;
+      xPosCategoryValue = lowerCategoryValue + (valueDiff * fractionalPart);
+    } else {
+      xPosCategoryValue = lowerCategoryValue;
+    }
+    return xPositionWithDynamicScaleFn(indexValue, xPosCategoryValue);
+  }
+
   drawAnnotationLabels(annotation: IAnnotationConfig, grpIndex: number): IVnode[] {
     let config = annotation.options;
+    let scaleY = this.storeData.getValue('scaleY');
+    let baseLine = this.storeData.getValue('baseLine');
     return annotation.labels.map((label: IAnnotationLabel, index: number) => {
       let valueY = label.y;
       if (this.props.yAxisType === AXIS_TYPE.LOGARITHMIC && valueY > 0) {
         valueY = Math.log10(valueY);
       }
-      let dataPoint = new Point(
-        (label.x * this.state.scaleX) - (this.state.scaleX * this.props.leftIndex) - (label.leftOffset + label.nextLeftOffset),
-        this.state.baseLine - (valueY * this.state.scaleY) - (label.topOffset + label.nextTopOffset)
-      );
+      let dataPoint: Point;
+      let posX = 0;
+      if (this.storeData.getValue('parseAsNumber')) {
+        posX = this.getXPositionValueFromIndex(label.x) - (label.leftOffset + label.nextLeftOffset);
+      } else {
+        const scaleX = this.storeData.getValue('scaleX')
+        posX = ((label.x - this.props.leftIndex) * scaleX) - (label.leftOffset + label.nextLeftOffset);
+      }
+      let posY = baseLine - (valueY * scaleY) - (label.topOffset + label.nextTopOffset)
+      dataPoint = new Point(posX, posY);
       const isDataVisible = this.getDataPointVisibility(new Point(dataPoint.x + label.leftOffset + label.nextLeftOffset, dataPoint.y));
       if (label.text) {
         return this.drawAnnotationTypeText(grpIndex, index, label, config, dataPoint, isDataVisible);
@@ -422,25 +438,25 @@ class AnnotationLabels extends Component<IAnnotationLabelsProps> {
     return (
       <style>
         {`
-          .sc-annotation-label-text {
+          #${(this as any).context.rootSvgId} .sc-annotation-label-text {
             pointer-events: none;
           }
-          .sc-minimize-icon-bg {
+          #${(this as any).context.rootSvgId} .sc-minimize-icon-bg {
             transition-duration: .15s;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-property: fill-opacity;
             cursor:pointer;
           }
-          .sc-minimize-icon-bg:hover, .sc-minimize-icon-bg:focus {
+          #${(this as any).context.rootSvgId} .sc-minimize-icon-bg:hover, #${(this as any).context.rootSvgId} .sc-minimize-icon-bg:focus {
             fill-opacity: 1;
           }
-          .sc-maximize-icon-bg {
+          #${(this as any).context.rootSvgId} .sc-maximize-icon-bg {
             transition-duration: .15s;
             transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
             transition-property: fill-opacity;
             cursor:pointer;
           }
-          .sc-maximize-icon-bg:hover, .sc-maximize-icon-bg:focus {
+          #${(this as any).context.rootSvgId} .sc-maximize-icon-bg:hover, #${(this as any).context.rootSvgId} .sc-maximize-icon-bg:focus {
             fill-opacity: 1;
           }
         `}

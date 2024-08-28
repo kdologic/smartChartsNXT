@@ -1,4 +1,4 @@
-import { IMarkRegion } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
+import { CategoryLabelType, IMarkRegion } from "../../charts/connectedPointChartsType/connectedPointChartsType.model";
 import { IYIntervalType } from "../../core/core.model";
 import { IObject } from "../../viewEngin/pview.model";
 
@@ -15,6 +15,7 @@ export interface IMarkRegionProps {
   paddingX: number;
   leftIndex: number;
   vTransformX: number;
+  allCategorySet: CategoryLabelType[];
 };
 
 export interface IMarkRegionConfig {

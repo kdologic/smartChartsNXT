@@ -68,21 +68,17 @@
               "marker": {
                 "enable": false
               },
-              "data": [dataSet[0]]
+              "data": [...dataSet.slice(1,30)]
             }]
-          },
-          "zoomWindow": {
-            "leftIndex": 1,
-            "rightIndex": 1
           }
         });
 
         /* Added data asynchronously and render */
-        let intervalId = setInterval(addData, 100);
-        let currentIndex = 1;
+        let intervalId = setInterval(addData, 500);
+        let currentIndex = 30;
         function addData() {
+          areaChart.config._state.dataSet.series[0].data.shift();
           areaChart.config._state.dataSet.series[0].data.push(dataSet[currentIndex++]);
-          areaChart.config._state.zoomWindow.rightIndex = areaChart.config._state.dataSet.series[0].data.length;
           areaChart.render(); /* Re-draw the chart */
           if (currentIndex >= dataSet.length) {
             clearInterval(intervalId);

@@ -93,11 +93,12 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
         tickOpacity: typeof config.tickOpacity === 'undefined' ? 1 : config.tickOpacity,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
-        labelColor: config.labelColor || defaultConfig.theme.fontColorDark
+        labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
+        modifier: typeof config.modifier === 'function' ? config.modifier : (value: number | string) => value
       }
     };
 
-    if(!config.labelAlign) {
+    if (!config.labelAlign) {
       config.labelAlign = TEXT_ANCHOR.END;
     }
     switch (config.labelAlign) {
@@ -110,13 +111,13 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
   render(): IVnode {
     return (
       <g class='sc-vertical-axis-labels' transform={`translate(${this.props.posX},${this.props.posY})`} aria-hidden='true'>
-        {this.getLabels()}
         {!this.props.opts.positionOpposite && this.config.labelAlign === TEXT_ANCHOR.END &&
           <Ticks posX={-(this.props.opts.tickSpan || this.defaultTickSpan)} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
         }
         {this.props.opts.positionOpposite && this.config.labelAlign === TEXT_ANCHOR.START &&
           <Ticks posX={0} posY={0} span={this.props.opts.tickSpan || this.defaultTickSpan} tickInterval={this.props.intervalLen} tickCount={this.props.labelCount + 1} opacity={this.config.tickOpacity} stroke={this.config.tickColor} type='vertical'></Ticks>
         }
+        {this.getLabels()}
       </g>
     );
   }
@@ -126,7 +127,7 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
     this.zeroBaseIndex = -1;
     let i = this.props.opts.type === AXIS_TYPE.LOGARITHMIC ? Math.log10(Number(this.minLabelVal)) : 0;
     let decimalCount = this.countDecimals(Number(this.minLabelVal));
-    for (let lCount = this.props.labelCount; lCount >= 0; lCount--, i++) {
+    for (let lCount = 0; lCount <= this.props.labelCount; lCount++, i++) {
       let labelVal = Number(this.minLabelVal) + (i * this.props.valueInterval(i));
       if (this.props.opts.type === AXIS_TYPE.LOGARITHMIC) {
         labelVal = this.props.valueInterval(i);
@@ -135,7 +136,7 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
       labels.push(this.getEachLabel(this.maxLabelVal, lCount));
       this.valueSet.unshift(this.maxLabelVal);
       if (labelVal === 0) {
-        this.zeroBaseIndex = lCount;
+        this.zeroBaseIndex = this.props.labelCount - lCount;
       }
     }
     this.emitter.emitSync('onVerticalLabelsRender', {
@@ -151,8 +152,9 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
 
   getEachLabel(val: number | string, index: number): IVnode {
     let labelMargin = (this.props.opts.tickSpan || this.defaultTickSpan) + 5;
+    val = this.config.modifier(val);
     let x = this.config.labelAlign === 'end' ? - (labelMargin) : this.config.labelAlign === 'start' ? labelMargin : 0;
-    let y = index * this.props.intervalLen;
+    let y = -(index * this.props.intervalLen);
     if (this.props.opts.positionOpposite) {
       y = this.config.labelAlign === 'start' ? y : y - 10;
     } else {
@@ -187,7 +189,7 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
       return 0;
     }
     let count = value.toString().split('.')[1].length;
-    return count > 10 ? 10 : count || 0;
+    return count > 2 ? 2 : count || 0;
   }
 }
 

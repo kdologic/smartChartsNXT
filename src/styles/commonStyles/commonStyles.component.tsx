@@ -72,6 +72,9 @@ class CommonStyles extends Component {
               'clip': 'rect(1px, 1px, 1px, 1px)',
               'marginTop': '-3px',
               'opacity': '0.01'
+            },
+            '.sc-vertical-label, .sc-tick, .sc-h-grid-line': {
+              'transition': 'transform .2s ease-in'
             }
           }}
         </Style>

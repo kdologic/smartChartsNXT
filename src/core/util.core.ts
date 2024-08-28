@@ -30,6 +30,11 @@ class UtilCore {
   static isTouchDevice = 'ontouchstart' in document.documentElement;
 
   /**
+   * Check if it is a Safari browser.
+   */
+  static isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+  /**
    * Using DayJS for date formatting lib.
    */
   static dateFormat = dayjs;
@@ -120,7 +125,7 @@ class UtilCore {
    * @returns {String} Color HEX code.
    */
   static getColor = (index: number, rainbowFlag?: boolean): string => {
-    let colors;
+    let colors: string[];
     if (rainbowFlag) {
       colors = $SC.RAINBOW_COLOR_MODEL.length ? $SC.RAINBOW_COLOR_MODEL : RAINBOW_COLOR_MODEL;
     } else {

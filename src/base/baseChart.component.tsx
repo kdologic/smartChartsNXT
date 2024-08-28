@@ -166,6 +166,7 @@ class BaseChart extends Component<IBaseChartProps> {
     this.emitter.removeListener('beforeSave', this.hideBeforeSave);
     this.emitter.removeListener('afterSave', this.showAfterSave);
     this.emitter.removeListener('resize', this.onResizeComponent);
+    this.emitter.removeListener('render', this.onRenderComponent);
   }
 
   afterUpdate() {
@@ -272,7 +273,7 @@ class BaseChart extends Component<IBaseChartProps> {
         <title>Chart Options</title>
         <style>
           {`
-            .sc-menu-icon-bg {
+            #${this.getChartId()} .sc-menu-icon-bg {
               fill-opacity: 1;
               stroke-opacity: 1;
               transform: scale(1);
@@ -281,16 +282,16 @@ class BaseChart extends Component<IBaseChartProps> {
               transition-property: transform, opacity;
               cursor:pointer;
             }
-            .sc-menu-icon-bg:hover, .sc-menu-icon-bg:focus {
+            #${this.getChartId()} .sc-menu-icon-bg:hover, #${this.getChartId()} .sc-menu-icon-bg:focus {
               fill-opacity: 1;
               fill: #000;
               transform: scale(1.5);
             }
-            .sc-menu-icon-bg:hover .inner-dot {
+            #${this.getChartId()} .sc-menu-icon-bg:hover .inner-dot {
               fill: #fff;
               stroke: #fff;
             }
-            .sc-menu-icon .dot-group.active {
+            #${this.getChartId()} .sc-menu-icon .dot-group.active {
               stroke: #fff;
               fill: #fff;
             }
