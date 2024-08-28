@@ -153,6 +153,7 @@ export interface IXAxisConfig {
   selectedCategories?: CategoryLabelType[];
   prepend?: string;
   append?: string;
+  modifier?: (value: CategoryLabelType) => CategoryLabelType;
   displayDateFormat?: string;
   labelRotate?: number;
   intervalThreshold?: number;
@@ -181,6 +182,7 @@ export interface IYAxisConfig {
   title?: string;
   prepend?: string;
   append?: string;
+  modifier?: (value: number | string) => number | string;
   labelRotate?: number;
   titleColor?: string;
   tickOpacity?: number;
@@ -283,6 +285,8 @@ export interface IMarkRegion {
     fontSize?: number;
     color?: string;
     style?: IObject;
+    verticalTextAlign?: VERTICAL_ALIGN; 
+    horizontalTextAlign?: HORIZONTAL_ALIGN; 
   };
 };
 

@@ -1,7 +1,7 @@
 'use strict';
 
 import { Component } from '../../viewEngin/pview';
-import { AXIS_TYPE, HORIZONTAL_ALIGN } from '../../global/global.enums';
+import { AXIS_TYPE, HORIZONTAL_ALIGN, VERTICAL_ALIGN } from '../../global/global.enums';
 import UtilCore from '../../core/util.core';
 import RichTextBox from '../richTextBox/richTextBox.component';
 import { IMarkRegionConfig, IMarkRegionProps } from './markRegion.model';
@@ -76,7 +76,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
         let xRegion = this.state.xRegionsLabel[refId];
         let textDim = xRegion.textDim = xRegion.obj.getContentDim();
         let xRegionConfig = this.config.xRegions.filter(v => v.refId === refId);
-        if (textDim.width > xRegion.width && xRegionConfig.length && xRegionConfig[0].rotateText != -90) {
+        if (textDim.width > xRegion.width && xRegionConfig.length && xRegionConfig[0].rotateText !== -90) {
           xRegionConfig[0].rotateText = -90;
           this.state.reRender = true;
         } else {
@@ -85,18 +85,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
       }
       for (let refId in this.state.yRegionsLabel) {
         let yRegion = this.state.yRegionsLabel[refId];
-        let textDim = yRegion.textDim = yRegion.obj.getContentDim();
-        let yRegionConfig = this.config.yRegions.filter(v => v.refId === refId);
-        if (yRegionConfig.length && yRegionConfig[0].moveTextOutside != 1) {
-          if (textDim.height > yRegion.height || (yRegion.posY < 0 && (yRegion.posY + yRegion.height) > 0)) {
-            yRegionConfig[0].moveTextOutside = 1;
-            this.state.reRender = true;
-          } else {
-            yRegionConfig[0].moveTextOutside = 0;
-          }
-        } else {
-          yRegionConfig[0].moveTextOutside = 0;
-        }
+        yRegion.textDim = yRegion.obj.getContentDim();
       }
       if (this.state.reRender) {
         this.setState({ reRender: false });
@@ -121,6 +110,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
   getYMarkRegions() {
     let scaleY = this.storeData.getValue('scaleY');
     return this.props.yMarkRegions.map((region: IMarkRegion, i: number) => {
+      let config = this.config.yRegions[i];
       region.from = region.from || 0;
       region.to = region.to || 0;
       let valueDiff = Math.abs(region.to - region.from);
@@ -132,18 +122,25 @@ class MarkRegion extends Component<IMarkRegionProps> {
       let height = valueDiff * scaleY;
       let textHeight = height;
       let textPosY = startRegionY;
-      let textPosX = 10;
-      let config = this.config.yRegions[i];
+      const defaultPosX = 10;
+      let textPosX = defaultPosX;
       if (config.refId && this.state.yRegionsLabel[config.refId]) {
+        textHeight = (this.state.yRegionsLabel[config.refId].textDim?.height || height);
         this.state.yRegionsLabel[config.refId].width = this.props.width;
         this.state.yRegionsLabel[config.refId].height = height;
-        if (config.moveTextOutside == 1) {
-          textPosY -= this.state.yRegionsLabel[config.refId].textDim.height;
-          textHeight = this.state.yRegionsLabel[config.refId].textDim.height;
-          if (textPosY < 0) {
-            textPosY = startRegionY + height;
-            textHeight = this.state.yRegionsLabel[config.refId].textDim.height;
-          }
+        if (region.label.verticalTextAlign === VERTICAL_ALIGN.BOTTOM) {
+          textPosY = startRegionY + height;
+        } else if (region.label.verticalTextAlign === VERTICAL_ALIGN.TOP) {
+          textPosY = startRegionY - textHeight;
+        } else {
+          textPosY = startRegionY + (height / 2) - (textHeight / 2);
+        }
+        if (region.label.horizontalTextAlign === HORIZONTAL_ALIGN.CENTER) {
+          textPosX = -defaultPosX;
+        } else if (region.label.horizontalTextAlign === HORIZONTAL_ALIGN.RIGHT) {
+          textPosX = -defaultPosX * 2;
+        } else {
+          textPosX = defaultPosX;
         }
         this.state.yRegionsLabel[config.refId].posX = textPosX;
         this.state.yRegionsLabel[config.refId].posY = textPosY;
@@ -157,7 +154,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
         <g>
           <rect class="sc-y-mark-region" x={0} y={startRegionY} width={this.props.width} height={height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
+            <RichTextBox class={`sc-y-mark-region-text-${i}`} posX={textPosX} posY={textPosY} width={this.props.width} height={textHeight} textAlign={region.label.horizontalTextAlign || HORIZONTAL_ALIGN.LEFT} verticalAlignMiddle={true}
               fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref: RichTextBox) => {
                 if (ref) {
@@ -183,13 +180,13 @@ class MarkRegion extends Component<IMarkRegionProps> {
   }
 
   getXRegionValueFromIndex(region: IMarkRegion) {
-    if(!region.from) {
+    if (!region.from) {
       region.from = 1
     }
-    if(!region.to) {
+    if (!region.to) {
       region.to = this.props.allCategorySet.length
     }
-    if(region.from > region.to) {
+    if (region.from > region.to) {
       let from = region.from;
       region.from = region.to;
       region.to = from;
@@ -199,8 +196,8 @@ class MarkRegion extends Component<IMarkRegionProps> {
     let endToPosX = 0;
     const parseAsNumber = this.storeData.getValue('parseAsNumber');
     const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
-    if(parseAsNumber) {
-      if(region.from > allCategories.length || region.to > allCategories.length) {
+    if (parseAsNumber) {
+      if (region.from > allCategories.length || region.to > allCategories.length) {
         return {
           startFromPosX,
           endToPosX
@@ -210,11 +207,11 @@ class MarkRegion extends Component<IMarkRegionProps> {
         let value = 0;
         let regionLowerCategoryValue = allCategories[Math.floor(regionIndexValue) - 1] as number;
         let regionFractionalPart = (regionIndexValue - Math.floor(regionIndexValue));
-        if(regionFractionalPart > 0) {
-          let regionUpperCategoryValue = allCategories[Math.ceil(regionIndexValue) -1] as number;
+        if (regionFractionalPart > 0) {
+          let regionUpperCategoryValue = allCategories[Math.ceil(regionIndexValue) - 1] as number;
           let valueDiff = regionUpperCategoryValue - regionLowerCategoryValue;
-          value = regionLowerCategoryValue + (valueDiff * regionFractionalPart); 
-        }else {
+          value = regionLowerCategoryValue + (valueDiff * regionFractionalPart);
+        } else {
           value = regionLowerCategoryValue;
         }
         return value;
@@ -223,7 +220,7 @@ class MarkRegion extends Component<IMarkRegionProps> {
       let endToValue = extractRegionCategoryValue(region.to);
       startFromPosX = xPositionWithDynamicScaleFn(region.from, startFromValue);
       endToPosX = xPositionWithDynamicScaleFn(region.to, endToValue);
-    }else {
+    } else {
       startFromPosX = xPositionWithDynamicScaleFn(region.from - this.props.leftIndex);
       endToPosX = xPositionWithDynamicScaleFn(region.to - this.props.leftIndex);
     }
@@ -235,17 +232,47 @@ class MarkRegion extends Component<IMarkRegionProps> {
 
   getXMarkRegions() {
     return this.props.xMarkRegions.map((region: IMarkRegion, i: number) => {
-      let {startFromPosX, endToPosX} = this.getXRegionValueFromIndex(region);
+      const defaultPosY = 10;
+      let { startFromPosX, endToPosX } = this.getXRegionValueFromIndex(region);
       let width = endToPosX - startFromPosX;
-      let posY = 10;
+      let posX = startFromPosX;
+      let posY = defaultPosY;
       let textWidth = undefined;
+      let textHeight = undefined;
       let config = this.config.xRegions[i];
       if (config.refId && this.state.xRegionsLabel[config.refId]) {
         this.state.xRegionsLabel[config.refId].width = width;
         this.state.xRegionsLabel[config.refId].height = this.props.height;
+        textHeight = this.state.xRegionsLabel[config.refId].textDim?.height || 0;
         if (config.rotateText) {
-          textWidth = Math.max(width, this.state.xRegionsLabel[config.refId].textDim.width);
-          posY = this.state.xRegionsLabel[config.refId].textDim.width;
+          textWidth = Math.max(width, this.state.xRegionsLabel[config.refId].textDim?.width || 0);
+          if (region.label.horizontalTextAlign === HORIZONTAL_ALIGN.CENTER) {
+            posX = startFromPosX + (width / 2) + (this.state.xRegionsLabel[config.refId].textDim?.height / 2);
+          }
+          if (region.label.horizontalTextAlign === HORIZONTAL_ALIGN.RIGHT) {
+            posX = startFromPosX + width + this.state.xRegionsLabel[config.refId].textDim?.height;
+          }
+        }
+        switch (region.label.verticalTextAlign) {
+          case VERTICAL_ALIGN.CENTER: {
+            if (config.rotateText) {
+              posY = (this.props.height / 2) - (textWidth / 2);
+            } else {
+              posY = (this.props.height / 2) - (textHeight / 2);
+            }
+            break;
+          }
+          case VERTICAL_ALIGN.BOTTOM: {
+            posY = this.props.height - 20;
+            break;
+          }
+          default:
+          case VERTICAL_ALIGN.TOP: {
+            posY = defaultPosY;
+            if (config.rotateText) {
+              posY = textWidth;
+            }
+          }
         }
       }
 
@@ -253,8 +280,8 @@ class MarkRegion extends Component<IMarkRegionProps> {
         <g class="sc-x-mark-region" transform={`translate(${this.props.vTransformX}, 0)`}>
           <rect x={startFromPosX} y={0} width={width} height={this.props.height} fill={config.fill} stroke={config.stroke} opacity={config.opacity} ></rect>
           {config.text &&
-            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={startFromPosX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={HORIZONTAL_ALIGN.CENTER} verticalAlignMiddle={false}
-              rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
+            <RichTextBox class={`sc-x-mark-region-text-${i}`} posX={posX} posY={posY} width={textWidth || width} contentWidth={textWidth} textAlign={region.label.horizontalTextAlign || HORIZONTAL_ALIGN.CENTER}
+              verticalAlignMiddle={false} rotation={config.rotateText} fontSize={config.fontSize} textColor={config.fontColor} style={config.textStyle} text={config.text || ''}
               onRef={(ref: RichTextBox) => {
                 if (ref) {
                   config.refId = ref.contentId;

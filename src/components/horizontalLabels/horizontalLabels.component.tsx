@@ -10,7 +10,7 @@ import a11yFactory, { A11yWriter } from '../../core/a11y';
 import { IHorizontalLabelsProps } from './horizontalLabels.model';
 import { VERTICAL_ALIGN } from '../../global/global.enums';
 import { IVnode } from '../../viewEngin/component.model';
-import { IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
+import { CategoryLabelType, IXAxisConfig } from '../../charts/connectedPointChartsType/connectedPointChartsType.model';
 import Store from '../../liveStore/store';
 import storeManager from '../../liveStore/storeManager';
 
@@ -117,7 +117,8 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
         labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
-        displayDateFormat: dateFormat
+        displayDateFormat: dateFormat,
+        modifier: typeof config.modifier === 'function' ? config.modifier : (value: CategoryLabelType) => value
       }
     };
   }
@@ -164,8 +165,9 @@ class HorizontalLabels extends Component<IHorizontalLabelsProps> {
     return labels;
   }
 
-  getEachLabel(val: string, index: number): IVnode {
+  getEachLabel(val: CategoryLabelType, index: number): IVnode {
     const xPositionWithDynamicScaleFn = this.storeData.getValue('xPositionWithDynamicScaleFn');
+    val = this.config.modifier(val);
     let xPos = xPositionWithDynamicScaleFn(index, val, true);
     let yPos = this.props.opts.labelAlign === VERTICAL_ALIGN.TOP ? -18 : 18;
     let opacity = xPos - this.state.clip.x + this.props.paddingX < 0 ? 0 : this.config.labelOpacity;

@@ -310,7 +310,7 @@
         "dataSet": {
           "xAxis": {
             "enable": true,                             // [ default: true | false ]
-            "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR ] Note: Log x-axis not supported yet.
+            "type": $SC.ENUMS.AXIS_TYPE.LINEAR,         // [ default: $SC.ENUMS.AXIS_TYPE.LINEAR | $SC.ENUMS.AXIS_TYPE.LOGARITHMIC ] Note: Log(base 10) x-axis not supported also supported.
             "title": "Date",                            // [ default: Label-axis ]
             // To resolve a category it uses multiple try-n-error logic. Categories inside series[i].data[j].label have the highest priority, 
             // if not found then search the label on other series with same data index.
@@ -341,6 +341,9 @@
             "fontSize": 12,                             // [ default : $SC.GLOBAL.theme.fontSizeMedium ]
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             "positionOpposite": false,                  // [ true | default: false ] Note: if true then axis will be position opposite side [top side]
+            "modifier": function(value) {               // modifier function to manipulate category value in between
+              return value;
+            },
             "markRegions": [{                           // Enable a color band region with text label on background.
               "from": 7,                                // [ default: 0 ] Data index start from 1, Region start value.
               "to": 8.1,                                // [ default: 0 ] Data index start from 1, Region end value.
@@ -351,6 +354,8 @@
                 "text": "Purple range",                 // [ default: "" ] Rich text (With HTML) label of the region.
                 "fontSize": 12,                         // [ default: 14 ]
                 "color": "#000",                        // [ default: #000 ]
+                "verticalTextAlign": $SC.ENUMS.VERTICAL_ALIGN.BOTTOM, // [ default: $SC.ENUMS.VERTICAL_ALIGN.CENTER | $SC.ENUMS.VERTICAL_ALIGN.TOP | $SC.ENUMS.VERTICAL_ALIGN.BOTTOM ]
+                "horizontalTextAlign": $SC.ENUMS.HORIZONTAL_ALIGN.CENTER, // [ default: $SC.ENUMS.HORIZONTAL_ALIGN.LEFT | $SC.ENUMS.HORIZONTAL_ALIGN.CENTER | $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT ]
                 "style": {}                             // [ default: {} ] Add css style for the label text.
               }
             }]
@@ -374,6 +379,9 @@
             "fontFamily": $SC.GLOBAL.theme.fontFamily,  // [ default: $SC.GLOBAL.theme.fontFamily ]
             "zeroBase": false,                          // [ true | default: false ] Note: Min label of y-axis always stick to zero if all value are positive and max label of y-axis always stick to zero if all value are negative.
             "positionOpposite": false,                  // [ true | default: false ] Note: if true then axis position will be on opposite side [right side]
+            "modifier": function(value) {          // modifier function to manipulate category value in between
+              return value;
+            },
             "markRegions": [{                           // Enable a color band region with text label on background.   
               "from": 800,                              // [ default: 0 ] Region start value.
               "to": 1010,                               // [ default: 0 ] Region end value.
@@ -384,6 +392,8 @@
                 "text": "Orange range",                 // [ default: "" ] Rich text (With HTML) label of the region.
                 "fontSize": "12",                       // [ default: 14 ]
                 "color": "#000",                        // [ default: #000 ]
+                "verticalTextAlign": $SC.ENUMS.VERTICAL_ALIGN.CENTER, // [ default: $SC.ENUMS.VERTICAL_ALIGN.TOP | $SC.ENUMS.VERTICAL_ALIGN.CENTER | $SC.ENUMS.VERTICAL_ALIGN.BOTTOM ]
+                "horizontalTextAlign": $SC.ENUMS.HORIZONTAL_ALIGN.LEFT, // [ default: $SC.ENUMS.HORIZONTAL_ALIGN.CENTER | $SC.ENUMS.HORIZONTAL_ALIGN.LEFT | $SC.ENUMS.HORIZONTAL_ALIGN.RIGHT ]
                 "style": {}                             // [ default: {} ] Add css style for the label text.
               }
             }]

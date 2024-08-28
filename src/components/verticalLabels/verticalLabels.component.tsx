@@ -93,7 +93,8 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
         tickOpacity: typeof config.tickOpacity === 'undefined' ? 1 : config.tickOpacity,
         tickColor: config.tickColor || defaultConfig.theme.fontColorDark,
         labelOpacity: typeof config.labelOpacity === 'undefined' ? 1 : config.labelOpacity,
-        labelColor: config.labelColor || defaultConfig.theme.fontColorDark
+        labelColor: config.labelColor || defaultConfig.theme.fontColorDark,
+        modifier: typeof config.modifier === 'function' ? config.modifier : (value: number | string) => value
       }
     };
 
@@ -151,6 +152,7 @@ class VerticalLabels extends Component<IVerticalLabelsProps> {
 
   getEachLabel(val: number | string, index: number): IVnode {
     let labelMargin = (this.props.opts.tickSpan || this.defaultTickSpan) + 5;
+    val = this.config.modifier(val);
     let x = this.config.labelAlign === 'end' ? - (labelMargin) : this.config.labelAlign === 'start' ? labelMargin : 0;
     let y = -(index * this.props.intervalLen);
     if (this.props.opts.positionOpposite) {

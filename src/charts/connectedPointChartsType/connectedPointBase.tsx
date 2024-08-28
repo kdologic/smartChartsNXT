@@ -643,7 +643,10 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
       if (parseAsNumber) {
         const minValue = this.CHART_DATA.dataSet.xAxis.categoryMinimaOfAllSeries;
         const maxValue = this.CHART_DATA.dataSet.xAxis.categoryMaximaOfAllSeries;
-        const valueDiff = maxValue - minValue;
+        let valueDiff = maxValue - minValue;
+        if (this.CHART_DATA.dataSet.xAxis.type === AXIS_TYPE.LOGARITHMIC) {
+          valueDiff = Math.log10(maxValue) - Math.log10(minValue);
+        }
         fsScaleX = maxWidth / valueDiff;
       } else {
         fsScaleX = maxWidth / (this.state.maxSeriesLenFS - 1);
@@ -688,7 +691,12 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
     if (parseAsNumber) {
       const minValue = Math.min(...categorySet);
       const maxValue = Math.max(...categorySet);
-      const valueDiff = maxValue - minValue;
+      let valueDiff = maxValue - minValue;
+      if (this.CHART_DATA.dataSet.xAxis.type === AXIS_TYPE.LOGARITHMIC) {
+        valueDiff = Math.log10(maxValue) - Math.log10(minValue);
+        console.log(Math.log10(maxValue),Math.log10(minValue), Math.log10(maxValue) - Math.log10(minValue));
+
+      }
       interval = (maxWidth - (2 * this.CHART_DATA.paddingX)) / valueDiff;
     }
 
@@ -699,7 +707,11 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
       }
       if (parseAsNumber) {
         categoryValue = categoryValue ?? this.state.cs.dataSet.xAxis.selectedCategories[index];
-        x = (categorySet.length === 1) ? index * interval : (+categoryValue - categorySet[0]) * interval;
+        if (this.CHART_DATA.dataSet.xAxis.type === AXIS_TYPE.LOGARITHMIC) {
+          x = (categorySet.length === 1) ? index * interval : (Math.log10(+categoryValue ) - Math.log10(categorySet[0])) * interval;
+        }else {
+          x = (categorySet.length === 1) ? index * interval : (+categoryValue - categorySet[0]) * interval;
+        }
       }
       return x;
     };
@@ -714,7 +726,11 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
         let x = fsCategorySet.length === 1 ? fsInterval : index * fsInterval;
         if (parseAsNumber) {
           categoryValue = categoryValue ?? fsCategorySet;
-          x = (fsCategorySet.length === 1) ? index * fsInterval : (+categoryValue - fsCategorySet[0]) * fsInterval;
+          if (this.CHART_DATA.dataSet.xAxis.type === AXIS_TYPE.LOGARITHMIC) {
+            x = (fsCategorySet.length === 1) ? index * fsInterval : (Math.log10(+categoryValue) - Math.log10(fsCategorySet[0])) * fsInterval;
+          }else {
+            x = (fsCategorySet.length === 1) ? index * fsInterval : (+categoryValue - fsCategorySet[0]) * fsInterval;
+          }
         }
         return x;
       };
@@ -729,12 +745,15 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
       newCategories.push(categorySet[0]);
       for (let i = 1; i < categorySet.length; i++) {
         nextCategoryXPos = getPositionByDynamicScaleX(i, categorySet[i]);
+        // console.log('categoryXPos',categoryXPos,'nextCategoryXPos',nextCategoryXPos)
         if ((nextCategoryXPos - categoryXPos) > this.state.cs.dataSet.xAxis.intervalThreshold) {
           newCategories.push(categorySet[i]);
           categoryXPos = nextCategoryXPos;
+          // console.log('selected category:',categorySet[i] )
         }
       }
       categorySet = newCategories;
+      // console.log('skipped categories:', newCategories);
     } else {
       const skipLen = Math.ceil(this.state.cs.dataSet.xAxis.intervalThreshold / interval);
       if (skipLen > 0) {
@@ -908,18 +927,18 @@ class ConnectedPointBase extends Component<IConnectedPointChartProps> {
           <Heading instanceId='sc-subtitle' type={HeadingTypeMap.h5} opts={this.CHART_OPTIONS.subtitle} posX={0} posY={UiCore.percentToPixel(this.CHART_DATA.svgHeight, this.CHART_OPTIONS.subtitle.top.toString())} width='95%' />
         </Draggable>
 
+        <Grid opts={this.CHART_OPTIONS?.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
+          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yAxisType={this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY].type}
+          vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
+        </Grid>
+
         {((this.state.cs.dataSet.xAxis.markRegions instanceof Array && this.state.cs.dataSet.xAxis.markRegions.length) || (this.state.cs.dataSet.yAxis.primary.markRegions instanceof Array && this.state.cs.dataSet.yAxis.primary.markRegions.length)) &&
           <MarkRegion posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop} xMarkRegions={this.state.cs.dataSet.xAxis.markRegions || []} yMarkRegions={this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY].markRegions || []}
             xAxisType={this.state.cs.dataSet.xAxis.type} yAxisType={this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY].type} width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yInterval={this.state.cs[AXIS_PRIORITY.PRIMARY].yInterval}
             paddingX={this.CHART_DATA.paddingX} leftIndex={this.state.windowLeftIndex} vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange} allCategorySet={this.state.cs.dataSet.xAxis.allCategories}>
           </MarkRegion>
         }
-
-        <Grid opts={this.CHART_OPTIONS?.gridBox || {}} posX={this.CHART_DATA.marginLeft} posY={this.CHART_DATA.marginTop}
-          width={this.CHART_DATA.gridBoxWidth} height={this.CHART_DATA.gridBoxHeight} yAxisType={this.state.cs.dataSet.yAxis[AXIS_PRIORITY.PRIMARY].type}
-          vTransformX={this.CHART_DATA.paddingX - this.state.offsetLeftChange}>
-        </Grid>
-
+        
         <g class='sc-chart-area-container'>
           {this.drawSeries()}
         </g>
