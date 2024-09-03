@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GitHub like - Area Chart | SmartChartsNXT</title>
+  <link rel="stylesheet" href="../static/css/example.common.style.css" type="text/css">
+  <script src="../../dist/smartchartsnxt.js" type="text/javascript"></script>
+  <script src="../static/js/example.common.js" type="text/javascript"></script>
+</head>
+<body style="background: #40c463;">
+  <div role="figure" class="chart-base">
+    <div id="chartContainer"></div>
+  </div>
+  <p class="chart-caption" aria-hidden="true">
+    SmartchartsNXT can support gitHub like area chart that can be used in dashboard to analyze code addition and deletion ratio.
+  <script type="text/javascript">
+    var areaChart;
+    SmartChartsNXT.ready(function () {
+      areaChart = new SmartChartsNXT.Chart({
+        "type": $SC.CHART_TYPE.AREA_CHART,
+        "targetElem": "chartContainer",
+        "a11y": {
+          "description": "SmartchartsNXT can support gitHub like area chart that can be used in dashboard to analyze code addition and deletion ratio."
+        },
+        "bgColor": "#FAFAFA",
+        "title": {
+          "text": "Code frequency - Insights",
+          "textColor": "#1f2328"
+        },
+        "subtitle": {
+          "text": "Additions and deletions per week",
+          "textColor": "#656d76"
+        },
+        "gridBox": {
+          "vertical": {
+            "enable": false
+          },
+          "horizontal": {
+            "lineStyle": $SC.ENUMS.LINE_STYLE.DASHED
+          },
+          "bgColor": "#FAFAFA",
+          "bgOpacity": 0.2 
+        },
+        "legends":{
+          "itemBorderWidth": 0
+        },
+        "horizontalScroller": {
+          "enable": true,
+          "height": 35,
+          "chartInside": true
+        },
+        "dataSet": {
+          "xAxis": {
+            "title": "Date",        
+            "intervalThreshold": 80,
+            "categories": {
+              "startFrom": 1490466600000,
+              "increaseBy": 1000*60*60*24*7,
+              "parseAsDate": true,
+              "parseDateFormat": "",
+              "displayDateFormat": "DD MMM, YYYY",
+            },
+            "fontSize": 10,
+          },
+          "yAxis": {
+            "title": "Frequency",
+            "zeroBase": true,
+          },
+          "series": [{
+              "name": "Additions",                    
+              "lineWidth": 1.5,                        
+              "lineOpacity": 1,                        
+              "lineColor": "#40c463", 
+              "areaColor": "#40c463", 
+              "areaOpacity": 0.6,                        
+              "spline": true,                          
+              "animated": true,                        
+              "data": [56689,4011,0,6,321,5210,0,2645,1628,0,1249,116,136,15,48098,8351,491,639,939,203,0,440,29219,0,175,29689,995,2999,1450,395,1613,1106,1085,235,521,235,477,199,121,1775,136,0,0,0,0,1461,0,0,491,757,38,378,174,3,49,194,190,215,567,0,0,0,185,0,0,0,0,0,0,12363,323,135,142,111,151,262,111,0,469,12,0,0,0,0,0,0,0,0,0,48,3042,23,165,147,0,379,141,37,437,256,961,66,63,94,2436,1440,292,81,384,620,2452,269,135,329,0,400,428,70,0,1061,2417,824,2304,0,234,8,342,217,285,6,6706,74,0,677,8,113,0,0,0,0,29,16,130,0,76,43,0,0,0,0,4,51,164,0,0,0,0,0,146,102,350,2886,48,9539,0,796,637,0,259,0,789,1342,16,54,3,0,0,339,0,0,0,511,2,1002,1598,914,884,0,318,0,0,16,0,8,0,841,826,6,214,0,0,0,0,0,0,0,28,0,0,20,0,0,8,0,8,8,0,45,8,256,8,0,0,291,0,271,0,0,0,0,313,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,975,0,0,9201,0,1869,0,0,0,0,13,0,7,730,0,0,0,0,103,268,1402,0,0,0,0,11,0,37,0,0,0,0,0,0,0,0,0,0,491,0,0,16710,1462,1174,560,866,585,0,0,0,0,0,0,0,0,146,1622,21,0,0,423,225,0,0,0,453,0,444,0,0,743,704,0,0,0,0,0,0,0,0,0,0,21973,7,0,0,0,237,0,0,352,0,0,0,0,0,0,0,0,0,0,254,0,619]  
+            },{
+            "name": "Deletions",
+            "lineWidth": 1.5,
+            "lineColor": "#df0c24",
+            "areaColor": "#df0c24",
+            "areaOpacity": 0.6,
+            "marker": {
+              "type": $SC.ENUMS.ICON_TYPE.DIAMOND,
+              "width": 10
+            },
+            "spline": true,
+            "animated": true,
+            "data": [-1,-2275,0,-9,-38,-4979,0,-13329,-491,0,-2404,-94,-64,-43,-48056,-15022,-388,-133,-659,-87,0,-149,-32192,0,-100,-29664,-4351,-15397,-1368,-237,-608,-834,-732,-590,-461,-122,-725,-144,-107,-1960,-801,0,0,0,0,-1201,0,0,-110,-267,-20,-138,-187,-2,-33,-176,-81,-333,-178,0,0,0,-159,0,0,0,0,0,0,-356,-507,-78,-95,-44,-48,-155,-61,0,-405,-14,0,0,0,0,0,0,0,0,0,-35,-825,-24,-132,-40,0,-123,-110,-33,-204,-142,-126,-26,-63,-30,-143,-1120,-125,-113,-131,-174,-2243,-156,-79,-184,0,-207,-202,-70,0,-864,-2273,-12,-457,0,-146,-8,-353,-160,-193,-6,-9799,-37,0,-454,-7,-70,0,0,0,0,-6,-14,-51,0,-17,-44,0,-1,0,0,-4,-10,-133,0,0,0,0,0,-76,-40,-216,-71,-10,-10713,0,-182,-56,0,-109,0,-120,-837,-5,-50,-3,0,0,-58,0,0,0,-56,-2,-795,-1559,-1767,-1726,0,-158,0,0,-15,0,-14,0,-65,-144,0,-60,0,0,0,0,0,0,0,-14,0,0,-14,0,0,-8,0,-8,-8,0,-40,-8,-34,-8,0,0,-96,0,-120,0,0,0,0,-271,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-5,0,0,0,0,0,0,0,0,0,-70,0,0,-9177,0,-1725,0,0,0,0,-25,0,-7,-632,0,0,0,0,-237,-257,-1377,0,0,0,0,-48,0,-72,0,0,0,0,0,0,0,0,0,0,-388,0,0,-2286,-1260,-945,-501,-708,-553,0,0,0,0,0,0,0,0,-114,-1534,-539,0,0,-370,-196,0,0,0,-681,0,-295,0,0,-271,-979,0,0,0,0,0,0,0,0,0,0,-23358,-5,0,0,0,-183,0,0,-167,0,0,0,0,0,0,0,0,0,0,-209,0,-408]
+          }]
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>
